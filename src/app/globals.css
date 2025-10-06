@@ -2,14 +2,14 @@
 
 :root {
   --background: #ffffff;
-  --foreground: #171717;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-background: #ffffff;
+  --color-primary: #FF690B;
+  --color-secondary: #3932C0;
+  --color-gris: #d5d5d5;
+  --font-sans: var(--font-inter);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -22,5 +22,24 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+}
+
+.slick-prev:before, .slick-next:before {
+  color: gray !important;
+}
+
+.slick-slide > div {
+    margin: 0 10px;
+    transition: all 0.3s ease-in-out;
+    transform: scale(0.8);
+    opacity: 0.5;
+}
+
+.slick-list{
+    margin: 0 -10px;
+}
+
+.slick-slide.slick-current > div {
+    transform: scale(1);
+    opacity: 1;
 }
