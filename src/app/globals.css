@@ -36,10 +36,5 @@ body {
 }
 
 .slick-list{
-    margin: 0 -10px;
-}
-
-.slick-slide.slick-current > div {
-    transform: scale(1);
-    opacity: 1;
+    overflow: hidden;
 }

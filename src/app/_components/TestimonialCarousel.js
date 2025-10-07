@@ -132,7 +132,7 @@ const TestimonialCarousel = () => {
   };
 
   return (
-    <div className="w-full py-16 bg-white">
+    <div className="w-full py-16 bg-white overflow-hidden">
       <div className="w-full max-w-7xl mx-auto px-4">
        
         <Slider {...settings}>
