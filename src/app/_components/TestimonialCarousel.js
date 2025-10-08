@@ -132,12 +132,12 @@ const TestimonialCarousel = () => {
   };
 
   return (
-    <div className="w-full py-16 bg-white overflow-hidden">
+    <div className="w-full py-16 bg-white overflow-hidden ">
       <div className="w-full max-w-7xl mx-auto px-4">
-       
+        <div className="overflow-hidden">
         <Slider {...settings}>
           {testimonials.map((testimonial, index) => (
-            <div key={index} className="px-3">
+            <div key={index} className="px-3 ">
               <div className="bg-[#3932C01A] h-full w-[420px] p-8 rounded-3xl shadow-lg border border-gray-100 hover:shadow-xl transition-shadow duration-300  flex flex-col items-center text-center">
                 <div className="relative  mb-6">
                   <Image 
@@ -157,6 +157,7 @@ const TestimonialCarousel = () => {
             </div>
           ))}
         </Slider>
+        </div>
       </div>
     </div>
   );

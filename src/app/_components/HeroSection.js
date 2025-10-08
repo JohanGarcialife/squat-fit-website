@@ -1,47 +1,56 @@
+'use client'
+import useWindowSize from '@/hooks/UseWindowSize';
 import Image from 'next/image'
 import React from 'react'
 
 export default function HeroSection() {
+  const { width } = useWindowSize();
   return (
     <>
     
-    <div className='flex  w-full '>
-      {/* Right */}
-      <div className='pl-36  w-full pt-12'>
+    <div className='flex flex-col  lg:flex-row w-full '>
+      {/* Left */}
+      <div className='lg:pl-36 px-5  w-full pt-12 max-w-screen'>
         <div >
 
-<p className='text-secondary xl:max-w-[510px] font-bold text-8xl leading-28 '>Transforma tu cuerpo hoy</p>
-<p className='text-black max-w-[510px] text-2xl mt-4'>Entra y consigue las herramientas que te ayudarán a lograr tu mejor versión</p>
-<button className=' text-white px-8 py-4 rounded-2xl mt-8 font-bold text-xl bg-linear-to-r from-primary to-secondary'>Únete Ahora</button>
+<p className='text-secondary text-center lg:text-start xl:max-w-[510px] max-w-screen font-bold text-5xl lg:text-8xl lg:leading-28 '>Transforma tu cuerpo hoy</p>
+<p className='text-black lg:max-w-[510px] text-center lg:text-start text-2xl mt-4'>Entra y consigue las herramientas que te ayudarán a lograr tu mejor versión</p>
+<div className='flex flex-row w-full items-center lg:items-start justify-center'>
 
-<div className='flex flex-row items-start justify-between mt-10 gap-20 w-full'>
+<button className=' text-white px-8 py-4 rounded-2xl mt-8 font-bold text-xl bg-linear-to-r from-primary to-secondary'>Únete Ahora</button>
+</div>
+
+
+<div className='flex flex-row items-start justify-between mt-10 lg:gap-20 gap-2 w-full'>
 <div className='flex flex-col items-center justify-center text-center'>
-  <p className='text-5xl font-bold text-secondary'>+1700</p>
-  <p className='text-secondary text-lg'>Vidas cambiadas</p>
+  <p className='text-3xl lg:text-5xl font-bold text-secondary'>+1700</p>
+  <p className='text-secondary  lg:text-lg'>Vidas cambiadas</p>
 </div>
 <div className='flex flex-col items-center justify-center text-center'>
-  <p className='text-5xl font-bold text-secondary'>+1M</p>
-  <p className='text-secondary text-lg'>Seguidores en redes</p>
+  <p className='text-3xl lg:text-5xl font-bold text-secondary'>+1M</p>
+  <p className='text-secondary  lg:text-lg'>Seguidores en redes</p>
 </div>
 <div className='flex flex-col items-center justify-center text-center'>
-  <p className='text-5xl font-bold text-secondary'>+250</p>
-  <p className='text-secondary text-lg'>Alumnos aprendiendo</p>
+  <p className='text-3xl lg:text-5xl font-bold text-secondary'>+250</p>
+  <p className='text-secondary  lg:text-lg'>Alumnos aprendiendo</p>
 </div>
 </div>
         </div>
       </div>
-      {/* Left */}
-      <div className=' w-full h-[900px] relative overflow-hidden'>
-        <Image src="/IMG-Maria-Hamlet-.png" width={874} height={847} alt='Coach'  className='absolute z-20 right-0'/>
-        <div className="h-[630px] w-[630px] bg-primary absolute z-10  -right-44 bottom-0 rounded-full" />
+      {/* Right */}
+      <div className=' w-full h-[530px] lg:h-[900px] relative overflow-hidden'>
+        {width < 1024 ? <Image src="/mobileCoach.png" width={530} height={514} alt='Coach'  className='absolute z-20 left-0'/> : <Image src="/IMG-Maria-Hamlet-.png" width={874} height={847} alt='Coach'  className='absolute z-20 right-0'/>}
+        {width < 1024 ? <div className="h-[382px] w-[382px] bg-primary absolute z-10 left-7 bottom-14 rounded-full" /> : <div className="h-[630px] w-[630px] bg-primary absolute z-10  -right-44 bottom-0 rounded-full" />}
       </div>
       
     </div>
+
+
     {/* Bottom */}
-    <div className='relative w-screen flex justify-center px-10'>
+    <div className='relative w-screen lg:flex lg:flex-row flex-col justify-center px-2 lg:px-10'>
       
-  <div className='bg-[rgb(255,247,242)] px-32 py-14 z-30 rounded-2xl absolute xl:-top-44 -top-14 w-[95%]'>
-    <div className='flex flex-row justify-between items-center'>
+  <div className='bg-[rgb(255,247,242)]  lg:px-32 px-14 py-14 z-30 rounded-2xl absolute xl:-top-44 -top-40 lg:-top-14 w-[95%]'>
+    <div className='flex flex-col lg:flex-row justify-between items-center'>
       <div className='flex flex-col items-center text-center '>
         <Image src="/icons/nutrition.png" width={120} height={120} alt='Icon' />
       <p className='text-secondary text-2xl font-bold'>Agenda para contar tus macros y calorías</p>
