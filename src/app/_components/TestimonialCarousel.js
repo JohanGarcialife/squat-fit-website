@@ -50,7 +50,7 @@ const TestimonialCarousel = () => {
 
     useEffect(() => {
         const handleResize = () => {
-            setIsMobile(window.innerWidth < 768);
+            setIsMobile(window.innerWidth < 769);
         };
 
         handleResize();

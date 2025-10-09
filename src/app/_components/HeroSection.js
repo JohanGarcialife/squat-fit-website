@@ -8,14 +8,14 @@ export default function HeroSection() {
   return (
     <>
     
-    <div className='flex flex-col  lg:flex-row w-full '>
+    <div className='flex flex-col md:flex-row w-full '>
       {/* Left */}
-      <div className='lg:pl-36 px-5  w-full pt-12 max-w-screen'>
+      <div className='xl:pl-36 px-5  w-full pt-12 max-w-screen'>
         <div >
 
-<p className='text-secondary text-center lg:text-start xl:max-w-[510px] max-w-screen font-bold text-5xl lg:text-8xl lg:leading-28 '>Transforma tu cuerpo hoy</p>
+<p className='text-secondary text-center lg:text-start xl:max-w-[510px] max-w-screen font-bold text-5xl lg:text-7xl xl:text-8xl lg:leading-28 '>Transforma tu cuerpo hoy</p>
 <p className='text-black lg:max-w-[510px] text-center lg:text-start text-2xl mt-4'>Entra y consigue las herramientas que te ayudarán a lograr tu mejor versión</p>
-<div className='flex flex-row w-full items-center lg:items-start justify-center'>
+<div className='flex flex-row w-full items-center lg:items-start lg:justify-center'>
 
 <button className=' text-white px-8 py-4 rounded-2xl mt-8 font-bold text-xl bg-linear-to-r from-primary to-secondary'>Únete Ahora</button>
 </div>
@@ -38,9 +38,15 @@ export default function HeroSection() {
         </div>
       </div>
       {/* Right */}
-      <div className=' w-full h-[530px] lg:h-[900px] relative overflow-hidden'>
-        {width < 1024 ? <Image src="/mobileCoach.png" width={530} height={514} alt='Coach'  className='absolute z-20 left-0'/> : <Image src="/IMG-Maria-Hamlet-.png" width={874} height={847} alt='Coach'  className='absolute z-20 right-0'/>}
-        {width < 1024 ? <div className="h-[382px] w-[382px] bg-primary absolute z-10 left-7 bottom-14 rounded-full" /> : <div className="h-[630px] w-[630px] bg-primary absolute z-10  -right-44 bottom-0 rounded-full" />}
+      <div className=' w-full h-[530px] lg:h-[650px] xl:h-[900px] relative overflow-hidden'>
+        {width < 768 && <Image src="/mobileCoach.png" width={530} height={514} alt='Coach'  className='absolute z-20 left-0'/>  }
+        {width >= 768 && width < 1024 && <Image src="/IMG-Maria-Hamlet-.png" width={530} height={530} alt='Coach'  className='absolute z-20 right-0'/>  }
+        {width >= 1024 && width < 1200 && <Image src="/IMG-Maria-Hamlet-.png" width={874} height={847} alt='Coach'  className='absolute z-20 bottom-0 right-0'/>  }
+        {width > 1200 && <Image src="/IMG-Maria-Hamlet-.png" width={874} height={847} alt='Coach'  className='absolute z-20 right-0'/>  }
+
+        {width < 768 && <div className="h-[382px] w-[382px] bg-primary absolute z-10 left-7 bottom-14 rounded-full" />  }
+        {width >= 768 && <div className="h-[430px] w-[430px] bg-primary absolute z-10  -right-44 bottom-0 rounded-full" />  }
+        {width>= 1024 && <div className="h-[630] w-[630] bg-primary absolute z-10  -right-44 bottom-0 rounded-full" />  }
       </div>
       
     </div>

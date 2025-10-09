@@ -17,8 +17,8 @@ const beforeSrc = "https://images.unsplash.com/photo-1573878222998-40b24a653ac8?
         <Comparision beforeSrc={beforeSrc} afterSrc={afterSrc} />
         <Progress />
       <TestimonialCarousel />
-      {/* <StartPlan /> */}
-      {/* <Newsletter /> */}
+      <StartPlan />
+      <Newsletter />
       </div>
     </main>
   );

@@ -7,7 +7,7 @@ export default function Comparision(props) {
   const { width } = useWindowSize();
     const {beforeSrc, afterSrc} = props;
   return (
-   <div className="px-5 lg:p-32 w-full flex flex-col lg:flex-row items-center justify-between lg:py-40 pt-[550px] ">
+   <div className="px-5 xl:px-32 w-full flex flex-col lg:flex-row items-center justify-between lg:pt-80 xl:pt-40 pt-[550px] ">
      
      {width < 1024 ? 
      <>
@@ -32,7 +32,7 @@ export default function Comparision(props) {
       </div>
      </>
       : 
-      <>
+      <div className="w-full flex flex-row items-center justify-between gap-10">
       <div className="lg:w-1/2 w-full">
 
       <ImageComparisonSlider beforeSrc={beforeSrc} afterSrc={afterSrc}/>
@@ -51,7 +51,7 @@ export default function Comparision(props) {
         </div>
         </div>
       </div>
-      </>
+      </div>
       }
 
      </div>
