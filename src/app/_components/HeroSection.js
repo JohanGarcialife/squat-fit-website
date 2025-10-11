@@ -39,12 +39,14 @@ export default function HeroSection() {
       </div>
       {/* Right */}
       <div className=' w-full h-[530px] lg:h-[650px] xl:h-[900px] relative overflow-hidden'>
-        {width < 768 && <Image src="/mobileCoach.png" width={530} height={514} alt='Coach'  className='absolute z-20 left-0'/>  }
+        {width < 425 && <Image src="/mobileCoach.png" width={330} height={214} alt='Coach'  className='absolute z-20 left-5 bottom-40 '/>  }
+        {width < 768 && width > 425 && <Image src="/mobileCoach.png" width={530} height={514} alt='Coach'  className='absolute z-20 left-0'/>  }
         {width >= 768 && width < 1024 && <Image src="/IMG-Maria-Hamlet-.png" width={530} height={530} alt='Coach'  className='absolute z-20 right-0'/>  }
         {width >= 1024 && width < 1200 && <Image src="/IMG-Maria-Hamlet-.png" width={874} height={847} alt='Coach'  className='absolute z-20 bottom-0 right-0'/>  }
         {width > 1200 && <Image src="/IMG-Maria-Hamlet-.png" width={874} height={847} alt='Coach'  className='absolute z-20 right-0'/>  }
 
-        {width < 768 && <div className="h-[382px] w-[382px] bg-primary absolute z-10 left-7 bottom-14 rounded-full" />  }
+{width < 425 && <div className="h-[282px] w-[282px] bg-primary absolute z-10 left-7 bottom-14 rounded-full" />  }
+        {width < 768 && width > 425 && <div className="h-[382px] w-[382px] bg-primary absolute z-10 left-7 bottom-14 rounded-full" />  }
         {width >= 768 && <div className="h-[430px] w-[430px] bg-primary absolute z-10  -right-44 bottom-0 rounded-full" />  }
         {width>= 1024 && <div className="h-[630] w-[630] bg-primary absolute z-10  -right-44 bottom-0 rounded-full" />  }
       </div>

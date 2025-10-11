@@ -33,7 +33,7 @@ const ImageComparisonSlider = ({ beforeSrc, afterSrc, captionText }) => {
   }, []);
 
   return (
-    <div className="relative lg:w-[460px] w-[390px] mx-auto h-[485px] lg:h-[570px] overflow-visible group">
+    <div className="relative mx-auto lg:w-[460px] sm:w-[390px]  sm:h-[485px] w-[290px]  h-[385px] lg:h-[570px]  overflow-visible group">
       {/* Flechas de navegación (solo visuales en este ejemplo) */}
       <div className="absolute -bottom-20 left-10 md:bottom-1/2 md:-left-28 -translate-y-1/2 cursor-pointer z-30">
         <svg className="h-10 w-10 text-gray-400/80 hover:text-white transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -94,7 +94,7 @@ const ImageComparisonSlider = ({ beforeSrc, afterSrc, captionText }) => {
 
       </div>
         {/* Etiqueta de texto informativa */}
-        <div className="absolute -bottom-10 right-[30%] md:bottom-20 z-40 md:-right-20 bg-white backdrop-blur-sm max-w-36 text-secondary text-center p-4 rounded-xl shadow-lg border border-gray-200">
+        <div className="absolute right-[35%] -bottom-20 sm:-bottom-10 sm:right-[30%] md:bottom-20 z-40 md:-right-20 bg-white backdrop-blur-sm max-w-24 sm:max-w-36 text-secondary text-center p-4 rounded-xl shadow-lg border border-gray-200">
           Ana Béjar
           después de 6 meses
         </div>
