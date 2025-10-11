@@ -94,7 +94,7 @@ const ImageComparisonSlider = ({ beforeSrc, afterSrc, captionText }) => {
 
       </div>
         {/* Etiqueta de texto informativa */}
-        <div className="absolute -bottom-10 left-[32%] lg:bottom-20 z-40 lg:-right-20 bg-white backdrop-blur-sm max-w-36 text-secondary text-center p-4 rounded-xl shadow-lg border border-gray-200">
+        <div className="absolute -bottom-10 right-[30%] md:bottom-20 z-40 md:-right-20 bg-white backdrop-blur-sm max-w-36 text-secondary text-center p-4 rounded-xl shadow-lg border border-gray-200">
           Ana Béjar
           después de 6 meses
         </div>
