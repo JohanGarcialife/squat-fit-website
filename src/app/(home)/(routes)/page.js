@@ -1,10 +1,10 @@
 import Image from "next/image";
-import Comparision from "./_components/Comparision";
-import HeroSection from "./_components/HeroSection";
-import Progress from "./_components/Progress";
-import TestimonialCarousel from "./_components/TestimonialCarousel";
-import StartPlan from "./_components/StartPlan";
-import Newsletter from "./_components/Newsletter";
+import Comparision from "../_components/Comparision";
+import HeroSection from "../_components/HeroSection";
+import Progress from "../_components/Progress";
+import TestimonialCarousel from "../_components/TestimonialCarousel";
+import StartPlan from "../_components/StartPlan";
+import Newsletter from "../_components/Newsletter";
 
 export default function Home() {
   

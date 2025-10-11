@@ -1,9 +1,12 @@
 "use client";
 import React, { useRef, useState, useEffect } from 'react';
-import Slider from 'react-slick';
+import dynamic from 'next/dynamic';
 import Image from 'next/image';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
+import useWindowSize from '@/hooks/UseWindowSize';
+
+const Slider = dynamic(() => import('react-slick'), { ssr: false });
 
 const testimonials = [
     {
@@ -47,6 +50,7 @@ const testimonials = [
 const TestimonialCarousel = () => {
     const sliderRef = useRef(null);
     const [isMobile, setIsMobile] = useState(false);
+     const { width } = useWindowSize();
 
     useEffect(() => {
         const handleResize = () => {
@@ -104,11 +108,83 @@ const TestimonialCarousel = () => {
         ],
     };
 
+    const settingsMobile = {
+        className: 'center',
+        centerMode: true,
+        infinite: true,
+        centerPadding: '0px',
+        slidesToShow: 1,
+        speed: 500,
+        arrows: false, // Desactivamos las flechas por defecto
+        responsive: [
+            {
+                breakpoint: 1280,
+                settings: {
+                    slidesToShow: 2,
+                    centerMode: false,
+                },
+            },
+            {
+                breakpoint: 1024,
+                settings: {
+                    slidesToShow: 1,
+                    centerMode: true,
+                    centerPadding: '60px',
+                },
+            },
+            {
+                breakpoint: 768,
+                settings: {
+                    slidesToShow: 1,
+                    centerMode: true,
+                    centerPadding: '40px',
+                },
+            },
+            {
+                breakpoint: 640,
+                settings: {
+                    slidesToShow: 1,
+                    centerMode: true,
+                    centerPadding: '20px',
+                },
+            },
+        ],
+    };
+
     return ( 
         <div className="w-screen py-16 bg-white">
             <div className="w-full max-w-7xl mx-auto px-4">
                 <div>
                     <div className="relative">
+                        {width < 480 ? <Slider {...settingsMobile} ref={sliderRef}>
+                            {testimonials.map((testimonial, index) => (
+                                <div key={index} className="px-3 py-5 ">
+                                    <div className="bg-[#3932C01A] h-full w-full lg:w-[420px] p-8 rounded-3xl shadow-lg border border-gray-100 hover:shadow-xl transition-shadow duration-300  flex flex-col items-center text-center">
+                                        <div className="relative  mb-6">
+                                            <Image
+                                                src={testimonial.image}
+                                                alt={testimonial.name}
+                                                width={80}
+                                                height={80}
+                                                className="rounded-full h-24 w-24 mx-auto border-4 border-violet-100"
+                                            />
+                                        </div>
+                                        <h3 className="text-xl font-bold mb-3 text-gray-800">
+                                            {testimonial.name}
+                                        </h3>
+                                        <div className="text-yellow-400 mb-4 text-lg">
+                                            {'★'.repeat(testimonial.rating)}
+                                        </div>
+                                        <p className="text-gray-600 leading-relaxed flex-grow">
+                                            {testimonial.text}
+                                        </p>
+                                    </div>
+                                </div>
+                            ))}
+                        </Slider>
+
+                        :
+
                         <Slider {...settings} ref={sliderRef}>
                             {testimonials.map((testimonial, index) => (
                                 <div key={index} className="px-3 py-5 ">
@@ -135,6 +211,8 @@ const TestimonialCarousel = () => {
                                 </div>
                             ))}
                         </Slider>
+                        
+                        }
 
                         {isMobile ? (
                             <div className="flex  items-center justify-between mt-4">
