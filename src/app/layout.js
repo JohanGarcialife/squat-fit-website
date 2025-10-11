@@ -11,6 +11,7 @@ const inter = Inter({
 export const metadata = {
   title: "Squat Fit",
   description: "Squat Fit Website",
+  viewport: "width=device-width, initial-scale=1",
 };
 
 export default function RootLayout({ children }) {

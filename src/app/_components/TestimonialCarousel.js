@@ -104,7 +104,7 @@ const TestimonialCarousel = () => {
         ],
     };
 
-    return (
+    return ( 
         <div className="w-screen py-16 bg-white">
             <div className="w-full max-w-7xl mx-auto px-4">
                 <div>
