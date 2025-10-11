@@ -35,12 +35,12 @@ const ImageComparisonSlider = ({ beforeSrc, afterSrc, captionText }) => {
   return (
     <div className="relative lg:w-[460px] w-[390px] mx-auto h-[485px] lg:h-[570px] overflow-visible group">
       {/* Flechas de navegación (solo visuales en este ejemplo) */}
-      <div className="absolute -bottom-20 left-10 lg:top-1/2 lg:-left-28 -translate-y-1/2 cursor-pointer z-30">
+      <div className="absolute -bottom-20 left-10 md:bottom-1/2 md:-left-28 -translate-y-1/2 cursor-pointer z-30">
         <svg className="h-10 w-10 text-gray-400/80 hover:text-white transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
         </svg>
       </div>
-      <div className="absolute -bottom-20 right-10 lg:top-1/2 lg:-right-28 -translate-y-1/2 cursor-pointer z-30">
+      <div className="absolute -bottom-20 right-10 md:bottom-1/2 md:-right-28 -translate-y-1/2 cursor-pointer z-30">
         <svg className="h-10 w-10 text-gray-400/80 hover:text-white transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
         </svg>
