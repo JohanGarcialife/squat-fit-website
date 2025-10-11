@@ -65,98 +65,57 @@ const TestimonialCarousel = () => {
         };
     }, []);
 
-    const settings = {
-        className: 'center',
-        centerMode: true,
-        infinite: true,
-        centerPadding: '0px',
-        slidesToShow: 3,
-        speed: 500,
-        arrows: false, // Desactivamos las flechas por defecto
-        responsive: [
-            {
-                breakpoint: 1280,
-                settings: {
-                    slidesToShow: 2,
-                    centerMode: false,
-                },
-            },
-            {
-                breakpoint: 1024,
-                settings: {
-                    slidesToShow: 1,
-                    centerMode: true,
-                    centerPadding: '60px',
-                },
-            },
-            {
-                breakpoint: 768,
-                settings: {
-                    slidesToShow: 1,
-                    centerMode: true,
-                    centerPadding: '40px',
-                },
-            },
-            {
-                breakpoint: 640,
-                settings: {
-                    slidesToShow: 1,
-                    centerMode: true,
-                    centerPadding: '20px',
-                },
-            },
-        ],
-    };
+   const settings = {
+  className: 'center',
+  centerMode: true,
+  infinite: true,
+  centerPadding: '0px',
+ slidesToShow: isMobile ? 1 : 3,         // valor por defecto para pantallas grandes
+  speed: 500,
+  arrows: false,
 
-    const settingsMobile = {
-        className: 'center',
-        centerMode: true,
-        infinite: true,
-        centerPadding: '0px',
+  responsive: [
+    /* Breakpoint más pequeño primero */
+    {
+      breakpoint: 640,
+      settings: {
         slidesToShow: 1,
-        speed: 500,
-        arrows: false, // Desactivamos las flechas por defecto
-        responsive: [
-            {
-                breakpoint: 1280,
-                settings: {
-                    slidesToShow: 2,
-                    centerMode: false,
-                },
-            },
-            {
-                breakpoint: 1024,
-                settings: {
-                    slidesToShow: 1,
-                    centerMode: true,
-                    centerPadding: '60px',
-                },
-            },
-            {
-                breakpoint: 768,
-                settings: {
-                    slidesToShow: 1,
-                    centerMode: true,
-                    centerPadding: '40px',
-                },
-            },
-            {
-                breakpoint: 640,
-                settings: {
-                    slidesToShow: 1,
-                    centerMode: true,
-                    centerPadding: '20px',
-                },
-            },
-        ],
-    };
+        centerMode: true,
+        centerPadding: '20px',
+      },
+    },
+    {
+      breakpoint: 768,
+      settings: {
+        slidesToShow: 1,
+        centerMode: true,
+        centerPadding: '40px',
+      },
+    },
+    {
+      breakpoint: 1024,
+      settings: {
+        slidesToShow: 1,
+        centerMode: true,
+        centerPadding: '60px',
+      },
+    },
+    {
+      breakpoint: 1280,
+      settings: {
+        slidesToShow: 2,
+        centerMode: false,
+      },
+    },
+  ],
+};
 
     return ( 
         <div className="w-screen py-16 bg-white">
             <div className="w-full max-w-7xl mx-auto px-4">
                 <div>
                     <div className="relative">
-                        {width < 480 ? <Slider {...settingsMobile} ref={sliderRef}>
+                        {width < 480 ? <Slider {...settings} ref={sliderRef}>
                             {testimonials.map((testimonial, index) => (
                                 <div key={index} className="px-3 py-5 ">
                                     <div className="bg-[#3932C01A] h-full w-full lg:w-[420px] p-8 rounded-3xl shadow-lg border border-gray-100 hover:shadow-xl transition-shadow duration-300  flex flex-col items-center text-center">
