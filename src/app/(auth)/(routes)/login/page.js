@@ -4,8 +4,9 @@ import React from 'react';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
 import axios from 'axios';
-import { useRouter } from 'next/navigation'; // Importa useRouter
-import { useAuthStore } from '../../../../stores/auth.store'; // Importa el store
+import { useRouter } from 'next/navigation';
+import { useAuthStore } from '../../../../stores/auth.store';
+import toast from 'react-hot-toast';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -27,11 +28,16 @@ export default function LoginPage() {
       const { token } = response.data;
       if (token) {
         setToken(token);
+        toast.success('Inicio de sesión exitoso!');
         router.push('/');
       }
     } catch (error) {
       console.error('Error en el login', error.response ? error.response.data : error.message);
-      // Aquí puedes manejar los errores, por ejemplo, mostrar un mensaje al usuario.
+      if (error.response && error.response.data.message === 'Invalid email or password') {
+        toast.error('Email o contraseña inválidos.');
+      } else {
+        toast.error('Ocurrió un error inesperado.');
+      }
     } finally {
       setSubmitting(false);
     }

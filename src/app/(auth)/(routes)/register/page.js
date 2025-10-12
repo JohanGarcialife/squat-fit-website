@@ -29,13 +29,18 @@ export default function RegisterPage() {
         router.push('/login');
       }
     } catch (error) {
-      if (error.response && error.response.data && error.response.data.message && error.response.data.message[0] === "Password must contain at least 8 characters, one uppercase letter, one lowercase letter, one number and one special character") {
-        setErrors({ password: "La contraseña debe tener al menos 8 caracteres, una mayúscula, una minúscula, un número y un caracter especial" });
-      } else if (error.response && error.response.data && error.response.data.message === "Email already in use") {
-        setErrors({ email: "El correo electrónico ya está en uso" });
+      if (error.response && error.response.data) {
+        const message = error.response.data.message;
+        if (Array.isArray(message) && message[0].includes("Password must contain")) {
+          toast.error("La contraseña debe tener al menos 8 caracteres, una mayúscula, una minúscula, un número y un caracter especial");
+        } else if (message === "Email already in use") {
+          toast.error("El correo electrónico ya está en uso");
+        } else {
+          toast.error("Ocurrió un error inesperado durante el registro.");
+        }
       } else {
-        console.error('Error en el registro', error.response ? error.response.data : error.message);
-        // Aquí puedes manejar otros errores, por ejemplo, mostrar un mensaje genérico al usuario.
+        console.error('Error en el registro', error.message);
+        toast.error("Ocurrió un error inesperado.");
       }
     } finally {
       setSubmitting(false);
