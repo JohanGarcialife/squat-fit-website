@@ -6,7 +6,7 @@ import BurgerMenu from './BurgerMenu';
 
 export default function Header() {
   const { width } = useWindowSize();
-  console.log(width);
+  
   
   return (
     <>
