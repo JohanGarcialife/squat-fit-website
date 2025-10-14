@@ -37,14 +37,14 @@ const ImageComparisonSlider = (props) => {
     <div className="relative mx-auto lg:w-[460px] sm:w-[390px]  sm:h-[485px] w-[290px]  h-[385px] lg:h-[570px]  overflow-visible group">
       {/* Flechas de navegación */}
       {currentIndex > 0 && (
-        <div onClick={onPrev} className="absolute -bottom-20 left-10 md:bottom-1/2 md:-left-28 -translate-y-1/2 cursor-pointer z-30">
+        <div onClick={onPrev} className="absolute -bottom-20 left-1 md:bottom-1/2 md:-left-28 -translate-y-1/2 cursor-pointer z-30">
           <svg className="h-10 w-10 text-gray-400/80 hover:text-white transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
         </div>
       )}
       {currentIndex < totalSlides - 1 && (
-        <div onClick={onNext} className="absolute -bottom-20 right-10 md:bottom-1/2 md:-right-28 -translate-y-1/2 cursor-pointer z-30">
+        <div onClick={onNext} className="absolute -bottom-20 right-1 md:bottom-1/2 md:-right-28 -translate-y-1/2 cursor-pointer z-30">
           <svg className="h-10 w-10 text-gray-400/80 hover:text-white transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
           </svg>
@@ -99,8 +99,11 @@ const ImageComparisonSlider = (props) => {
 
       </div>
         {/* Etiqueta de texto informativa */}
-        <div className="absolute right-[35%] -bottom-20 sm:-bottom-10 sm:right-[30%] md:bottom-20 z-40 md:-right-20 bg-white backdrop-blur-sm max-w-24 sm:max-w-36 text-secondary text-center p-4 rounded-xl shadow-lg border border-gray-200">
+        <div className="absolute right-[25%] text-xs md:text-base -bottom-5 sm:-bottom-10 sm:right-[30%] md:bottom-20 z-40 md:-right-20 bg-white backdrop-blur-sm max-w-40 text-secondary text-center p-4 rounded-xl shadow-lg border border-gray-200 break-words">
+          <p>
+
           {text}
+          </p>
         </div>
     </div>
   );
