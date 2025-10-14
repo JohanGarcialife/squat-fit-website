@@ -67,8 +67,8 @@ const ImageComparisonSlider = ({ beforeSrc, afterSrc, captionText }) => {
 
         {/* Imagen del 'Después' */}
         <div
-          className="absolute top-0 left-0 h-full pointer-events-none overflow-hidden"
-          style={{ width: `${sliderPosition}%` }}
+          className="absolute top-0 left-0 w-full h-full pointer-events-none"
+          style={{ clipPath: `inset(0 ${100 - sliderPosition}% 0 0)` }}
         >
           <Image
             src={afterSrc}
@@ -86,7 +86,7 @@ const ImageComparisonSlider = ({ beforeSrc, afterSrc, captionText }) => {
           onMouseDown={handleMouseDown}
           onTouchStart={() => setIsDragging(true)}
         >
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-12 h-12 text-primary bg-white rounded-full flex items-center justify-center shadow-md border-2 border-gray-300 transform transition-transform group-hover:scale-110">
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-12 h-12 text-primary bg-white rounded-full flex items-center justify-center shadow-md border-2 border-gray-300 ">
             {/* SVG para el ícono de play del divisor */}
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="icon icon-tabler icons-tabler-outline icon-tabler-switch-horizontal"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M16 3l4 4l-4 4" /><path d="M10 7l10 0" /><path d="M8 13l-4 4l4 4" /><path d="M4 17l9 0" /></svg>
           </div>

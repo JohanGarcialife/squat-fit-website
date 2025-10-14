@@ -8,7 +8,7 @@ export default function StartPlan() {
   return (
     <div className='flex flex-col items-center  lg:pt-32'>
         <h2 className='text-5xl lg:text-6xl text-primary font-bold text-center lg:max-w-[670px] '>
-            Te ayudamos a lograr tu físico deseado
+            Comienza tu verdadera transformación hoy
         </h2>
         <div className="w-full flex items-center justify-center gap-10">
 

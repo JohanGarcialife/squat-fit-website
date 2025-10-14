@@ -7,13 +7,13 @@ export default function Comparision(props) {
   const { width } = useWindowSize();
     const {beforeSrc, afterSrc} = props;
   return (
-   <div className="px-5 xl:px-32 w-full flex flex-col lg:flex-row items-center justify-between lg:pt-80 xl:pt-40 pt-[650px] ">
+   <div className="px-5 xl:px-32 w-full flex flex-col lg:flex-row items-center justify-between lg:pt-80 xl:pt-64 pt-[900px] ">
      
      {width < 1024 ? 
      <>
     
       <div className="lg:w-1/2 h-full flex flex-col items-start justify-center lg:max-w-[510px] mb-10">
-        <p className="text-primary lg:text-start text-center font-bold text-5xl lg:text-7xl">Mejora tu físico y también tu estilo de vida</p>
+        <p className="text-secondary lg:text-start text-center font-bold text-5xl lg:text-7xl">Un cambio físico que se mantiene en el tiempo</p>
         <p className="text-black lg:text-start text-center text-2xl mt-10">Aprende a mantenerte sano y en forma; evita el efecto rebote y continua progresando después de meses en incluso años.</p>
         <div className="w-full flex flex-col items-center justify-center ">
 
@@ -38,7 +38,7 @@ export default function Comparision(props) {
       <ImageComparisonSlider beforeSrc={beforeSrc} afterSrc={afterSrc}/>
       </div>
       <div className="lg:w-1/2 h-full flex flex-col items-start justify-center lg:max-w-[510px] ">
-        <p className="text-primary font-bold text-7xl">Mejora tu físico y también tu estilo de vida</p>
+        <p className="text-secondary font-bold text-7xl">Un cambio físico que se mantiene en el tiempo</p>
         <p className="text-black text-2xl mt-10">Aprende a mantenerte sano y en forma; evita el efecto rebote y continua progresando después de meses en incluso años.</p>
         <div className="w-full flex items-center justify-start gap-10">
 

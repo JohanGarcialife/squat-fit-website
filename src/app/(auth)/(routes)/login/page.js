@@ -44,7 +44,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className='min-h-screen text-2xl text-white bg-linear-to-b from-primary to-secondary flex flex-col md:flex-row px-3 gap-10 md:px-32 py-40'>
+    <div className='min-h-screen text-2xl text-white bg-linear-to-b from-primary to-secondary flex flex-col md:flex-row px-3 gap-10 md:px-32 py-32'>
       <div className='md:w-1/2'>
         <h2 className='md:text-8xl text-6xl font-bold text-center md:text-start'>Inicia Sesión</h2>
         <p className='text-white text-3xl mt-12 max-w-[430px] text-center md:text-start'>Accede a tu cuenta y continúa tu entrenamiento con Squat Fit</p>
