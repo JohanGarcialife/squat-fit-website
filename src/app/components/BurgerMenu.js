@@ -14,6 +14,29 @@ export default function BurgerMenu() {
       setIsClient(true);
   }, []);
 
+  // Evitar scroll en el fondo cuando el burger está abierto
+  useEffect(() => {
+    if (!isClient) return;
+    const originalOverflow = document.body.style.overflow;
+    const originalPaddingRight = document.body.style.paddingRight;
+
+    if (show) {
+      document.body.style.overflow = 'hidden';
+      const scrollbarComp = window.innerWidth - document.documentElement.clientWidth;
+      if (scrollbarComp > 0) {
+        document.body.style.paddingRight = `${scrollbarComp}px`;
+      }
+    } else {
+      document.body.style.overflow = originalOverflow;
+      document.body.style.paddingRight = originalPaddingRight;
+    }
+
+    return () => {
+      document.body.style.overflow = originalOverflow;
+      document.body.style.paddingRight = originalPaddingRight;
+    };
+  }, [show, isClient]);
+
   const handleLogout = () => {
     logout();
     setShow(false);
@@ -39,8 +62,8 @@ export default function BurgerMenu() {
         />
       </div>
       {show &&
-        <div className='absolute top-0 left-0 w-full h-fit opacity-90 z-50' >
-          <div className='w-full bg-linear-to-b from-primary to-secondary px-5 pb-32 pt-10 flex flex-col'>
+        <div className='fixed inset-0 z-50' >
+          <div className='w-full h-screen bg-linear-to-b from-primary to-secondary opacity-90 px-5 pb-32 pt-10 flex flex-col overflow-y-auto'>
             <div className='flex justify-end'>
               <div onClick={() => setShow(false)}>
                 <Image

@@ -16,8 +16,10 @@ export default function HeroSection() {
 <p className='text-secondary text-center lg:text-start xl:max-w-[510px] max-w-screen font-bold text-5xl lg:text-7xl xl:text-8xl lg:leading-28 '>Transforma tu cuerpo hoy</p>
 <p className='text-black lg:max-w-[510px] text-center lg:text-start text-2xl mt-4'>Método con dieta, entreno y mentalidad para un cambio físico real y duradero</p>
 <div className='flex flex-row w-full items-center lg:items-start lg:justify-center'>
+<div className='flex flex-row items-center justify-center lg:justify-start w-full'>
 
 <button className=' text-white px-8 py-4 rounded-2xl mt-8 font-bold text-xl bg-linear-to-r from-primary to-secondary'>Únete Ahora</button>
+</div>
 </div>
 
 
@@ -37,6 +39,7 @@ export default function HeroSection() {
 </div>
         </div>
       </div>
+
       {/* Right */}
       <div className=' w-full h-[530px] lg:h-[650px] xl:h-[900px] relative overflow-hidden'>
         {width < 425 && <Image src="/mobileCoach.png" width={330} height={214} alt='Coach'  className='absolute z-20 left-5 bottom-40 '/>  }

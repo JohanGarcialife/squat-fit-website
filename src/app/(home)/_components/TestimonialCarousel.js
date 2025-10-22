@@ -117,7 +117,11 @@ const TestimonialCarousel = () => {
                     <div className="relative">
                         {width < 480 ? <Slider {...settings} ref={sliderRef}>
                             {testimonials.map((testimonial, index) => (
-                                <div key={index} className="px-3 py-5 ">
+                                <div
+                                    key={index}
+                                    className="px-3 py-5 "
+                                    onClick={() => sliderRef.current && sliderRef.current.slickGoTo(index)}
+                                >
                                     <div className="bg-[#3932C01A] h-full w-full lg:w-[420px] p-8 rounded-3xl shadow-lg border border-gray-100 hover:shadow-xl transition-shadow duration-300  flex flex-col items-center text-center">
                                         <div className="relative  mb-6">
                                             <Image
@@ -146,7 +150,11 @@ const TestimonialCarousel = () => {
 
                         <Slider {...settings} ref={sliderRef}>
                             {testimonials.map((testimonial, index) => (
-                                <div key={index} className="px-3 py-5 ">
+                                <div
+                                    key={index}
+                                    className="px-3 py-5 "
+                                    onClick={() => sliderRef.current && sliderRef.current.slickGoTo(index)}
+                                >
                                     <div className="bg-[#3932C01A] h-full w-full lg:w-[420px] p-8 rounded-3xl shadow-lg border border-gray-100 hover:shadow-xl transition-shadow duration-300  flex flex-col items-center text-center">
                                         <div className="relative  mb-6">
                                             <Image

@@ -20,7 +20,8 @@ export default function StartPlan() {
         <svg  xmlns="http://www.w3.org/2000/svg"  width="24"  height="24"  viewBox="0 0 24 24"  fill="none"  stroke="currentColor"  stroke-width="2"  stroke-linecap="round"  stroke-linejoin="round"  class="icon icon-tabler icons-tabler-outline icon-tabler-arrow-narrow-right"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M5 12l14 0" /><path d="M15 16l4 -4" /><path d="M15 8l4 4" /></svg>
         </div>
         </div>
-        <div className='lg:flex lg:flex-row lg:gap-16 px-7 lg:px-10  mt-20 lg:mt-44 mb-20 flex flex-row flex-wrap gap-10 items-center justify-center'>
+
+        <div className='lg:flex lg:flex-row lg:gap-16 px-7 lg:px-10  mt-40 lg:mt-44 mb-20 flex flex-row flex-wrap gap-10 items-center justify-center'>
 <Image src="/partners/logo-trainologym.png" width={184} height={38} alt='Partner' />
            <Image src="/partners/logo-life-pro-nutrition.png" width={106} height={45} alt='Partner' />
            <Image src="/partners/logo-fitgeneration.png" width={170} height={36} alt='Partner' />
