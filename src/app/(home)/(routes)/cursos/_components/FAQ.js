@@ -68,9 +68,9 @@ export default function FAQ() {
   };
 
   return (
-    <div className="w-full  mx-auto py-12 px-32">
+    <div className="w-full  mx-auto py-12 px-4 md:px-32">
       {/* Título */}
-      <h2 className="text-3xl lg:text-7xl font-bold text-center text-orange-500 mb-10">
+      <h2 className="text-5xl lg:text-7xl font-bold text-center text-orange-500 mb-10">
         Preguntas frecuentes
       </h2>
 
@@ -88,7 +88,7 @@ export default function FAQ() {
               aria-expanded={openIndex === index}
               aria-controls={`faq-answer-${index}`}
             >
-              <span className="text-4xl font-bold text-blue-800 cursor-pointer">
+              <span className="text-3xl md:text-4xl font-bold text-blue-800 cursor-pointer">
                 {faq.question}
               </span>
               <span className="text-blue-800 cursor-pointer font-bold">

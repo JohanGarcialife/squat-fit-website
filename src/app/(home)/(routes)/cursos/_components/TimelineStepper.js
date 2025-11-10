@@ -49,8 +49,8 @@ const TimelineStepper = () => {
   };
 
   return (
-    <div className=" pl-72">
-      <ol className="relative border-l-2 border-[#FF690B33]">
+    <div className=" pl-10 md:pl-72">
+      <ol className="relative border-l-4 border-[#FF690B33]">
         
         {steps.map((step, index) => {
           // Determinamos si este paso es el que está abierto
@@ -75,7 +75,7 @@ const TimelineStepper = () => {
                 // Controla la sección de contenido para lectores de pantalla
                 aria-expanded={isOpen}
                 aria-controls={`step-content-${step.number}`}
-                className="bg-[#FF690B33] text-gray-800 font-bold py-2 px-5 rounded-2xl inline-block text-left w-auto cursor-pointer transition-all text-2xl"
+                className="bg-[#FF690B33] text-gray-800 font-bold py-2 px-5 rounded-2xl inline-block text-left w-auto cursor-pointer transition-all text-lg md:text-2xl"
               >
                 {step.title}
               </button>

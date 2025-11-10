@@ -3,7 +3,7 @@ import React from 'react'
 
 export default function Benefits() {
   return (
-    <div className='mx-10 mb-16 rounded-[80px] bg-secondary text-white grid grid-cols-3 py-12 px-24'>
+    <div className='mx-3 md:mx-10 mb-16 rounded-[80px] bg-secondary text-white grid grid-cols-1 md:grid-cols-3 py-12 px-4 md:px-24 gap-20 md:gap-0'>
 <div className='w-full flex justify-center items-center '>
 
         <div className='w-full flex flex-col justify-center items-center max-w-[320px] text-center '>
