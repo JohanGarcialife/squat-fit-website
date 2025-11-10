@@ -8,6 +8,7 @@ import CoursesCarousel from './_components/CoursesCarousel'
 import Content from './_components/Content'
 import GoalsAndBenefits from './_components/GoalsAndBenefits'
 import CTO from './_components/CTO'
+import FAQ from './_components/FAQ'
 
 export default function page() {
   return (
@@ -21,6 +22,7 @@ export default function page() {
        <Content />
        <CTO />
        <GoalsAndBenefits />
+       <FAQ />
     </div>
   )
 }
