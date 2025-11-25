@@ -25,7 +25,7 @@ body {
 }
 
 .slick-prev:before, .slick-next:before {
-  color: gray !important;
+  color: rgba(255,105,11,0.5) !important;
 }
 
 .slick-slide > div {
@@ -42,4 +42,9 @@ body {
 .slick-slide.slick-current > div {
     transform: scale(1);
     opacity: 1;
+}
+
+/* Para los SVG que usan stroke="currentColor" (por ejemplo tus iconos custom) */
+.icon-tabler {
+  color: rgba(255,105,11,0.5);
 }

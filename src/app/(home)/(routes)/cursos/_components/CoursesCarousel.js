@@ -95,7 +95,7 @@ const CoursesCarousel = () => {
   };
 
   return (
-    <div className="w-screen py-60 bg-white">
+    <div className="w-screen py-12 bg-white">
       <div className="w-full max-w-7xl mx-auto px-4">
         <div>
           <div className="relative">
@@ -113,6 +113,7 @@ const CoursesCarousel = () => {
                       alt={course.src}
                       width={333}
                       height={563}
+                      className="rounded-3xl"
                     />
                   </div>
                 ))}
@@ -131,6 +132,7 @@ const CoursesCarousel = () => {
                       alt={course.src}
                       width={333}
                       height={563}
+                      className="rounded-3xl"
                     />
                   </div>
                 ))}

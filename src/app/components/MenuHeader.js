@@ -35,7 +35,7 @@ export default function MenuHeader() {
                         Inicio
                     </p>
                 </Link>
-                <Link href="/">
+                <Link href="/cocina">
                     <p
                         className={active === 'cocina' ? 'text-primary' : 'text-secondary'}
                         onClick={() => setActive('cocina')}
