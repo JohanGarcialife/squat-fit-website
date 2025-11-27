@@ -64,11 +64,19 @@ export default function MenuHeader() {
             <div className='flex gap-5 items-center'>
                 {isClient && isAuth ? (
                     <>
-                        <p className='text-secondary text-xl'>Hola, {user?.username}</p>
+                    <Link href="/profile">
+                        <p className='text-secondary text-xl cursor-pointer'>Hola, {user?.username}</p>
+                        </Link>
                         <button 
                             onClick={logout} 
-                            className='bg-primary text-background px-8 py-2 rounded-[20px] font-bold hover:opacity-80 text-2xl transition cursor-pointer'>
-                            Logout
+                            className=' text-secondary px-8 py-2 font-bold hover:opacity-80 text-4xl transition cursor-pointer flex items-center gap-2'>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#3932C0" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="icon icon-tabler icon-tabler-logout" aria-hidden="true" focusable="false">
+                              <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                              <path d="M14 8v-2a2 2 0 0 0 -2 -2h-7a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h7a2 2 0 0 0 2 -2v-2" />
+                              <path d="M9 12h12l-3 -3" />
+                              <path d="M18 15l3 -3" />
+                            </svg>
+                            <span className="sr-only">Cerrar sesión</span>
                         </button>
                     </>
                 ) : (

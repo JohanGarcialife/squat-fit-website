@@ -37,6 +37,13 @@ body {
 
 .slick-list{
     margin: 0 -10px;
+    
+}
+
+.slick-track{
+
+  padding-top: 10;
+    padding-bottom: 10;
 }
 
 .slick-slide.slick-current > div {

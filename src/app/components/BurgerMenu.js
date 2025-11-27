@@ -85,7 +85,10 @@ export default function BurgerMenu() {
             <div className="mt-10 flex flex-col items-center gap-4">
               {isClient && isAuth ? (
                 <>
+                <Link href="/profile">
+                
                   <p className='text-white text-3xl'>Hola, {user?.username}</p>
+                </Link>
                   <div onClick={handleLogout} className='flex justify-center py-2 px-4 border border-white rounded-xl cursor-pointer mt-4'>
                     <p className='text-5xl font-bold text-white'>Logout</p>
                   </div>
