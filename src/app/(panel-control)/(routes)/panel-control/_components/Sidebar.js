@@ -1,9 +1,11 @@
 "use client";
 import Image from "next/image";
+import Link from "next/link";
 import { useState } from "react";
 
 export default function Sidebar() {
   const [active, setActive] = useState(0);
+
   return (
     <div className="bg-primary/10 flex flex-col items-center justify-between py-8 px-10">
       <div className="space-y-6">
@@ -26,52 +28,54 @@ export default function Sidebar() {
           <p className="font-bold">Ir al chat</p>
         </div>
 
-        <div className="space-y-6 mt-10">
-          <div
-            className="flex items-center space-x-3  cursor-pointer "
-            onClick={() => setActive(0)}>
-            {active === 0 ? (
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="30"
-                height="30"
-                viewBox="0 0 24 24"
-                fill="#FF690B"
-                class="icon icon-tabler icons-tabler-filled icon-tabler-home">
-                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                <path d="M12.707 2.293l9 9c.63 .63 .184 1.707 -.707 1.707h-1v6a3 3 0 0 1 -3 3h-1v-7a3 3 0 0 0 -2.824 -2.995l-.176 -.005h-2a3 3 0 0 0 -3 3v7h-1a3 3 0 0 1 -3 -3v-6h-1c-.89 0 -1.337 -1.077 -.707 -1.707l9 -9a1 1 0 0 1 1.414 0m.293 11.707a1 1 0 0 1 1 1v7h-4v-7a1 1 0 0 1 .883 -.993l.117 -.007z" />
-              </svg>
-            ) : (
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="30"
-                height="30"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="#3932C0"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                class="icon icon-tabler icons-tabler-outline icon-tabler-home">
-                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                <path d="M5 12l-2 0l9 -9l9 9l-2 0" />
-                <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
-                <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
-              </svg>
-            )}
+        <div className=" mt-10">
+          <Link href="/panel-control">
+            <div
+              className="flex items-center space-x-3  cursor-pointer my-3"
+              onClick={() => setActive(0)}>
+              {active === 0 ? (
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="30"
+                  height="30"
+                  viewBox="0 0 24 24"
+                  fill="#FF690B"
+                  class="icon icon-tabler icons-tabler-filled icon-tabler-home">
+                  <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                  <path d="M12.707 2.293l9 9c.63 .63 .184 1.707 -.707 1.707h-1v6a3 3 0 0 1 -3 3h-1v-7a3 3 0 0 0 -2.824 -2.995l-.176 -.005h-2a3 3 0 0 0 -3 3v7h-1a3 3 0 0 1 -3 -3v-6h-1c-.89 0 -1.337 -1.077 -.707 -1.707l9 -9a1 1 0 0 1 1.414 0m.293 11.707a1 1 0 0 1 1 1v7h-4v-7a1 1 0 0 1 .883 -.993l.117 -.007z" />
+                </svg>
+              ) : (
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="30"
+                  height="30"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="#3932C0"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  class="icon icon-tabler icons-tabler-outline icon-tabler-home">
+                  <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                  <path d="M5 12l-2 0l9 -9l9 9l-2 0" />
+                  <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
+                  <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
+                </svg>
+              )}
 
-            <p
-              className={
-                active === 0
-                  ? "font-bold text-2xl text-primary"
-                  : "text-2xl text-secondary"
-              }>
-              Inicio
-            </p>
-          </div>
+              <p
+                className={
+                  active === 0
+                    ? "font-bold text-2xl text-primary"
+                    : "text-2xl text-secondary"
+                }>
+                Inicio
+              </p>
+            </div>
+          </Link>
 
           <div
-            className="flex items-center space-x-3  cursor-pointer "
+            className="flex items-center space-x-3  cursor-pointer my-3"
             onClick={() => setActive(1)}>
             {active === 1 ? (
               <svg
@@ -109,12 +113,12 @@ export default function Sidebar() {
                   ? "font-bold text-2xl text-primary"
                   : "text-2xl text-secondary"
               }>
-              Inicio
+              Alertas
             </p>
           </div>
 
           <div
-            className="flex items-center space-x-3  cursor-pointer "
+            className="flex items-center space-x-3  cursor-pointer my-3"
             onClick={() => setActive(2)}>
             {active === 2 ? (
               <svg
@@ -156,49 +160,51 @@ export default function Sidebar() {
             </p>
           </div>
 
-          <div
-            className="flex items-center space-x-3  cursor-pointer "
-            onClick={() => setActive(3)}>
-            {active === 3 ? (
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="30"
-                height="30"
-                viewBox="0 0 24 24"
-                fill="#FF690B"
-                class="icon icon-tabler icons-tabler-filled icon-tabler-star">
-                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                <path d="M8.243 7.34l-6.38 .925l-.113 .023a1 1 0 0 0 -.44 1.684l4.622 4.499l-1.09 6.355l-.013 .11a1 1 0 0 0 1.464 .944l5.706 -3l5.693 3l.1 .046a1 1 0 0 0 1.352 -1.1l-1.091 -6.355l4.624 -4.5l.078 -.085a1 1 0 0 0 -.633 -1.62l-6.38 -.926l-2.852 -5.78a1 1 0 0 0 -1.794 0l-2.853 5.78z" />
-              </svg>
-            ) : (
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="30"
-                height="30"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="#3932C0"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                class="icon icon-tabler icons-tabler-outline icon-tabler-star">
-                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                <path d="M12 17.75l-6.172 3.245l1.179 -6.873l-5 -4.867l6.9 -1l3.086 -6.253l3.086 6.253l6.9 1l-5 4.867l1.179 6.873z" />
-              </svg>
-            )}
+          <Link href={"/planes"}>
+            <div
+              className="flex items-center space-x-3  cursor-pointer my-3"
+              onClick={() => setActive(3)}>
+              {active === 3 ? (
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="30"
+                  height="30"
+                  viewBox="0 0 24 24"
+                  fill="#FF690B"
+                  class="icon icon-tabler icons-tabler-filled icon-tabler-star">
+                  <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                  <path d="M8.243 7.34l-6.38 .925l-.113 .023a1 1 0 0 0 -.44 1.684l4.622 4.499l-1.09 6.355l-.013 .11a1 1 0 0 0 1.464 .944l5.706 -3l5.693 3l.1 .046a1 1 0 0 0 1.352 -1.1l-1.091 -6.355l4.624 -4.5l.078 -.085a1 1 0 0 0 -.633 -1.62l-6.38 -.926l-2.852 -5.78a1 1 0 0 0 -1.794 0l-2.853 5.78z" />
+                </svg>
+              ) : (
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="30"
+                  height="30"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="#3932C0"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  class="icon icon-tabler icons-tabler-outline icon-tabler-star">
+                  <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                  <path d="M12 17.75l-6.172 3.245l1.179 -6.873l-5 -4.867l6.9 -1l3.086 -6.253l3.086 6.253l6.9 1l-5 4.867l1.179 6.873z" />
+                </svg>
+              )}
 
-            <p
-              className={
-                active === 3
-                  ? "font-bold text-2xl text-primary"
-                  : "text-2xl text-secondary"
-              }>
-              Planes
-            </p>
-          </div>
+              <p
+                className={
+                  active === 3
+                    ? "font-bold text-2xl text-primary"
+                    : "text-2xl text-secondary"
+                }>
+                Planes
+              </p>
+            </div>
+          </Link>
 
           <div
-            className="flex items-center space-x-3  cursor-pointer "
+            className="flex items-center space-x-3  cursor-pointer my-3"
             onClick={() => setActive(4)}>
             {active === 4 ? (
               <svg
@@ -244,8 +250,9 @@ export default function Sidebar() {
             </p>
           </div>
 
+<Link href={"/profile-panel"}>
           <div
-            className="flex items-center space-x-3  cursor-pointer "
+            className="flex items-center space-x-3  cursor-pointer my-3"
             onClick={() => setActive(5)}>
             {active === 5 ? (
               <svg
@@ -286,9 +293,9 @@ export default function Sidebar() {
               Perfil
             </p>
           </div>
-
+</Link>
           <div
-            className="flex items-center space-x-3  cursor-pointer "
+            className="flex items-center space-x-3  cursor-pointer my-3"
             onClick={() => setActive(6)}>
             {active === 6 ? (
               <svg
@@ -329,50 +336,50 @@ export default function Sidebar() {
           </div>
         </div>
       </div>
-      
-        <div>
-          <div
-            className="flex items-center space-x-3  cursor-pointer "
-            onClick={() => setActive(7)}>
-            {active === 7 ? (
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="30"
-                height="30"
-                viewBox="0 0 24 24"
-                fill="#FF690B"
-                class="icon icon-tabler icons-tabler-filled icon-tabler-settings">
-                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                <path d="M14.647 4.081a.724 .724 0 0 0 1.08 .448c2.439 -1.485 5.23 1.305 3.745 3.744a.724 .724 0 0 0 .447 1.08c2.775 .673 2.775 4.62 0 5.294a.724 .724 0 0 0 -.448 1.08c1.485 2.439 -1.305 5.23 -3.744 3.745a.724 .724 0 0 0 -1.08 .447c-.673 2.775 -4.62 2.775 -5.294 0a.724 .724 0 0 0 -1.08 -.448c-2.439 1.485 -5.23 -1.305 -3.745 -3.744a.724 .724 0 0 0 -.447 -1.08c-2.775 -.673 -2.775 -4.62 0 -5.294a.724 .724 0 0 0 .448 -1.08c-1.485 -2.439 1.305 -5.23 3.744 -3.745a.722 .722 0 0 0 1.08 -.447c.673 -2.775 4.62 -2.775 5.294 0zm-2.647 4.919a3 3 0 1 0 0 6a3 3 0 0 0 0 -6z" />
-              </svg>
-            ) : (
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="30"
-                height="30"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="#3932C0"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                class="icon icon-tabler icons-tabler-outline icon-tabler-settings">
-                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                <path d="M10.325 4.317c.426 -1.756 2.924 -1.756 3.35 0a1.724 1.724 0 0 0 2.573 1.066c1.543 -.94 3.31 .826 2.37 2.37a1.724 1.724 0 0 0 1.065 2.572c1.756 .426 1.756 2.924 0 3.35a1.724 1.724 0 0 0 -1.066 2.573c.94 1.543 -.826 3.31 -2.37 2.37a1.724 1.724 0 0 0 -2.572 1.065c-.426 1.756 -2.924 1.756 -3.35 0a1.724 1.724 0 0 0 -2.573 -1.066c-1.543 .94 -3.31 -.826 -2.37 -2.37a1.724 1.724 0 0 0 -1.065 -2.572c-1.756 -.426 -1.756 -2.924 0 -3.35a1.724 1.724 0 0 0 1.066 -2.573c-.94 -1.543 .826 -3.31 2.37 -2.37c1 .608 2.296 .07 2.572 -1.065z" />
-                <path d="M9 12a3 3 0 1 0 6 0a3 3 0 0 0 -6 0" />
-              </svg>
-            )}
 
-            <p
-              className={
-                active === 7
-                  ? "font-bold text-2xl text-primary"
-                  : "text-2xl text-secondary"
-              }>
-              Ajustes
-            </p>
-          </div>
+      <div>
+        <div
+          className="flex items-center space-x-3  cursor-pointer "
+          onClick={() => setActive(7)}>
+          {active === 7 ? (
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="30"
+              height="30"
+              viewBox="0 0 24 24"
+              fill="#FF690B"
+              class="icon icon-tabler icons-tabler-filled icon-tabler-settings">
+              <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+              <path d="M14.647 4.081a.724 .724 0 0 0 1.08 .448c2.439 -1.485 5.23 1.305 3.745 3.744a.724 .724 0 0 0 .447 1.08c2.775 .673 2.775 4.62 0 5.294a.724 .724 0 0 0 -.448 1.08c1.485 2.439 -1.305 5.23 -3.744 3.745a.724 .724 0 0 0 -1.08 .447c-.673 2.775 -4.62 2.775 -5.294 0a.724 .724 0 0 0 -1.08 -.448c-2.439 1.485 -5.23 -1.305 -3.745 -3.744a.724 .724 0 0 0 -.447 -1.08c-2.775 -.673 -2.775 -4.62 0 -5.294a.724 .724 0 0 0 .448 -1.08c-1.485 -2.439 1.305 -5.23 3.744 -3.745a.722 .722 0 0 0 1.08 -.447c.673 -2.775 4.62 -2.775 5.294 0zm-2.647 4.919a3 3 0 1 0 0 6a3 3 0 0 0 0 -6z" />
+            </svg>
+          ) : (
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="30"
+              height="30"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#3932C0"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              class="icon icon-tabler icons-tabler-outline icon-tabler-settings">
+              <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+              <path d="M10.325 4.317c.426 -1.756 2.924 -1.756 3.35 0a1.724 1.724 0 0 0 2.573 1.066c1.543 -.94 3.31 .826 2.37 2.37a1.724 1.724 0 0 0 1.065 2.572c1.756 .426 1.756 2.924 0 3.35a1.724 1.724 0 0 0 -1.066 2.573c.94 1.543 -.826 3.31 -2.37 2.37a1.724 1.724 0 0 0 -2.572 1.065c-.426 1.756 -2.924 1.756 -3.35 0a1.724 1.724 0 0 0 -2.573 -1.066c-1.543 .94 -3.31 -.826 -2.37 -2.37a1.724 1.724 0 0 0 -1.065 -2.572c-1.756 -.426 -1.756 -2.924 0 -3.35a1.724 1.724 0 0 0 1.066 -2.573c-.94 -1.543 .826 -3.31 2.37 -2.37c1 .608 2.296 .07 2.572 -1.065z" />
+              <path d="M9 12a3 3 0 1 0 6 0a3 3 0 0 0 -6 0" />
+            </svg>
+          )}
+
+          <p
+            className={
+              active === 7
+                ? "font-bold text-2xl text-primary"
+                : "text-2xl text-secondary"
+            }>
+            Ajustes
+          </p>
         </div>
+      </div>
     </div>
   );
 }
