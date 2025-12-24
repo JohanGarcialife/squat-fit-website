@@ -4,10 +4,16 @@ import React, { useState, useEffect } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useAuthStore } from '../../stores/auth.store';
+import { useCartStore } from '@/stores/cart.store';
+import MiniCart from './MiniCart';
 
 export default function MenuHeader() {
     const [active, setActive] = useState('home')
     const { isAuth, logout, user } = useAuthStore();
+    const { cart } = useCartStore();
+    
+    const [isCartOpen, setIsCartOpen] = useState(false);
+    const totalItems = cart.reduce((acc, item) => acc + item.quantity, 0);
 
     // Hydration fix for client-side state
     const [isClient, setIsClient] = useState(false);
@@ -62,6 +68,24 @@ export default function MenuHeader() {
             </div>
 
             <div className='flex gap-5 items-center'>
+                <div className='relative'>
+                    <button onClick={() => setIsCartOpen(!isCartOpen)} className='relative' aria-label="Ver carrito">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#3932C0" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                            <circle cx="6" cy="19" r="2" />
+                            <circle cx="17" cy="19" r="2" />
+                            <path d="M17 17h-11v-14h-2" />
+                            <path d="M6 5l14 1l-1 7h-13" />
+                        </svg>
+                        {isClient && totalItems > 0 && (
+                            <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                                {totalItems}
+                            </span>
+                        )}
+                    </button>
+                    {isCartOpen && <MiniCart onClose={() => setIsCartOpen(false)} />}
+                </div>
+
                 {isClient && isAuth ? (
                     <>
                     <Link href="/profile">

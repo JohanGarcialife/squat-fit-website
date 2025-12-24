@@ -3,10 +3,16 @@ import React, { useState, useEffect } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useAuthStore } from '../../stores/auth.store';
+import { useCartStore } from '@/stores/cart.store';
+import MiniCart from './MiniCart';
 
 export default function BurgerMenu() {
   const [show, setShow] = useState(false)
   const { isAuth, logout, user } = useAuthStore();
+  const { cart } = useCartStore();
+
+  const [isCartOpen, setIsCartOpen] = useState(false);
+  const totalItems = cart.reduce((acc, item) => acc + item.quantity, 0);
 
   // Hydration fix for client-side state
   const [isClient, setIsClient] = useState(false);
@@ -43,24 +49,47 @@ export default function BurgerMenu() {
   }
 
   return (
-    <div className='flex flex-row items-center justify-between px-5'>
+    <div className='flex flex-row items-center justify-between px-5 py-4'>
       <Link href="/">
         <Image
           src="/Logo-horizontal.png"
           width={210}
           height={50}
           alt="Logo"
+          className='object-contain'
         />
       </Link>
-      <div className={show ? "hidden" : "block"} onClick={() => setShow(true)}>
-        <Image
-          src="/icons/menu.png"
-          width={40}
-          height={30}
-          alt="Menu"
-          className='cursor-pointer'
-        />
+      
+      <div className='flex items-center gap-4'>
+        <div className='relative'>
+            <button onClick={() => setIsCartOpen(!isCartOpen)} className='relative' aria-label="Ver carrito">
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#3932C0" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                    <circle cx="6" cy="19" r="2" />
+                    <circle cx="17" cy="19" r="2" />
+                    <path d="M17 17h-11v-14h-2" />
+                    <path d="M6 5l14 1l-1 7h-13" />
+                </svg>
+                {isClient && totalItems > 0 && (
+                    <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                        {totalItems}
+                    </span>
+                )}
+            </button>
+            {isCartOpen && <MiniCart onClose={() => setIsCartOpen(false)} />}
+        </div>
+
+        <div className={show ? "hidden" : "block"} onClick={() => setShow(true)}>
+          <Image
+            src="/icons/menu.png"
+            width={40}
+            height={30}
+            alt="Menu"
+            className='cursor-pointer'
+          />
+        </div>
       </div>
+
       {show &&
         <div className='fixed inset-0 z-50' >
           <div className='w-full h-screen bg-linear-to-b from-primary to-secondary opacity-90 px-5 pb-32 pt-10 flex flex-col overflow-y-auto'>

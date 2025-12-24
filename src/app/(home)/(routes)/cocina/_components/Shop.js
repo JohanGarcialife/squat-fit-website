@@ -1,9 +1,61 @@
 'use client'
 import Image from 'next/image'
 import React, { useState } from 'react'
+import { useCartStore } from '@/stores/cart.store'
 
 export default function Shop() {
   const [presentacion, setPresentacion] = useState(null)
+  const { addToCart } = useCartStore()
+
+  const products = [
+    {
+      id: 'vol-1',
+      name: 'Volumen 1',
+      price: 34.99,
+      image: '/LibroCocina.png',
+      features: [
+        '1 aplicación para instalar en Android, iPhone o Tablet',
+        '70+ recetas fit (del Vol 1)',
+        'Guía de contar calorías, preparación semanal y utensilios esenciales',
+      ],
+      buttonClass: 'bg-secondary',
+      textColor: 'text-secondary',
+    },
+    {
+      id: 'vol-2',
+      name: 'Volumen 2',
+      price: 34.99,
+      image: '/LibroCocina.png',
+      features: [
+        '1 aplicación para instalar en Android, iPhone o Tablet',
+        '70+ recetas fit (del Vol 2)',
+        'Guía de la compra, tamaño de porciones y adaptar las recetas a tu dieta',
+      ],
+      buttonClass: 'bg-secondary',
+      textColor: 'text-secondary',
+    },
+    {
+      id: 'pack-1-2',
+      name: 'Volumen 1 + 2',
+      price: 63.97,
+      image: '/LibroCocina.png',
+      features: [
+        '2 apps para instalar en Android, iPhone o Tablet',
+        '140+ recetas fit (Vol 1 y 2)',
+        'Guía de contar calorías, preparación semanal y utensilios esenciales',
+        'Guía de la compra, tamaño de porciones y adaptar las recetas a tu dieta',
+      ],
+      buttonClass: 'bg-amber-500',
+      textColor: 'text-amber-500',
+      discount: '-10%',
+    },
+  ]
+
+  const handleAddToCart = (product) => {
+    addToCart(product)
+    console.log('Producto añadido:', product.name)
+  }
+
   return (
     <div className='px-4 sm:px-8 md:px-12 lg:px-20 py-12 flex flex-col items-center gap-6 max-w-screen-xl mx-auto'>
       <h2 className='text-black font-bold text-3xl sm:text-4xl md:text-5xl text-center'>Compra tu libro aquí:</h2>
@@ -69,82 +121,40 @@ export default function Shop() {
 
       {/* Libro */}
       <div className='grid grid-cols-1 md:grid-cols-3 gap-6 w-full text-black'>
-        <div className="w-full border-2 border-gray-300 rounded-lg px-4 py-6 flex flex-col  items-center justify-between space-y-6">
-          <p className='font-bold text-lg md:text-xl text-secondary'>Volumen 1</p>
-          <Image
-            src="/libroCocina.png"
-            alt='Libro de Cocina Squat Fit'
-            width={160}
-            height={200}
-            className="object-contain relative"
-            quality={75}
-            priority
-          />
-          <p className='font-bold text-3xl md:text-4xl text-secondary'>€34.99</p>
+        {products.map((product) => (
+          <div key={product.id} className="relative w-full border-2 border-gray-300 rounded-lg px-4 py-6 flex flex-col items-center justify-between space-y-6 overflow-hidden">
+            {product.discount && (
+              <div className='bg-amber-500 text-white font-bold absolute rotate-45 -right-7 top-4 md:top-6 md:right-0 lg:-right-12 lg:top-7 py-1 px-10 md:px-20'>
+                <p>{product.discount}</p>
+              </div>
+            )}
+            <p className={`font-bold text-lg md:text-xl ${product.textColor}`}>{product.name}</p>
+            <Image
+              src={product.image}
+              alt={`Libro de Cocina Squat Fit - ${product.name}`}
+              width={160}
+              height={200}
+              className="object-contain relative"
+              quality={75}
+              priority
+            />
+            <p className={`font-bold text-3xl md:text-4xl ${product.textColor}`}>
+              €{product.price.toString().replace('.', ',')}
+            </p>
 
-          <div className='space-y-2 text-sm md:text-base'>
-            <p><span className='text-primary'>✓</span> 1 aplicación para instalar en Android, iPhone o Tablet</p>
-            <p><span className='text-primary'>✓</span> 70+ recetas fit (del Vol 1)</p>
-            <p><span className='text-primary'>✓</span> Guía de contar calorías, preparación semanal y utensilios esenciales</p>
+            <div className='space-y-2 text-sm md:text-base'>
+              {product.features.map((feature, index) => (
+                <p key={index}><span className='text-primary'>✓</span> {feature}</p>
+              ))}
+            </div>
+
+            <div className='mt-4 cursor-pointer'>
+              <button onClick={() => handleAddToCart(product)} className={`${product.buttonClass} w-full sm:w-auto rounded-lg py-3 px-6 text-white font-bold cursor-pointer`}>
+                Añadir al carrito
+              </button>
+            </div>
           </div>
-
-          <div className='mt-4'>
-            <button className='bg-secondary w-full sm:w-auto rounded-lg py-3 px-6 text-white font-bold'>Añadir al carrito</button>
-          </div>
-        </div>
-
-        <div className="w-full border-2 border-gray-300 rounded-lg px-4 py-6 flex items-center flex-col justify-between space-y-6">
-          <p className='font-bold text-lg md:text-xl text-secondary'>Volumen 2</p>
-          <Image
-            src="/libroCocina.png"
-            alt='Libro de Cocina Squat Fit'
-            width={160}
-            height={200}
-            className="object-contain relative"
-            quality={75}
-            priority
-          />
-          <p className='font-bold text-3xl md:text-4xl text-secondary'>€34.99</p>
-
-          <div className='space-y-2 text-sm md:text-base'>
-            <p><span className='text-primary'>✓</span> 1 aplicación para instalar en Android, iPhone o Tablet</p>
-            <p><span className='text-primary'>✓</span> 70+ recetas fit (del Vol 2)</p>
-            <p><span className='text-primary'>✓</span> Guía de la compra, tamaño de porciones y adaptar las recetas a tu dieta</p>
-          </div>
-
-          <div className='mt-4'>
-            <button className='bg-secondary w-full sm:w-auto rounded-lg py-3 px-6 text-white font-bold'>Añadir al carrito</button>
-          </div>
-        </div>
-
-        <div className="relative w-full border-2 border-gray-300 rounded-lg px-4 py-6 flex flex-col items-center justify-between space-y-6 overflow-hidden">
-          <div className='bg-amber-500 text-white font-bold absolute rotate-45 -right-7 top-4 md:top-6 md:right-0 lg:-right-12 lg:top-7 py-1 px-10 md:px-20'>
-            <p>-10%</p>
-          </div>
-
-          <p className='font-bold text-lg md:text-xl text-amber-500'>Volumen 1 + 2</p>
-          <Image
-            src="/libroCocina.png"
-            alt='Libro de Cocina Squat Fit'
-            width={160}
-            height={200}
-            className="object-contain relative"
-            quality={75}
-            priority
-          />
-          <p className='font-bold text-3xl md:text-4xl text-amber-500'>€63,97</p>
-
-          <div className='space-y-2 text-sm md:text-base'>
-            <p><span className='text-primary'>✓</span> 2 apps para instalar en Android, iPhone o Tablet</p>
-            <p><span className='text-primary'>✓</span> 140+ recetas fit (Vol 1 y 2)</p>
-            <p><span className='text-primary'>✓</span> Guía de contar calorías, preparación semanal y utensilios esenciales</p>
-            <p><span className='text-primary'>✓</span> Guía de la compra, tamaño de porciones y adaptar las recetas a tu dieta</p>
-          </div>
-
-          <div className='mt-4'>
-            <button className='bg-amber-500 w-full sm:w-auto rounded-lg py-3 px-6 text-white font-bold'>Añadir al carrito</button>
-          </div>
-        </div>
+        ))}
       </div>
     </div>
   )
