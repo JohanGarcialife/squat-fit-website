@@ -2,12 +2,18 @@
 
 import React, { useState } from 'react';
 import { ChevronLeft, ChevronDown, Check } from 'lucide-react';
+import { useCheckoutStore } from '@/stores/checkout.store';
 
 export default function CheckoutForm() {
-  // Estado para el tipo de cliente (Particular vs Empresa)
+  const { formData, updateFormData } = useCheckoutStore();
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    updateFormData({ [name]: value });
+  };
+
+  // Estado local para UI, no necesita estar en el store global por ahora
   const [customerType, setCustomerType] = useState('particular');
-  
-  // Estado para el checkbox de envío
   const [sameAddress, setSameAddress] = useState(true);
 
   return (
@@ -26,14 +32,11 @@ export default function CheckoutForm() {
         {/* --- Dirección de Facturación --- */}
         <h2 className="text-indigo-900 font-bold text-lg mb-4">Dirección de facturación</h2>
 
-        {/* Toggle: Particular / Empresa */}
         <div className="flex gap-4 mb-8">
           <button
             onClick={() => setCustomerType('particular')}
             className={`px-6 py-2 rounded-full font-bold transition-all border cursor-pointer ${
-              customerType === 'particular'
-                ? 'bg-orange-500 text-white border-orange-500'
-                : 'bg-white text-orange-500 border-orange-300 hover:border-orange-500'
+              customerType === 'particular' ? 'bg-orange-500 text-white border-orange-500' : 'bg-white text-orange-500 border-orange-300 hover:border-orange-500'
             }`}
           >
             Particular
@@ -41,9 +44,7 @@ export default function CheckoutForm() {
           <button
             onClick={() => setCustomerType('empresa')}
             className={`px-6 py-2 rounded-full font-bold transition-all border ${
-              customerType === 'empresa'
-                ? 'bg-orange-500 text-white border-orange-500'
-                : 'bg-white text-orange-500 border-orange-300 hover:border-orange-500'
+              customerType === 'empresa' ? 'bg-orange-500 text-white border-orange-500' : 'bg-white text-orange-500 border-orange-300 hover:border-orange-500'
             }`}
           >
             Empresa
@@ -53,60 +54,25 @@ export default function CheckoutForm() {
         {/* --- Formulario --- */}
         <form className="space-y-5">
           
-          {/* DNI/CIF */}
-          <InputField 
-            label="DNI/CIF (opcional)" 
-            placeholder="Número de Identificación" 
-          />
-
-          {/* Nombre */}
-          <InputField 
-            label="Nombre*" 
-            placeholder="Tu nombre" 
-          />
-
-          {/* Apellidos */}
-          <InputField 
-            label="Apellidos*" 
-            placeholder="Tus apellidos" 
-          />
-
-          {/* Separador visual (opcional, por el espacio en la imagen) */}
+          <InputField label="DNI/CIF (opcional)" placeholder="Número de Identificación" name="dni_cif" value={formData.dni_cif} onChange={handleChange} />
+          <InputField label="Nombre*" placeholder="Tu nombre" name="firstName" value={formData.firstName} onChange={handleChange} />
+          <InputField label="Apellidos*" placeholder="Tus apellidos" name="lastName" value={formData.lastName} onChange={handleChange} />
+          
           <div className="h-2"></div>
 
-          {/* Dirección */}
-          <InputField 
-            label="Dirección*" 
-            placeholder="Introduce tu calle y número" 
-          />
-
-          {/* Piso / Puerta */}
-          <InputField 
-            label="Piso / puerta (opcional)" 
-            placeholder="Piso, puerta, etc." 
-          />
-
-          {/* Código Postal */}
-          <InputField 
-            label="Código postal*" 
-            placeholder="XXXXX" 
-          />
-
-          {/* Ciudad */}
-          <InputField 
-            label="Ciudad*" 
-            placeholder="Tu ciudad" 
-          />
-
-          {/* País (Select customizado) */}
+          <InputField label="Dirección*" placeholder="Introduce tu calle y número" name="address" value={formData.address} onChange={handleChange} />
+          <InputField label="Piso / puerta (opcional)" placeholder="Piso, puerta, etc." name="apartment" value={formData.apartment} onChange={handleChange} />
+          <InputField label="Código postal*" placeholder="XXXXX" name="postalCode" value={formData.postalCode} onChange={handleChange} />
+          <InputField label="Ciudad*" placeholder="Tu ciudad" name="city" value={formData.city} onChange={handleChange} />
+          
           <div className="flex flex-col gap-1">
             <label className="text-orange-500 text-sm ml-1">País*</label>
             <div className="relative">
-              <select className="w-full appearance-none bg-white border border-orange-300 rounded-2xl px-5 py-3 text-orange-300 outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all cursor-pointer">
-                <option>Seleccionar país</option>
-                <option>España</option>
-                <option>México</option>
-                <option>Colombia</option>
+              <select name="country" value={formData.country} onChange={handleChange} className="w-full appearance-none bg-white border border-orange-300 rounded-2xl px-5 py-3 text-gray-700 outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all cursor-pointer">
+                <option value="ES">España</option>
+                <option value="MX">México</option>
+                <option value="CO">Colombia</option>
+                <option value="US">United States</option>
               </select>
               <div className="absolute right-4 top-1/2 -translate-y-1/2 text-orange-500 pointer-events-none">
                 <ChevronDown size={20} />
@@ -116,36 +82,19 @@ export default function CheckoutForm() {
 
           <div className="h-4"></div>
 
-          {/* Teléfono */}
           <div className="flex flex-col gap-1">
             <label className="text-orange-500 text-sm ml-1">Teléfono*</label>
             <div className="flex gap-3">
-              {/* Prefijo (Simulado) */}
               <div className="flex items-center justify-center gap-1 w-24 border border-white rounded-2xl px-3 py-3 text-orange-500 font-medium">
-                <span>🇪🇸</span>
-                <span>+34</span>
+                <span>🇪🇸</span><span>+34</span>
               </div>
-              {/* Input */}
-              <input 
-                type="tel"
-                placeholder="Tu teléfono"
-                className="flex-1 border border-orange-300 rounded-2xl px-5 py-3 placeholder-orange-200 text-gray-700 outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all"
-              />
+              <input name="phone" value={formData.phone} onChange={handleChange} type="tel" placeholder="Tu teléfono" className="flex-1 border border-orange-300 rounded-2xl px-5 py-3 placeholder-orange-200 text-gray-700 outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all" />
             </div>
           </div>
 
-          {/* E-mail */}
-          <InputField 
-            label="e-mail*" 
-            placeholder="Tu correo electrónico" 
-            type="email"
-          />
-
-          {/* Checkbox "Usar la misma dirección" */}
-          <div 
-            className="flex items-center gap-3 cursor-pointer mt-2"
-            onClick={() => setSameAddress(!sameAddress)}
-          >
+          <InputField label="e-mail*" placeholder="Tu correo electrónico" type="email" name="email" value={formData.email} onChange={handleChange} />
+          
+          <div className="flex items-center gap-3 cursor-pointer mt-2" onClick={() => setSameAddress(!sameAddress)}>
             <div className={`w-6 h-6 rounded-full flex items-center justify-center transition-colors ${sameAddress ? 'bg-orange-500' : 'border border-orange-300'}`}>
               {sameAddress && <Check size={16} className="text-white" strokeWidth={3} />}
             </div>
@@ -153,15 +102,10 @@ export default function CheckoutForm() {
           </div>
 
           <div className="h-2"></div>
-
-          {/* Notas del envío */}
+          
           <div className="flex flex-col gap-1">
             <label className="text-orange-500 text-sm ml-1">Notas del envío (opcional)</label>
-            <textarea 
-              rows={4}
-              placeholder="Escribe aquí..."
-              className="w-full border border-orange-300 rounded-2xl px-5 py-3 placeholder-orange-200 text-gray-700 outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all resize-none"
-            />
+            <textarea name="shippingNotes" value={formData.shippingNotes} onChange={handleChange} rows={4} placeholder="Escribe aquí..." className="w-full border border-orange-300 rounded-2xl px-5 py-3 placeholder-orange-200 text-gray-700 outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all resize-none" />
           </div>
 
         </form>
@@ -170,16 +114,11 @@ export default function CheckoutForm() {
   );
 }
 
-// Componente auxiliar reutilizable para los inputs estándar
-function InputField({ label, placeholder, type = "text" }) {
+function InputField({ label, placeholder, type = "text", name, value, onChange }) {
   return (
     <div className="flex flex-col gap-1">
       <label className="text-orange-500 text-sm ml-1">{label}</label>
-      <input 
-        type={type}
-        placeholder={placeholder}
-        className="w-full border border-orange-300 rounded-2xl px-5 py-3 placeholder-orange-200 text-gray-700 outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all"
-      />
+      <input name={name} value={value} onChange={onChange} type={type} placeholder={placeholder} className="w-full border border-orange-300 rounded-2xl px-5 py-3 placeholder-orange-200 text-gray-700 outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all" />
     </div>
   );
 }

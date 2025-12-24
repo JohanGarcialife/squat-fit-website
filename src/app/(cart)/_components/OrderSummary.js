@@ -1,46 +1,30 @@
+'use client';
+
 import React from 'react';
 import { Euro } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
+import { useCartStore } from '@/stores/cart.store';
 
 export default function OrderSummary(props) {
     const { setStep, setSuccess } = props;
-  // Datos de ejemplo basados en la imagen
-  const items = [
-    {
-      id: 1,
-      title: "La Cocina Squat Fit - Vol.1",
-      quantity: 1,
-      price: 29.99,
-      image: "/api/placeholder/80/80" // Reemplaza con tu imagen
-    },
-    {
-      id: 2,
-      title: "La Cocina Squat Fit - Vol.1",
-      quantity: 1,
-      price: 29.99,
-      image: "/api/placeholder/80/80"
-    },
-    {
-      id: 3,
-      title: "La Cocina Squat Fit - Vol.1",
-      quantity: 1,
-      price: 29.99,
-      image: "/api/placeholder/80/80"
-    }
-  ];
+    const { cart } = useCartStore();
+
+    const subtotal = cart.reduce((acc, item) => acc + item.price * item.quantity, 0);
+    const shippingCost = 4.99;
+    const freeShippingThreshold = 90.00;
+    
+    const finalShipping = subtotal >= freeShippingThreshold ? 0 : shippingCost;
+    const total = subtotal + finalShipping;
 
   return (
     <div className="w-full max-w-sm mx-auto bg-[#FFF5F3] rounded-[2.5rem] p-8 shadow-sm font-sans">
       
       {/* 1. Logo SQ/FT */}
-      <Link href="/PaymentSuccess">
-      
-      <div  className="flex flex-col items-center mb-4">
-        <div className="text-4xl font-black text-indigo-900 leading-none text-center tracking-tight">
-          SQ<br />
-          <span className="text-orange-500">FT</span>
+      <Link href="/">
+        <div  className="flex flex-col items-center mb-4">
+            <Image src="/LogotipoSquatfit.png" width={100} height={40} alt="Logo Squat Fit" />
         </div>
-      </div>
       </Link>
 
       {/* 2. Cambiar Moneda */}
@@ -54,32 +38,33 @@ export default function OrderSummary(props) {
       </div>
 
       {/* 3. Lista de Productos (Cards compactas) */}
-      <div className="space-y-4 mb-10">
-        {items.map((item) => (
+      <div className="space-y-4 mb-10 max-h-64 overflow-y-auto pr-2">
+        {cart.map((item) => (
           <div 
             key={item.id} 
             className="bg-[#FFFDFC] p-3 rounded-2xl shadow-sm flex items-center gap-4 transition-transform hover:scale-[1.02]"
           >
             {/* Imagen del producto */}
             <div className="w-16 h-16 shrink-0 bg-gray-100 rounded-lg overflow-hidden relative">
-              <img 
+              <Image 
                 src={item.image} 
-                alt={item.title} 
-                className="w-full h-full object-cover mix-blend-multiply" 
+                alt={item.name} 
+                layout="fill"
+                className="object-contain" 
               />
             </div>
 
             {/* Info del producto */}
             <div className="flex-1 flex flex-col justify-center">
               <h4 className="text-orange-500 font-bold text-sm leading-tight mb-1">
-                {item.title}
+                {item.name}
               </h4>
               <div className="flex justify-between items-end">
                 <span className="text-indigo-900 text-sm font-medium">
                   {item.quantity} ud.
                 </span>
                 <span className="text-indigo-900 font-bold text-sm">
-                  {item.price.toFixed(2).replace('.', ',')} EUR
+                  {(item.price * item.quantity).toFixed(2).replace('.', ',')} EUR
                 </span>
               </div>
             </div>
@@ -91,11 +76,11 @@ export default function OrderSummary(props) {
       <div className="space-y-3 mb-8 px-2">
         <div className="flex justify-between items-center text-indigo-900">
           <span className="text-lg font-medium">Envío</span>
-          <span className="text-lg font-medium">00,00 EUR</span>
+          <span className="text-lg font-medium">{finalShipping.toFixed(2).replace('.', ',')} EUR</span>
         </div>
         <div className="flex justify-between items-center text-indigo-900 font-bold text-xl">
           <span>Total</span>
-          <span>89,97 EUR</span>
+          <span>{total.toFixed(2).replace('.', ',')} EUR</span>
         </div>
       </div>
 
