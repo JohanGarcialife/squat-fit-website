@@ -14,7 +14,7 @@ export default function MiniCart({ onClose }) {
       <div className="p-4">
         <div className="flex justify-between items-center mb-4">
           <h3 className="font-bold text-lg">Mi Carrito</h3>
-          <button onClick={onClose} className="font-bold text-xl">&times;</button>
+          <button onClick={onClose} className="font-bold text-xl cursor-pointer">&times;</button>
         </div>
         {cart.length === 0 ? (
           <p className="text-center text-gray-500 my-6">Tu carrito está vacío.</p>
@@ -29,7 +29,7 @@ export default function MiniCart({ onClose }) {
                     <p className="text-xs text-gray-500">Cantidad: {item.quantity}</p>
                     <p className="font-bold text-sm">€{(item.price * item.quantity).toFixed(2)}</p>
                   </div>
-                  <button onClick={() => removeFromCart(item.id)} className="text-red-500 hover:text-red-700 font-bold text-lg">
+                  <button onClick={() => removeFromCart(item.id)} className="text-red-500 hover:text-red-700 font-bold text-lg cursor-pointer">
                     &times;
                   </button>
                 </div>

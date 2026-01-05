@@ -22,7 +22,8 @@ export default function MenuHeader() {
     }, []);
 
     return (
-        <div className='flex justify-between items-center px-10 py-7'>
+        <>
+        <div className='flex justify-between items-center px-10 pt-7'>
             <Link href="/">
                 <Image
                     src="/Logo-horizontal.png"
@@ -69,7 +70,7 @@ export default function MenuHeader() {
 
             <div className='flex gap-5 items-center'>
                 <div className='relative'>
-                    <button onClick={() => setIsCartOpen(!isCartOpen)} className='relative' aria-label="Ver carrito">
+                    <button onClick={() => setIsCartOpen(!isCartOpen)} className='relative cursor-pointer' aria-label="Ver carrito">
                         <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#3932C0" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                             <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
                             <circle cx="6" cy="19" r="2" />
@@ -115,5 +116,7 @@ export default function MenuHeader() {
                 )}
             </div>
         </div>
+
+        </>
     )
 }

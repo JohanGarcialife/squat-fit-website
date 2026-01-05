@@ -109,6 +109,22 @@ export default function BurgerMenu() {
               <Link href="/cocina" className='text-5xl font-bold text-white' onClick={() => setShow(false)}>Cocina</Link>
               <Link href="/planes" className='text-5xl font-bold text-white' onClick={() => setShow(false)}>Planes</Link>
               <Link href="/cursos" className='text-5xl font-bold text-white' onClick={() => setShow(false)}>Cursos</Link>
+               <Link href="/politicas">
+                    <p
+                        className='text-5xl font-bold text-white'
+                         onClick={() => setShow(false)}
+                    >
+                        Políticas
+                    </p>
+                </Link>
+                <Link href="/nosotros">
+                    <p
+                        className='text-5xl font-bold text-white'
+                         onClick={() => setShow(false)}
+                    >
+                        Nosotros
+                    </p>
+                </Link>
             </nav>
             
             <div className="mt-10 flex flex-col items-center gap-4">

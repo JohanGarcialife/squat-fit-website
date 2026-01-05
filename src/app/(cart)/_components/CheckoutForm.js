@@ -4,7 +4,8 @@ import React, { useState } from 'react';
 import { ChevronLeft, ChevronDown, Check } from 'lucide-react';
 import { useCheckoutStore } from '@/stores/checkout.store';
 
-export default function CheckoutForm() {
+export default function CheckoutForm(props) {
+  const { setStep } = props;
   const { formData, updateFormData } = useCheckoutStore();
 
   const handleChange = (e) => {
@@ -23,7 +24,7 @@ export default function CheckoutForm() {
         {/* --- Header --- */}
         <div className="mb-8">
           <span className="text-slate-500 text-sm font-medium">Paso 2 de 3</span>
-          <div className="flex items-center gap-2 mt-2 cursor-pointer text-indigo-900 hover:text-indigo-700 transition-colors">
+          <div onClick={() => setStep(1)} className="flex items-center gap-2 mt-2 cursor-pointer text-indigo-900 hover:text-indigo-700 transition-colors">
             <ChevronLeft size={24} />
             <h1 className="text-3xl font-bold">Mis datos</h1>
           </div>
@@ -36,14 +37,14 @@ export default function CheckoutForm() {
           <button
             onClick={() => setCustomerType('particular')}
             className={`px-6 py-2 rounded-full font-bold transition-all border cursor-pointer ${
-              customerType === 'particular' ? 'bg-orange-500 text-white border-orange-500' : 'bg-white text-orange-500 border-orange-300 hover:border-orange-500'
+              customerType === 'particular' ? 'bg-orange-500 text-white border-orange-500' : 'bg-white  text-orange-500 border-orange-300 hover:border-orange-500'
             }`}
           >
             Particular
           </button>
           <button
             onClick={() => setCustomerType('empresa')}
-            className={`px-6 py-2 rounded-full font-bold transition-all border ${
+            className={`px-6 py-2 rounded-full font-bold transition-all border cursor-pointer ${
               customerType === 'empresa' ? 'bg-orange-500 text-white border-orange-500' : 'bg-white text-orange-500 border-orange-300 hover:border-orange-500'
             }`}
           >

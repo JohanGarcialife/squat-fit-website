@@ -53,18 +53,18 @@ export default function Summary(props) {
                   <div className="flex items-center gap-4">
                       {/* Quantity Controls */}
                       <div className="flex items-center gap-1">
-                          <button onClick={() => decrementQuantity(item.id)} className="bg-indigo-900 text-white p-2 rounded-md hover:bg-indigo-800 transition-colors">
+                          <button onClick={() => decrementQuantity(item.id)} className="bg-indigo-900 text-white p-2 cursor-pointer rounded-md hover:bg-indigo-800 transition-colors">
                               <Minus size={16} />
                           </button>
                           <span className="px-2 font-medium text-indigo-900">{item.quantity} ud.</span>
-                          <button onClick={() => addToCart(item)} className="bg-indigo-900 text-white p-2 rounded-md hover:bg-indigo-800 transition-colors">
+                          <button onClick={() => addToCart(item)} className="bg-indigo-900 text-white p-2 cursor-pointer rounded-md hover:bg-indigo-800 transition-colors">
                               <Plus size={16} />
                           </button>
                       </div>
                       {/* Remove Button */}
                       <button
                           onClick={() => removeFromCart(item.id)}
-                          className="text-gray-500 hover:text-red-500 transition-colors">
+                          className="text-gray-500 hover:text-red-500 transition-colors cursor-pointer">
                           <Trash2 size={20} />
                       </button>
                   </div>                </div>
@@ -138,7 +138,7 @@ export default function Summary(props) {
                   </span>
                 </div>
               </div>
-              <button onClick={() => setStep(2)} className="w-full bg-indigo-800 text-white font-bold py-4 rounded-xl hover:bg-indigo-900 transition-colors shadow-lg shadow-indigo-200">
+              <button onClick={() => setStep(2)} className="w-full cursor-pointer bg-indigo-800 text-white font-bold py-4 rounded-xl hover:bg-indigo-900 transition-colors shadow-lg shadow-indigo-200">
                 Continuar
               </button>
             </div>

@@ -7,7 +7,7 @@ export default function FormData(props) {
   return (
      <div className="min-h-screen bg-white flex flex-row justify-between font-sans">
       <div className="w-1/2 space-y-6 min-h-screen py-14 px-40 ">
-      <CheckoutForm />
+      <CheckoutForm setStep={setStep} />
       </div>
      
       <div className="bg-[#FFF5F3] w-1/2 min-h-screen sticky top-10">

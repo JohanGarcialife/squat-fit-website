@@ -28,10 +28,50 @@ export default function Footer() {
                   <Link href="/cocina" className={active === 'cocina' ? 'text-2xl text-primary': 'text-2xl text-secondary'} onClick={() => setShow(false)}>Cocina</Link>
                   <Link href="/planes" className={active === 'planes' ? 'text-2xl text-primary': 'text-2xl text-secondary'} onClick={() => setShow(false)}>Planes</Link>
                   <Link href="/cursos" className={active === 'cursos' ? 'text-2xl text-primary': 'text-2xl text-secondary'} onClick={() => setShow(false)}>Cursos</Link>
+                   <Link href="/politicas">
+                    <p
+                        className={active === 'politicas' ? 'text-primary' : 'text-secondary'}
+                        onClick={() => setActive('politicas')}
+                    >
+                        Políticas
+                    </p>
+                </Link>
+                <Link href="/nosotros">
+                    <p
+                        className={active === 'nosotros' ? 'text-primary' : 'text-secondary'}
+                        onClick={() => setActive('nosotros')}
+                    >
+                        Nosotros
+                    </p>
+                </Link>
             </nav>
+            
     </div>
             
-            : <MenuHeader />}
+            : 
+            <>
+            <MenuHeader />
+            <div className='flex justify-center gap-x-9 pb-10 text-secondary text-lg'>
+                <Link href="/politicas">
+                    <p
+                        className={active === 'politicas' ? 'text-primary' : 'text-secondary'}
+                        onClick={() => setActive('politicas')}
+                    >
+                        Políticas
+                    </p>
+                </Link>
+                <Link href="/nosotros">
+                    <p
+                        className={active === 'nosotros' ? 'text-primary' : 'text-secondary'}
+                        onClick={() => setActive('nosotros')}
+                    >
+                        Nosotros
+                    </p>
+                </Link>
+             
+            </div>
+            </>
+}
     </>
   )
 }
