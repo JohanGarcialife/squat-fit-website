@@ -1,77 +1,37 @@
 'use client'
-import React, { useState } from 'react'
-import MenuHeader from './MenuHeader'
+import React from 'react'
 import Link from 'next/link';
 import Image from 'next/image';
-import useWindowSize from '@/hooks/UseWindowSize';
 
 export default function Footer() { 
-  const { width } = useWindowSize();
-  const [active, setActive] = useState('home')
   return (
-    <>
-    
-    {width < 1024 ? 
-    <div className='flex flex-col items-center justify-center py-12'>
+    <div className='bg-gray-100 text-gray-700 py-8 px-4 sm:px-8 md:px-12 lg:px-20 flex flex-col items-center text-center space-y-4 lg:flex-row lg:justify-between lg:space-y-0'>
+        {/* Logo */}
+        <Link href="/">
+            <Image
+                src="/Logo-horizontal.png"
+                width={200}
+                height={40}
+                alt="Logo Squat Fit"
+                className='object-contain'
+            />
+        </Link>
 
-    <Link href="/">
-                <Image
-                    src="/Logo-horizontal.png"
-                    width={210}
-                    height={50}
-                    alt="Logo"
-                />
-            </Link> 
+        {/* Enlaces del Footer */}
+        <div className='flex flex-col space-y-2 lg:flex-row lg:space-x-8 lg:space-y-0'>
+            <Link href="/politicas">
+                <p className='text-sm hover:text-primary transition-colors'>Políticas de Privacidad</p>
+            </Link>
+            <Link href="/nosotros">
+                <p className='text-sm hover:text-primary transition-colors'>Sobre Nosotros</p>
+            </Link>
+            {/* Se puede añadir más enlaces o información aquí */}
+        </div>
 
-            <nav className='flex flex-col items-center justify-center'>
-              <Link href="/" className={active === 'home' ? 'text-2xl text-primary': 'text-2xl text-secondary'} onClick={() => setShow(false)}>Inicio</Link>
-                  <Link href="/cocina" className={active === 'cocina' ? 'text-2xl text-primary': 'text-2xl text-secondary'} onClick={() => setShow(false)}>Cocina</Link>
-                  <Link href="/planes" className={active === 'planes' ? 'text-2xl text-primary': 'text-2xl text-secondary'} onClick={() => setShow(false)}>Planes</Link>
-                  <Link href="/cursos" className={active === 'cursos' ? 'text-2xl text-primary': 'text-2xl text-secondary'} onClick={() => setShow(false)}>Cursos</Link>
-                   <Link href="/politicas">
-                    <p
-                        className={active === 'politicas' ? 'text-primary' : 'text-secondary'}
-                        onClick={() => setActive('politicas')}
-                    >
-                        Políticas
-                    </p>
-                </Link>
-                <Link href="/nosotros">
-                    <p
-                        className={active === 'nosotros' ? 'text-primary' : 'text-secondary'}
-                        onClick={() => setActive('nosotros')}
-                    >
-                        Nosotros
-                    </p>
-                </Link>
-            </nav>
-            
+        {/* Derechos de Autor o Redes Sociales */}
+        <div className='text-xs text-gray-500'>
+            © {new Date().getFullYear()} Squat Fit. Todos los derechos reservados.
+        </div>
     </div>
-            
-            : 
-            <>
-            <MenuHeader />
-            <div className='flex justify-center gap-x-9 pb-10 text-secondary text-lg'>
-                <Link href="/politicas">
-                    <p
-                        className={active === 'politicas' ? 'text-primary' : 'text-secondary'}
-                        onClick={() => setActive('politicas')}
-                    >
-                        Políticas
-                    </p>
-                </Link>
-                <Link href="/nosotros">
-                    <p
-                        className={active === 'nosotros' ? 'text-primary' : 'text-secondary'}
-                        onClick={() => setActive('nosotros')}
-                    >
-                        Nosotros
-                    </p>
-                </Link>
-             
-            </div>
-            </>
-}
-    </>
   )
 }

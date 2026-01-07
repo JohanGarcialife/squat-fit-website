@@ -85,7 +85,7 @@ const ContenidoEmpresa = () => {
     <div className="animate-fadeIn">
       {/* Sección del Título Principal */}
       <header className="py-12 text-center lg:text-left">
-        <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-[#3B3B98]">
+        <h1 className="text-8xl sm:text-5xl lg:text-8xl font-bold text-[#3B3B98]">
           ¡Hola y bienvenido a Squat Fit!
         </h1>
       </header>
@@ -94,21 +94,21 @@ const ContenidoEmpresa = () => {
       <section className="py-10">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <div className="text-center lg:text-left">
-            <h2 className="text-3xl font-bold text-orange-500 mb-4">Sobre nosotros</h2>
-            <p className="mb-4 text-lg">
+            <h2 className="text-4xl font-bold text-orange-500 mb-4">Sobre nosotros</h2>
+            <p className="mb-4 text-3xl">
               Somos un equipo apasionado por el fitness y la salud, y estamos aquí para ayudarte a alcanzar tus metas de una manera divertida y sostenible.
             </p>
-            <p className="text-lg">
+            <p className="text-3xl">
               En Squat Fit, creemos que el entrenamiento y una buena dieta son claves no sólo para un cuerpo en forma sino también para una mente sana, y una vida equilibrada y feliz.
             </p>
           </div>
           <div className="flex justify-center">
             <Image 
-              src="/IMG-Maria-Hamlet-.png" // Corregido a IMG-Maria-Hamlet-.png
+              src="/nosotros.png" // Corregido a IMG-Maria-Hamlet-.png
               alt="Equipo de Squat Fit"
               width={500}
               height={500}
-              className="rounded-full object-cover"
+              
             />
           </div>
         </div>
@@ -118,20 +118,20 @@ const ContenidoEmpresa = () => {
       <section className="py-10">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
           <div className="text-center lg:text-left">
-            <h2 className="text-3xl font-bold text-orange-500 mb-4">Nuestra misión</h2>
-            <p className="mb-4 text-lg">
+            <h2 className="text-4xl font-bold text-orange-500 mb-4">Nuestra misión</h2>
+            <p className="mb-4 text-3xl">
               Como uno de nuestros lemas: “la mejor inversión que puedes hacer es: Aprender”, nuestra misión es darte herramientas, conocimiento y apoyo para lograr tu mejor versión.
             </p>
-            <p className="text-lg">
+            <p className="text-3xl">
               Aquí cada miembro es parte de nuestra familia, y nos aseguramos de que te sientas valorado y motivado.
             </p>
           </div>
           <div className="text-center lg:text-left">
-            <h2 className="text-3xl font-bold text-orange-500 mb-4">Nuestra visión</h2>
-            <p className="mb-4 text-lg">
+            <h2 className="text-4xl font-bold text-orange-500 mb-4">Nuestra visión</h2>
+            <p className="mb-4 text-3xl">
               Tenemos dos convicciones principales: 1º si todos entendiéramos las calorías tomaríamos las mejores decisiones y 2º si erradicamos el sedentarismo todos seremos más saludables.
             </p>
-            <p className="text-lg">
+            <p className="text-3xl">
               Por eso, ya sea que busques mejorar tu físico, tu rendimiento, tu mentalidad, tu salud, o simplemente empezar tu viaje fitness, este es el equipo ideal para ti.
             </p>
           </div>
@@ -139,12 +139,12 @@ const ContenidoEmpresa = () => {
       </section>
 
       {/* Sección "Únete al equipo" */}
-      <section className="py-10 text-center">
+      <section className="py-10 ">
         <h2 className="text-4xl font-bold text-[#3B3B98] mb-6">Únete al equipo</h2>
-        <p className="mb-4 text-lg max-w-3xl mx-auto">
+        <p className="mb-4 text-3xl mx-auto">
           Si estás listo para transformar tu vida y divertirte mientras lo haces, ¡estás en la comunidad perfecta! Únete y descubre con nosotros cómo alcanzar tus objetivos de fitness y salud.
         </p>
-        <p className="mb-8 text-lg max-w-3xl mx-auto">
+        <p className="mb-8 text-3xl  mx-auto">
           Gracias por confiar en nosotros y por permitirnos ser parte de tu viaje hacia una vida más saludable y activa. Juntos, haremos que cada Squat cuente. ¡Nos vemos en Squat Fit!
         </p>
       </section>
