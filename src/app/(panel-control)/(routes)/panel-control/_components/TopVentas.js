@@ -1,13 +1,22 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
 import dynamic from "next/dynamic";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import Image from "next/image";
+import { useRouter } from 'next/navigation';
+
+
+import { useAuthStore } from "@/stores/auth.store";
+import ConfirmationModal from "@/app/components/ConfirmationModal";
 
 const Slider = dynamic(() => import("react-slick"), { ssr: false });
 
 export default function TopVentas() {
+  const { logout } = useAuthStore();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const router = useRouter();
+
   const settings = {
     dots: true,
     infinite: true,
@@ -30,28 +39,33 @@ export default function TopVentas() {
     ],
   };
 
+  const handleLogoutConfirmed = () => {
+    logout();
+    setIsModalOpen(false);
+    router.push('/');
+  };
+
   return (
     <div>
       <div className="flex items-center justify-between w-full pr-8">
         <h2 className="text-secondary font-bold text-4xl">Nuestros top ventas</h2>
-        <div>
+        <div onClick={() => setIsModalOpen(true)} className="cursor-pointer">
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            width="50"
-            height="50"
+            width="32"
+            height="32"
             viewBox="0 0 24 24"
             fill="none"
             stroke="#3932C0"
             strokeWidth="2"
             strokeLinecap="round"
             strokeLinejoin="round"
-            className="icon icon-tabler icons-tabler-outline icon-tabler-shopping-cart"
+            className="icon icon-tabler icon-tabler-logout"
           >
             <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-            <path d="M6 19m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" />
-            <path d="M17 19m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" />
-            <path d="M17 17h-11v-14h-2" />
-            <path d="M6 5l14 1l-1 7h-13" />
+            <path d="M14 8v-2a2 2 0 0 0 -2 -2h-7a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h7a2 2 0 0 0 2 -2v-2" />
+            <path d="M9 12h12l-3 -3" />
+            <path d="M18 15l3 -3" />
           </svg>
         </div>
       </div>
@@ -133,6 +147,12 @@ export default function TopVentas() {
         </Slider>
       </div>
       </div>
+      <ConfirmationModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onConfirm={handleLogoutConfirmed}
+        message="¿Estás seguro de que quieres cerrar sesión?"
+      />
     </div>
   );
 }

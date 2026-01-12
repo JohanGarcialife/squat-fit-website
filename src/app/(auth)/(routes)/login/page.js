@@ -1,16 +1,18 @@
 'use client';
 import Link from 'next/link';
-import React from 'react';
+import React, { useState } from 'react';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '../../../../stores/auth.store';
 import toast from 'react-hot-toast';
+import { Eye, EyeOff } from 'lucide-react';
 
 export default function LoginPage() {
   const router = useRouter();
   const { setToken } = useAuthStore();
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 
   const initialValues = {
     username: '',
@@ -29,7 +31,7 @@ export default function LoginPage() {
       if (token) {
         setToken(token);
         toast.success('Inicio de sesión exitoso!');
-        router.push('/');
+        router.push('/panel-control');
       }
     } catch (error) {
       console.error('Error en el login', error.response ? error.response.data : error.message);
@@ -62,9 +64,21 @@ export default function LoginPage() {
                   <Field type="email" name="username" placeholder='E-mail' className='w-full text-white border border-gray-300 rounded-3xl p-5 text-lg focus:outline-none focus:ring-2 focus:ring-primary placeholder-white placeholder-opacity-50 placeholder:font-bold' />
                   <ErrorMessage name="username" component="div" className="text-red-500 text-sm mt-1" />
                 </div>
-                <div>
-                  <Field type="password" name="password" placeholder='Contraseña' className='w-full text-white border border-gray-300 rounded-3xl p-5 text-lg focus:outline-none focus:ring-2 focus:ring-primary placeholder-white placeholder-opacity-50 placeholder:font-bold' />
-                  <ErrorMessage name="password" component="div" className="text-red-500 text-sm mt-1" />
+                <div className="relative border border-gray-300 rounded-3xl flex items-center justify-between">
+                  <Field
+                    type={isPasswordVisible ? 'text' : 'password'}
+                    name="password"
+                    placeholder='Contraseña'
+                    className='w-full text-white  p-5 text-lg focus:outline-none focus:ring-2 focus:ring-primary placeholder-white placeholder-opacity-50 placeholder:font-bold'
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setIsPasswordVisible(!isPasswordVisible)}
+                    className=" right-0  top-1/2 pr-5 text-white"
+                  >
+                    {isPasswordVisible ? <EyeOff className="h-6 w-6" /> : <Eye className="h-6 w-6" />}
+                  </button>
+                  <ErrorMessage name="password" component="div" className="text-red-500 absolute -bottom-5 left-0 text-sm mt-1" />
                 </div>
                 <button type="submit" disabled={isSubmitting} className='cursor-pointer bg-white text-primary rounded-3xl p-5 text-lg font-bold hover:bg-primary-dark transition duration-300 disabled:opacity-50'>
                   Iniciar Sesión

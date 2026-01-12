@@ -2,17 +2,17 @@
 import React, { useState, useEffect } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation';
 import { useAuthStore } from '../../stores/auth.store';
 import { useCartStore } from '@/stores/cart.store';
-import MiniCart from './MiniCart';
+import ConfirmationModal from './ConfirmationModal';
 
 export default function BurgerMenu() {
   const [show, setShow] = useState(false)
   const { isAuth, logout, user } = useAuthStore();
   const { cart } = useCartStore();
-
-  const [isCartOpen, setIsCartOpen] = useState(false);
-  const totalItems = cart.reduce((acc, item) => acc + item.quantity, 0);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const router = useRouter();
 
   // Hydration fix for client-side state
   const [isClient, setIsClient] = useState(false);
@@ -43,9 +43,11 @@ export default function BurgerMenu() {
     };
   }, [show, isClient]);
 
-  const handleLogout = () => {
+  const handleLogoutConfirmed = () => {
     logout();
+    setIsModalOpen(false);
     setShow(false);
+    router.push('/');
   }
 
   return (
@@ -61,25 +63,7 @@ export default function BurgerMenu() {
       </Link>
       
       <div className='flex items-center gap-4'>
-        {isClient && cart.length > 0 && (
-            <div className='relative'>
-                <button onClick={() => setIsCartOpen(!isCartOpen)} className='relative' aria-label="Ver carrito">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#3932C0" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-                        <circle cx="6" cy="19" r="2" />
-                        <circle cx="17" cy="19" r="2" />
-                        <path d="M17 17h-11v-14h-2" />
-                        <path d="M6 5l14 1l-1 7h-13" />
-                    </svg>
-                    {totalItems > 0 && (
-                        <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                            {totalItems}
-                        </span>
-                    )}
-                </button>
-                {isCartOpen && <MiniCart onClose={() => setIsCartOpen(false)} />}
-            </div>
-        )}
+        {/* Carrito eliminado de aquí */}
 
         <div className={show ? "hidden" : "block"} onClick={() => setShow(true)}>
           <Image
@@ -106,7 +90,7 @@ export default function BurgerMenu() {
                 />
               </div>
             </div>
-            <nav className='flex flex-col items-center justify-center gap-4 mt-10'>
+            <nav className='flex flex-col items-start justify-center gap-4 mt-10'> {/* Cambiado items-center a items-start */}
               <Link href="/" className='text-5xl font-bold text-white' onClick={() => setShow(false)}>Inicio</Link>
               <Link href="/cocina" className='text-5xl font-bold text-white' onClick={() => setShow(false)}>Cocina</Link>
               <Link href="/planes" className='text-5xl font-bold text-white' onClick={() => setShow(false)}>Planes</Link>
@@ -132,12 +116,12 @@ export default function BurgerMenu() {
             <div className="mt-10 flex flex-col items-center gap-4">
               {isClient && isAuth ? (
                 <>
-                <Link href="/profile">
+                <Link href="/panel-control">
                 
                   <p className='text-white text-3xl'>Hola, {user?.username}</p>
                 </Link>
-                  <div onClick={handleLogout} className='flex justify-center py-2 px-4 border border-white rounded-xl cursor-pointer mt-4'>
-                    <p className='text-5xl font-bold text-white'>Logout</p>
+                  <div onClick={() => setIsModalOpen(true)} className='flex justify-center py-2 px-4 border border-white rounded-xl cursor-pointer mt-4'>
+                    <p className='text-3xl font-bold text-white'>Logout</p>
                   </div>
                 </>
               ) : (
@@ -159,6 +143,12 @@ export default function BurgerMenu() {
           </div>
         </div>
       }
+       <ConfirmationModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onConfirm={handleLogoutConfirmed}
+        message="¿Estás seguro de que quieres cerrar sesión?"
+      />
     </div>
   )
 }
