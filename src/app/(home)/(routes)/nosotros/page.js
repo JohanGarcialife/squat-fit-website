@@ -1,6 +1,9 @@
 'use client'
 import React, { useState } from 'react';
 import Image from 'next/image';
+import Achievements from '../../_components/Achievements';
+import Education from '../../_components/Education';
+import SobreHamlet from '../../_components/SobreHamlet';
 
 // Componente principal de la página "Nosotros" con Tabs
 export default function NosotrosPage() {
@@ -49,8 +52,7 @@ export default function NosotrosPage() {
 
           {activeTab === 'sobre-hamlet' && (
             <div className="animate-fadeIn p-4">
-              <h1 className="text-4xl font-bold text-[#3B3B98] mb-6">Sobre Hamlet</h1>
-              <p>Contenido sobre Hamlet pendiente...</p>
+              <SobreHamlet />
             </div>
           )}
 
@@ -81,6 +83,8 @@ export default function NosotrosPage() {
 
 // Componente con el contenido de la pestaña "La empresa"
 const ContenidoEmpresa = () => {
+
+  
   return (
     <div className="animate-fadeIn">
       {/* Sección del Título Principal */}
@@ -154,28 +158,72 @@ const ContenidoEmpresa = () => {
 
 // Nuevo componente con el contenido de la pestaña "Sobre María"
 const ContenidoSobreMaria = () => {
+   const data = [
+    {
+      icon: "Pills",
+      title: "Licenciatura en Farmacia",
+      subtitle: "Universidad",
+      detail: "Complutense de Madrid (UCM)"
+    },
+    {
+      icon: "ClipboardList",
+      title: "Grado Superior en Dietética",
+      subtitle: "Instituto Técnico de Estudios",
+      detail: "Profesionales (ITEP)"
+    },
+    {
+      icon: "Piramide",
+      title: "Asesora Nutricional",
+      subtitle: "+350 clientes",
+      detail: "satisfechos desde 2019"
+    },
+    {
+      icon: "Seminario",
+      title: "+10 Seminarios de Fitness",
+      subtitle: "Seminario de Fuerza e Hipertrofia 2018",
+      detail: "(NSCA), entre otros"
+    }
+  ];
   return (
-    <div className="animate-fadeIn p-4 text-gray-800 leading-relaxed">
-      <h1 className="text-8xl font-bold text-[#3B3B98] mb-6">Sobre María</h1>
-      <p className="mb-4 text-lg">
-        Soy María Casas, conocida también como María Squat Fit, tengo 31 años y vivo en Alicante, ES.
-      </p>
-      <p className="mb-4 text-lg">
-        Mientras estudiaba farmacia, empecé a interesarme en el fitness: en el metabolismo, el ambiente hormonal, así como en el papel de la nutrición y el entrenamiento en el cuerpo humano.
-      </p>
-      <p className="mb-4 text-lg">
-        A raíz de esto, decidí empezar a formar parte del equipo PowerExplosive, redactando artículos en su blog y divulgando en su Canal de YouTube.
-      </p>
-      <p className="mb-4 text-lg">
-        Esta experiencia me llevó a cambiar mi trabajo de farmacéutica por mi nueva pasión: el fitness. Empecé a dar clases y a crecer exponencialmente en mi presencia en las redes sociales.
-      </p>
-      <p className="mb-4 text-lg">
-        A día de hoy, llevo 8 años entrenando y +5 años en el mundo de la nutrición. Me dedico al asesoramiento nutricional y deportivo, así como creación de contenido online.
-      </p>
-      <p className="mb-4 text-lg">
-        Soy profesora de formación online, anteriormente en los másteres del ICNS, y actualmente en la Formación Profesional de FitGeneration.
-      </p>
-    </div>
+    <>
+    <div className='flex items-center'>
+
+      <div className="animate-fadeIn p-4 text-gray-800 leading-relaxed max-w-2xl">
+        <h1 className="text-8xl font-bold text-secondary mb-6">Sobre María</h1>
+        <p className="mb-4 text-2xl">
+          Soy María Casas, conocida también como María Squat Fit, tengo 31 años y vivo en Alicante, ES.
+        </p>
+        <p className="mb-4 text-2xl">
+          Mientras estudiaba farmacia, empecé a interesarme en el fitness: en el metabolismo, el ambiente hormonal, así como en el papel de la nutrición y el entrenamiento en el cuerpo humano.
+        </p>
+        <p className="mb-4 text-2xl">
+          A raíz de esto, decidí empezar a formar parte del equipo PowerExplosive, redactando artículos en su blog y divulgando en su Canal de YouTube.
+        </p>
+        <p className="mb-4 text-2xl">
+          Esta experiencia me llevó a cambiar mi trabajo de farmacéutica por mi nueva pasión: el fitness. Empecé a dar clases y a crecer exponencialmente en mi presencia en las redes sociales.
+        </p>
+        <p className="mb-4 text-2xl">
+          A día de hoy, llevo 8 años entrenando y +5 años en el mundo de la nutrición. Me dedico al asesoramiento nutricional y deportivo, así como creación de contenido online.
+        </p>
+        <p className="mb-4 text-2xl">
+          Soy profesora de formación online, anteriormente en los másteres del ICNS, y actualmente en la Formación Profesional de FitGeneration.
+        </p>
+      </div>
+
+      
+
+      <Image 
+            src="/maria-image.png" 
+            alt="María de Squat Fit"
+            width={550}
+            height={528}
+            className="w-full object-cover"
+          />
+      </div>
+    
+    <Achievements />
+    <Education data={data} />
+  </>
   );
 };
 
