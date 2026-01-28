@@ -22,7 +22,7 @@ Come bien mientras logras tus objetivos y disfrutas de tus platos favoritos.</p>
             <p className='font-bold text-3xl'>Súper simple
 </p>
   <p className='text-2xl'>
-Recetas fáciles y rápidas de hacer y se adaptan a tu estilo de vida.</p>
+Recetas rápidas para tus días normales que sí puedes mantener</p>
         </div>
 </div>
 
@@ -30,7 +30,7 @@ Recetas fáciles y rápidas de hacer y se adaptan a tu estilo de vida.</p>
 
         <div className='w-full flex flex-col justify-center items-center max-w-[320px] text-center '>
             <Image src="/benefits/image3.png" width={95} height={95} alt='icon' className='mb-5'/>
-            <p className='font-bold text-3xl'>Recetas de muerte
+            <p className='font-bold text-3xl'>Recetas brutales
 
 </p>
   <p className='text-2xl'>
