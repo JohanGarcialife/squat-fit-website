@@ -2,160 +2,342 @@
 import Image from 'next/image'
 import React, { useState } from 'react'
 import { useCartStore } from '@/stores/cart.store'
+import { BookOpen, FileText } from 'lucide-react'
 
 export default function Shop() {
-  const [presentacion, setPresentacion] = useState(null)
   const { addToCart } = useCartStore()
+  
+  // State to track selected products
+  const [selectedDigital, setSelectedDigital] = useState('digital-annual') // Default to annual
+  const [selectedPhysical, setSelectedPhysical] = useState('book-pack') // Default to pack
+  
+  // Digital Library Products
+  const digitalProducts = [
+    {
+      id: 'digital-monthly',
+      name: 'Mensual',
+      price: 9.99,
+      period: '/mes',
+      description: 'Acceso completo a la biblioteca sin permanencia',
+      type: 'digital',
+      badge: null,
+      recommended: false,
+      features: [
+        'Acceso completo a la biblioteca digital',
+        'Todas las recetas de Vol. 1 y 2',
+        'Contenido actualizado regularmente',
+        'Sin compromiso de permanencia'
+      ]
+    },
+    {
+      id: 'digital-annual',
+      name: 'Anual',
+      price: 89.99,
+      period: '/año',
+      description: 'El más rentable si vas a usarlo de verdad',
+      type: 'digital',
+      badge: 'Recomendado',
+      recommended: true,
+      features: [
+        'Acceso completo a la biblioteca digital',
+        'Todas las recetas de Vol. 1 y 2',
+        'Contenido actualizado regularmente',
+        'Ahorra más de 30€ vs mensual'
+      ]
+    },
+    {
+      id: 'digital-permanent',
+      name: 'Permanente',
+      price: 159,
+      period: '/pago único',
+      description: 'Acceso para siempre a la biblioteca Vol. 1 y 2',
+      type: 'digital',
+      badge: null,
+      recommended: false,
+      features: [
+        'Acceso de por vida',
+        'Todas las recetas de Vol. 1 y 2',
+        'Contenido actualizado',
+        'Sin pagos recurrentes'
+      ]
+    }
+  ]
 
-  const products = [
+  // Physical Book Products
+  const physicalProducts = [
     {
-      id: 'vol-1',
+      id: 'book-vol-1',
       name: 'Volumen 1',
-      price: 34.99,
-      image: '/LibroCocina.png',
+      price: 49,
+      description: 'Libro impreso del volumen 1',
+      type: 'physical',
+      badge: null,
+      popular: false,
       features: [
-        '1 aplicación para instalar en Android, iPhone o Tablet',
-        '70+ recetas fit (del Vol 1)',
-        'Guía de contar calorías, preparación semanal y utensilios esenciales',
-      ],
-      buttonClass: 'bg-secondary',
-      textColor: 'text-secondary',
+        'Libro físico del volumen 1',
+        '70+ recetas fit',
+        'Guía de nutrición básica',
+        'Envío incluido'
+      ]
     },
     {
-      id: 'vol-2',
+      id: 'book-vol-2',
       name: 'Volumen 2',
-      price: 34.99,
-      image: '/LibroCocina.png',
+      price: 49,
+      description: 'Libro impreso del volumen 2',
+      type: 'physical',
+      badge: null,
+      popular: false,
       features: [
-        '1 aplicación para instalar en Android, iPhone o Tablet',
-        '70+ recetas fit (del Vol 2)',
-        'Guía de la compra, tamaño de porciones y adaptar las recetas a tu dieta',
-      ],
-      buttonClass: 'bg-secondary',
-      textColor: 'text-secondary',
+        'Libro físico del volumen 2',
+        '70+ recetas fit',
+        'Guía de planificación',
+        'Envío incluido'
+      ]
     },
     {
-      id: 'pack-1-2',
-      name: 'Volumen 1 + 2',
-      price: 63.97,
-      image: '/LibroCocina.png',
+      id: 'book-pack',
+      name: 'Pack Vol. 1 y 2',
+      price: 89,
+      description: 'Libros impresos del volumen 1 y 2',
+      type: 'physical',
+      badge: 'Más popular',
+      popular: true,
       features: [
-        '2 apps para instalar en Android, iPhone o Tablet',
-        '140+ recetas fit (Vol 1 y 2)',
-        'Guía de contar calorías, preparación semanal y utensilios esenciales',
-        'Guía de la compra, tamaño de porciones y adaptar las recetas a tu dieta',
-      ],
-      buttonClass: 'bg-amber-500',
-      textColor: 'text-amber-500',
-      discount: '-10%',
-    },
+        'Ambos libros físicos',
+        '140+ recetas fit',
+        'Todas las guías incluidas',
+        'Envío incluido'
+      ]
+    }
   ]
 
   const handleAddToCart = (product) => {
     addToCart(product)
     console.log('Producto añadido:', product.name)
   }
+  
+  // Get selected products
+  const getSelectedDigitalProduct = () => digitalProducts.find(p => p.id === selectedDigital)
+  const getSelectedPhysicalProduct = () => physicalProducts.find(p => p.id === selectedPhysical)
 
   return (
-    <div className='px-4 sm:px-8 md:px-12 lg:px-20 py-12 flex flex-col items-center gap-6 max-w-screen-xl mx-auto'>
-      <h2 className='text-black font-bold text-3xl sm:text-4xl md:text-5xl text-center'>Compra tu libro aquí:</h2>
-
-      {/* Presentacion */}
-      <div className='flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-4 w-full my-6'>
-        <p className='text-black font-bold text-xl sm:text-2xl self-start sm:self-center'>Presentación</p>
-
-        <div
-          onClick={() => setPresentacion('digital')}
-          className={`${presentacion === 'digital' ? 'bg-amber-400 border-2 border-amber-500 text-white' : 'bg-gray-200 border-2 border-gray-300 text-black'} flex items-center gap-3 rounded-2xl px-4 py-3 w-full sm:w-auto cursor-pointer`}
-        >
-          <input
-            type='radio'
-            id='presentacion-digital'
-            name='presentacion'
-            value='digital'
-            checked={presentacion === 'digital'}
-            onChange={() => setPresentacion('digital')}
-            className='h-4 w-4'
-          />
-          <label htmlFor='presentacion-digital' className='ml-1 font-bold text-base sm:text-lg'>
-            App Digital
-          </label>
+    <section className="py-16 px-4 bg-gray-50">
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <div className="text-center mb-4">
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-indigo-900 mb-4">
+            Elige cómo quieres disfrutar<br />Cocina Squat Fit
+          </h2>
+          <p className="text-gray-700 text-lg max-w-3xl mx-auto">
+            Acceso digital por suscripción o compra del libro impreso.<br />
+            Dos experiencias distintas, sin líos.
+          </p>
         </div>
 
-        <div
-          onClick={() => setPresentacion('libro')}
-          className={`${presentacion === 'libro' ? 'bg-amber-400 border-2 border-amber-500 text-white' : 'bg-gray-200 border-2 border-gray-300 text-black'} flex items-center gap-3 rounded-2xl px-4 py-3 w-full sm:w-auto cursor-pointer`}
-        >
-          <input
-            type='radio'
-            id='presentacion-libro'
-            name='presentacion'
-            value='libro'
-            checked={presentacion === 'libro'}
-            onChange={() => setPresentacion('libro')}
-            className='h-4 w-4'
-          />
-          <label htmlFor='presentacion-libro' className='ml-1 font-bold text-base sm:text-lg'>
-            Libro Impreso
-          </label>
-        </div>
-
-        <div
-          onClick={() => setPresentacion('pack')}
-          className={`${presentacion === 'pack' ? 'bg-amber-400 border-2 border-amber-500 text-white' : 'bg-gray-200 border-2 border-gray-300 text-black'} flex items-center gap-3 rounded-2xl px-4 py-3 w-full sm:w-auto cursor-pointer`}
-        >
-          <input
-            type='radio'
-            id='presentacion-pack'
-            name='presentacion'
-            value='pack'
-            checked={presentacion === 'pack'}
-            onChange={() => setPresentacion('pack')}
-            className='h-4 w-4'
-          />
-          <label htmlFor='presentacion-pack' className='ml-1 font-bold text-base sm:text-lg'>
-            Pack (Libro + App)
-          </label>
-        </div>
-      </div>
-
-      {/* Libro */}
-      <div className='grid grid-cols-1 md:grid-cols-3 gap-6 w-full text-black'>
-        {products.map((product) => (
-          <div key={product.id} className="relative w-full border-2 border-gray-300 rounded-lg px-4 py-6 flex flex-col items-center justify-between space-y-6 overflow-hidden">
-            {product.discount && (
-              <div className='bg-amber-500 text-white font-bold absolute rotate-45 -right-7 top-4 md:top-6 md:right-0 lg:-right-12 lg:top-7 py-1 px-10 md:px-20'>
-                <p>{product.discount}</p>
+        {/* Main Grid - Two Columns */}
+        <div className="grid lg:grid-cols-2 gap-8 mt-24">
+          
+          {/* BIBLIOTECA DIGITAL - Left Column */}
+          <div className="bg-white rounded-3xl shadow-lg p-8 relative">
+            {/* Header with Image */}
+            <div className="flex items-start justify-between mb-6">
+              <div>
+                <h3 className="text-7xl font-bold text-indigo-900 mb-2">
+                  Biblioteca<br />Digital
+                </h3>
+                <p className="text-indigo-700 text-3xl">
+                  Todo el contenido en digital,<br />
+                  siempre actualizado.
+                </p>
               </div>
-            )}
-            <p className={`font-bold text-lg md:text-xl ${product.textColor}`}>{product.name}</p>
-            <Image
-              src={product.image}
-              alt={`Libro de Cocina Squat Fit - ${product.name}`}
-              width={160}
-              height={200}
-              className="object-contain relative"
-              quality={75}
-              priority
-            />
-            <p className={`font-bold text-3xl md:text-4xl ${product.textColor}`}>
-              €{product.price.toString().replace('.', ',')}
-            </p>
+              <div className="flex-shrink-0 ">
+                <Image 
+                  src="/Mockuptelefono1.png" 
+                  alt="Biblioteca Digital"
+                  width={150}
+                  height={300}
+                  className="object-contain absolute -top-20 right-0 z-20"
+                />
+              </div>
+            </div>
 
-            <div className='space-y-2 text-sm md:text-base'>
-              {product.features.map((feature, index) => (
-                <p key={index}><span className='text-primary'>✓</span> {feature}</p>
+            {/* Digital Products */}
+            <div className="space-y-4">
+              {digitalProducts.map((product) => (
+                <div
+                  key={product.id}
+                  onClick={() => setSelectedDigital(product.id)}
+                  className={`
+                    relative rounded-2xl p-4 border-2 transition-all cursor-pointer
+                    ${selectedDigital === product.id
+                      ? 'border-indigo-500 bg-indigo-50 shadow-md' 
+                      : product.recommended 
+                        ? 'bg-indigo-50 border-indigo-200 hover:border-indigo-300' 
+                        : 'bg-white border-gray-200 hover:border-gray-300'
+                    }
+                  `}
+                >
+                  {product.badge && (
+                    <span className="absolute -top-2 left-4 bg-indigo-700 text-white text-xs font-bold px-3 py-1 rounded-full">
+                      {product.badge}
+                    </span>
+                  )}
+                  
+                  <div className="flex items-center justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        {/* Radio button indicator */}
+                        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+                          selectedDigital === product.id 
+                            ? 'border-indigo-600 bg-indigo-600' 
+                            : 'border-gray-300 bg-white'
+                        }`}>
+                          {selectedDigital === product.id && (
+                            <div className="w-2 h-2 bg-white rounded-full"></div>
+                          )}
+                        </div>
+                        <h4 className="text-xl font-bold text-indigo-900">{product.name}</h4>
+                      </div>
+                      <p className="text-sm text-gray-600 mt-1 ml-7">{product.description}</p>
+                    </div>
+                    <div className="text-right ml-4">
+                      <p className="text-2xl font-bold text-indigo-900">
+                        {product.price} €
+                        <span className="text-sm font-normal text-gray-600">{product.period}</span>
+                      </p>
+                    </div>
+                  </div>
+                </div>
               ))}
             </div>
 
-            <div className='mt-4 cursor-pointer'>
-              <button onClick={() => handleAddToCart(product)} className={`${product.buttonClass} w-full sm:w-auto rounded-lg py-3 px-6 text-white font-bold cursor-pointer`}>
-                Añadir al carrito
-              </button>
+            {/* CTA Button */}
+            <button 
+              onClick={() => handleAddToCart(getSelectedDigitalProduct())}
+              className="w-full cursor-pointer mt-6 bg-indigo-700 hover:bg-indigo-800 text-white font-bold py-4 rounded-2xl transition-colors text-lg"
+            >
+              Acceder a la biblioteca
+            </button>
+            <p className="text-center text-sm text-gray-600 mt-2">
+              <span className="font-bold">Acceso inmediato.</span> Cancela cuando quieras en mensual.
+            </p>
+          </div>
+
+          {/* LIBROS EN PAPEL - Right Column */}
+          <div className="bg-white rounded-3xl shadow-lg p-8 relative">
+            {/* Header with Image */}
+            <div className="flex items-start justify-between mb-6">
+              <div>
+                <h3 className="text-7xl font-bold text-orange-600 mb-2">
+                  Libros en<br />papel
+                </h3>
+                <p className="text-orange-600 text-3xl">
+                  Libro impreso. Compra única.<br />
+                  Sin suscripción.
+                </p>
+              </div>
+              <div className="flex-shrink-0">
+                <Image 
+                  src="/LibrosFisicos.png" 
+                  alt="Libros en papel"
+                  width={350}
+                  height={350}
+                  className="object-contain absolute -top-30 -right-20 z-20"
+                />
+              </div>
+            </div>
+
+            {/* Physical Products */}
+            <div className="space-y-4">
+              {physicalProducts.map((product) => (
+                <div
+                  key={product.id}
+                  onClick={() => setSelectedPhysical(product.id)}
+                  className={`
+                    relative rounded-2xl p-4 border-2 transition-all cursor-pointer
+                    ${selectedPhysical === product.id
+                      ? 'border-orange-500 bg-orange-50 shadow-md' 
+                      : product.popular 
+                        ? 'bg-orange-50 border-orange-200 hover:border-orange-300' 
+                        : 'bg-white border-gray-200 hover:border-gray-300'
+                    }
+                  `}
+                >
+                  {product.badge && (
+                    <span className="absolute -top-2 left-4 bg-orange-500 text-white text-xs font-bold px-3 py-1 rounded-full">
+                      {product.badge}
+                    </span>
+                  )}
+                  
+                  <div className="flex items-center justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        {/* Radio button indicator */}
+                        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+                          selectedPhysical === product.id 
+                            ? 'border-orange-600 bg-orange-600' 
+                            : 'border-gray-300 bg-white'
+                        }`}>
+                          {selectedPhysical === product.id && (
+                            <div className="w-2 h-2 bg-white rounded-full"></div>
+                          )}
+                        </div>
+                        <h4 className="text-xl font-bold text-orange-600">{product.name}</h4>
+                      </div>
+                      <p className="text-sm text-gray-600 mt-1 ml-7">{product.description}</p>
+                    </div>
+                    <div className="text-right ml-4">
+                      <p className="text-2xl font-bold text-orange-600">
+                        {product.price} €
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* CTA Button */}
+            <button 
+              onClick={() => handleAddToCart(getSelectedPhysicalProduct())}
+              className="w-full cursor-pointer mt-6 bg-orange-500 hover:bg-orange-600 text-white font-bold py-4 rounded-2xl transition-colors text-lg"
+            >
+              Comprar libro impreso
+            </button>
+          </div>
+        </div>
+
+        {/* Difference Section */}
+        <div className="mt-16 text-center">
+          <h3 className="text-3xl md:text-4xl font-bold text-indigo-900 mb-12">
+            ¿Cuál es la diferencia?
+          </h3>
+          
+          <div className="grid md:grid-cols-2 gap-12 max-w-4xl mx-auto">
+            {/* Biblioteca Digital */}
+            <div className="flex flex-col items-center">
+              <div className="bg-indigo-100 p-6 rounded-2xl mb-4">
+                <FileText className="w-16 h-16 text-indigo-700" strokeWidth={2} />
+              </div>
+              <h4 className="text-xl font-bold text-indigo-900 mb-3">Biblioteca digital</h4>
+              <p className="text-gray-700 text-center">
+                acceso online al contenido digital completo mientras dure la suscripción.
+              </p>
+            </div>
+
+            {/* Libro Impreso */}
+            <div className="flex flex-col items-center">
+              <div className="bg-orange-100 p-6 rounded-2xl mb-4">
+                <BookOpen className="w-16 h-16 text-orange-600" strokeWidth={2} />
+              </div>
+              <h4 className="text-xl font-bold text-orange-600 mb-3">Libro impreso</h4>
+              <p className="text-gray-700 text-center">
+                el libro físico en papel, sin acceso digital y sin actualizaciones.
+              </p>
             </div>
           </div>
-        ))}
+        </div>
       </div>
-    </div>
+    </section>
   )
 }

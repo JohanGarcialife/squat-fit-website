@@ -9,6 +9,7 @@ import TestimonialsCocina from './_components/TestimonialsCocina'
 import ComparisionCocina from './_components/ComparisionCocina'
 import Description from './_components/Description'
 import Temario from './_components/Temario'
+import Extras from './_components/Extras'
 export default function page() {
 
   const comparacion = [
@@ -53,6 +54,7 @@ export default function page() {
         <ComparisionCocina comparacion={comparacion} />
         <Description />
         <Temario />
+        <Extras/>
         <Shop />
        <GoalsAndBenefits />
      
