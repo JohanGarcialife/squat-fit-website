@@ -2,7 +2,7 @@ import React from 'react'
 
 export default function GoalsAndBenefits() {
   return (
-    <div className='flex flex-col md:flex-row px-3 md:px-10 gap-8 my-52'>
+    <div className='flex flex-col md:flex-row px-3 md:px-10 gap-8 my-12'>
         <div className='bg-[#3932C080] rounded-[80px] md:w-1/2 py-14 px-6 md:p-14'>
         <p className='text-white font-bold text-5xl md:text-6xl mb-8 pr-20'>Objetivos que lograrás</p>
         <ul className='list-disc list-inside space-y-10 text-white text-2xl md:text-3xl'>

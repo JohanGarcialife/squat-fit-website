@@ -9,7 +9,9 @@ export default function Sidebar() {
   return (
     <div className="bg-primary/10 flex flex-col items-center justify-between py-8 px-10">
       <div className="space-y-6">
-        <Image src="/LogotipoSquatfit.png" width={80} height={80} alt="Logo" />
+        <Link href="/">
+          <Image src="/LogotipoSquatfit.png" width={80} height={80} alt="Logo" className="mb-6"/>
+        </Link>
         <div className="flex items-center space-x-2 border border-secondary rounded-lg py-2 w-full px-3 text-secondary cursor-pointer hover:bg-secondary/10 transition  duration-200  ease-in-out">
           <svg
             xmlns="http://www.w3.org/2000/svg"

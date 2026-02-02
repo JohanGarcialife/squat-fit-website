@@ -4,6 +4,7 @@ import Image from 'next/image';
 import Achievements from '../../_components/Achievements';
 import Education from '../../_components/Education';
 import SobreHamlet from '../../_components/SobreHamlet';
+import Empleo from '../../_components/Empleo';
 
 // Componente principal de la página "Nosotros" con Tabs
 export default function NosotrosPage() {
@@ -57,10 +58,7 @@ export default function NosotrosPage() {
           )}
 
           {activeTab === 'empleo' && (
-            <div className="animate-fadeIn p-4">
-              <h1 className="text-4xl font-bold text-[#3B3B98] mb-6">Empleo</h1>
-              <p>Contenido sobre oportunidades de empleo pendiente...</p>
-            </div>
+            <Empleo />  
           )}
         </section>
       </main>
@@ -213,7 +211,7 @@ const ContenidoSobreMaria = () => {
       
 
       <Image 
-            src="/maria-image.png" 
+            src="/maria.png" 
             alt="María de Squat Fit"
             width={550}
             height={528}

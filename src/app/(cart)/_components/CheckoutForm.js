@@ -32,13 +32,12 @@ export default function CheckoutForm({ setStep, onValidationChange, submitRef })
   const countryNames = useMemo(() => getNames(), []);
 
   return (
-    <div className="min-h-screen bg-white flex justify-center py-10 px-4 font-sans">
-      <div className="w-full max-w-lg">
+    <div className="w-full max-w-lg mx-auto pb-10">
         <div className="mb-8">
-          <span className="text-slate-500 text-sm font-medium">Paso 2 de 3</span>
-          <div onClick={() => setStep(1)} className="flex items-center gap-2 mt-2 cursor-pointer text-indigo-900 hover:text-indigo-700 transition-colors">
-            <ChevronLeft size={24} />
-            <h1 className="text-3xl font-bold">Mis datos</h1>
+          <span className="text-indigo-900 text-lg font-medium">Paso 2 de 3</span>
+          <div onClick={() => setStep(1)} className="flex items-center gap-2 mt-2 cursor-pointer text-indigo-900 group">
+            <ChevronLeft size={28} className="group-hover:-translate-x-1 transition-transform" />
+            <h1 className="text-3xl md:text-4xl font-bold">Mis datos</h1>
           </div>
         </div>
 
@@ -46,16 +45,16 @@ export default function CheckoutForm({ setStep, onValidationChange, submitRef })
 
         <div className="flex gap-4 mb-8">
           <button
-            onClick={() => setCustomerType('particular')}
-            className={`px-6 py-2 rounded-full font-bold transition-all border cursor-pointer ${
-              customerType === 'particular' ? 'bg-orange-500 text-white border-orange-500' : 'bg-white  text-orange-500 border-orange-300 hover:border-orange-500'
+            onClick={(e) => { e.preventDefault(); setCustomerType('particular'); }}
+            className={`px-8 py-2.5 rounded-full font-bold transition-all border-2 cursor-pointer ${
+              customerType === 'particular' ? 'bg-orange-500 text-white border-orange-500' : 'bg-white text-orange-500 border-orange-300 hover:border-orange-500'
             }`}
           >
             Particular
           </button>
           <button
-            onClick={() => setCustomerType('empresa')}
-            className={`px-6 py-2 rounded-full font-bold transition-all border cursor-pointer ${
+            onClick={(e) => { e.preventDefault(); setCustomerType('empresa'); }}
+            className={`px-8 py-2.5 rounded-full font-bold transition-all border-2 cursor-pointer ${
               customerType === 'empresa' ? 'bg-orange-500 text-white border-orange-500' : 'bg-white text-orange-500 border-orange-300 hover:border-orange-500'
             }`}
           >
@@ -139,7 +138,6 @@ export default function CheckoutForm({ setStep, onValidationChange, submitRef })
             );
           }}
         </Formik>
-      </div>
     </div>
   );
 }

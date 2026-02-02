@@ -17,7 +17,7 @@ export default function FormData(props) {
     setIsFormDirty(dirty);
   }, []);
 
-  const subtotal = cart.reduce((acc, item) => acc + item.price * item.quantity, 0);
+  const subtotal = cart.reduce((acc, item) => acc + item.price * (item.quantity || 1), 0);
   const shippingCost = 4.99;
   const freeShippingThreshold = 90.00;
   
@@ -26,11 +26,7 @@ export default function FormData(props) {
 
   const triggerCheckoutFormSubmit = async () => {
     if (checkoutFormRef.current) {
-      await checkoutFormRef.current(); // Call Formik's submitForm
-      // Formik's onSubmit will update store and then we can proceed
-      // The onSubmit in CheckoutForm will update the formData in store,
-      // and here we rely on the state (isFormValid) being updated by onValidationChange
-      // to decide if we proceed to the next step.
+      await checkoutFormRef.current(); 
       if (isFormValid) {
         setStep(3);
       }
@@ -38,32 +34,31 @@ export default function FormData(props) {
   };
 
   return (
-    <div className="min-h-screen bg-background-primary">
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between py-6">
-          <h1 className="text-3xl font-extrabold text-text-primary">Checkout</h1>
+    <div className="min-h-screen bg-white flex flex-col lg:flex-row font-sans">
+      
+      {/* Columna Izquierda: Formulario (aprox 60%) */}
+      <div className="w-full lg:w-3/5 xl:w-1/2 p-6 lg:p-14 lg:pl-40 min-h-screen bg-white">
+        <CheckoutForm 
+            setStep={setStep} 
+            onValidationChange={handleValidationChange}
+            submitRef={checkoutFormRef}
+        />
+      </div>
+      
+      {/* Columna Derecha: Resumen (aprox 40%, fondo Peach) */}
+      <div className="w-full lg:w-2/5 xl:w-1/2 min-h-screen bg-[#FFF5F3]">
+        <div className="sticky top-0 h-screen overflow-y-auto">
+          <OrderSummary 
+            setStep={setStep} 
+            total={total} 
+            finalShipping={finalShipping} 
+            subtotal={subtotal} 
+            isFormValid={isFormValid}
+            isFormDirty={isFormDirty}
+            triggerCheckoutFormSubmit={triggerCheckoutFormSubmit}
+          />
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          <div className="bg-white rounded-lg shadow-lg p-6">
-            <CheckoutForm 
-              setStep={setStep} 
-              onValidationChange={handleValidationChange}
-              submitRef={checkoutFormRef}
-            />
-          </div>
-          <div>
-            <OrderSummary 
-              setStep={setStep} 
-              total={total} 
-              finalShipping={finalShipping} 
-              subtotal={subtotal} 
-              isFormValid={isFormValid}
-              isFormDirty={isFormDirty}
-              triggerCheckoutFormSubmit={triggerCheckoutFormSubmit}
-            />
-          </div>
-        </div>
-      </main>
+      </div>
     </div>
   );
 }

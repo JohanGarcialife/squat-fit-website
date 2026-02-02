@@ -53,49 +53,65 @@ export default function OrderSummary(props) {
         return priceInEur.toFixed(2).replace('.', ',');
     };
 
-    return (
-    <div className="w-full max-w-sm mx-auto bg-[#FFF5F3] rounded-[2.5rem] p-8 shadow-sm font-sans">
-      
-      <Link href="/">
-        <div  className="flex flex-col items-center mb-4">
-            <Image src="/LogotipoSquatfit.png" width={100} height={40} alt="Logo Squat Fit" />
-        </div>
-      </Link>
+    // Recurring Payment Logic
+    const monthlyItems = cart.filter(item => item.period === '/mes');
+    const recurringTotal = monthlyItems.reduce((acc, item) => acc + (item.price * (item.quantity || 1)), 0);
+    
+    // Today's total includes everything (monthly first payment + others)
+    // Assuming 'total' calculated above is correct for the first payment.
+    
+    const hasRecurring = recurringTotal > 0;
 
-      <div className="flex justify-end mb-8">
-        <button onClick={toggleCurrency} className="group cursor-pointer flex items-center gap-2 text-indigo-300 text-xs border-b border-indigo-200 pb-0.5 hover:text-indigo-600 transition-colors">
-          <span className="mt-1">Cambiar moneda</span>
-          <div className="w-6 h-6 rounded-full border-2 border-indigo-900 flex items-center justify-center text-indigo-900 font-bold">
-            {currency === 'EUR' ? <Euro size={14} strokeWidth={3} /> : <DollarSign size={14} strokeWidth={3} />}
-          </div>
+    return (
+    <div className="w-full h-full p-8 lg:p-14 xl:p-20 font-sans flex flex-col justify-center">
+      
+      {/* Logo & Header */}
+      <div className="flex flex-col items-center mb-8">
+         <Link href="/" className="mb-4">
+            <div className="w-20 h-20 relative">
+                 <Image src="/LogotipoSquatfit.png" layout="fill" objectFit="contain" alt="Logo Squat Fit" />
+            </div>
+         </Link>
+         
+         <button onClick={toggleCurrency} className="flex items-center gap-2 text-indigo-400 text-sm border-b border-indigo-200 pb-0.5 hover:text-indigo-600 transition-colors">
+            Cambiar moneda
+            <div className="border-2 border-indigo-900 rounded-full w-7 h-7 flex items-center justify-center text-indigo-900 font-bold text-sm">
+                {currency === 'EUR' ? '€' : '$'}
+            </div>
         </button>
       </div>
 
-      <div className="space-y-4 mb-10 max-h-64 overflow-y-auto pr-2">
+      {/* Product List Cards */}
+      <div className="space-y-4 mb-8 overflow-y-auto pr-2 max-h-[40vh]">
         {cart.map((item) => (
           <div 
             key={item.id} 
-            className="bg-[#FFFDFC] p-3 rounded-2xl shadow-sm flex items-center gap-4 transition-transform hover:scale-[1.02]"
+            className="bg-white p-4 rounded-2xl shadow-sm flex items-center gap-4 border border-indigo-50"
           >
-            <div className="w-16 h-16 shrink-0 bg-gray-100 rounded-lg overflow-hidden relative">
+            <div className="w-16 h-16 shrink-0 bg-gray-50 rounded-xl overflow-hidden relative">
               <Image 
                 src={item.image} 
                 alt={item.name} 
                 layout="fill"
-                className="object-contain" 
+                className="object-contain p-1" 
               />
             </div>
 
-            <div className="flex-1 flex flex-col justify-center">
+            <div className="flex-1">
               <h4 className="text-orange-500 font-bold text-sm leading-tight mb-1">
                 {item.name}
               </h4>
+              <p className="text-indigo-400 text-xs mb-2">
+                 {item.description || (item.type === 'digital' ? 'Suscripción online' : 'Volumen en papel')}
+              </p>
+              
               <div className="flex justify-between items-end">
-                <span className="text-indigo-900 text-sm font-medium">
-                  {item.quantity} ud.
+                <span className="text-indigo-900 text-xs font-semibold bg-indigo-50 px-2 py-0.5 rounded-lg">
+                  {item.type === 'digital' ? item.period?.replace('/', '') || 'mes' : `${item.quantity || 1} unidad`}
                 </span>
                 <span className="text-indigo-900 font-bold text-sm">
-                  {convertPrice(item.price * item.quantity)} {currency}
+                  {convertPrice(item.price * (item.quantity || 1))} {currency === 'EUR' ? '€' : '$'}
+                  {item.period && <span className="text-xs font-normal text-gray-500"> {item.period}</span>}
                 </span>
               </div>
             </div>
@@ -103,21 +119,40 @@ export default function OrderSummary(props) {
         ))}
       </div>
 
-      <div className="space-y-3 mb-8 px-2">
-        <div className="flex justify-between items-center text-indigo-900">
-          <span className="text-lg font-medium">Envío</span>
-          <span className="text-lg font-medium">{convertPrice(finalShipping)} {currency}</span>
-        </div>
-        <div className="flex justify-between items-center text-indigo-900 font-bold text-xl">
-          <span>Total</span>
-          <span>{convertPrice(total)} {currency}</span>
+      {/* Payment Breakdown */}
+      <div className="space-y-4 mb-8">
+        {hasRecurring && (
+            <div className="text-center mb-6">
+                <p className="text-indigo-500 text-sm font-medium leading-relaxed">
+                    Tu carrito incluye productos de<br/>
+                    pago único y de suscripción
+                </p>
+            </div>
+        )}
+
+        <div className="space-y-2">
+            <div className="flex justify-between items-center text-indigo-900/80 text-lg">
+                <span>Hoy pagarás</span>
+                <span className="font-bold text-indigo-900 text-xl">
+                    {convertPrice(total)} {currency === 'EUR' ? '€' : '$'}
+                </span>
+            </div>
+            
+            {hasRecurring && (
+                <div className="flex justify-between items-center text-indigo-900 font-bold text-lg pt-2 border-t border-indigo-100/50">
+                    <span>Los siguientes meses</span>
+                    <span>
+                        {convertPrice(recurringTotal)} {currency === 'EUR' ? '€' : '$'}
+                    </span>
+                </div>
+            )}
         </div>
       </div>
 
       <button 
         onClick={triggerCheckoutFormSubmit} 
-        disabled={!isFormValid || !isFormDirty}
-        className="w-full bg-[#3b4097] text-white cursor-pointer font-bold py-4 rounded-2xl hover:bg-[#2f337a] transition-colors shadow-lg shadow-indigo-200 disabled:opacity-50 disabled:cursor-not-allowed"
+        disabled={!isFormValid}
+        className="w-full bg-indigo-800 text-white cursor-pointer font-bold text-lg py-4 rounded-2xl hover:bg-indigo-900 transition-all shadow-xl shadow-indigo-200 disabled:opacity-50 disabled:cursor-not-allowed"
       >
         Continuar
       </button>

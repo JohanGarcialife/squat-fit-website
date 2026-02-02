@@ -1,7 +1,6 @@
 import React from 'react'
 import HeroSection from './_components/HeroSection'
 import Benefits from './_components/Benefits'
-import VideoPresentation from './_components/VideoPresentation'
 import Testimonials from './_components/Testimonials'
 import CourseContent from './_components/CourseContent'
 import CoursesCarousel from './_components/CoursesCarousel'
@@ -15,13 +14,12 @@ export default function page() {
     <div className='min-h-screen'>
         <HeroSection />
         <Benefits />
-        <VideoPresentation />
         <Testimonials />
         <CourseContent />
         <CoursesCarousel />
+       <GoalsAndBenefits />
        <Content />
        <CTO />
-       <GoalsAndBenefits />
        <FAQ />
     </div>
   )

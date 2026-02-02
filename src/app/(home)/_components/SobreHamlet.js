@@ -32,9 +32,9 @@ const SobreHamlet = () => {
   ];
   return (
     <div className="bg-white text-gray-800 font-sans">
-      <section className="max-w-6xl mx-auto px-6 py-16">
+      <section className="max-w-6xl mx-auto  py-16">
         {/* Sección Superior: Texto e Imagen */}
-         <div className='flex items-center'>
+         <div className='flex items-center w-full'>
         
               <div className="animate-fadeIn p-4 text-gray-800 leading-relaxed max-w-2xl">
                 <h1 className="text-8xl font-bold text-secondary mb-6">Sobre Hamlet</h1>
@@ -64,8 +64,8 @@ const SobreHamlet = () => {
               
         
               <Image 
-                    src="/maria-image.png" 
-                    alt="María de Squat Fit"
+                    src="/hamlet.png" 
+                    alt="Hamlet de Squat Fit"
                     width={550}
                     height={528}
                     className="w-full object-cover"
