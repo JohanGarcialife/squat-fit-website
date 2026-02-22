@@ -4,7 +4,8 @@ import HeroSection from "../_components/HeroSection";
 import Progress from "../_components/Progress";
 import TestimonialCarousel from "../_components/TestimonialCarousel";
 import StartPlan from "../_components/StartPlan";
-import Newsletter from "../_components/Newsletter";
+import FourPillars from "../_components/FourPillars";
+import HowItWorks from "../_components/HowItWorks";
 
 export default function Home() {
 
@@ -48,9 +49,10 @@ export default function Home() {
         <HeroSection />
         <Comparision comparacion={comparacion} />
         <Progress />
-      <TestimonialCarousel />
-      <StartPlan />
-      <Newsletter />
+        <FourPillars />
+        <HowItWorks />
+        <TestimonialCarousel />
+        <StartPlan />
       </div>
     </main>
   );

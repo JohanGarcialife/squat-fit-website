@@ -13,12 +13,12 @@ export default function HeroSection() {
       <div className='xl:pl-36 px-5  w-full pt-12 max-w-screen'>
         <div >
 
-<p className='text-secondary text-center lg:text-start xl:max-w-[510px] max-w-screen font-bold text-5xl lg:text-7xl xl:text-8xl lg:leading-28 '>Transforma tu cuerpo hoy</p>
-<p className='text-black lg:max-w-[510px] text-center lg:text-start text-2xl mt-4'>Método con dieta, entreno y mentalidad para un cambio físico real y duradero</p>
+<p className='text-secondary text-center lg:text-start xl:max-w-[510px] max-w-screen font-bold text-5xl lg:text-6xl xl:text-7xl lg:leading-28 '>Logra tu mejor versión</p>
+<p className='text-black lg:max-w-[510px] text-center lg:text-start text-2xl mt-4'>El método de dieta, entreno y mentalidad para un cambio físico real y duradero</p>
 <div className='flex flex-row w-full items-center lg:items-start lg:justify-center'>
 <div className='flex flex-row items-center justify-center lg:justify-start w-full'>
 
-<button className=' text-white px-8 py-4 rounded-2xl mt-8 font-bold text-xl bg-linear-to-r from-primary to-secondary'>Únete Ahora</button>
+<button className=' text-white px-8 py-4 rounded-xl mt-8 font-bold text-xl bg-secondary hover:opacity-90'>Reserva tu plaza</button>
 </div>
 </div>
 
@@ -57,31 +57,7 @@ export default function HeroSection() {
     </div>
 
 
-    {/* Bottom */}
-    <div className='relative w-screen lg:flex lg:flex-row flex-col justify-center px-2 lg:px-10'>
-      
-  <div className='bg-[rgb(255,247,242)]  lg:px-32 px-14 py-5 md:py-14 z-30 rounded-2xl absolute xl:-top-44 -top-40 lg:-top-14 w-[95%]'>
-    <h2 className='text-primary text-4xl md:text-6xl font-bold text-center mb-10'>Los 4 pilares de tu transformación</h2>
-    <div className='flex flex-col lg:flex-row justify-between items-center'>
-      <div className='flex flex-col items-center text-center '>
-        <Image src="/icons/nutrition.png" width={120} height={120} alt='Icon' />
-      <p className='text-secondary text-xl md:text-2xl font-bold'>Agenda para contar tus macros y calorías</p>
-      </div>
-<div className='flex flex-col items-center text-center '>
-        <Image src="/icons/running.png" width={120} height={120} alt='Icon' />
-      <p className='text-secondary text-xl md:text-2xl font-bold'>Herramienta que sigue tus pasos diarios</p>
-      </div>
-      <div className='flex flex-col items-center text-center '>
-        <Image src="/icons/speech.png" width={120} height={120} alt='Icon' />
-      <p className='text-secondary text-xl md:text-2xl font-bold'>Una comunidad para compartir y aprender</p>
-      </div>
-      <div className='flex flex-col items-center text-center '>
-        <Image src="/icons/human-brain.png" width={120} height={120} alt='Icon' />
-      <p className='text-secondary text-xl md:text-2xl font-bold'>Apoyo psicológico para afianzar hábitos</p>
-      </div>
-    </div>
-  </div>
-</div>
+    {/* Bottom section moved to FourPillars component */}
     
     </>
   )

@@ -91,7 +91,6 @@ export default function BurgerMenu() {
               </div>
             </div>
             <nav className='flex flex-col items-start justify-center gap-4 mt-10'> {/* Cambiado items-center a items-start */}
-              <Link href="/" className='text-5xl font-bold text-white' onClick={() => setShow(false)}>Inicio</Link>
               <Link href="/cocina" className='text-5xl font-bold text-white' onClick={() => setShow(false)}>Cocina</Link>
               <Link href="/planes" className='text-5xl font-bold text-white' onClick={() => setShow(false)}>Planes</Link>
               <Link href="/cursos" className='text-5xl font-bold text-white' onClick={() => setShow(false)}>Cursos</Link>
@@ -116,11 +115,15 @@ export default function BurgerMenu() {
             <div className="mt-10 flex flex-col items-center gap-4">
               {isClient && isAuth ? (
                 <>
-                <Link href="/panel-control">
-                
-                  <p className='text-white text-3xl'>Hola, {user?.username}</p>
+                <Link href="/panel-control" onClick={() => setShow(false)} className='w-full text-center'>
+                    <div className='flex justify-center bg-white py-2 px-4 rounded-xl cursor-pointer'>
+                      <p className='text-5xl font-bold text-primary'>Inicio</p>
+                    </div>
                 </Link>
-                  <div onClick={() => setIsModalOpen(true)} className='flex justify-center py-2 px-4 border border-white rounded-xl cursor-pointer mt-4'>
+                <div className='w-full text-center py-2'>
+                  <p className='text-white text-3xl'>Hola, {user?.username}</p>
+                </div>
+                  <div onClick={() => setIsModalOpen(true)} className='flex justify-center py-2 px-4 border border-white rounded-xl cursor-pointer mt-4 w-full'>
                     <p className='text-3xl font-bold text-white'>Logout</p>
                   </div>
                 </>

@@ -39,21 +39,21 @@ export default function Comparision(props) {
   );
 
   return (
-    <div className="px-5 xl:px-32 w-full flex flex-col lg:flex-row items-center justify-between lg:pt-80 xl:pt-64 pt-[900px] ">
+    <div className="bg-[#FFF9F2] px-5 xl:px-32 w-full flex flex-col lg:flex-row items-center justify-between py-20 mt-10">
       {width < 1024 ? (
         <>
           <div className="lg:w-1/2 h-full flex flex-col items-start justify-center lg:max-w-[510px] mb-10">
-            <p className="text-secondary lg:text-start text-center font-bold text-5xl lg:text-7xl">
-              Un cambio físico que se mantiene en el tiempo
+            <p className="text-primary lg:text-start text-center font-bold text-4xl lg:text-6xl">
+              Un cambio físico que se mantiene
             </p>
             <p className="text-black lg:text-start text-center text-2xl mt-10">
               Aprende a mantenerte sano y en forma; evita el efecto rebote y continua progresando después de meses en incluso años.
             </p>
             <div className="w-full flex flex-col items-center justify-center ">
-              <button className="mt-10 w-1/2 text-white px-6 py-3 rounded-2xl bg-linear-to-r from-primary to-secondary font-bold">
-                Empieza hoy
+              <button className="mt-10 w-1/2 text-white px-6 py-3 rounded-xl bg-secondary hover:opacity-90 font-bold">
+                Reserva tu plaza
               </button>
-              <div className="flex items-center w-full  text-secondary mt-10 justify-center gap-3 cursor-pointer text-2xl">
+              <div className="hidden items-center w-full text-secondary mt-10 justify-center gap-3 cursor-pointer text-2xl">
                 <p className="">Saber más</p>
 
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="icon icon-tabler icons-tabler-outline icon-tabler-arrow-narrow-right">
@@ -75,11 +75,11 @@ export default function Comparision(props) {
             {slider}
           </div>
           <div className="lg:w-1/2 h-full flex flex-col items-start justify-center lg:max-w-[510px] ">
-            <p className="text-secondary font-bold text-7xl">Un cambio físico que se mantiene en el tiempo</p>
-            <p className="text-black text-2xl mt-10">Aprende a mantenerte sano y en forma; evita el efecto rebote y continua progresando después de meses en incluso años.</p>
+            <p className="text-primary font-bold text-6xl">Un cambio físico que se mantiene</p>
+            <p className="text-black text-lg mt-10">Aprende a mantenerte sano y en forma; evita el efecto rebote y continua progresando después de meses en incluso años.</p>
             <div className="w-full flex items-center justify-start gap-10">
-              <button className="mt-10  text-white px-6 py-3 rounded-2xl bg-linear-to-r from-primary to-secondary font-bold">Empieza hoy</button>
-              <div className="flex items-center text-secondary mt-10 justify-center gap-3 cursor-pointer text-2xl">
+              <button className="mt-10  text-white px-6 py-3 rounded-xl bg-secondary font-bold hover:opacity-90">Reserva tu plaza</button>
+              <div className="hidden items-center text-secondary mt-10 justify-center gap-3 cursor-pointer text-2xl">
                 <p className="">Saber más</p>
 
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="icon icon-tabler icons-tabler-outline icon-tabler-arrow-narrow-right">

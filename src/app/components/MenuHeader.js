@@ -43,14 +43,6 @@ export default function MenuHeader() {
                 </Link>
 
                 <div className='flex gap-9 text-secondary text-2xl justify-start'> {/* Enlaces ahora justificados a la izquierda dentro de su grupo */}
-                    <Link href="/">
-                        <p
-                            className={active === 'home' ? 'text-primary' : 'text-secondary'}
-                            onClick={() => setActive('home')}
-                        >
-                            Inicio
-                        </p>
-                    </Link>
                     <Link href="/cocina">
                         <p
                             className={active === 'cocina' ? 'text-primary' : 'text-secondary'}
@@ -85,8 +77,9 @@ export default function MenuHeader() {
                 {isClient && isAuth ? (
                     <>
                     <Link href="/panel-control">
-                        <p className='text-secondary text-xl cursor-pointer'>Hola, {user?.username}</p>
-                        </Link>
+                        <button className='bg-primary text-white px-6 py-2 rounded-[20px] font-bold text-xl hover:opacity-80 transition cursor-pointer'>Inicio</button>
+                    </Link>
+                    <p className='text-secondary text-xl ml-2'>Hola, {user?.username}</p>
                         <button 
                             onClick={() => setIsModalOpen(true)} 
                             className='text-secondary font-bold hover:opacity-80 text-2xl transition cursor-pointer flex items-center gap-2'>
