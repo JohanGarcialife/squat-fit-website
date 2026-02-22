@@ -1,5 +1,5 @@
 'use client'
-import React from 'react'
+import React, { useState } from 'react'
 import { useCartStore } from '@/stores/cart.store'
 
 const PLANS = [
@@ -10,6 +10,7 @@ const PLANS = [
 
 export default function CTO() {
   const { addToCart } = useCartStore()
+  const [selectedPlanId, setSelectedPlanId] = useState('annual')
 
   const handleAddToCart = (plan) => {
     addToCart({
@@ -27,32 +28,38 @@ export default function CTO() {
         </p>
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl w-full px-4">
-            {PLANS.map((plan) => (
+            {PLANS.map((plan) => {
+                const isSelected = selectedPlanId === plan.id;
+                return (
                 <div 
                     key={plan.id} 
-                    className={`relative flex flex-col items-center p-8 rounded-lg bg-white ${plan.label ? 'border-2 border-indigo-600 shadow-xl scale-105 z-10' : 'border border-gray-200 shadow-lg'}`}
+                    onClick={() => setSelectedPlanId(plan.id)}
+                    className={`relative flex flex-col items-center p-8 rounded-lg cursor-pointer transition-all duration-300 bg-white ${isSelected ? 'border-4 border-secondary shadow-2xl scale-105 z-10' : 'border border-gray-200 shadow-lg opacity-70 hover:opacity-100'}`}
                 >
                     {plan.label && (
-                        <div className="absolute -top-4 bg-indigo-600 text-white px-6 py-1 rounded-full text-sm font-medium">
+                        <div className="absolute -top-4 bg-secondary text-white px-6 py-1 rounded-full text-sm font-medium">
                             {plan.label}
                         </div>
                     )}
-                    <h3 className="text-2xl font-bold text-indigo-900 mb-4">{plan.title}</h3>
+                    <h3 className="text-2xl font-bold text-secondary mb-4">{plan.title}</h3>
                     <div className="text-center mb-6">
                         <div className="flex items-start justify-center">
-                            <span className="text-5xl font-bold text-indigo-900">{String(plan.price).replace('.', ',')}</span>
-                            <span className="text-3xl font-bold text-indigo-900 mt-1 ml-1">€</span>
+                            <span className="text-5xl font-bold text-secondary">{String(plan.price).replace('.', ',')}</span>
+                            <span className="text-3xl font-bold text-secondary mt-1 ml-1">€</span>
                         </div>
                         <div className="text-gray-500 mt-1">{plan.subtitle}</div>
                     </div>
                     <button 
-                        onClick={() => handleAddToCart(plan)}
-                        className=" cursor-pointer w-full bg-indigo-600 text-white py-3 rounded-md font-bold text-lg hover:bg-indigo-700 transition-colors mt-auto shadow-md"
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            handleAddToCart(plan);
+                        }}
+                        className="w-full bg-secondary text-white py-3 rounded-md font-bold text-lg hover:opacity-90 transition-opacity mt-auto shadow-md"
                     >
                         Empezar
                     </button>
                 </div>
-            ))}
+            )})}
         </div>
     </div>
   )

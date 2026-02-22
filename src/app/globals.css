@@ -10,6 +10,31 @@
   --color-secondary: #363C98;
   --color-gris: #d5d5d5;
   --font-sans: var(--font-inter);
+  
+  /* Corporate Blue Override for all indigo and blue classes used in the project */
+  --color-indigo-50: #edf0fc;
+  --color-indigo-100: #dde4f9;
+  --color-indigo-200: #c1cff6;
+  --color-indigo-300: #9eb3f0;
+  --color-indigo-400: #788fe6;
+  --color-indigo-500: #5a6dd8;
+  --color-indigo-600: #363C98; /* Corporate Blue */
+  --color-indigo-700: #363C98; /* Corporate Blue */
+  --color-indigo-800: #363C98; /* Corporate Blue */
+  --color-indigo-900: #363C98; /* Corporate Blue */
+  --color-indigo-950: #363C98; /* Corporate Blue */
+  
+  --color-blue-50: #edf0fc;
+  --color-blue-100: #dde4f9;
+  --color-blue-200: #c1cff6;
+  --color-blue-300: #9eb3f0;
+  --color-blue-400: #788fe6;
+  --color-blue-500: #5a6dd8;
+  --color-blue-600: #363C98; /* Corporate Blue */
+  --color-blue-700: #363C98; /* Corporate Blue */
+  --color-blue-800: #363C98; /* Corporate Blue */
+  --color-blue-900: #363C98; /* Corporate Blue */
+  --color-blue-950: #363C98; /* Corporate Blue */
 }
 
 @media (prefers-color-scheme: dark) {
@@ -54,4 +79,10 @@ body {
 /* Para los SVG que usan stroke="currentColor" (por ejemplo tus iconos custom) */
 .icon-tabler {
   color: rgba(255,105,11,0.5);
+}
+
+/* Prevenir selección de texto y arrastre accidental (UI Bug Fix) */
+img, a, button {
+  user-select: none;
+  -webkit-user-drag: none;
 }

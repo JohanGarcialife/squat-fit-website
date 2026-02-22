@@ -13,36 +13,36 @@ import Extras from './_components/Extras'
 export default function page() {
 
   const comparacion = [
-{
-   beforeSrc: "https://images.unsplash.com/photo-1561758033-d89a9ad46330?q=80&w=1470&auto=format&fit=crop",
-   afterSrc: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=1480&auto=format&fit=crop",
-   text: "De comida procesada a saludable",
-},
     {
-   beforeSrc: "https://images.unsplash.com/photo-1594212699903-ec8a3eca50f5?q=80&w=1471&auto=format&fit=crop",
-   afterSrc: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?q=80&w=1470&auto=format&fit=crop",
-   text: "Desayunos nutritivos y deliciosos",
-},
-{
-   beforeSrc: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?q=80&w=1398&auto=format&fit=crop",
-   afterSrc: "https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?q=80&w=1587&auto=format&fit=crop",
-   text: "Comidas balanceadas y sabrosas",
-},
-{
-   beforeSrc: "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?q=80&w=1481&auto=format&fit=crop",
-   afterSrc: "https://images.unsplash.com/photo-1547592180-85f173990554?q=80&w=1470&auto=format&fit=crop",
-   text: "Proteínas saludables y ricas",
-},
-{
-   beforeSrc: "https://images.unsplash.com/photo-1571091718767-18b5b1457add?q=80&w=1472&auto=format&fit=crop",
-   afterSrc: "https://images.unsplash.com/photo-1563379926898-05f4575a45d8?q=80&w=1470&auto=format&fit=crop",
-   text: "Recetas que encajan en tu vida",
-},
-{
-   beforeSrc: "https://images.unsplash.com/photo-1606755962773-d324e0a13086?q=80&w=1374&auto=format&fit=crop",
-   afterSrc: "https://images.unsplash.com/photo-1490645935967-10de6ba17061?q=80&w=1453&auto=format&fit=crop",
-   text: "Transformación total de tu cocina",
-},
+       beforeSrc: "/recetasImages/1 antes.jpg",
+       afterSrc: "/recetasImages/1 despues.jpg",
+       text: "Recetas que encajan en tu vida real.",
+    },
+    {
+       beforeSrc: "/recetasImages/2 antes.jpg",
+       afterSrc: "/recetasImages/2 despues.jpg",
+       text: "De improvisar a tener un sistema.",
+    },
+    {
+       beforeSrc: "/recetasImages/3 antes.jpg",
+       afterSrc: "/recetasImages/3 despues.jpg",
+       text: "Más saciedad + menos kcal = más disfrute.",
+    },
+    {
+       beforeSrc: "/recetasImages/4 antes.jpg",
+       afterSrc: "/recetasImages/4 despues.jpg",
+       text: "Comer bien no debería ser aburrido.",
+    },
+    {
+       beforeSrc: "/recetasImages/5 antes.jpg",
+       afterSrc: "/recetasImages/5 despues.jpg",
+       text: "Tu dieta flexible ejecutada a la perfección.",
+    },
+    {
+       beforeSrc: "/recetasImages/6 antes.jpg",
+       afterSrc: "/recetasImages/6 despues.jpg",
+       text: "Menos fricción en cocina = más constancia.",
+    }
   ]
 
   return (

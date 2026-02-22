@@ -7,18 +7,15 @@ const TestimonialsCocina = () => {
   const [currentIndex, setCurrentIndex] = useState(1); // Start at index 1 to show middle card
 
   const testimonials = [
-    {
-      quote: "Por fin tengo desayunos y postres que me quitan el antojo sin sentirme a dieta",
-      author: "Silvia Cascos"
-    },
-    {
-      quote: "Lo mejor no es que estén ricas. Es que ahora sé que cenar sin improvisar cada día.",
-      author: "Paloma Malagón"
-    },
-    {
-      quote: "Antes me costaba comer suficiente proteína sin aburrirme. Ahora lo tengo fácil y rico.",
-      author: "Pablo Guerra"
-    }
+    { quote: "Lo mejor no es que estén ricas. Es que ahora sé qué cenar sin improvisar cada día.", author: "Paloma Malagón" },
+    { quote: "Antes me costaba comer suficiente proteína sin aburrirme. Ahora lo tengo fácil y rico.", author: "Pablo Guerra" },
+    { quote: "Por fin tengo desayunos y postres que me quitan el antojo sin sentirme ‘a dieta’", author: "Silvia Cascos" },
+    { quote: "Es el libro que uso de verdad. No el típico que compras y se queda en una estantería.", author: "Silvia Maqueda Ara" },
+    { quote: "Me ha simplificado la semana. Repito 4–5 recetas, y aun así siento variedad.", author: "Cristina Pérez" },
+    { quote: "Recetas prácticas y saciantes. Así mantengo el déficit sin pelearme con el hambre.", author: "Mariluz González" },
+    { quote: "Me encanta tener opción de todo: dulce, salado, cenas rápidas y platos más completos.", author: "Estrella Haro" },
+    { quote: "Cocino en 10–20 minutos y tengo comidas que encajan perfecto en mi día.", author: "Sonia Duarte" },
+    { quote: "Pasé de comer ‘triste’ a platos que de verdad disfruto. Esa diferencia me cambió la constancia.", author: "Laura Molina" },
   ];
 
   const nextSlide = () => {

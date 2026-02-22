@@ -39,7 +39,7 @@ const ImageComparisonSlider = (props) => {
       {/* Wrapper interior con border-radius y overflow-hidden */}
       <div
         ref={containerRef}
-        className="relative w-full h-full rounded-[70px] overflow-hidden shadow-2xl"
+        className="relative w-full h-full rounded-[70px] overflow-hidden shadow-2xl select-none touch-none"
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseUp}
@@ -84,7 +84,7 @@ const ImageComparisonSlider = (props) => {
 
       </div>
         {/* Etiqueta de texto informativa */}
-        <div className="absolute right-[25%] text-xs md:text-base -bottom-5 sm:-bottom-10 sm:right-[30%] md:bottom-20 z-40 md:-right-20 bg-white backdrop-blur-sm max-w-40 text-secondary text-center p-4 rounded-xl shadow-lg border border-gray-200 break-words">
+        <div className="absolute right-[25%] text-xs md:text-base -bottom-5 sm:-bottom-10 sm:right-[30%] md:bottom-20 z-40 md:-right-20 bg-white backdrop-blur-sm max-w-40 text-secondary text-center p-4 rounded-xl shadow-lg border border-gray-200 break-words pointer-events-none select-none">
           <p>
 
           {text}
