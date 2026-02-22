@@ -18,7 +18,7 @@ export default function Extras() {
             {/* Column 1: Salsas */}
             <div className="flex flex-col justify-center items-center">
               <div className="mb-6">
-                <Image src="/salsas.png" width={45} height={45} alt="Salsas fit" className="object-contain" />
+                <Image src="/Salsas.png" width={45} height={45} alt="Salsas fit" className="object-contain" />
               </div>
               <h3 className="text-2xl font-bold text-orange-500 mb-4">
                 +30 Salsas fit

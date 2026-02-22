@@ -59,7 +59,7 @@ export default function Temario() {
                     </span>
                     <button
                       onClick={() => handleToggleVol1(step.number)}
-                      className={`font-bold py-3 px-6 rounded-2xl inline-block text-left w-auto cursor-pointer transition-all text-lg md:text-5xl ${isOpen ? 'bg-orange-200 text-secondary' : 'bg-orange-100 text-black hover:bg-orange-200'}`}
+                      className={`font-bold py-3 px-6 rounded-2xl inline-block text-left w-auto cursor-pointer transition-all text-lg md:text-5xl ${isOpen ? 'bg-orange-200 text-secondary scale-105 shadow-md border-2 border-orange-400' : 'bg-orange-100 text-black hover:bg-orange-200 border-2 border-transparent'}`}
                     >
                       {step.title}
                     </button>
@@ -133,7 +133,7 @@ export default function Temario() {
                     </span>
                     <button
                       onClick={() => handleToggleVol2(step.number)}
-                      className={`font-bold py-3 px-6 rounded-2xl inline-block text-left w-auto cursor-pointer transition-all text-lg md:text-5xl ${isOpen ? 'bg-orange-200 text-secondary' : 'bg-orange-100 text-black hover:bg-orange-200'}`}
+                      className={`font-bold py-3 px-6 rounded-2xl inline-block text-left w-auto cursor-pointer transition-all text-lg md:text-5xl ${isOpen ? 'bg-orange-200 text-secondary scale-105 shadow-md border-2 border-orange-400' : 'bg-orange-100 text-black hover:bg-orange-200 border-2 border-transparent'}`}
                     >
                       {step.title}
                     </button>
