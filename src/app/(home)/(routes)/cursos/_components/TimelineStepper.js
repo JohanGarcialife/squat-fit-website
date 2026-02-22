@@ -10,27 +10,41 @@ const steps = [
     number: 1,
     title: "Conceptos básicos",
     items: [
-      "Lorem ipsum vitae sans jude memorials day",
-      "Lorem ipsum vitae sans jude memorials day",
-      "Lorem ipsum vitae sans jude memorials day",
-      "Lorem ipsum vitae sans jude memorials day",
+      "Cómo funciona la composición corporal",
+      "Qué es realmente la hipertrofia",
+      "Metabolismo y adaptaciones al déficit",
+      "Errores habituales que frenan resultados",
     ],
   },
   {
     number: 2,
     title: "Nutrición",
-    // Agregué contenido de ejemplo para probar el clic
-    items: ["Sub-item de Nutrición 1", "Sub-item de Nutrición 2"], 
+    items: [
+      "Papel de los hidratos, grasas y proteínas",
+      "Pasos de recomposición bien planteada",
+      "Protocolos prácticos y enfoques reales",
+      "Dietas populares: cuándo usarlas"
+    ], 
   },
   {
     number: 3,
     title: "Entrenamiento",
-    items: [], // Sin sub-items (no mostrará nada)
+    items: [
+      "Bases del entrenamiento para hipertrofia",
+      "Relación entre dieta y estímulo muscular",
+      "Ejercicios prácticos y aplicación real",
+      "Cómo entrenar según tu objetivo"
+    ],
   },
   {
     number: 4,
     title: "Resultados",
-    items: ["Sub-item de Resultados"], // Con un solo sub-item
+    items: [
+      "Planificación paso a paso",
+      "Ajustes, seguimiento y errores comunes",
+      "Casos reales y toma de decisiones",
+      "Cómo lograr y mantener tus resultados"
+    ],
   },
 ];
 
@@ -75,7 +89,7 @@ const TimelineStepper = () => {
                 // Controla la sección de contenido para lectores de pantalla
                 aria-expanded={isOpen}
                 aria-controls={`step-content-${step.number}`}
-                className="bg-[#FF690B33] text-gray-800 font-bold py-2 px-5 rounded-2xl inline-block text-left w-auto cursor-pointer transition-all text-lg md:text-2xl"
+                className={`font-bold py-2 px-5 rounded-2xl inline-block text-left w-auto cursor-pointer transition-all text-lg md:text-2xl ${isOpen ? 'bg-primary text-white shadow-md border-2 border-orange-400' : 'bg-[#FF690B33] text-gray-800 border-2 border-transparent'}`}
               >
                 {step.title}
               </button>
