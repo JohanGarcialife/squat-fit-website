@@ -1,6 +1,8 @@
 'use client'
 import React, { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { useCartStore } from '@/stores/cart.store'
+import { toast } from 'react-hot-toast'
 
 const PLANS = [
   { id: 'monthly', title: 'Mensual', price: 27.47, subtitle: 'al mes', label: null },
@@ -9,16 +11,24 @@ const PLANS = [
 ]
 
 export default function CTO() {
-  const { addToCart } = useCartStore()
+  const { setDirectCheckoutItem, cart } = useCartStore()
   const [selectedPlanId, setSelectedPlanId] = useState('annual')
+  const router = useRouter()
 
   const handleAddToCart = (plan) => {
-    addToCart({
+    if (cart.length > 0 && !cart.some(item => item.isDirectCheckout)) {
+       toast.error('Tus productos físicos fueron removidos por seguridad (no se pueden mezclar suscripciones y productos de pago único).', { duration: 5000 });
+    }
+
+    setDirectCheckoutItem({
       id: plan.id,
       name: `Curso - Plan ${plan.title}`,
       price: plan.price,
-      image: '', 
+      image: '/CursosHero.png',
+      endpoint: '/api/v1/course/create-payment-intent',
+      payload: { course_id: plan.id } // Backend expects: { course_id: "uuid" }. Assumes plan.id is mapped to a UUID.
     })
+    toast.success('Curso añadido al carrito')
   }
 
   return (

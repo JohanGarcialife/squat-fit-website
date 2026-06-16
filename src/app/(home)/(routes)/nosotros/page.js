@@ -20,7 +20,7 @@ export default function NosotrosPage() {
 
   return (
     <> {/* Fragmento para permitir múltiples elementos hermanos */}
-      <main className="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10 font-sans">
+        <main className="w-full px-4 sm:px-6 lg:px-16 py-10 font-sans">
         
         {/* Navegación de TABS */}
         <nav className="flex items-end w-full overflow-x-auto no-scrollbar mb-10">

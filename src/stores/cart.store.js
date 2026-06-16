@@ -7,22 +7,35 @@ export const useCartStore = create(
     (set, get) => ({
       cart: [],
 
-      // Añade un producto al carrito.
+      // Añade un producto al carrito (Comportamiento clásico para Carrito global)
       // Si el producto ya existe, incrementa su cantidad.
       addToCart: (product) => {
-        const cart = get().cart
-        const productInCart = cart.find((item) => item.id === product.id)
+        let currentCart = get().cart;
+        
+        // Evitar carritos mixtos: Si el carrito actual tiene alguna suscripción/producto directo,
+        // vaciamos el carrito porque el usuario decidió agregar un producto físico que usa el checkout global.
+        if (currentCart.some(item => item.isDirectCheckout)) {
+            currentCart = [];
+        }
+
+        const productInCart = currentCart.find((item) => item.id === product.id)
 
         if (productInCart) {
-          const updatedCart = cart.map((item) =>
+          const updatedCart = currentCart.map((item) =>
             item.id === product.id
               ? { ...item, quantity: item.quantity + 1 }
               : item
           )
           set({ cart: updatedCart })
         } else {
-          set({ cart: [...cart, { ...product, quantity: 1 }] })
+          set({ cart: [...currentCart, { ...product, quantity: 1 }] })
         }
+      },
+
+      // Opción de Compra Directa (Bypass de carrito para Suscripciones)
+      // Limpia el carrito y añade solo este item con sus instrucciones de checkout exactas
+      setDirectCheckoutItem: (product) => {
+        set({ cart: [{ ...product, quantity: 1, isDirectCheckout: true }] })
       },
 
       // Elimina un producto del carrito por su ID

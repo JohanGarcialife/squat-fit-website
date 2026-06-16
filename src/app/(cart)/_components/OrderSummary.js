@@ -17,13 +17,26 @@ export default function OrderSummary(props) {
     useEffect(() => {
         const fetchExchangeRate = async () => {
             try {
-                const response = await fetch('https://api.frankfurter.app/latest?from=EUR&to=USD');
+                // Use a short timeout to fail fast if blocked by CORS/Network
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 2000);
+
+                const response = await fetch('https://api.frankfurter.app/latest?from=EUR&to=USD', { 
+                    signal: controller.signal 
+                });
+                
+                clearTimeout(timeoutId);
+
+                if (!response.ok) throw new Error('Network response not ok');
                 const data = await response.json();
-                setExchangeRate(data.rates.USD);
+                if (data?.rates?.USD) {
+                    setExchangeRate(data.rates.USD);
+                } else {
+                    setExchangeRate(1.08); // Fallback
+                }
             } catch (error) {
-                console.error("Failed to fetch exchange rate:", error);
-                // Fallback rate in case of API failure
-                setExchangeRate(1.08); 
+                // Silence common fetch errors to keep dev logs clean
+                setExchangeRate(1.08); // Fallback standard EUR/USD
             } finally {
                 setIsLoading(false);
             }
@@ -37,7 +50,9 @@ export default function OrderSummary(props) {
     };
     
     const subtotal = cart.reduce((acc, item) => acc + item.price * item.quantity, 0);
-    const shippingCost = 4.99; // in EUR
+    // Only apply shipping if the cart contains physical products (non-direct checkouts)
+    const hasPhysicalItems = cart.some(item => !item.isDirectCheckout);
+    const shippingCost = hasPhysicalItems ? 4.99 : 0; 
     const freeShippingThreshold = 90.00; // in EUR
     
     const finalShipping = subtotal >= freeShippingThreshold ? 0 : shippingCost;
@@ -102,7 +117,7 @@ export default function OrderSummary(props) {
                 {item.name}
               </h4>
               <p className="text-indigo-400 text-xs mb-2">
-                 {item.description || (item.type === 'digital' ? 'Suscripción online' : 'Volumen en papel')}
+                 {item.description || (item.isDirectCheckout ? 'Suscripción online' : 'Volumen en papel')}
               </p>
               
               <div className="flex justify-between items-end">

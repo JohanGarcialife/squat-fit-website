@@ -1,5 +1,6 @@
 import { Inter } from "next/font/google";
 import "../globals.css";
+import ToasterProvider from "@/components/ToasterProvider";
 
 import Sidebar from "./(routes)/panel-control/_components/Sidebar";
 
@@ -20,7 +21,7 @@ export default function RootLayout({ children }) {
         className={`${inter.variable} antialiased`}
       >
         <div className="min-h-screen bg-background flex">
-        
+        <ToasterProvider />
         <Sidebar />
         {children}
         </div>

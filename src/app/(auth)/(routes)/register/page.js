@@ -29,26 +29,48 @@ export default function RegisterPage() {
       .required('Confirmar la contraseña es obligatorio'),
   });
 
-  const handleSubmit = async (values, { setSubmitting, setErrors }) => {
+  const handleSubmit = async (values, { setSubmitting }) => {
     try {
-      const { confirmPassword, ...apiValues } = values;
-      const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/user/register`, apiValues);
+      const { username, email, password } = values;
+      
+      // Split "Nombre" into firstName and lastName
+      const nameParts = username.trim().split(/\s+/);
+      const firstName = nameParts[0] || 'Usuario';
+      const lastName = nameParts.length > 1 ? nameParts.slice(1).join(' ') : 'SquatFit';
+
+      // Generate a valid username from email (alphanumeric only)
+      const generatedUsername = email.split('@')[0].replace(/[^a-zA-Z0-9_]/g, '_');
+
+      const payload = {
+        email,
+        username: generatedUsername,
+        password,
+        firstName,
+        lastName
+      };
+
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/user/register`, payload);
+      
       if (response.data.message === 'Usuario registrado exitosamente') {
         toast.success('¡Registro exitoso!');
         router.push('/login');
       }
     } catch (error) {
+      console.error('Error en el registro', error.response ? error.response.data : error.message);
+      
       if (error.response && error.response.data) {
-        const message = error.response.data.message;
-        if (Array.isArray(message) && message[0].includes("Password must contain")) {
-          toast.error("La contraseña debe tener al menos 8 caracteres, una mayúscula, una minúscula, un número y un caracter especial");
+        const { message } = error.response.data;
+        
+        if (Array.isArray(message)) {
+          // Display the first validation error from the API
+          const cleanMessage = message[0].replace('property ', '');
+          toast.error(cleanMessage);
         } else if (message === "Email already in use") {
           toast.error("El correo electrónico ya está en uso");
         } else {
-          toast.error("Ocurrió un error inesperado durante el registro.");
+          toast.error(typeof message === 'string' ? message : "Error en el registro");
         }
       } else {
-        console.error('Error en el registro', error.message);
         toast.error("Ocurrió un error inesperado.");
       }
     } finally {

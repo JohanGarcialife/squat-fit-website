@@ -39,7 +39,7 @@ export default function Comparision(props) {
   );
 
   return (
-    <div className="bg-[#FFF9F2] px-5 xl:px-32 w-full flex flex-col lg:flex-row items-center justify-between py-20 mt-10">
+    <div className="bg-[#FFF9F2] px-5 xl:px-32 w-full flex flex-col lg:flex-row items-center justify-between py-20">
       {width < 1024 ? (
         <>
           <div className="lg:w-1/2 h-full flex flex-col items-start justify-center lg:max-w-[510px] mb-10">
@@ -50,7 +50,7 @@ export default function Comparision(props) {
               Aprende a mantenerte sano y en forma; evita el efecto rebote y continua progresando después de meses en incluso años.
             </p>
             <div className="w-full flex flex-col items-center justify-center ">
-              <button className="mt-10 w-1/2 text-white px-6 py-3 rounded-xl bg-secondary hover:opacity-90 font-bold">
+              <button className="mt-10 w-[70%] text-white px-6 py-3 rounded-xl bg-gradient-to-r from-primary to-secondary hover:opacity-90 font-bold shadow-md">
                 Reserva tu plaza
               </button>
               <div className="hidden items-center w-full text-secondary mt-10 justify-center gap-3 cursor-pointer text-2xl">
@@ -78,7 +78,7 @@ export default function Comparision(props) {
             <p className="text-primary font-bold text-6xl">Un cambio físico que se mantiene</p>
             <p className="text-black text-lg mt-10">Aprende a mantenerte sano y en forma; evita el efecto rebote y continua progresando después de meses en incluso años.</p>
             <div className="w-full flex items-center justify-start gap-10">
-              <button className="mt-10  text-white px-6 py-3 rounded-xl bg-secondary font-bold hover:opacity-90">Reserva tu plaza</button>
+              <button className="mt-10 text-white px-12 py-4 rounded-xl bg-gradient-to-r from-primary to-secondary font-bold text-xl lg:text-2xl hover:opacity-90 transition-all shadow-md">Reserva tu plaza</button>
               <div className="hidden items-center text-secondary mt-10 justify-center gap-3 cursor-pointer text-2xl">
                 <p className="">Saber más</p>
 

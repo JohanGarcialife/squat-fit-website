@@ -1,5 +1,6 @@
 import { Inter } from "next/font/google";
 import "../globals.css";
+import ToasterProvider from "@/components/ToasterProvider";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 
@@ -21,6 +22,7 @@ export default function RootLayout({ children }) {
       <body
         className={`${inter.variable} antialiased`}
       >
+        <ToasterProvider />
         <Toaster />
         <div className="min-h-screen bg-background ">
         

@@ -1,27 +1,75 @@
 'use client';
 
-import React, { useState } from 'react';
-import { ChevronLeft, ChevronDown, ChevronUp } from 'lucide-react';
-import Image from 'next/image';
+import React, { useState, useEffect, useMemo } from 'react';
+import { ChevronLeft } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import OrderSummary from './OrderSummary';
 import { useCartStore } from '@/stores/cart.store';
+import { useAuthStore } from '@/stores/auth.store';
+import axios from 'axios';
+import { loadStripe } from '@stripe/stripe-js';
+import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
+import { toast } from 'react-hot-toast';
 
-export default function Payment(props) {
+// Make sure to configure your .env.local with NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
+const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || 'pk_test_placeholder');
+
+// Componente interno que ya tiene acceso a los hooks de Stripe
+function PaymentInner(props) {
   const { setStep, setSuccess } = props;
-  const { cart } = useCartStore();
-  
-  // State for UI toggles
-  const [selectedMethod, setSelectedMethod] = useState('card');
-  const [showMoreMethods, setShowMoreMethods] = useState(false);
+  const stripe = useStripe();
+  const elements = useElements();
+  const [isProcessing, setIsProcessing] = useState(false);
 
-  // Mock calculation for totals (OrderSummary will handle its own logic, 
-  // but we pass necessary props if needed or it gets them from store)
-  // For this step, OrderSummary is self-contained via store.
+  const handleSubmit = async () => {
+    if (!stripe || !elements) {
+      return;
+    }
+
+    setIsProcessing(true);
+    const toastId = toast.loading('Procesando pago...');
+
+    try {
+      const { error, paymentIntent } = await stripe.confirmPayment({
+        elements,
+        confirmParams: {
+          return_url: `${window.location.origin}/cart?success=true`,
+        },
+        redirect: 'if_required',
+      });
+
+      if (error) {
+        toast.error(error.message, { id: toastId });
+      } else if (paymentIntent) {
+        if (paymentIntent.status === 'succeeded' || paymentIntent.status === 'processing') {
+          const msg = paymentIntent.status === 'succeeded'
+            ? 'Pago completado con éxito'
+            : 'El pago se está procesando. Te avisaremos cuando se complete.';
+          toast.success(msg, { id: toastId });
+
+          // Limpiar el carrito y actualizar estado de suscripción en el store global
+          useCartStore.getState().clearCart();
+          await useAuthStore.getState().refreshSubscriptionStatus();
+
+          setSuccess(true);
+        } else {
+          toast.error(`Estado del pago: ${paymentIntent.status}`, { id: toastId });
+        }
+      } else {
+        // En caso de que no haya error ni paymentIntent (raro pero posible)
+        toast.dismiss(toastId);
+      }
+    } catch (err) {
+      console.error("Stripe confirm error:", err);
+      toast.error('Ocurrió un error inesperado al procesar el pago', { id: toastId });
+    } finally {
+      setIsProcessing(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-white flex flex-col lg:flex-row font-sans">
-      
-      {/* Columna Izquierda: Métodos de Pago y Formulario (aprox 60%) */}
+      {/* Columna Izquierda: Formulario Stripe (aprox 60%) */}
       <div className="w-full lg:w-3/5 xl:w-1/2 p-6 lg:p-14 lg:pl-40 min-h-screen bg-white">
         
         {/* Header */}
@@ -33,111 +81,31 @@ export default function Payment(props) {
             </div>
         </div>
 
-        {/* Métodos de Pago */}
+        {/* Métodos de Pago Integrados de Stripe */}
         <div className="mb-12">
             <h2 className="text-indigo-900 font-bold text-lg mb-4">Métodos de pago</h2>
-            
-            <div className="space-y-4">
-                {/* Opción Tarjeta */}
-                <PaymentOption 
-                    id="card" 
-                    label="Pago con Tarjeta" 
-                    selected={selectedMethod === 'card'} 
-                    onSelect={() => setSelectedMethod('card')} 
-                />
-                
-                {/* Opción Apple/Google Pay */}
-                <PaymentOption 
-                    id="wallets" 
-                    label="Apple Pay / Google Pay" 
-                    selected={selectedMethod === 'wallets'} 
-                    onSelect={() => setSelectedMethod('wallets')} 
-                />
-                
-                {/* Opción Klarna */}
-                <PaymentOption 
-                    id="klarna" 
-                    label="Klarna" 
-                    selected={selectedMethod === 'klarna'} 
-                    onSelect={() => setSelectedMethod('klarna')} 
-                />
-                
-                {/* Más métodos toggle */}
-                <div 
-                    onClick={() => setShowMoreMethods(!showMoreMethods)}
-                    className="flex items-center gap-2 text-orange-500 font-bold cursor-pointer hover:underline mt-4"
-                >
-                    <span>Más métodos de pago</span>
-                    {showMoreMethods ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
-                </div>
-
-                {/* Métodos adicionales */}
-                {showMoreMethods && (
-                    <div className="space-y-4 pt-2 animate-in slide-in-from-top-2 fade-in duration-300">
-                        <PaymentOption 
-                            id="paypal" 
-                            label="Pago con PayPal" 
-                            selected={selectedMethod === 'paypal'} 
-                            onSelect={() => setSelectedMethod('paypal')} 
-                        />
-                        <PaymentOption 
-                            id="transfer" 
-                            label="Transferencia bancaria" 
-                            selected={selectedMethod === 'transfer'} 
-                            onSelect={() => setSelectedMethod('transfer')} 
-                        />
-                    </div>
-                )}
-            </div>
-        </div>
-
-        {/* Formulario de Tarjeta (Solo visible si 'card' está seleccionado) */}
-        {selectedMethod === 'card' && (
             <div className="animate-in fade-in zoom-in-95 duration-300">
-                <div className="space-y-6 max-w-md">
-                    <MockInput label="Número de tarjeta*" placeholder="1234 1234 1234 1234" />
-                    <div className="flex gap-6">
-                        <MockInput label="Caducidad*" placeholder="mm / aa" />
-                        <MockInput label="Código*" placeholder="CVC" />
-                    </div>
-                </div>
-
+                <PaymentElement />
+                
                 {/* Logos de seguridad */}
                 <div className="mt-10 opacity-80">
                     <div className="relative w-48 h-12">
-                         {/* Placeholder for "Pago Seguro Stripe" logos */}
-                         {/* Using a simple text representation or local image if available. 
-                             Based on user prompt, mocking layout first. 
-                             Reference image shows a specific stripe logo block. */}
                          <div className="flex items-center gap-2 border border-gray-200 rounded p-2 bg-gray-50 text-xs text-gray-500">
                             <span>PAGO SEGURO</span>
                             <span className="font-bold">Stripe</span>
-                            <div className="flex gap-1">
-                                <span className="bg-blue-900 text-white px-1 font-bold text-[8px] rounded">VISA</span>
-                                <span className="bg-red-600 text-white px-1 font-bold text-[8px] rounded">MC</span>
-                            </div>
                          </div>
                     </div>
                 </div>
             </div>
-        )}
-
+        </div>
       </div>
       
-      {/* Columna Derecha: Resumen (aprox 40%, fondo Peach) */}
+      {/* Columna Derecha: Resumen */}
       <div className="w-full lg:w-2/5 xl:w-1/2 min-h-screen bg-[#FFF5F3]">
         <div className="sticky top-0 h-screen overflow-y-auto">
-          {/* Reutilizamos OrderSummary pero pasando la función para "Continuar" que en este paso sería "Pagar" theoretically */}
-          {/* Note: In real implementation, this button would trigger Stripe payment. 
-              Here visually it will just match the design "Continuar" */}
           <OrderSummary 
-             triggerCheckoutFormSubmit={() => {
-                 // Mock success action
-                 // En el futuro aquí irá la lógica de stripe.confirmPayment
-                 console.log("Processing payment visual mock...");
-                 setSuccess(true); // Simulate success for now if user clicks
-             }}
-             isFormValid={true} // Always valid for visual mock
+             triggerCheckoutFormSubmit={handleSubmit}
+             isFormValid={!isProcessing} // Prevenir clicks múltiples mientras procesa
              isFormDirty={true}
           />
         </div>
@@ -146,35 +114,120 @@ export default function Payment(props) {
   );
 }
 
-// Subcomponente para Opciones de Pago (Radio Buttons personalizados)
-function PaymentOption({ id, label, selected, onSelect }) {
-    return (
-        <div 
-            onClick={onSelect}
-            className="flex items-center gap-3 cursor-pointer group"
-        >
-            <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors ${
-                selected ? 'border-orange-500 bg-orange-500' : 'border-orange-300 bg-white group-hover:border-orange-400'
-            }`}>
-                {selected && <div className="w-2.5 h-2.5 bg-white rounded-full"></div>}
-            </div>
-            <span className={`text-lg ${selected ? 'text-orange-500 font-medium' : 'text-orange-400'}`}>
-                {label}
-            </span>
-        </div>
-    )
-}
+// Wrapper principal que obtiene el clientSecret antes de montar el formulario
+export default function Payment(props) {
+  const router = useRouter();
+  const { cart } = useCartStore();
+  const { token } = useAuthStore();
+  const [clientSecret, setClientSecret] = useState('');
+  const [loading, setLoading] = useState(true);
 
-// Subcomponente para Inputs Mock (Estilo naranja redondeado)
-function MockInput({ label, placeholder }) {
+  const appearance = useMemo(() => ({
+    theme: 'stripe',
+    variables: {
+      colorPrimary: '#FF7F50', // Naranja SquatFit
+      colorBackground: '#ffffff',
+      colorText: '#30313d',
+      colorDanger: '#df1b41',
+      spacingUnit: '4px',
+      borderRadius: '8px',
+    }
+  }), []);
+
+  const options = useMemo(() => ({
+    clientSecret,
+    appearance
+  }), [clientSecret, appearance]);
+
+  useEffect(() => {
+    if (!cart || cart.length === 0) return;
+
+    let endpoint = '';
+    let payload = {};
+
+    // Detectar si es un checkout de suscripción directo o un carrito mixto
+    const directItem = cart.find(item => item.isDirectCheckout);
+    
+    if (directItem && directItem.endpoint) {
+       endpoint = directItem.endpoint;
+       payload = directItem.payload;
+    } else {
+       // Carrito global de productos físicos
+       if (cart.length > 1) {
+           toast.error('La API actual solo procesa 1 tipo de artículo a la vez. Por favor ajusta tu carrito.', { duration: 5000 });
+           setLoading(false);
+           return;
+       }
+       
+       const item = cart[0];
+       
+       if (item.type === 'pack') {
+           endpoint = '/api/v1/book/create-payment-intent-pack';
+           payload = { pack_id: item.id, quantity: item.quantity || 1 };
+       } else {
+           endpoint = '/api/v1/book/create-payment-intent-version';
+           payload = { version_id: item.id, quantity: item.quantity || 1 };
+       }
+    }
+
+    const fetchPaymentIntent = async () => {
+      try {
+        const response = await axios.post(
+          `https://squatfit-api-cyrc2g3zra-no.a.run.app${endpoint}`,
+          payload,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        
+        // Manejar el caso donde el usuario ya tiene la suscripción activa
+        if (response.data.hasActiveSubscription) {
+            toast.success("¡Ya tienes una suscripción activa! Redirigiendo a tu biblioteca...");
+            useCartStore.getState().clearCart();
+            useAuthStore.getState().setSubscribed(true);
+            router.push('/panel-cocina');
+            return;
+        }
+
+        // Stripe nos mandará el client_secret o clientSecret
+        const secret = response.data.clientSecret || response.data.client_secret;
+        setClientSecret(secret);
+      } catch (error) {
+        console.error("Error creating payment intent", error);
+        console.error("Payload sent:", JSON.stringify(payload));
+        if (error.response?.data) {
+           console.error("Server validation errors:", JSON.stringify(error.response.data));
+           const serverSms = error.response.data.message || error.response.data.error;
+           toast.error(typeof serverSms === 'string' ? serverSms : JSON.stringify(serverSms));
+        } else {
+           toast.error("Error al iniciar el pago");
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPaymentIntent();
+  }, [cart, token]);
+
+  if (loading) {
     return (
-        <div className="flex flex-col gap-1 w-full">
-            <label className="text-orange-500 text-sm ml-1">{label}</label>
-            <input 
-                type="text" 
-                placeholder={placeholder}
-                className="w-full border border-orange-300 rounded-2xl px-5 py-3 placeholder-orange-300 text-indigo-900 text-lg font-medium outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all bg-white"
-            />
+        <div className="min-h-screen bg-white flex items-center justify-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-900"></div>
         </div>
-    )
+    );
+  }
+
+  if (!clientSecret) {
+    return (
+        <div className="min-h-screen bg-white flex flex-col items-center justify-center">
+            <p className="text-red-500 font-bold mb-4">No se pudo inicializar el pago seguro.</p>
+            <button onClick={() => props.setStep(2)} className="text-secondary font-bold underline">Volver</button>
+        </div>
+    );
+  }
+
+  return (
+    <Elements key={clientSecret} stripe={stripePromise} options={options}>
+      <PaymentInner {...props} />
+    </Elements>
+  );
 }

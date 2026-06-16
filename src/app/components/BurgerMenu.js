@@ -80,7 +80,7 @@ export default function BurgerMenu() {
         <div className='fixed inset-0 z-50' >
           <div className='w-full h-screen bg-linear-to-b from-primary to-secondary opacity-90 px-5 pb-32 pt-10 flex flex-col overflow-y-auto'>
             <div className='flex justify-end'>
-              <div onClick={() => setShow(false)}>
+              <div className="cursor-pointer" onClick={() => setShow(false)}>
                 <Image
                   src="/icons/Close.png"
                   width={32}
@@ -96,7 +96,7 @@ export default function BurgerMenu() {
               <Link href="/cursos" className='text-5xl font-bold text-white' onClick={() => setShow(false)}>Cursos</Link>
                <Link href="/politicas">
                     <p
-                        className='text-5xl font-bold text-white'
+                        className='cursor-pointer text-5xl font-bold text-white'
                          onClick={() => setShow(false)}
                     >
                         Políticas
@@ -104,7 +104,7 @@ export default function BurgerMenu() {
                 </Link>
                 <Link href="/nosotros">
                     <p
-                        className='text-5xl font-bold text-white'
+                        className='cursor-pointer text-5xl font-bold text-white'
                          onClick={() => setShow(false)}
                     >
                         Nosotros
@@ -123,7 +123,7 @@ export default function BurgerMenu() {
                 <div className='w-full text-center py-2'>
                   <p className='text-white text-3xl'>Hola, {user?.username}</p>
                 </div>
-                  <div onClick={() => setIsModalOpen(true)} className='flex justify-center py-2 px-4 border border-white rounded-xl cursor-pointer mt-4 w-full'>
+                  <div className="cursor-pointer" onClick={() => setIsModalOpen(true)} className='flex justify-center py-2 px-4 border border-white rounded-xl cursor-pointer mt-4 w-full'>
                     <p className='text-3xl font-bold text-white'>Logout</p>
                   </div>
                 </>

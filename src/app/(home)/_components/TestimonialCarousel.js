@@ -82,7 +82,7 @@ const TestimonialCarousel = () => {
   centerMode: true,
   infinite: true,
   centerPadding: '0px',
- slidesToShow: isMobile ? 1 : 3,         // valor por defecto para pantallas grandes
+  slidesToShow: 3,         // valor por defecto para pantallas grandes
   speed: 500,
   arrows: false,
 
@@ -93,7 +93,7 @@ const TestimonialCarousel = () => {
       settings: {
         slidesToShow: 1,
         centerMode: true,
-        centerPadding: '20px',
+        centerPadding: '40px',
       },
     },
     {
@@ -101,7 +101,7 @@ const TestimonialCarousel = () => {
       settings: {
         slidesToShow: 1,
         centerMode: true,
-        centerPadding: '40px',
+        centerPadding: '60px',
       },
     },
     {
@@ -109,16 +109,9 @@ const TestimonialCarousel = () => {
       settings: {
         slidesToShow: 1,
         centerMode: true,
-        centerPadding: '60px',
+        centerPadding: '100px',
       },
-    },
-    {
-      breakpoint: 1280,
-      settings: {
-        slidesToShow: 2,
-        centerMode: false,
-      },
-    },
+    }
   ],
 };
 
@@ -126,12 +119,13 @@ const TestimonialCarousel = () => {
         <div className="w-screen py-16 bg-white">
             <div className="w-full max-w-7xl mx-auto px-4">
                 <div>
+                   <h2 className="text-secondary font-bold text-center text-5xl md:text-6xl mb-12">Lo que dicen mis clientes</h2>
                     <div className="relative">
                         {width < 480 ? <Slider {...settings} ref={sliderRef}>
                             {testimonials.map((testimonial, index) => (
                                 <div
                                     key={index}
-                                    className="px-3 py-5 "
+                                    className="cursor-pointer px-3 py-5 "
                                     onClick={() => sliderRef.current && sliderRef.current.slickGoTo(index)}
                                 >
                                     <div className="bg-[#3932C01A] h-full w-full lg:w-[420px] p-8 rounded-3xl shadow-lg border border-gray-100 hover:shadow-xl transition-shadow duration-300  flex flex-col items-center text-center">
@@ -164,7 +158,7 @@ const TestimonialCarousel = () => {
                             {testimonials.map((testimonial, index) => (
                                 <div
                                     key={index}
-                                    className="px-3 py-5 "
+                                    className="cursor-pointer px-3 py-5 "
                                     onClick={() => sliderRef.current && sliderRef.current.slickGoTo(index)}
                                 >
                                     <div className="bg-[#3932C01A] h-full w-full lg:w-[420px] p-8 rounded-3xl shadow-lg border border-gray-100 hover:shadow-xl transition-shadow duration-300  flex flex-col items-center text-center">

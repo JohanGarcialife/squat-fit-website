@@ -71,10 +71,16 @@ const StarIcon = ({ filled }) => (
 )
 
 const SchoolIcon = ({ filled }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke={filled ? "#FF690B" : "#3932C0"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+  <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill={filled ? "#FF690B" : "none"} stroke={filled ? "none" : "#3932C0"} strokeWidth={filled ? "0" : "2"} strokeLinecap="round" strokeLinejoin="round">
     <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-    <path d="M22 9l-10 -4l-10 4l10 4l10 -4v6" />
-    <path d="M6 10.6v5.4a6 3 0 0 0 12 0v-5.4" />
+    {filled ? (
+        <path d="M12 2.133l10.59 4.354a1 1 0 0 1 0 1.854l-5.467 2.248v5.411a1 1 0 0 1 -1.455 .89l-3.328 -1.664a.5 .5 0 0 0 -.44 0l-3.328 1.664a1 1 0 0 1 -1.455 -.89v-5.411l-5.708 -2.347a1 1 0 0 1 0 -1.854l10.59 -4.354z" />
+    ) : (
+        <>
+            <path d="M22 9l-10 -4l-10 4l10 4l10 -4v6" />
+            <path d="M6 10.6v5.4a6 3 0 0 0 12 0v-5.4" />
+        </>
+    )}
   </svg>
 )
 
@@ -121,11 +127,17 @@ const SettingsIcon = ({ filled }) => (
 )
 
 const InfoIcon = ({ filled }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke={filled ? "#FF690B" : "#3932C0"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+  <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill={filled ? "#FF690B" : "none"} stroke={filled ? "none" : "#3932C0"} strokeWidth={filled ? "0" : "2"} strokeLinecap="round" strokeLinejoin="round">
     <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-    <path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0" />
-    <path d="M12 9h.01" />
-    <path d="M11 12h1v4h1" />
+    {filled ? (
+        <path d="M12 2c5.523 0 10 4.477 10 10s-4.477 10 -10 10s-10 -4.477 -10 -10s4.477 -10 10 -10zm0 9h-1l-.117 .007a1 1 0 0 0 0 1.986l.117 .007v3l.007 .117a1 1 0 0 0 .876 .876l.117 .007h1l.117 -.007a1 1 0 0 0 .876 -.876l.007 -.117l-.007 -.117a1 1 0 0 0 -.764 -.857l-.112 -.02l-.117 -.006v-3l-.007 -.117a1 1 0 0 0 -.876 -.876l-.117 -.007zm.01 -3l-.127 .007a1 1 0 0 0 0 1.986l.117 .007l.127 -.007a1 1 0 0 0 0 -1.986l-.117 -.007z" />
+    ) : (
+        <>
+            <path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0" />
+            <path d="M12 9h.01" />
+            <path d="M11 12h1v4h1" />
+        </>
+    )}
   </svg>
 )
 
@@ -134,46 +146,32 @@ const MENU_ITEMS = [
   { id: 0, label: 'Inicio', href: '/panel-control', Icon: HomeIcon },
   { id: 1, label: 'Alertas', href: null, Icon: BellIcon },
   { id: 2, label: 'Cocina', href: '/panel-cocina', Icon: AppleIcon },
-  { id: 3, label: 'Planes', href: '/planes', Icon: StarIcon },
+  { id: 3, label: 'Planes', href: '/panel-planes', Icon: StarIcon },
   { id: 4, label: 'Cursos', href: '/panel-cursos', Icon: SchoolIcon },
   { id: 5, label: 'Perfil', href: '/profile-panel', Icon: UserIcon },
   { id: 6, label: 'Contacto', href: null, Icon: MessageIcon },
-  { id: 8, label: 'Info', href: null, Icon: InfoIcon },
+  { id: 8, label: 'Info', href: '/panel-info', Icon: InfoIcon },
   { id: 7, label: 'Ajustes', href: null, Icon: SettingsIcon },
 ]
 
+// ─── Default (navigation) Sidebar ───────────────────────────────────────────
 export default function Sidebar() {
   const pathname = usePathname()
   const [activeId, setActiveId] = useState(0)
 
-  // Sync active state with URL
   useEffect(() => {
-    // Check if any href corresponds to the current path
     const activeItem = MENU_ITEMS.find(item => item.href && pathname.startsWith(item.href))
-    if (activeItem) {
-      setActiveId(activeItem.id)
-    } else if (pathname === '/') {
-        // Optional: Reset or keep as is? 
-        // If we are here, we are outside known paths, maybe do nothing or default to 0
-    }
+    if (activeItem) setActiveId(activeItem.id)
   }, [pathname])
 
-  const handleItemClick = (id) => {
-    setActiveId(id)
-  }
+  const handleItemClick = (id) => setActiveId(id)
 
   return (
     <div className="bg-[#FFF6F0] rounded-[40px] flex flex-col items-center py-8 px-6 h-[calc(100vh-40px)] sticky top-[20px] ml-[20px] overflow-y-auto">
-      <div className="flex flex-col w-full max-w-[200px] h-full"> 
+      <div className="flex flex-col w-full max-w-[200px] h-full">
         {/* Logo */}
         <Link href="/" className="mx-auto mb-8">
-          <Image 
-            src="/LogotipoSquatfit.png" 
-            width={80} 
-            height={80} 
-            alt="Logo" 
-            className="hover:scale-105 transition-transform"
-          />
+          <Image src="/LogotipoSquatfit.png" width={80} height={80} alt="Logo" className="hover:scale-105 transition-transform" />
         </Link>
 
         {/* Telegram Link */}
@@ -184,59 +182,188 @@ export default function Sidebar() {
 
         {/* Menu Items */}
         <div className="flex flex-col space-y-4 flex-grow">
-            {MENU_ITEMS.map((item) => {
-                if (item.label === 'Ajustes') return null; // Render settings separately at bottom
-
-                const isActive = activeId === item.id
-                
-                // Wrap content in Link if href exists, otherwise just a div
-                const Content = (
-                    <div
-                        className="flex items-center space-x-3 cursor-pointer group"
-                        onClick={() => handleItemClick(item.id)}
-                    >
-                        <div className="transition-transform group-hover:scale-110">
-                            <item.Icon filled={isActive} />
-                        </div>
-                        <span className={`text-lg transition-colors ${isActive ? 'font-bold text-[#FF690B]' : 'text-[#7D7D7D] group-hover:text-[#FF690B]'}`}>
-                            {item.label}
-                        </span>
-                    </div>
-                )
-
-                return item.href ? (
-                    <Link key={item.id} href={item.href} className="no-underline">
-                        {Content}
-                    </Link>
-                ) : (
-                    <div key={item.id}>
-                        {Content}
-                    </div>
-                )
-            })}
+          {MENU_ITEMS.map((item) => {
+            if (item.label === 'Ajustes') return null;
+            const isActive = activeId === item.id
+            const Content = (
+              <div className="flex items-center space-x-3 cursor-pointer group" onClick={() => handleItemClick(item.id)}>
+                <div className="transition-transform group-hover:scale-110"><item.Icon filled={isActive} /></div>
+                <span className={`text-lg transition-colors ${isActive ? 'font-bold text-[#FF690B]' : 'text-[#3932C0] group-hover:text-[#FF690B]'}`}>{item.label}</span>
+              </div>
+            )
+            return item.href ? (<Link key={item.id} href={item.href} className="no-underline">{Content}</Link>) : (<div key={item.id}>{Content}</div>)
+          })}
         </div>
-        
+
         {/* Bottom Items (Ajustes) */}
-         <div className="mt-auto pt-8">
-            {MENU_ITEMS.filter(item => item.label === 'Ajustes').map((item) => {
-                 const isActive = activeId === item.id
-                 return (
-                    <div
-                        key={item.id}
-                        className="flex items-center space-x-3 cursor-pointer group"
-                        onClick={() => handleItemClick(item.id)}
-                    >
-                         <div className="transition-transform group-hover:scale-110">
-                            <item.Icon filled={isActive} />
-                        </div>
-                        <span className={`text-lg transition-colors ${isActive ? 'font-bold text-[#FF690B]' : 'text-[#7D7D7D] group-hover:text-[#FF690B]'}`}>
-                            {item.label}
-                        </span>
-                    </div>
-                 )
-            })}
-         </div>
+        <div className="mt-auto pt-8">
+          {MENU_ITEMS.filter(item => item.label === 'Ajustes').map((item) => {
+            const isActive = activeId === item.id
+            return (
+              <div key={item.id} className="flex items-center space-x-3 cursor-pointer group" onClick={() => handleItemClick(item.id)}>
+                <div className="transition-transform group-hover:scale-110"><item.Icon filled={isActive} /></div>
+                <span className={`text-lg transition-colors ${isActive ? 'font-bold text-[#FF690B]' : 'text-[#3932C0] group-hover:text-[#FF690B]'}`}>{item.label}</span>
+              </div>
+            )
+          })}
+        </div>
       </div>
     </div>
   )
 }
+
+// Helper to contextually choose an emoji icon based on title keywords and level
+function getIconForTitle(title, level) {
+  if (!title) return level === 0 ? '📘' : '🔸';
+  const t = title.toLowerCase();
+  if (t.includes('índice') || t.includes('indice') || t.includes('contenido')) return '📋';
+  if (t.includes('antes') || t.includes('empezar') || t.includes('bienvenida') || t.includes('presentación') || t.includes('presentacion')) return '👋';
+  if (t.includes('esenciales') || t.includes('básicos') || t.includes('basicos')) return '🍳';
+  if (t.includes('desayuno')) return '☕';
+  if (t.includes('comida') || t.includes('almuerzo')) return '🍽️';
+  if (t.includes('cena')) return '🌙';
+  if (t.includes('snack') || t.includes('merienda') || t.includes('entre horas') || t.includes('fruta')) return '🍎';
+  if (t.includes('postre') || t.includes('dulce')) return '🧁';
+  if (t.includes('salsa') || t.includes('aderezo')) return '🥫';
+  if (t.includes('tropical')) return '🌴';
+  if (t.includes('cierre') || t.includes('final') || t.includes('contacto') || t.includes('gracias')) return '🤍';
+  
+  // Default based on level
+  if (level === 0) return '📘';
+  if (level === 1) return '🔸';
+  return '▪️';
+}
+
+// Helper to flatten hierarchical tree nodes recursively
+// Soporta tanto:
+//   - Árboles del backend: { id, title, page_number, level, sort_order, children[] }
+//   - Arrays planos del fallback: { title, icon, page }
+function flattenIndexTree(nodes, inheritedLevel = 0) {
+  let flat = [];
+  if (!nodes || !Array.isArray(nodes)) return flat;
+  
+  // Sort by sort_order to maintain correct order of chapters
+  const sortedNodes = [...nodes].sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
+  
+  for (const node of sortedNodes) {
+    // Soporte dual: API usa page_number + level, fallback usa page + (sin level)
+    const nodeLevel = node.level ?? inheritedLevel;
+    const pageNum = node.page_number ?? node.page ?? 1;
+    
+    flat.push({
+      id: node.id || `node-${pageNum}-${Math.random().toString(36).slice(2,7)}`,
+      title: node.title,
+      page: pageNum,
+      level: nodeLevel,
+      icon: node.icon || getIconForTitle(node.title, nodeLevel)
+    });
+    
+    if (node.children && node.children.length > 0) {
+      flat.push(...flattenIndexTree(node.children, nodeLevel + 1));
+    }
+  }
+  return flat;
+}
+
+
+// ─── Book Index Overlay Sidebar ──────────────────────────────────────────────
+// Props:
+//   isOpen        – boolean para mostrar/ocultar
+//   onClose       – callback al cerrar
+//   items         – VersionIndexTreeNode[] del backend o array plano del fallback
+//   activePage    – número de página actual del PDF
+//   onItemClick   – callback(page) al hacer clic en un ítem
+export function BookIndexSidebar({ isOpen, onClose, items = [], activePage, onItemClick }) {
+  const flatItems = React.useMemo(() => {
+    return flattenIndexTree(items);
+  }, [items]);
+
+  return (
+    <>
+      {/* Backdrop */}
+      {isOpen && (
+        <div
+          className="fixed inset-0 bg-black/20 z-40 transition-opacity"
+          onClick={onClose}
+        />
+      )}
+
+      {/* Drawer */}
+      <div
+        className={`fixed top-[20px] right-[20px] h-[calc(100vh-40px)] w-[260px] bg-[#FFF6F0] rounded-[40px] shadow-2xl z-50 flex flex-col py-8 px-6 transform transition-transform duration-300 ease-in-out overflow-y-auto ${
+          isOpen ? 'translate-x-0' : 'translate-x-[calc(100%+20px)]'
+        }`}
+      >
+        {/* Header: label + close button */}
+        <div className="flex items-center justify-between mb-2">
+          <span className="text-xs font-bold text-[#3932C0] uppercase tracking-widest opacity-50">
+            Índice
+          </span>
+          <button onClick={onClose} className="text-[#FF690B] hover:opacity-80 transition-opacity cursor-pointer">
+            <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M18 6l-12 12" /><path d="M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        {/* Conteo de secciones */}
+        {flatItems.length > 0 && (
+          <p className="text-[10px] text-[#3932C0]/40 mb-6">
+            {flatItems.length} {flatItems.length === 1 ? 'sección' : 'secciones'}
+          </p>
+        )}
+
+        {/* Contenido del índice */}
+        {flatItems.length === 0 ? (
+          /* Estado vacío cuando no hay índices */
+          <div className="flex flex-col items-center justify-center flex-1 gap-3 text-center py-8">
+            <span className="text-4xl">📖</span>
+            <p className="text-[#3932C0]/50 text-sm font-medium leading-relaxed">
+              Este libro no tiene<br />índice disponible.
+            </p>
+          </div>
+        ) : (
+          /* Lista de items con indentación jerárquica */
+          <div className="flex flex-col space-y-2">
+            {flatItems.map((item, index) => {
+              const isActive = activePage === item.page;
+              const indentStyle = { paddingLeft: `${item.level * 14}px` };
+              const fontSizeClass = item.level === 0
+                ? 'text-base font-bold'
+                : item.level === 1
+                  ? 'text-sm font-semibold'
+                  : 'text-xs font-medium';
+              const colorClass = isActive
+                ? 'text-[#FF690B]'
+                : item.level === 0
+                  ? 'text-[#3932C0] group-hover:text-[#FF690B]'
+                  : 'text-[#3932C0]/70 group-hover:text-[#FF690B]';
+
+              return (
+                <button
+                  key={item.id || index}
+                  onClick={() => onItemClick(item.page)}
+                  style={indentStyle}
+                  className={`flex items-center gap-2.5 cursor-pointer group text-left w-full transition-all duration-150 hover:translate-x-0.5 rounded-xl px-2 py-1.5 ${
+                    isActive ? 'bg-[#FF690B]/10' : 'hover:bg-[#3932C0]/5'
+                  }`}
+                >
+                  <span className="text-lg w-6 flex-shrink-0 flex items-center justify-center transition-transform group-hover:scale-110">
+                    {item.icon}
+                  </span>
+                  <span className={`transition-colors leading-snug flex-1 ${fontSizeClass} ${colorClass}`}>
+                    {item.title}
+                  </span>
+                  {isActive && (
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#FF690B] flex-shrink-0" />
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    </>
+  );
+}
+

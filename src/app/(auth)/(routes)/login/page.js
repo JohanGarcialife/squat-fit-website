@@ -35,8 +35,15 @@ export default function LoginPage() {
       }
     } catch (error) {
       console.error('Error en el login', error.response ? error.response.data : error.message);
-      if (error.response && error.response.data.message === 'Invalid email or password') {
-        toast.error('Email o contraseña inválidos.');
+      if (error.response && error.response.data) {
+        const { message } = error.response.data;
+        if (message === 'User is not active') {
+          toast.error('Tu cuenta aún no está activa. Por favor, contacta con soporte.');
+        } else if (message === 'Invalid email or password' || error.response.status === 401) {
+          toast.error('Email o contraseña inválidos.');
+        } else {
+          toast.error(typeof message === 'string' ? message : 'Error al iniciar sesión');
+        }
       } else {
         toast.error('Ocurrió un error inesperado.');
       }

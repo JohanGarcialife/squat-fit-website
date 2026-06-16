@@ -11,19 +11,11 @@ import ConfirmationModal from "@/app/components/ConfirmationModal";
 
 const Slider = dynamic(() => import("react-slick"), { ssr: false });
 
-// Mock Data - Replace with real data or props later
-const TOP_SALES = [
-  { id: 1, title: "La Cocina Squat Fit - Vol.1", subtitle: "Libro", image: "/group32.png" },
-  { id: 2, title: "Fuerte y Definid@", subtitle: "Cursos", image: "/group32.png" }, // Using placeholder, replace if better asset exists
-  { id: 3, title: "La Cocina Squat Fit - Vol.2", subtitle: "Libro", image: "/group32.png" },
-  { id: 4, title: "Pack Completo", subtitle: "Bundle", image: "/group32.png" },
-];
+// The Top Sales data is now passed as `courses` prop from the parent
 
-const CONTINUE_WATCHING = [
-  { id: 101, title: "Módulo 3: Nutrición", subtitle: "Curso Básico", image: "/group32.png", progress: 45 },
-  { id: 102, title: "Entrenamiento de Fuerza", subtitle: "Rutina A", image: "/group32.png", progress: 80 },
-  { id: 103, title: "Recetas Rápidas", subtitle: "Cocina", image: "/group32.png", progress: 10 },
-];
+
+// 'Continua donde estabas' section will be added once course purchase
+// and progress tracking are implemented (GET /api/v1/course/by-user)
 
 const CarouselSection = ({ title, items, variant = 'default' }) => {
   const settings = {
@@ -99,7 +91,7 @@ const CarouselSection = ({ title, items, variant = 'default' }) => {
   );
 };
 
-export default function TopVentas() {
+export default function TopVentas({ courses = [] }) {
   const { logout } = useAuthStore();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const router = useRouter();
@@ -130,7 +122,7 @@ export default function TopVentas() {
         */}
         <div className="flex-grow"></div> {/* Spacer */}
         <div className="flex items-center space-x-6">
-             <div onClick={() => setIsModalOpen(true)} className="cursor-pointer text-[#3932C0] hover:text-[#FF690B] transition-colors">
+             <div className="cursor-pointer" onClick={() => setIsModalOpen(true)} className="cursor-pointer text-[#3932C0] hover:text-[#FF690B] transition-colors">
                 <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
                     <path d="M14 8v-2a2 2 0 0 0 -2 -2h-7a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h7a2 2 0 0 0 2 -2v-2" />
@@ -156,8 +148,40 @@ export default function TopVentas() {
         </div>
       </div>
 
-      <CarouselSection title="Nuestros top ventas" items={TOP_SALES} />
-      <CarouselSection title="Continua donde estabas" items={CONTINUE_WATCHING} variant="progress" />
+      <CarouselSection 
+        title="Nuestros top ventas" 
+        items={courses.map(course => {
+          // Sanitization logic for Next.js <Image> component
+          let safeImageUrl = "/group32.png";
+          if (course.image) {
+            try {
+              const parsedUrl = new URL(course.image);
+              const allowedHosts = ['storage.googleapis.com', 'images.unsplash.com', 'www.google.com'];
+              if (allowedHosts.includes(parsedUrl.hostname)) {
+                safeImageUrl = course.image;
+              }
+            } catch (error) {
+              // Not a valid absolute URL. Next.js requires relative URLs to start with '/'
+              if (course.image.startsWith('/')) {
+                safeImageUrl = course.image;
+              } else {
+                safeImageUrl = '/' + course.image;
+              }
+            }
+          }
+
+          return {
+            id: course.id,
+            title: course.name || course.title,
+            subtitle: course.category || "Curso",
+            image: safeImageUrl
+          };
+        })} 
+      />
+      
+      {/* 'Continua donde estabas' slider is hidden by passing an empty array for now. 
+          Use `items={CONTINUE_WATCHING}` to show it again, or wire it up to API data later. */}
+      <CarouselSection title="Continua donde estabas" items={[]} variant="progress" />
 
       <ConfirmationModal
         isOpen={isModalOpen}

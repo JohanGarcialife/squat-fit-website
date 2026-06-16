@@ -2,6 +2,7 @@ import { Inter } from "next/font/google";
 import "../globals.css";
 // import Header from "../components/Header";
 // import Footer from "../components/Footer";
+import ToasterProvider from "@/components/ToasterProvider";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -20,7 +21,7 @@ export default function RootLayout({ children }) {
         className={`${inter.variable} antialiased`}
       >
         <div className="min-h-screen bg-background ">
-        
+        <ToasterProvider />
         {/* <Header /> */}
         {children}
         {/* <Footer /> */}

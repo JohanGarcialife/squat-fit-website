@@ -35,7 +35,7 @@ export default function CheckoutForm({ setStep, onValidationChange, submitRef })
     <div className="w-full max-w-lg mx-auto pb-10">
         <div className="mb-8">
           <span className="text-indigo-900 text-lg font-medium">Paso 2 de 3</span>
-          <div onClick={() => setStep(1)} className="flex items-center gap-2 mt-2 cursor-pointer text-indigo-900 group">
+          <div className="cursor-pointer" onClick={() => setStep(1)} className="flex items-center gap-2 mt-2 cursor-pointer text-indigo-900 group">
             <ChevronLeft size={28} className="group-hover:-translate-x-1 transition-transform" />
             <h1 className="text-3xl md:text-4xl font-bold">Mis datos</h1>
           </div>

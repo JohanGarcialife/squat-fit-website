@@ -26,10 +26,15 @@ export default function Summary(props) {
         const fetchExchangeRate = async () => {
             try {
                 const response = await fetch('https://api.frankfurter.app/latest?from=EUR&to=USD');
+                if (!response.ok) throw new Error('Network response was not ok');
                 const data = await response.json();
-                setExchangeRate(data.rates.USD);
+                if (data && data.rates && data.rates.USD) {
+                    setExchangeRate(data.rates.USD);
+                } else {
+                    throw new Error('Invalid data format');
+                }
             } catch (error) {
-                console.error("Failed to fetch exchange rate:", error);
+                console.warn("Using fallback exchange rate (CORS/Network):", error.message);
                 setExchangeRate(1.08); // Fallback
             } finally {
                 setIsLoading(false);

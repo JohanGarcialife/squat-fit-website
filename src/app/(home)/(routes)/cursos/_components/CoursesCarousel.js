@@ -104,7 +104,7 @@ const CoursesCarousel = () => {
                 {courses.map((course, index) => (
                   <div
                     key={index}
-                    className="px-3 py-5 "
+                    className="cursor-pointer px-3 py-5 "
                     onClick={() =>
                       sliderRef.current && sliderRef.current.slickGoTo(index)
                     }>
@@ -123,7 +123,7 @@ const CoursesCarousel = () => {
                 {courses.map((course, index) => (
                   <div
                     key={index}
-                    className="px-3 py-5 "
+                    className="cursor-pointer px-3 py-5 "
                     onClick={() =>
                       sliderRef.current && sliderRef.current.slickGoTo(index)
                     }>

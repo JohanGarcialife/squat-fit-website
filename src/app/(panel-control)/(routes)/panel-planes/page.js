@@ -112,8 +112,8 @@ export default function Page() {
             </div>
           </section>
 
-          {/* Sección: Pasos diarios */}
-          <section>
+          {/* Sección: Pasos diarios - OCULTO hasta Fase 2 (Health Kit) */}
+          {/* <section>
             <h2 className="text-2xl md:text-3xl font-bold text-secondary mb-6">Pasos diarios</h2>
             <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
                 <div className="flex items-end justify-between mb-2">
@@ -127,7 +127,7 @@ export default function Page() {
                 <div className="h-full bg-primary w-[21%] rounded-full"></div>
                 </div>
             </div>
-          </section>
+          </section> */}
 
         </div>
 

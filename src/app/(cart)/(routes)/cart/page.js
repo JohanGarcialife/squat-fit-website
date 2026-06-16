@@ -13,11 +13,18 @@ import PaymentSuccess from "../../_components/PaymentSuccess";
 export default function CartPage() {
   const [isClient, setIsClient] = useState(false);
   const [step, setStep] = useState(1);
-    const [success, setSuccess] = useState(false);
-console.log(success);
+  const [success, setSuccess] = useState(false);
 
   useEffect(() => {
     setIsClient(true);
+    
+    // Detect Stripe redirect success
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('redirect_status') === 'succeeded' || params.get('success') === 'true') {
+      setSuccess(true);
+      setStep(3); // Render the success screen
+      useCartStore.getState().clearCart();
+    }
   }, []);
 
   const { cart, addToCart, decrementQuantity, removeFromCart } = useCartStore();
@@ -37,6 +44,10 @@ console.log(success);
 
   if (!isClient) {
     return <div className="min-h-screen bg-white"></div>;
+  }
+
+  if (success) {
+    return <PaymentSuccess />;
   }
 
   if (cart.length === 0) {
