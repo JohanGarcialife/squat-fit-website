@@ -61,10 +61,13 @@ export default function BookReaderPage({ params, searchParams }) {
 
         // ── Paso 1: obtener el libro y la URL del PDF con /book/by-id ──────────
         // GET /api/v1/book/by-id?book_id={bookId}&version_id={versionId}
+        console.log("Solicitando libro por ID:", { book_id: bookId, version_id: versionId });
         const bookRes = await axios.get(`${API_BASE}/api/v1/book/by-id`, {
           params: { book_id: bookId, version_id: versionId },
           headers,
         });
+
+        console.log("Respuesta de /book/by-id:", JSON.stringify(bookRes.data, null, 2));
 
         const bookData = Array.isArray(bookRes.data) ? bookRes.data[0] : bookRes.data;
 
@@ -80,6 +83,8 @@ export default function BookReaderPage({ params, searchParams }) {
           v.version_id === versionId || v.id === versionId
         ) || bookData.versions?.[0];
 
+        console.log("Versión de libro seleccionada:", version);
+
         if (version) {
           setVersionTitle(version.version_title || version.title || '');
 
@@ -94,11 +99,16 @@ export default function BookReaderPage({ params, searchParams }) {
             bookData.file_url     ||
             null;
 
+          console.log("URL de PDF extraída:", pdfUrl);
+
           if (pdfUrl) {
             setPdfFile(pdfUrl.startsWith('http') ? pdfUrl : `/${pdfUrl.replace(/^\//, '')}`);
           } else {
             setError('Este libro aún no tiene un PDF disponible.');
           }
+        } else {
+          console.log("No se encontró versión en bookData.versions:", bookData.versions);
+          setError('No se encontró la versión seleccionada para este libro.');
         }
 
         // ── Paso 2: cargar índices del libro ────────────────────────────────────
