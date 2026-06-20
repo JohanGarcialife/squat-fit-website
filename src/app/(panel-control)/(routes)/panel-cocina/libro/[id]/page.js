@@ -89,7 +89,11 @@ export default function BookReaderPage({ params, searchParams }) {
           setVersionTitle(version.version_title || version.title || '');
 
           // Extraer URL del PDF — probar varios campos posibles
-          const pdfUrl = version.version_url?.startsWith('https://')
+          const isUrlImage = version.version_url?.includes('pexels.com') || 
+                             version.version_url?.match(/\.(jpeg|jpg|gif|png)/i);
+          const pdfUrl = (version.version_url?.startsWith('https://') && 
+                          version.version_url !== version.version_image && 
+                          !isUrlImage)
             ? version.version_url
             : null;
 
