@@ -35,7 +35,7 @@ const nextConfig = {
         headers: [
           {
             key: 'Content-Security-Policy',
-            value: "frame-src 'self' https://iframe.mediadelivery.net https://*.b-cdn.net https://js.stripe.com https://hooks.stripe.com; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com; connect-src 'self' https://api.stripe.com https://squatfit-api-cyrc2g3zra-no.a.run.app https://api.frankfurter.app;",
+            value: "frame-src 'self' https://iframe.mediadelivery.net https://*.b-cdn.net https://js.stripe.com https://hooks.stripe.com; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com; connect-src 'self' https://api.stripe.com https://squatfit-api-cyrc2g3zra-no.a.run.app https://api.frankfurter.app https://storage.googleapis.com https://*.b-cdn.net https://images.pexels.com;",
           },
         ],
       },
