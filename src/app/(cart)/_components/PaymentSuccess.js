@@ -12,9 +12,26 @@ export default function PaymentSuccess() {
   const { user } = useAuthStore();
   const { clearCart } = useCartStore();
 
-  // Clear the cart as soon as the success screen is shown
+  // Clear the cart and refresh subscription status (handling webhook delay)
   useEffect(() => {
     clearCart();
+
+    const refresh = async () => {
+      try {
+        await useAuthStore.getState().refreshSubscriptionStatus();
+      } catch (err) {
+        console.error('Error refreshing subscription on success page:', err);
+      }
+    };
+
+    refresh();
+    const t1 = setTimeout(refresh, 3000);
+    const t2 = setTimeout(refresh, 7000);
+
+    return () => {
+      clearTimeout(t1);
+      clearTimeout(t2);
+    };
   }, []);
 
   return (

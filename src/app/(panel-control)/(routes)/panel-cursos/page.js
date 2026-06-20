@@ -196,39 +196,37 @@ function CursosPageContent() {
     }
   };
 
+  const fetchCourseList = async () => {
+    try {
+      const headers = { Authorization: `Bearer ${token}` };
+      const API = process.env.NEXT_PUBLIC_API_URL;
+
+      // Verificar suscripción con /by-user
+      const byUserRes = await axios.get(`${API}/api/v1/course/by-user`, { headers });
+      const list = byUserRes.data;
+
+      if (!Array.isArray(list) || list.length === 0) {
+        setNoAccess(true);
+        return;
+      }
+
+      setCourseList(list);
+
+      // Si viene ?id= en la URL, ir directamente al player de ese curso
+      if (courseIdParam) {
+        const target = list.find((c) => c.id === courseIdParam) || list[0];
+        openCourse(target);
+      }
+    } catch (err) {
+      console.error("Error al cargar cursos:", err);
+      setNoAccess(true);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // ── Carga inicial: lista de cursos ────────────────────────────────────────────
   useEffect(() => {
-    const fetchCourseList = async () => {
-      try {
-        const headers = { Authorization: `Bearer ${token}` };
-        const API = process.env.NEXT_PUBLIC_API_URL;
-
-        // Verificar suscripción con /by-user
-        const byUserRes = await axios.get(`${API}/api/v1/course/by-user`, { headers });
-        const list = byUserRes.data;
-
-        if (!Array.isArray(list) || list.length === 0) {
-          setNoAccess(true);
-          return;
-        }
-
-        setCourseList(list);
-
-        // Si viene ?id= en la URL, ir directamente al player de ese curso
-        if (courseIdParam) {
-          const target = list.find((c) => c.id === courseIdParam) || list[0];
-          openCourse(target);
-        }
-        // Si no hay ?id=, quedarse en el catálogo (no auto-seleccionar)
-
-      } catch (err) {
-        console.error("Error al cargar cursos:", err);
-        setNoAccess(true);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     if (token) fetchCourseList();
     else setLoading(false);
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -312,12 +310,24 @@ function CursosPageContent() {
               <p className="text-indigo-900 font-bold text-sm mt-1">Métodos Squat Fit</p>
             </div>
           </div>
-          <a href="/planes">
-            <button className="flex items-center gap-3 bg-[#FF690B] text-white font-bold py-4 px-10 rounded-2xl text-lg hover:bg-[#FF690B]/90 transition-all shadow-xl shadow-orange-200 cursor-pointer">
-              Ver planes de suscripción
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          <div className="flex flex-col sm:flex-row gap-4 mb-4">
+            <a href="/planes">
+              <button className="flex items-center justify-center gap-3 bg-[#FF690B] text-white font-bold py-4 px-10 rounded-2xl text-lg hover:bg-[#FF690B]/90 transition-all shadow-xl shadow-orange-200 cursor-pointer">
+                Ver planes de suscripción
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+              </button>
+            </a>
+
+            <button 
+              onClick={() => {
+                setLoading(true);
+                fetchCourseList();
+              }}
+              className="flex items-center justify-center gap-3 bg-white text-[#FF690B] border-2 border-[#FF690B] font-bold py-4 px-10 rounded-2xl text-lg hover:bg-gray-50 transition-all cursor-pointer shadow-md"
+            >
+              🔄 Verificar mi pago / acceso
             </button>
-          </a>
+          </div>
           <p className="text-gray-400 text-sm mt-4">Desde 9,99€/mes • Cancela cuando quieras</p>
         </div>
       </div>

@@ -19,51 +19,51 @@ export default function CocinaPage() {
     return url.startsWith('/') ? url : `/${url}`;
   };
 
-  useEffect(() => {
-    const fetchBooks = async () => {
-      try {
-        const headers = { Authorization: `Bearer ${token}` };
-        const API = process.env.NEXT_PUBLIC_API_URL;
+  const fetchBooks = async () => {
+    try {
+      const headers = { Authorization: `Bearer ${token}` };
+      const API = process.env.NEXT_PUBLIC_API_URL;
 
-        // Paso 1: verificar suscripción con /book/by-user
-        const byUserRes = await axios.get(`${API}/api/v1/book/by-user`, { headers });
-        const userBooks = byUserRes.data;
+      // Paso 1: verificar suscripción con /book/by-user
+      const byUserRes = await axios.get(`${API}/api/v1/book/by-user`, { headers });
+      const userBooks = byUserRes.data;
 
-        // Obtener catálogo completo para sanitizar IDs
-        const allRes = await axios.get(`${API}/api/v1/book/all`, { headers });
-        const allBooks = allRes.data;
+      // Obtener catálogo completo para sanitizar IDs
+      const allRes = await axios.get(`${API}/api/v1/book/all`, { headers });
+      const allBooks = allRes.data;
 
-        if (Array.isArray(userBooks) && userBooks.length > 0) {
-          // Tiene libros asignados directamente → suscripción activa
-          useAuthStore.getState().setSubscribed(true);
+      if (Array.isArray(userBooks) && userBooks.length > 0) {
+        // Tiene libros asignados directamente → suscripción activa
+        useAuthStore.getState().setSubscribed(true);
 
-          // Sanitizar IDs mutados cruzando con allBooks (catálogo confiable)
-          const sanitizedUserBooks = userBooks.map(ub => {
-            const match = Array.isArray(allBooks) && allBooks.find(ab => 
-              ab.title?.toLowerCase() === ub.title?.toLowerCase() ||
-              (ab.id && ub.id && ab.id.split('-').slice(2).join('-') === ub.id.split('-').slice(2).join('-'))
-            );
-            if (match) {
-              return { ...ub, id: match.id };
-            }
-            return ub;
-          });
+        // Sanitizar IDs mutados cruzando con allBooks (catálogo confiable)
+        const sanitizedUserBooks = userBooks.map(ub => {
+          const match = Array.isArray(allBooks) && allBooks.find(ab => 
+            ab.title?.toLowerCase() === ub.title?.toLowerCase() ||
+            (ab.id && ub.id && ab.id.split('-').slice(2).join('-') === ub.id.split('-').slice(2).join('-'))
+          );
+          if (match) {
+            return { ...ub, id: match.id };
+          }
+          return ub;
+        });
 
-          setBooks(sanitizedUserBooks);
-        } else {
-          // Sin suscripción activa
-          useAuthStore.getState().setSubscribed(false);
-          setBooks([]);
-        }
-      } catch (error) {
-        console.error("Error al obtener libros:", error);
+        setBooks(sanitizedUserBooks);
+      } else {
+        // Sin suscripción activa
         useAuthStore.getState().setSubscribed(false);
         setBooks([]);
-      } finally {
-        setLoading(false);
       }
-    };
+    } catch (error) {
+      console.error("Error al obtener libros:", error);
+      useAuthStore.getState().setSubscribed(false);
+      setBooks([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     if (token) fetchBooks();
     else setLoading(false);
   }, [token]);
@@ -160,12 +160,24 @@ export default function CocinaPage() {
           </div>
 
           {/* CTA Principal */}
-          <Link href="/cocina#shop">
-            <button className="flex items-center gap-3 bg-[#3932C0] text-white font-bold py-4 px-10 rounded-2xl text-lg hover:bg-[#3932C0]/90 transition-all shadow-xl shadow-indigo-200 cursor-pointer group">
-              Ver planes de suscripción
-              <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
+          <div className="flex flex-col sm:flex-row gap-4 mb-4">
+            <Link href="/cocina#shop">
+              <button className="flex items-center justify-center gap-3 bg-[#3932C0] text-white font-bold py-4 px-10 rounded-2xl text-lg hover:bg-[#3932C0]/90 transition-all shadow-xl shadow-indigo-200 cursor-pointer group">
+                Ver planes de suscripción
+                <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
+              </button>
+            </Link>
+
+            <button 
+              onClick={() => {
+                setLoading(true);
+                fetchBooks();
+              }}
+              className="flex items-center justify-center gap-3 bg-white text-[#3932C0] border-2 border-[#3932C0] font-bold py-4 px-10 rounded-2xl text-lg hover:bg-gray-50 transition-all cursor-pointer shadow-md"
+            >
+              🔄 Verificar mi pago / acceso
             </button>
-          </Link>
+          </div>
 
           <p className="text-gray-400 text-sm mt-4">
             Desde 9,99€/mes • Cancela cuando quieras
