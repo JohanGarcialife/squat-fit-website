@@ -89,16 +89,9 @@ export default function BookReaderPage({ params, searchParams }) {
           setVersionTitle(version.version_title || version.title || '');
 
           // Extraer URL del PDF — probar varios campos posibles
-          const pdfUrl =
-            version.version_url   ||
-            version.version_file ||
-            version.pdf_url       ||
-            version.file_url      ||
-            version.url           ||
-            version.file          ||
-            bookData.pdf_url      ||
-            bookData.file_url     ||
-            null;
+          const pdfUrl = version.version_url?.startsWith('https://')
+            ? version.version_url
+            : null;
 
           console.log("URL de PDF extraída:", pdfUrl);
 

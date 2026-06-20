@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
@@ -7,6 +7,7 @@ import Image from "next/image";
 import { useRouter } from 'next/navigation';
 
 import { useAuthStore } from "@/stores/auth.store";
+import { useCartStore } from "@/stores/cart.store";
 import ConfirmationModal from "@/app/components/ConfirmationModal";
 
 const Slider = dynamic(() => import("react-slick"), { ssr: false });
@@ -93,8 +94,16 @@ const CarouselSection = ({ title, items, variant = 'default' }) => {
 
 export default function TopVentas({ courses = [] }) {
   const { logout } = useAuthStore();
+  const { cart } = useCartStore();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const router = useRouter();
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const totalItems = mounted ? cart.reduce((acc, item) => acc + (item.quantity || 0), 0) : 0;
 
   const handleLogoutConfirmed = () => {
     logout();
@@ -131,8 +140,11 @@ export default function TopVentas({ courses = [] }) {
                 </svg>
              </div>
              
-             {/* Cart Icon */}
-             <div className="relative cursor-pointer text-[#3932C0] hover:text-[#FF690B] transition-colors">
+              {/* Cart Icon */}
+             <div 
+               onClick={() => router.push('/cart')}
+               className="relative cursor-pointer text-[#3932C0] hover:text-[#FF690B] transition-colors"
+             >
                 <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="icon icon-tabler icons-tabler-outline icon-tabler-shopping-cart">
                     <path stroke="none" d="M0 0h24v24H0z" fill="none" />
                     <path d="M6 19m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" />
@@ -140,10 +152,11 @@ export default function TopVentas({ courses = [] }) {
                     <path d="M17 17h-11v-14h-2" />
                     <path d="M6 5l14 1l-1 7h-13" />
                 </svg>
-                {/* Badge example */}
-                <span className="absolute -top-2 -right-2 bg-[#FF690B] text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
-                    3
-                </span>
+                {totalItems > 0 && (
+                  <span className="absolute -top-2 -right-2 bg-[#FF690B] text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center animate-in scale-in duration-200">
+                      {totalItems}
+                  </span>
+                )}
              </div>
         </div>
       </div>
