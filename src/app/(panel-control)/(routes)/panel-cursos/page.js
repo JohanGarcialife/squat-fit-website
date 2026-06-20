@@ -95,7 +95,7 @@ function CursosPageContent() {
   const searchParams = useSearchParams();
   const courseIdParam = searchParams.get("id");
 
-  const token = useAuthStore((state) => state.token);
+  const { token, isSubscribed } = useAuthStore();
 
   // ── Vista: 'catalog' o 'player' ─────────────────────────────────────────────
   const [view, setView] = useState('catalog');
@@ -205,9 +205,7 @@ function CursosPageContent() {
       const allRes = await axios.get(`${API}/api/v1/course/all`, { headers });
       const list = allRes.data;
 
-      if (Array.isArray(list) && list.length > 0) {
-        // Acceso permitido
-        useAuthStore.getState().setSubscribed(true);
+      if (Array.isArray(list)) {
         setCourseList(list);
         setNoAccess(false);
 
@@ -217,14 +215,11 @@ function CursosPageContent() {
           openCourse(target);
         }
       } else {
-        // Sin acceso
-        useAuthStore.getState().setSubscribed(false);
         setCourseList([]);
         setNoAccess(true);
       }
     } catch (err) {
       console.error("Error al cargar cursos:", err);
-      useAuthStore.getState().setSubscribed(false);
       setCourseList([]);
       setNoAccess(true);
     } finally {
@@ -234,10 +229,19 @@ function CursosPageContent() {
 
   // ── Carga inicial: lista de cursos ────────────────────────────────────────────
   useEffect(() => {
-    if (token) fetchCourseList();
-    else setLoading(false);
+    if (token) {
+      if (isSubscribed) {
+        fetchCourseList();
+      } else {
+        setCourseList([]);
+        setNoAccess(true);
+        setLoading(false);
+      }
+    } else {
+      setLoading(false);
+    }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [token]);
+  }, [token, isSubscribed]);
 
   // ── Cuando cambia ?id= mientras ya hay cursos cargados ───────────────────────
   useEffect(() => {
@@ -292,7 +296,7 @@ function CursosPageContent() {
     );
   }
 
-  if (noAccess) {
+  if (!isSubscribed || noAccess) {
     return (
       <div className="w-full max-w-5xl mx-auto p-6 md:p-12 min-h-screen">
         <h1 className="text-[#3932C0] text-5xl font-bold mb-16">Cursos</h1>
@@ -326,9 +330,9 @@ function CursosPageContent() {
             </a>
 
             <button 
-              onClick={() => {
+              onClick={async () => {
                 setLoading(true);
-                fetchCourseList();
+                await useAuthStore.getState().refreshSubscriptionStatus();
               }}
               className="flex items-center justify-center gap-3 bg-white text-[#FF690B] border-2 border-[#FF690B] font-bold py-4 px-10 rounded-2xl text-lg hover:bg-gray-50 transition-all cursor-pointer shadow-md"
             >

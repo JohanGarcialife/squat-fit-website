@@ -16,7 +16,14 @@ export const useAuthStore = create(
       setToken: (token) => {
         try {
           const decoded = jwtDecode(token);
-          set({ token, user: decoded, isAuth: true });
+          // Verificar si tiene suscripción activa en el token decoded
+          const isSubscribed = !!(
+            decoded.isSubscribed ||
+            decoded.is_subscribed ||
+            decoded.subscribed ||
+            decoded.role === 'admin'
+          );
+          set({ token, user: decoded, isAuth: true, isSubscribed });
         } catch (error) {
           console.error("Invalid token:", error);
           get().logout();
@@ -30,8 +37,7 @@ export const useAuthStore = create(
 
       /**
        * Verifica si el usuario tiene suscripción activa.
-       * Valida /book/by-user y /course/by-user.
-       * Si alguno devuelve elementos → isSubscribed = true.
+       * Renueva el token JWT para obtener el estado más reciente.
        */
       refreshSubscriptionStatus: async (token) => {
         const tkn = token || get().token;
@@ -39,29 +45,20 @@ export const useAuthStore = create(
         try {
           const headers = { Authorization: `Bearer ${tkn}` };
 
-          // Paso 1: /book/all
-          const bookRes = await fetch(`${API_BASE}/api/v1/book/all`, { headers });
-          if (bookRes.ok) {
-            const bookData = await bookRes.json();
-            if (Array.isArray(bookData) && bookData.length > 0) {
-              set({ isSubscribed: true });
-              return;
-            }
-          }
-
-          // Paso 2: /course/all
-          const courseRes = await fetch(`${API_BASE}/api/v1/course/all`, { headers });
-          if (courseRes.ok) {
-            const courseData = await courseRes.json();
-            if (Array.isArray(courseData) && courseData.length > 0) {
-              set({ isSubscribed: true });
+          // Renovar token para obtener el JWT actualizado con el estado de suscripción
+          const res = await fetch(`${API_BASE}/api/v1/user/renew-token`, { headers });
+          if (res.ok) {
+            const data = await res.json();
+            const newToken = data.token;
+            if (newToken) {
+              get().setToken(newToken);
               return;
             }
           }
 
           set({ isSubscribed: false });
         } catch (err) {
-          console.error('Error verificando suscripción:', err);
+          console.error('Error verificando suscripción por renew-token:', err);
           set({ isSubscribed: false });
         }
       },

@@ -8,7 +8,7 @@ import { useAuthStore } from "@/stores/auth.store";
 import { BookOpen, Lock, ArrowRight } from "lucide-react";
 
 export default function CocinaPage() {
-  const { token } = useAuthStore();
+  const { token, isSubscribed } = useAuthStore();
   const [books, setBooks] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -28,18 +28,13 @@ export default function CocinaPage() {
       const allRes = await axios.get(`${API}/api/v1/book/all`, { headers });
       const allBooks = allRes.data;
 
-      if (Array.isArray(allBooks) && allBooks.length > 0) {
-        // Acceso permitido
-        useAuthStore.getState().setSubscribed(true);
+      if (Array.isArray(allBooks)) {
         setBooks(allBooks);
       } else {
-        // Sin acceso
-        useAuthStore.getState().setSubscribed(false);
         setBooks([]);
       }
     } catch (error) {
       console.error("Error al obtener libros:", error);
-      useAuthStore.getState().setSubscribed(false);
       setBooks([]);
     } finally {
       setLoading(false);
@@ -47,9 +42,17 @@ export default function CocinaPage() {
   };
 
   useEffect(() => {
-    if (token) fetchBooks();
-    else setLoading(false);
-  }, [token]);
+    if (token) {
+      if (isSubscribed) {
+        fetchBooks();
+      } else {
+        setBooks([]);
+        setLoading(false);
+      }
+    } else {
+      setLoading(false);
+    }
+  }, [token, isSubscribed]);
 
   const ownedVersions = books.flatMap(book => {
     if (book.versions && book.versions.length > 0) {
@@ -83,7 +86,7 @@ export default function CocinaPage() {
         <div className="flex justify-center items-center py-20">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-900"></div>
         </div>
-      ) : ownedVersions.length > 0 ? (
+      ) : (isSubscribed && ownedVersions.length > 0) ? (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-24">
           
           {ownedVersions.map((item, index) => (
@@ -152,9 +155,9 @@ export default function CocinaPage() {
             </Link>
 
             <button 
-              onClick={() => {
+              onClick={async () => {
                 setLoading(true);
-                fetchBooks();
+                await useAuthStore.getState().refreshSubscriptionStatus();
               }}
               className="flex items-center justify-center gap-3 bg-white text-[#3932C0] border-2 border-[#3932C0] font-bold py-4 px-10 rounded-2xl text-lg hover:bg-gray-50 transition-all cursor-pointer shadow-md"
             >
