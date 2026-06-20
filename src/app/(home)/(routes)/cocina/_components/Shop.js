@@ -175,7 +175,7 @@ export default function Shop() {
   const getSelectedPhysicalProduct = () => physicalProducts.find(p => p.id === selectedPhysical)
 
   return (
-    <section className="py-16 px-4 bg-gray-50">
+    <section id="shop" className="py-16 px-4 bg-gray-50">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="text-center mb-4">
