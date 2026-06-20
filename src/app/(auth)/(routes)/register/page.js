@@ -51,8 +51,8 @@ export default function RegisterPage() {
 
       const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/user/register`, payload);
       
-      if (response.data.message === 'Usuario registrado exitosamente') {
-        toast.success('¡Registro exitoso!');
+      if (response.data.message && response.data.message.includes('Usuario registrado exitosamente')) {
+        toast.success(response.data.message);
         router.push('/login');
       }
     } catch (error) {

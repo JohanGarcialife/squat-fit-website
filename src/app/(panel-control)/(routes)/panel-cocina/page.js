@@ -29,26 +29,36 @@ export default function CocinaPage() {
         const byUserRes = await axios.get(`${API}/api/v1/book/by-user`, { headers });
         const userBooks = byUserRes.data;
 
+        // Obtener catálogo completo para sanitizar IDs
+        const allRes = await axios.get(`${API}/api/v1/book/all`, { headers });
+        const allBooks = allRes.data;
+
         if (Array.isArray(userBooks) && userBooks.length > 0) {
           // Tiene libros asignados directamente → suscripción activa
           useAuthStore.getState().setSubscribed(true);
-          setBooks(userBooks);
-        } else {
-          // /by-user vacío → puede ser suscripción digital que da acceso a todo
-          // Llamar a /book/all con el token para verificar acceso
-          const allRes = await axios.get(`${API}/api/v1/book/all`, { headers });
-          const allBooks = allRes.data;
 
-          if (Array.isArray(allBooks) && allBooks.length > 0) {
-            // Suscripción activa → mostrar catálogo completo
-            useAuthStore.getState().setSubscribed(true);
-            setBooks(allBooks);
-          }
-          // Si ambos devuelven vacío → books queda [], ownedVersions queda [],
-          // se muestra la pantalla de sin suscripción automáticamente
+          // Sanitizar IDs mutados cruzando con allBooks (catálogo confiable)
+          const sanitizedUserBooks = userBooks.map(ub => {
+            const match = Array.isArray(allBooks) && allBooks.find(ab => 
+              ab.title?.toLowerCase() === ub.title?.toLowerCase() ||
+              (ab.id && ub.id && ab.id.split('-').slice(2).join('-') === ub.id.split('-').slice(2).join('-'))
+            );
+            if (match) {
+              return { ...ub, id: match.id };
+            }
+            return ub;
+          });
+
+          setBooks(sanitizedUserBooks);
+        } else {
+          // Sin suscripción activa
+          useAuthStore.getState().setSubscribed(false);
+          setBooks([]);
         }
       } catch (error) {
         console.error("Error al obtener libros:", error);
+        useAuthStore.getState().setSubscribed(false);
+        setBooks([]);
       } finally {
         setLoading(false);
       }

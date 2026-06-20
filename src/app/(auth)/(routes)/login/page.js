@@ -93,9 +93,15 @@ export default function LoginPage() {
               </Form>
             )}
           </Formik>
-          <Link href='/register'>
-            <p className='underline text-gris cursor-pointer text-2xl mt-5'>Crear Cuenta</p>
-          </Link>
+          <div className="flex justify-between items-center mt-5 text-2xl font-bold">
+            <Link href='/register'>
+              <p className='underline text-gris cursor-pointer'>Crear Cuenta</p>
+            </Link>
+            <Link href='/forgot-password'>
+              <p className='underline text-gris cursor-pointer'>¿Olvidaste tu contraseña?</p>
+            </Link>
+          </div>
+
         </div>
       </div>
     </div>

@@ -203,14 +203,9 @@ function CursosPageContent() {
         const headers = { Authorization: `Bearer ${token}` };
         const API = process.env.NEXT_PUBLIC_API_URL;
 
-        // Verificar suscripción con /by-user, fallback a /all
+        // Verificar suscripción con /by-user
         const byUserRes = await axios.get(`${API}/api/v1/course/by-user`, { headers });
-        let list = byUserRes.data;
-
-        if (!Array.isArray(list) || list.length === 0) {
-          const allRes = await axios.get(`${API}/api/v1/course/all`, { headers });
-          list = allRes.data;
-        }
+        const list = byUserRes.data;
 
         if (!Array.isArray(list) || list.length === 0) {
           setNoAccess(true);

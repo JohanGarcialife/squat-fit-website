@@ -30,9 +30,8 @@ export const useAuthStore = create(
 
       /**
        * Verifica si el usuario tiene suscripción activa.
-       * Primero llama a /book/by-user (acceso específico).
-       * Si devuelve vacío, llama a /book/all (suscripción digital).
-       * Si alguno devuelve libros → isSubscribed = true.
+       * Valida /book/by-user y /course/by-user.
+       * Si alguno devuelve elementos → isSubscribed = true.
        */
       refreshSubscriptionStatus: async (token) => {
         const tkn = token || get().token;
@@ -50,14 +49,17 @@ export const useAuthStore = create(
             }
           }
 
-          // Paso 2: fallback a /book/all (suscripción digital activa)
-          const allRes = await fetch(`${API_BASE}/api/v1/book/all`, { headers });
-          if (allRes.ok) {
-            const allData = await allRes.json();
-            set({ isSubscribed: Array.isArray(allData) && allData.length > 0 });
-          } else {
-            set({ isSubscribed: false });
+          // Paso 2: /course/by-user
+          const courseByUserRes = await fetch(`${API_BASE}/api/v1/course/by-user`, { headers });
+          if (courseByUserRes.ok) {
+            const courseByUserData = await courseByUserRes.json();
+            if (Array.isArray(courseByUserData) && courseByUserData.length > 0) {
+              set({ isSubscribed: true });
+              return;
+            }
           }
+
+          set({ isSubscribed: false });
         } catch (err) {
           console.error('Error verificando suscripción:', err);
           set({ isSubscribed: false });

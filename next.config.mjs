@@ -22,6 +22,10 @@ const nextConfig = {
         protocol: 'https',
         hostname: 'iframe.mediadelivery.net',
       },
+      {
+        protocol: 'https',
+        hostname: 'images.pexels.com',
+      },
     ],
   },
   async headers() {
