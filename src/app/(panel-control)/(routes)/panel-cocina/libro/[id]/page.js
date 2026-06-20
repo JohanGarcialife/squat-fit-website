@@ -90,6 +90,7 @@ export default function BookReaderPage({ params, searchParams }) {
 
           // Extraer URL del PDF — probar varios campos posibles
           const pdfUrl =
+            version.version_url   ||
             version.version_file ||
             version.pdf_url       ||
             version.file_url      ||
