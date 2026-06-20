@@ -201,24 +201,31 @@ function CursosPageContent() {
       const headers = { Authorization: `Bearer ${token}` };
       const API = process.env.NEXT_PUBLIC_API_URL;
 
-      // Verificar suscripción con /by-user
-      const byUserRes = await axios.get(`${API}/api/v1/course/by-user`, { headers });
-      const list = byUserRes.data;
+      // Obtener cursos directamente de /course/all
+      const allRes = await axios.get(`${API}/api/v1/course/all`, { headers });
+      const list = allRes.data;
 
-      if (!Array.isArray(list) || list.length === 0) {
+      if (Array.isArray(list) && list.length > 0) {
+        // Acceso permitido
+        useAuthStore.getState().setSubscribed(true);
+        setCourseList(list);
+        setNoAccess(false);
+
+        // Si viene ?id= en la URL, ir directamente al player de ese curso
+        if (courseIdParam) {
+          const target = list.find((c) => c.id === courseIdParam) || list[0];
+          openCourse(target);
+        }
+      } else {
+        // Sin acceso
+        useAuthStore.getState().setSubscribed(false);
+        setCourseList([]);
         setNoAccess(true);
-        return;
-      }
-
-      setCourseList(list);
-
-      // Si viene ?id= en la URL, ir directamente al player de ese curso
-      if (courseIdParam) {
-        const target = list.find((c) => c.id === courseIdParam) || list[0];
-        openCourse(target);
       }
     } catch (err) {
       console.error("Error al cargar cursos:", err);
+      useAuthStore.getState().setSubscribed(false);
+      setCourseList([]);
       setNoAccess(true);
     } finally {
       setLoading(false);

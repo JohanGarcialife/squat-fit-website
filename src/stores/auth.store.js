@@ -39,21 +39,21 @@ export const useAuthStore = create(
         try {
           const headers = { Authorization: `Bearer ${tkn}` };
 
-          // Paso 1: /book/by-user
-          const byUserRes = await fetch(`${API_BASE}/api/v1/book/by-user`, { headers });
-          if (byUserRes.ok) {
-            const byUserData = await byUserRes.json();
-            if (Array.isArray(byUserData) && byUserData.length > 0) {
+          // Paso 1: /book/all
+          const bookRes = await fetch(`${API_BASE}/api/v1/book/all`, { headers });
+          if (bookRes.ok) {
+            const bookData = await bookRes.json();
+            if (Array.isArray(bookData) && bookData.length > 0) {
               set({ isSubscribed: true });
               return;
             }
           }
 
-          // Paso 2: /course/by-user
-          const courseByUserRes = await fetch(`${API_BASE}/api/v1/course/by-user`, { headers });
-          if (courseByUserRes.ok) {
-            const courseByUserData = await courseByUserRes.json();
-            if (Array.isArray(courseByUserData) && courseByUserData.length > 0) {
+          // Paso 2: /course/all
+          const courseRes = await fetch(`${API_BASE}/api/v1/course/all`, { headers });
+          if (courseRes.ok) {
+            const courseData = await courseRes.json();
+            if (Array.isArray(courseData) && courseData.length > 0) {
               set({ isSubscribed: true });
               return;
             }

@@ -24,33 +24,16 @@ export default function CocinaPage() {
       const headers = { Authorization: `Bearer ${token}` };
       const API = process.env.NEXT_PUBLIC_API_URL;
 
-      // Paso 1: verificar suscripción con /book/by-user
-      const byUserRes = await axios.get(`${API}/api/v1/book/by-user`, { headers });
-      const userBooks = byUserRes.data;
-
-      // Obtener catálogo completo para sanitizar IDs
+      // Obtener libros directamente de /book/all
       const allRes = await axios.get(`${API}/api/v1/book/all`, { headers });
       const allBooks = allRes.data;
 
-      if (Array.isArray(userBooks) && userBooks.length > 0) {
-        // Tiene libros asignados directamente → suscripción activa
+      if (Array.isArray(allBooks) && allBooks.length > 0) {
+        // Acceso permitido
         useAuthStore.getState().setSubscribed(true);
-
-        // Sanitizar IDs mutados cruzando con allBooks (catálogo confiable)
-        const sanitizedUserBooks = userBooks.map(ub => {
-          const match = Array.isArray(allBooks) && allBooks.find(ab => 
-            ab.title?.toLowerCase() === ub.title?.toLowerCase() ||
-            (ab.id && ub.id && ab.id.split('-').slice(2).join('-') === ub.id.split('-').slice(2).join('-'))
-          );
-          if (match) {
-            return { ...ub, id: match.id };
-          }
-          return ub;
-        });
-
-        setBooks(sanitizedUserBooks);
+        setBooks(allBooks);
       } else {
-        // Sin suscripción activa
+        // Sin acceso
         useAuthStore.getState().setSubscribed(false);
         setBooks([]);
       }
