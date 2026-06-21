@@ -18,7 +18,7 @@ const Slider = dynamic(() => import("react-slick"), { ssr: false });
 // 'Continua donde estabas' section will be added once course purchase
 // and progress tracking are implemented (GET /api/v1/course/by-user)
 
-const CarouselSection = ({ title, items, variant = 'default' }) => {
+const CarouselSection = ({ title, items, variant = 'default', onItemClick }) => {
   const settings = {
     dots: true,
     infinite: items.length > 3,
@@ -48,7 +48,11 @@ const CarouselSection = ({ title, items, variant = 'default' }) => {
       <div className="slider-container overflow-hidden max-w-full mx-auto px-2">
         <Slider {...settings}>
           {items.map((item) => (
-            <div key={item.id} className="px-3 pb-8 pt-2"> {/* Added padding for shadow */}
+            <div 
+              key={item.id} 
+              onClick={() => onItemClick && onItemClick(item.id)}
+              className="px-3 pb-8 pt-2 cursor-pointer hover:scale-[1.03] transition-all duration-300"
+            > {/* Added padding for shadow and transition */}
               {variant === 'progress' ? (
                  // --- Progress Card Variant ---
                  <div className="flex flex-col space-y-3">
@@ -92,7 +96,7 @@ const CarouselSection = ({ title, items, variant = 'default' }) => {
   );
 };
 
-export default function TopVentas({ courses = [] }) {
+export default function TopVentas({ courses = [], userCourses = [] }) {
   const { logout } = useAuthStore();
   const { cart } = useCartStore();
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -104,6 +108,10 @@ export default function TopVentas({ courses = [] }) {
   }, []);
 
   const totalItems = mounted ? cart.reduce((acc, item) => acc + (item.quantity || 0), 0) : 0;
+
+  const handleCourseClick = (courseId) => {
+    router.push(`/panel-cursos?id=${courseId}`);
+  };
 
   const handleLogoutConfirmed = () => {
     logout();
@@ -190,11 +198,41 @@ export default function TopVentas({ courses = [] }) {
             image: safeImageUrl
           };
         })} 
+        onItemClick={handleCourseClick}
       />
       
-      {/* 'Continua donde estabas' slider is hidden by passing an empty array for now. 
-          Use `items={CONTINUE_WATCHING}` to show it again, or wire it up to API data later. */}
-      <CarouselSection title="Continua donde estabas" items={[]} variant="progress" />
+      {/* 'Continua donde estabas' slider */}
+      <CarouselSection 
+        title="Continua donde estabas" 
+        items={userCourses.map(course => {
+          let safeImageUrl = "/group32.png";
+          if (course.image) {
+            try {
+              const parsedUrl = new URL(course.image);
+              const allowedHosts = ['storage.googleapis.com', 'images.unsplash.com', 'www.google.com'];
+              if (allowedHosts.includes(parsedUrl.hostname)) {
+                safeImageUrl = course.image;
+              }
+            } catch (error) {
+              if (course.image.startsWith('/')) {
+                safeImageUrl = course.image;
+              } else {
+                safeImageUrl = '/' + course.image;
+              }
+            }
+          }
+
+          return {
+            id: course.id,
+            title: course.title || course.name,
+            subtitle: course.subtitle || course.category || "Curso",
+            image: safeImageUrl,
+            progress: course.progress || 0
+          };
+        })} 
+        variant="progress" 
+        onItemClick={handleCourseClick}
+      />
 
       <ConfirmationModal
         isOpen={isModalOpen}
