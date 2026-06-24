@@ -56,11 +56,11 @@ const CarouselSection = ({ title, items, variant = 'default', onItemClick }) => 
               {variant === 'progress' ? (
                  // --- Progress Card Variant ---
                  <div className="flex flex-col space-y-3">
-                    <div className="bg-[#FFF6F0] rounded-[20px] p-6 shadow-md flex flex-col items-center justify-center space-y-4 hover:shadow-lg transition-shadow duration-300 h-full min-h-[300px]">
-                        <div className="w-full flex justify-center mb-4 relative">
-                            <Image src={item.image} width={180} height={180} alt={item.title} className="object-contain drop-shadow-xl" />
+                    <div className="bg-[#FFF6F0] rounded-[20px] shadow-md hover:shadow-lg transition-shadow duration-300 h-full min-h-[300px] overflow-hidden flex flex-col justify-between">
+                        <div className="w-full h-48 relative">
+                            <Image src={item.image} fill alt={item.title} className="object-cover rounded-t-[20px]" />
                         </div>
-                        <div className="text-center">
+                        <div className="text-center p-6 flex-grow flex flex-col justify-center">
                             <p className="text-[#FF690B] font-bold text-xl mb-1">{item.title}</p>
                             <p className="text-[#3932C0] text-lg font-medium">{item.subtitle}</p>
                         </div>
@@ -78,11 +78,11 @@ const CarouselSection = ({ title, items, variant = 'default', onItemClick }) => 
                  </div>
               ) : (
                 // --- Default Card Variant ---
-                <div className="bg-white rounded-[20px] p-6 shadow-md flex flex-col items-center justify-center space-y-4 hover:shadow-lg transition-shadow duration-300 h-full min-h-[300px]">
-                    <div className="w-full flex justify-center mb-4 relative">
-                    <Image src={item.image} width={180} height={180} alt={item.title} className="object-contain drop-shadow-xl" />
+                <div className="bg-white rounded-[20px] shadow-md hover:shadow-lg transition-shadow duration-300 h-full min-h-[300px] overflow-hidden flex flex-col justify-between">
+                    <div className="w-full h-48 relative">
+                        <Image src={item.image} fill alt={item.title} className="object-cover rounded-t-[20px]" />
                     </div>
-                    <div className="text-center">
+                    <div className="text-center p-6 flex-grow flex flex-col justify-center">
                         <p className="text-[#FF690B] font-bold text-xl mb-1">{item.title}</p>
                         <p className="text-[#3932C0] text-lg font-medium">{item.subtitle}</p>
                     </div>
