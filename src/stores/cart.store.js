@@ -63,6 +63,16 @@ export const useCartStore = create(
           set({ cart: get().cart.filter((item) => item.id !== productId) })
         }
       },
+
+      // Actualiza la cantidad de un producto directamente
+      updateQuantity: (productId, quantity) => {
+        const updatedCart = get().cart.map((item) =>
+          item.id === productId
+            ? { ...item, quantity: Math.max(1, quantity) }
+            : item
+        )
+        set({ cart: updatedCart })
+      },
       
       // Vacía completamente el carrito
       clearCart: () => {

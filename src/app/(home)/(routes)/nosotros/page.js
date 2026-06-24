@@ -211,7 +211,7 @@ const ContenidoSobreMaria = () => {
       
 
       <Image 
-            src="/maria.png" 
+            src="/Maria.png" 
             alt="María de Squat Fit"
             width={550}
             height={528}

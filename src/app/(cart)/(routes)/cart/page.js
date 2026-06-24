@@ -27,7 +27,7 @@ export default function CartPage() {
     }
   }, []);
 
-  const { cart, addToCart, decrementQuantity, removeFromCart } = useCartStore();
+  const { cart, addToCart, decrementQuantity, removeFromCart, updateQuantity } = useCartStore();
 
   const totalItems = cart.reduce((acc, item) => acc + item.quantity, 0);
   const subtotal = cart.reduce(
@@ -78,6 +78,7 @@ export default function CartPage() {
       addToCart={addToCart}
       decrementQuantity={decrementQuantity}
       removeFromCart={removeFromCart}
+      updateQuantity={updateQuantity}
       setStep={setStep}
     />}
     {step === 2 && <FormData setStep={setStep} />}

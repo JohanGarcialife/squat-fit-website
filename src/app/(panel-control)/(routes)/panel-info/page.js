@@ -86,7 +86,7 @@ export default function InfoPage() {
                 <p className="mb-4 text-xl">Esta experiencia me llevó a cambiar mi trabajo de farmacéutica por mi nueva pasión: el fitness. Empecé a dar clases y a crecer exponencialmente en redes sociales.</p>
                 <p className="mb-4 text-xl">A día de hoy, llevo 8 años entrenando y +5 años en el mundo de la nutrición. Me dedico al asesoramiento nutricional y deportivo.</p>
               </div>
-              <Image src="/maria.png" alt="María de Squat Fit" width={400} height={400} className="object-cover rounded-2xl" />
+              <Image src="/Maria.png" alt="María de Squat Fit" width={400} height={400} className="object-cover rounded-2xl" />
             </div>
             <Achievements />
           </div>

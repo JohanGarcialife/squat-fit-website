@@ -15,6 +15,7 @@ export default function Summary(props) {
         addToCart,
         decrementQuantity,
         removeFromCart,
+        updateQuantity,
         setStep    } = props;
 
     // Currency State
@@ -184,7 +185,7 @@ export default function Summary(props) {
                                             {[1, 2, 3, 4, 5].map(num => (
                                                 <button 
                                                     key={num}
-                                                    onClick={() => num > item.quantity ? addToCart({...item, quantity: num - item.quantity}) : decrementQuantity(item.id)}
+                                                    onClick={() => updateQuantity(item.id, num)}
                                                     className="w-full text-left px-4 py-2 hover:bg-indigo-50 text-indigo-900 text-sm"
                                                 >
                                                     {num}
