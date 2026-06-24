@@ -173,12 +173,15 @@ export default function TopVentas({ courses = [], userCourses = [] }) {
         title="Nuestros top ventas" 
         items={courses.map(course => {
           // Sanitization logic for Next.js <Image> component
-          let safeImageUrl = "/group32.png";
+          let safeImageUrl = "/Group32.png";
           if (course.image) {
             try {
               const parsedUrl = new URL(course.image);
-              const allowedHosts = ['storage.googleapis.com', 'images.unsplash.com', 'www.google.com'];
-              if (allowedHosts.includes(parsedUrl.hostname)) {
+              const allowedHosts = ['storage.googleapis.com', 'images.unsplash.com', 'www.google.com', 'images.pexels.com', 'iframe.mediadelivery.net', 'b-cdn.net'];
+              const isAllowed = allowedHosts.some(host => 
+                parsedUrl.hostname === host || parsedUrl.hostname.endsWith('.' + host)
+              );
+              if (isAllowed) {
                 safeImageUrl = course.image;
               }
             } catch (error) {
@@ -205,12 +208,15 @@ export default function TopVentas({ courses = [], userCourses = [] }) {
       <CarouselSection 
         title="Continua donde estabas" 
         items={userCourses.map(course => {
-          let safeImageUrl = "/group32.png";
+          let safeImageUrl = "/Group32.png";
           if (course.image) {
             try {
               const parsedUrl = new URL(course.image);
-              const allowedHosts = ['storage.googleapis.com', 'images.unsplash.com', 'www.google.com'];
-              if (allowedHosts.includes(parsedUrl.hostname)) {
+              const allowedHosts = ['storage.googleapis.com', 'images.unsplash.com', 'www.google.com', 'images.pexels.com', 'iframe.mediadelivery.net', 'b-cdn.net'];
+              const isAllowed = allowedHosts.some(host => 
+                parsedUrl.hostname === host || parsedUrl.hostname.endsWith('.' + host)
+              );
+              if (isAllowed) {
                 safeImageUrl = course.image;
               }
             } catch (error) {
