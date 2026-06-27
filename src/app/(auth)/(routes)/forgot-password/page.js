@@ -135,7 +135,7 @@ export default function ForgotPasswordPage() {
                     <Field 
                       type="text" 
                       name="code" 
-                      placeholder='Código de 6 dígitos' 
+                      placeholder='Código de recuperación' 
                       className='w-full text-white border border-gray-300 rounded-3xl p-5 text-lg focus:outline-none focus:ring-2 focus:ring-primary placeholder-white placeholder-opacity-50 placeholder:font-bold' 
                     />
                     <ErrorMessage name="code" component="div" className="text-red-500 text-sm mt-1" />
