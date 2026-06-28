@@ -44,3 +44,10 @@ next-env.d.ts
 GEMINI.md
 MD/
 probe.js
+Cotización-funcionalidades.pdf
+public/Cotización-funcionalidades.pdf
+FUNCIONAMIENTO_ENDPOINT_PAYMENT_INTENT_LIBROS*.md
+fix_pointers*.js
+schemas_tmp.json
+test_checkout*.js
+test_valid_auth.js
