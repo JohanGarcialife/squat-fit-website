@@ -3,6 +3,7 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { ChevronLeft, ChevronDown, Check } from 'lucide-react';
 import { useCheckoutStore } from '@/stores/checkout.store';
+import { useAuthStore } from '@/stores/auth.store';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
 import PhoneInput from 'react-phone-input-2';
@@ -26,10 +27,16 @@ const validationSchema = Yup.object({
 
 export default function CheckoutForm({ setStep, onValidationChange, submitRef }) {
   const { formData, updateFormData } = useCheckoutStore();
+  const { user } = useAuthStore();
   const [customerType, setCustomerType] = useState('particular');
   const [sameAddress, setSameAddress] = useState(true);
 
   const countryNames = useMemo(() => getNames(), []);
+
+  const initialValues = useMemo(() => ({
+    ...formData,
+    email: formData.email || user?.email || user?.username || '',
+  }), [formData, user]);
 
   return (
     <div className="w-full max-w-lg mx-auto pb-10">
@@ -63,7 +70,7 @@ export default function CheckoutForm({ setStep, onValidationChange, submitRef })
         </div>
 
         <Formik
-          initialValues={formData}
+          initialValues={initialValues}
           validationSchema={validationSchema}
           onSubmit={(values) => {
             updateFormData(values);
