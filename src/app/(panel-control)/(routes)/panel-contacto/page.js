@@ -21,12 +21,16 @@ const ContactSchema = Yup.object().shape({
 });
 
 const MOTIVOS = [
-  'Duda sobre mis Asesorías',
-  'Problema con la Biblioteca Digital / Recetas',
-  'Duda o Problema con Cursos en Video',
-  'Reporte de error en la plataforma',
-  'Facturación o pagos',
-  'Consulta general'
+  'Información sobre programas / asesorías',
+  'Dudas antes de comprar',
+  'Soporte de un curso ya comprado',
+  'Acceso a libros o contenido digital',
+  'Problemas técnicos con la web',
+  'Pagos, facturación o suscripciones',
+  'Colaboraciones o propuestas profesionales',
+  'Prensa, entrevistas o eventos',
+  'Feedback o sugerencias',
+  'Otro motivo'
 ];
 
 const CONTACTOS = [
@@ -67,20 +71,21 @@ export default function ContactPage() {
 
       setIsSubmitting(true);
       try {
-        // Mapear motivo a categoría del ticket del backend
+        // Mapear motivo a categoría del ticket del backend (opciones 3, 4 y 5 a technical/devs, opción 6 a billing, resto a general)
         let category = 'general';
-        if (values.motivo === 'Problema con la Biblioteca Digital / Recetas' || values.motivo === 'Duda o Problema con Cursos en Video') {
+        const motivoIndex = MOTIVOS.indexOf(values.motivo) + 1; // 1-indexed para coincidir con la lista del cliente
+
+        if (motivoIndex === 3 || motivoIndex === 4 || motivoIndex === 5) {
           category = 'technical';
-        } else if (values.motivo === 'Facturación o pagos') {
+        } else if (motivoIndex === 6) {
           category = 'billing';
-        } else if (values.motivo === 'Reporte de error en la plataforma') {
-          category = 'bug_report';
         }
 
         const description = `
 [CONTACTO PANEL]
-Contacto solicitado con: ${values.contactarA}
-Motivo: ${values.motivo}
+Destinatario: ${values.contactarA}
+Motivo (${motivoIndex}): ${values.motivo}
+Ruta de Correo: ${category === 'technical' ? 'Devs' : 'Ventas'}
 
 DATOS DEL CLIENTE:
 - Nombre: ${values.nombre}
