@@ -114,10 +114,12 @@ export default function CheckoutForm({ setStep, onValidationChange, submitRef })
                     country={'es'}
                     value={formData.phone}
                     onChange={(phone) => setFieldValue('phone', phone)}
-                    inputClass="!w-full !border !border-orange-300 !rounded-2xl !px-5 !py-3 !placeholder-orange-200 !text-gray-700 !outline-none focus:!border-orange-500 focus:!ring-1 focus:!ring-orange-500 !transition-all"
+                    inputClass="!w-full !border !border-orange-300 !rounded-2xl !pl-14 !pr-5 !py-3 !placeholder-orange-300 !text-black !outline-none focus:!border-orange-500 focus:!ring-1 focus:!ring-orange-500 !transition-all"
                     containerClass="!w-full"
-                    buttonClass="!border-r-0 !border-orange-300 !bg-white !rounded-l-2xl !px-3"
-                    dropdownClass="!rounded-b-2xl"
+                    buttonClass="!bg-transparent !border-0 !rounded-l-2xl !pl-4"
+                    dropdownClass="!rounded-b-2xl !text-black"
+                    dropdownStyle={{ color: 'black' }}
+                    inputStyle={{ color: 'black' }}
                     inputProps={{ id: 'phone' }}
                   />
                   <ErrorMessage name="phone" component="div" className="text-red-500 text-sm" />
