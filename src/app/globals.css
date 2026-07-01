@@ -101,8 +101,13 @@ img, a, button {
 
 .react-tel-input .selected-flag:hover,
 .react-tel-input .selected-flag:focus,
+.react-tel-input .selected-flag.open,
+.react-tel-input .selected-flag.open:hover,
+.react-tel-input .selected-flag.open:focus,
 .react-tel-input .flag-dropdown:hover,
 .react-tel-input .flag-dropdown.open:hover,
-.react-tel-input .flag-dropdown:focus {
+.react-tel-input .flag-dropdown:focus,
+.react-tel-input .flag-dropdown:hover .selected-flag,
+.react-tel-input .flag-dropdown.open .selected-flag {
   background-color: transparent !important;
 }

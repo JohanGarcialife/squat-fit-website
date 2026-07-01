@@ -33,10 +33,15 @@ export default function CheckoutForm({ setStep, onValidationChange, submitRef })
 
   const countryNames = useMemo(() => getNames(), []);
 
-  const initialValues = useMemo(() => ({
-    ...formData,
-    email: formData.email || user?.email || user?.username || '',
-  }), [formData, user]);
+  const initialValues = useMemo(() => {
+    const userEmail = (user?.email && user.email.includes('@')) 
+      ? user.email 
+      : ((user?.username && user.username.includes('@')) ? user.username : '');
+    return {
+      ...formData,
+      email: userEmail || formData.email || '',
+    };
+  }, [formData, user]);
 
   return (
     <div className="w-full max-w-lg mx-auto pb-10">
