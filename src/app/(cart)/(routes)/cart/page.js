@@ -3,7 +3,10 @@
 import React, { useEffect, useState } from "react";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useCartStore } from "@/stores/cart.store";
+import { useAuthStore } from "@/stores/auth.store";
+import toast from "react-hot-toast";
 
 import Summary from "../../_components/Summary";
 import FormData from "../../_components/FormData";
@@ -11,6 +14,8 @@ import Payment from "../../_components/Payment";
 import PaymentSuccess from "../../_components/PaymentSuccess";
 
 export default function CartPage() {
+  const router = useRouter();
+  const { token } = useAuthStore();
   const [isClient, setIsClient] = useState(false);
   const [step, setStep] = useState(1);
   const [success, setSuccess] = useState(false);
@@ -26,6 +31,24 @@ export default function CartPage() {
       useCartStore.getState().clearCart();
     }
   }, []);
+
+  // Force Step 1 if the user is not authenticated
+  useEffect(() => {
+    if (isClient && step > 1 && !token) {
+      setStep(1);
+      toast.error("Debes iniciar sesión para realizar la compra.");
+      router.push("/login?redirect=/cart");
+    }
+  }, [step, token, isClient, router]);
+
+  const handleSetStep = (nextStep) => {
+    if (nextStep > 1 && !token) {
+      toast.error("Debes iniciar sesión para realizar la compra.");
+      router.push("/login?redirect=/cart");
+      return;
+    }
+    setStep(nextStep);
+  };
 
   const { cart, addToCart, decrementQuantity, removeFromCart, updateQuantity } = useCartStore();
 
@@ -79,10 +102,10 @@ export default function CartPage() {
       decrementQuantity={decrementQuantity}
       removeFromCart={removeFromCart}
       updateQuantity={updateQuantity}
-      setStep={setStep}
+      setStep={handleSetStep}
     />}
-    {step === 2 && <FormData setStep={setStep} />}
-    {step === 3 && <Payment setStep={setStep} setSuccess={setSuccess} />}
+    {step === 2 && <FormData setStep={handleSetStep} />}
+    {step === 3 && <Payment setStep={handleSetStep} setSuccess={setSuccess} />}
      </>
   );
 }

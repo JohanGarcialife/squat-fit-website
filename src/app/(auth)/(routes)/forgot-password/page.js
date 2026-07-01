@@ -1,19 +1,22 @@
 'use client';
 
 import Link from 'next/link';
-import React, { useState } from 'react';
+import React, { useState, Suspense } from 'react';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
 import axios from 'axios';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import toast from 'react-hot-toast';
 import { Eye, EyeOff, ArrowLeft } from 'lucide-react';
 
-export default function ForgotPasswordPage() {
+function ForgotPasswordContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [step, setStep] = useState(1); // 1: request code, 2: reset password
   const [userEmail, setUserEmail] = useState('');
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+
+  const redirectParam = searchParams.get('redirect') ? `?redirect=${encodeURIComponent(searchParams.get('redirect'))}` : '';
 
   const requestSchema = Yup.object({
     email: Yup.string().email('El formato del email no es válido').required('El email es obligatorio'),
@@ -61,7 +64,7 @@ export default function ForgotPasswordPage() {
       
       if (response.data === true) {
         toast.success('¡Contraseña restablecida con éxito!');
-        router.push('/login');
+        router.push(`/login${redirectParam}`);
       } else {
         toast.error('Código incorrecto o expirado.');
       }
@@ -181,15 +184,27 @@ export default function ForgotPasswordPage() {
           )}
 
           <div className="flex justify-between items-center mt-5 text-2xl font-bold">
-            <Link href='/login'>
+            <Link href={`/login${redirectParam}`}>
               <p className='underline text-gris cursor-pointer'>Iniciar Sesión</p>
             </Link>
-            <Link href='/register'>
+            <Link href={`/register${redirectParam}`}>
               <p className='underline text-gris cursor-pointer'>Crear Cuenta</p>
             </Link>
           </div>
         </div>
       </div>
     </div>
+  );
+}
+
+export default function ForgotPasswordPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen text-2xl text-white bg-linear-to-b from-primary to-secondary flex items-center justify-center">
+        <p>Cargando...</p>
+      </div>
+    }>
+      <ForgotPasswordContent />
+    </Suspense>
   );
 }

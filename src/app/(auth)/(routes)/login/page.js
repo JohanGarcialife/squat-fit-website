@@ -1,18 +1,21 @@
 'use client';
 import Link from 'next/link';
-import React, { useState } from 'react';
+import React, { useState, Suspense } from 'react';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
 import axios from 'axios';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuthStore } from '../../../../stores/auth.store';
 import toast from 'react-hot-toast';
 import { Eye, EyeOff } from 'lucide-react';
 
-export default function LoginPage() {
+function LoginContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { setToken } = useAuthStore();
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+
+  const redirectParam = searchParams.get('redirect') ? `?redirect=${encodeURIComponent(searchParams.get('redirect'))}` : '';
 
   const initialValues = {
     username: '',
@@ -31,7 +34,8 @@ export default function LoginPage() {
       if (token) {
         setToken(token);
         toast.success('Inicio de sesión exitoso!');
-        router.push('/panel-control');
+        const redirect = searchParams.get('redirect') || '/panel-control';
+        router.push(redirect);
       }
     } catch (error) {
       console.error('Error en el login', error.response ? error.response.data : error.message);
@@ -94,10 +98,10 @@ export default function LoginPage() {
             )}
           </Formik>
           <div className="flex justify-between items-center mt-5 text-2xl font-bold">
-            <Link href='/register'>
+            <Link href={`/register${redirectParam}`}>
               <p className='underline text-gris cursor-pointer'>Crear Cuenta</p>
             </Link>
-            <Link href='/forgot-password'>
+            <Link href={`/forgot-password${redirectParam}`}>
               <p className='underline text-gris cursor-pointer'>¿Olvidaste tu contraseña?</p>
             </Link>
           </div>
@@ -105,5 +109,17 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen text-2xl text-white bg-linear-to-b from-primary to-secondary flex items-center justify-center">
+        <p>Cargando...</p>
+      </div>
+    }>
+      <LoginContent />
+    </Suspense>
   );
 }

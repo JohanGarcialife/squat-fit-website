@@ -1,16 +1,19 @@
 'use client';
 import Link from 'next/link';
-import React, { useState } from 'react';
+import React, { useState, Suspense } from 'react';
 import axios from 'axios';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import toast from 'react-hot-toast';
 import { Eye, EyeOff } from 'lucide-react';
 
-export default function RegisterPage() {
+function RegisterContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+
+  const redirectParam = searchParams.get('redirect') ? `?redirect=${encodeURIComponent(searchParams.get('redirect'))}` : '';
   const [isConfirmPasswordVisible, setIsConfirmPasswordVisible] = useState(false);
 
   const initialValues = {
@@ -53,7 +56,7 @@ export default function RegisterPage() {
       
       if (response.status === 201 || response.status === 200 || response.data) {
         toast.success("Registro exitoso. Por favor revisa tu correo electrónico para activar tu cuenta.");
-        router.push('/login');
+        router.push(`/login${redirectParam}`);
       }
     } catch (error) {
       console.error('Error en el registro', error.response ? error.response.data : error.message);
@@ -139,11 +142,23 @@ export default function RegisterPage() {
               </Form>
             )}
           </Formik>
-          <Link href='/login'>
+          <Link href={`/login${redirectParam}`}>
             <p className='underline text-gris cursor-pointer text-2xl mt-5'>Iniciar Sesión</p>
           </Link>
         </div>
       </div>
     </div>
+  );
+}
+
+export default function RegisterPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen text-2xl text-white bg-linear-to-b from-primary to-secondary flex items-center justify-center">
+        <p>Cargando...</p>
+      </div>
+    }>
+      <RegisterContent />
+    </Suspense>
   );
 }
