@@ -3,18 +3,24 @@
 import React, { useState, useEffect } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { useAuthStore } from '../../stores/auth.store';
 import { useCartStore } from '@/stores/cart.store';
 import ConfirmationModal from './ConfirmationModal';
 
 export default function MenuHeader() {
-    const [active, setActive] = useState('home')
+    const pathname = usePathname();
     const { isAuth, logout, user } = useAuthStore();
     const { cart } = useCartStore();
     const router = useRouter();
     
     const [isModalOpen, setIsModalOpen] = useState(false);
+
+    // Determine active menu item based on current URL path
+    let active = 'home';
+    if (pathname?.startsWith('/cocina')) active = 'cocina';
+    else if (pathname?.startsWith('/planes')) active = 'planes';
+    else if (pathname?.startsWith('/cursos')) active = 'cursos';
 
     // Hydration fix for client-side state
     const [isClient, setIsClient] = useState(false);
@@ -44,26 +50,17 @@ export default function MenuHeader() {
 
                 <div className='flex gap-9 text-secondary text-2xl justify-start'> {/* Enlaces ahora justificados a la izquierda dentro de su grupo */}
                     <Link href="/cocina">
-                        <p
-                            className={active === 'cocina' ? 'text-primary' : 'text-secondary'}
-                            onClick={() => setActive('cocina')}
-                        >
+                        <p className={active === 'cocina' ? 'text-primary font-bold' : 'text-secondary'}>
                             Cocina
                         </p>
                     </Link>
                     <Link href="/planes">
-                        <p
-                            className={active === 'planes' ? 'text-primary' : 'text-secondary'}
-                            onClick={() => setActive('planes')}
-                        >
+                        <p className={active === 'planes' ? 'text-primary font-bold' : 'text-secondary'}>
                             Planes
                         </p>
                     </Link>
                     <Link href="/cursos">
-                        <p
-                            className={active === 'cursos' ? 'text-primary' : 'text-secondary'}
-                            onClick={() => setActive('cursos')}
-                        >
+                        <p className={active === 'cursos' ? 'text-primary font-bold' : 'text-secondary'}>
                             Cursos
                         </p>
                     </Link>
