@@ -122,11 +122,12 @@ export default function Shop() {
           })
         }
 
-        setPhysicalProducts(formattedProducts)
-        if (formattedProducts.length > 0) {
+        const visibleProducts = formattedProducts.slice(-3);
+        setPhysicalProducts(visibleProducts);
+        if (visibleProducts.length > 0) {
           // Find popular one, fallback to first
-          const defaultProd = formattedProducts.find(p => p.popular) || formattedProducts[0]
-          setSelectedPhysical(defaultProd.id)
+          const defaultProd = visibleProducts.find(p => p.popular) || visibleProducts[0];
+          setSelectedPhysical(defaultProd.id);
         }
       } catch (error) {
         console.error("Error fetching physical products:", error)
