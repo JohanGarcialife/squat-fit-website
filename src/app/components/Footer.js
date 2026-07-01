@@ -59,7 +59,7 @@ export default function Footer() {
               </Link>
             </li>
             <li>
-              <Link href="/panel-contacto" className="text-[#FF690B] font-medium text-base hover:text-[#363C98] transition-colors">
+              <Link href="/contacto" className="text-[#FF690B] font-medium text-base hover:text-[#363C98] transition-colors">
                 Contacto
               </Link>
             </li>
