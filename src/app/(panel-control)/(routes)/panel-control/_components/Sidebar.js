@@ -149,7 +149,7 @@ const MENU_ITEMS = [
   { id: 3, label: 'Planes', href: '/panel-planes', Icon: StarIcon },
   { id: 4, label: 'Cursos', href: '/panel-cursos', Icon: SchoolIcon },
   { id: 5, label: 'Perfil', href: '/profile-panel', Icon: UserIcon },
-  { id: 6, label: 'Contacto', href: null, Icon: MessageIcon },
+  { id: 6, label: 'Contacto', href: '/panel-contacto', Icon: MessageIcon },
   { id: 8, label: 'Info', href: '/panel-info', Icon: InfoIcon },
   { id: 7, label: 'Ajustes', href: null, Icon: SettingsIcon },
 ]
