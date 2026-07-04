@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import axios from "axios";
 import { useAuthStore } from "@/stores/auth.store";
+import RichProductCards from "@/app/components/RichProductCards";
 
 // ─── TEST VIDEO (Bunny.net iframe) ───────────────────────────────────────────
 // Remove this constant once the backend is returning real video_url fields
@@ -298,49 +299,23 @@ function CursosPageContent() {
 
   if (!isSubscribed || noAccess) {
     return (
-      <div className="w-full max-w-5xl mx-auto p-6 md:p-12 min-h-screen">
+      <div className="w-full max-w-6xl mx-auto p-6 md:p-12 min-h-screen">
         <h1 className="text-[#3932C0] text-5xl font-bold mb-16">Cursos</h1>
-        <div className="flex flex-col items-center justify-center py-16 text-center">
-          <div className="w-24 h-24 bg-orange-50 rounded-3xl flex items-center justify-center mb-8 shadow-lg">
-            <svg xmlns="http://www.w3.org/2000/svg" width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#FDBA74" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-              <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-            </svg>
-          </div>
+        <div className="text-center mb-12">
           <h2 className="text-[#3932C0] text-3xl font-bold mb-4">Aún no tienes acceso a los cursos</h2>
-          <p className="text-gray-500 text-lg max-w-md mb-10 leading-relaxed">
+          <p className="text-gray-500 text-lg max-w-xl mx-auto leading-relaxed">
             Suscríbete a <strong>Squat Fit</strong> para desbloquear todos los cursos en video y transformar tu cuerpo con nuestras metodologías.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 mb-10 w-full max-w-sm">
-            <div className="flex-1 bg-orange-50 rounded-2xl p-4 text-center">
-              <span className="text-2xl">🎥</span>
-              <p className="text-orange-700 font-bold text-sm mt-1">Clases en video HD</p>
-            </div>
-            <div className="flex-1 bg-indigo-50 rounded-2xl p-4 text-center">
-              <span className="text-2xl">💪</span>
-              <p className="text-indigo-900 font-bold text-sm mt-1">Métodos Squat Fit</p>
-            </div>
-          </div>
-          <div className="flex flex-col sm:flex-row gap-4 mb-4">
-            <a href="/planes">
-              <button className="flex items-center justify-center gap-3 bg-[#FF690B] text-white font-bold py-4 px-10 rounded-2xl text-lg hover:bg-[#FF690B]/90 transition-all shadow-xl shadow-orange-200 cursor-pointer">
-                Ver planes de suscripción
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-              </button>
-            </a>
-
-            <button 
-              onClick={async () => {
-                setLoading(true);
-                await useAuthStore.getState().refreshSubscriptionStatus();
-              }}
-              className="flex items-center justify-center gap-3 bg-white text-[#FF690B] border-2 border-[#FF690B] font-bold py-4 px-10 rounded-2xl text-lg hover:bg-gray-50 transition-all cursor-pointer shadow-md"
-            >
-              🔄 Verificar mi pago / acceso
-            </button>
-          </div>
-          <p className="text-gray-400 text-sm mt-4">Desde 9,99€/mes • Cancela cuando quieras</p>
         </div>
+        
+        <RichProductCards
+          verifyLoading={loading}
+          onVerifyAccess={async () => {
+            setLoading(true);
+            await useAuthStore.getState().refreshSubscriptionStatus();
+            setLoading(false);
+          }}
+        />
       </div>
     );
   }

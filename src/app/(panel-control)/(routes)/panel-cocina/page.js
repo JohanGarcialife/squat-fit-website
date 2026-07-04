@@ -6,6 +6,7 @@ import Link from "next/link";
 import axios from "axios";
 import { useAuthStore } from "@/stores/auth.store";
 import { BookOpen, Lock, ArrowRight } from "lucide-react";
+import RichProductCards from "@/app/components/RichProductCards";
 
 export default function CocinaPage() {
   const { token, isSubscribed } = useAuthStore();
@@ -119,55 +120,25 @@ export default function CocinaPage() {
 
         </div>
       ) : (
-        /* --- Pantalla de Sin Suscripción Activa --- */
-        <div className="flex flex-col items-center justify-center py-16 text-center">
-          {/* Icono de bloqueo */}
-          <div className="w-24 h-24 bg-indigo-50 rounded-3xl flex items-center justify-center mb-8 shadow-lg">
-            <Lock size={44} className="text-indigo-300" strokeWidth={1.5} />
+        /* --- Pantalla de Sin Suscripción Activa (Tarjetas Enriquecidas) --- */
+        <div className="py-12">
+          <div className="text-center mb-12">
+            <h2 className="text-[#3932C0] text-3xl font-bold mb-4">
+              Aún no tienes acceso a la biblioteca
+            </h2>
+            <p className="text-gray-500 text-lg max-w-xl mx-auto leading-relaxed">
+              Suscríbete a la <strong>Biblioteca Digital de Squat Fit</strong> para acceder a todas las recetas y contenido exclusivo de cocina fit.
+            </p>
           </div>
-
-          <h2 className="text-[#3932C0] text-3xl font-bold mb-4">
-            Aún no tienes acceso a la biblioteca
-          </h2>
-          <p className="text-gray-500 text-lg max-w-md mb-10 leading-relaxed">
-            Suscríbete a la <strong>Biblioteca Digital de Squat Fit</strong> para acceder a todas las recetas y contenido exclusivo de cocina fit.
-          </p>
-
-          {/* Preview de lo que tendrán */}
-          <div className="flex flex-col sm:flex-row gap-4 mb-10 w-full max-w-sm">
-            <div className="flex-1 bg-indigo-50 rounded-2xl p-4 text-center">
-              <BookOpen size={28} className="text-indigo-700 mx-auto mb-2" />
-              <p className="text-indigo-900 font-bold text-sm">Libros digitales Vol. 1 y 2</p>
-            </div>
-            <div className="flex-1 bg-orange-50 rounded-2xl p-4 text-center">
-              <span className="text-2xl">🥗</span>
-              <p className="text-orange-700 font-bold text-sm mt-1">+100 recetas fit</p>
-            </div>
-          </div>
-
-          {/* CTA Principal */}
-          <div className="flex flex-col sm:flex-row gap-4 mb-4">
-            <Link href="/cocina#shop">
-              <button className="flex items-center justify-center gap-3 bg-[#3932C0] text-white font-bold py-4 px-10 rounded-2xl text-lg hover:bg-[#3932C0]/90 transition-all shadow-xl shadow-indigo-200 cursor-pointer group">
-                Ver planes de suscripción
-                <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
-              </button>
-            </Link>
-
-            <button 
-              onClick={async () => {
-                setLoading(true);
-                await useAuthStore.getState().refreshSubscriptionStatus();
-              }}
-              className="flex items-center justify-center gap-3 bg-white text-[#3932C0] border-2 border-[#3932C0] font-bold py-4 px-10 rounded-2xl text-lg hover:bg-gray-50 transition-all cursor-pointer shadow-md"
-            >
-              🔄 Verificar mi pago / acceso
-            </button>
-          </div>
-
-          <p className="text-gray-400 text-sm mt-4">
-            Desde 9,99€/mes • Cancela cuando quieras
-          </p>
+          
+          <RichProductCards
+            verifyLoading={loading}
+            onVerifyAccess={async () => {
+              setLoading(true);
+              await useAuthStore.getState().refreshSubscriptionStatus();
+              setLoading(false);
+            }}
+          />
         </div>
       )}
 
