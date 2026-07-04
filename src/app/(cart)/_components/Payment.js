@@ -178,13 +178,18 @@ export default function Payment(props) {
           { headers: { Authorization: `Bearer ${token}` } }
         );
         
-        // Manejar el caso donde el usuario ya tiene la suscripción activa
-        if (response.data.hasActiveSubscription) {
-            toast.success("¡Ya tienes una suscripción activa! Redirigiendo a tu biblioteca...");
+        // Manejar el caso donde el usuario ya tiene la suscripción activa Y es mismo/menor tier
+        if (response.data.hasActiveSubscription && !response.data.isUpgrade) {
+            toast.success("¡Ya tienes esta suscripción activa! Redirigiendo a tu biblioteca...");
             useCartStore.getState().clearCart();
             useAuthStore.getState().setSubscribed(true);
             router.push('/panel-cocina');
             return;
+        }
+
+        // Caso upgrade (isUpgrade: true) → el backend devuelve clientSecret, proceder con pago
+        if (response.data.isUpgrade) {
+            toast.success("¡Upgrade detectado! Completa el pago para actualizar tu suscripción.");
         }
 
         // Stripe nos mandará el client_secret o clientSecret

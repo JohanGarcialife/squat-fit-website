@@ -12,6 +12,7 @@ export const useAuthStore = create(
       user: null,
       isAuth: false,
       isSubscribed: false,
+      subscriptionType: null, // 'monthly' | 'annual' | 'permanent' | null
 
       setToken: (token) => {
         try {
@@ -23,7 +24,13 @@ export const useAuthStore = create(
             decoded.subscribed ||
             decoded.role === 'admin'
           );
-          set({ token, user: decoded, isAuth: true, isSubscribed });
+          // Tipo de suscripción de biblioteca digital (monthly/annual/permanent)
+          const subscriptionType =
+            decoded.subscription_type ||
+            decoded.subscriptionType ||
+            decoded.digital_subscription_type ||
+            null;
+          set({ token, user: decoded, isAuth: true, isSubscribed, subscriptionType });
         } catch (error) {
           console.error("Invalid token:", error);
           get().logout();
@@ -33,6 +40,11 @@ export const useAuthStore = create(
       /** Actualiza manualmente el estado de suscripción */
       setSubscribed: (value) => {
         set({ isSubscribed: !!value });
+      },
+
+      /** Actualiza manualmente el tipo de suscripción de biblioteca digital */
+      setSubscriptionType: (type) => {
+        set({ subscriptionType: type || null });
       },
 
       /**
@@ -52,11 +64,22 @@ export const useAuthStore = create(
             const newToken = data.token;
             if (newToken) {
               get().setToken(newToken);
+              // Intentar también obtener subscription type via user/info
+              try {
+                const infoRes = await fetch(`${API_BASE}/api/v1/user/info`, {
+                  headers: { Authorization: `Bearer ${newToken}` }
+                });
+                if (infoRes.ok) {
+                  const info = await infoRes.json();
+                  const subType = info.subscription?.type || info.suscription_type || info.subscription_type || null;
+                  if (subType) set({ subscriptionType: subType });
+                }
+              } catch (_) { /* silenciar error de info */ }
               return;
             }
           }
 
-          set({ isSubscribed: false });
+          set({ isSubscribed: false, subscriptionType: null });
         } catch (err) {
           console.error('Error verificando suscripción por renew-token:', err);
           set({ isSubscribed: false });
@@ -64,7 +87,7 @@ export const useAuthStore = create(
       },
 
       logout: () => {
-        set({ token: null, user: null, isAuth: false, isSubscribed: false });
+        set({ token: null, user: null, isAuth: false, isSubscribed: false, subscriptionType: null });
       },
     }),
     {

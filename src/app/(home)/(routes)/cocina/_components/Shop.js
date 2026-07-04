@@ -3,12 +3,18 @@ import Image from 'next/image'
 import React, { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useCartStore } from '@/stores/cart.store'
+import { useAuthStore } from '@/stores/auth.store'
 import { BookOpen, FileText } from 'lucide-react'
 import { toast } from 'react-hot-toast'
 
 export default function Shop() {
   const { addToCart, setDirectCheckoutItem, cart } = useCartStore()
+  const { isSubscribed, subscriptionType } = useAuthStore()
   const router = useRouter()
+  
+  // Tier ranking: higher number = higher tier
+  const TIER_RANK = { monthly: 1, annual: 2, permanent: 3 };
+  const currentTierRank = TIER_RANK[subscriptionType] || 0;
   
   // State to track selected products
   const [selectedDigital, setSelectedDigital] = useState('digital-annual') // Default to annual
@@ -141,11 +147,24 @@ export default function Shop() {
 
   const handleAddToCart = (product) => {
     if (product.type === 'digital') {
+      // Extraer tipo de plan
+      const subType = product.id.replace('digital-', '') // ej: 'annual'
+      const targetTierRank = TIER_RANK[subType] || 0;
+
+      // Bloquear si es mismo tier o inferior al actual
+      if (currentTierRank > 0 && targetTierRank <= currentTierRank) {
+        if (targetTierRank === currentTierRank) {
+          toast.error('Ya tienes este plan activo.');
+        } else {
+          toast.error('No puedes adquirir un plan inferior al que ya tienes activo.');
+        }
+        return;
+      }
+
       if (cart.length > 0 && !cart.some(item => item.isDirectCheckout)) {
           toast.error('Tus productos físicos fueron removidos por seguridad (no se pueden mezclar suscripciones y productos).', { duration: 5000 });
       }
 
-      let subType = product.id.replace('digital-', '') // ej: 'annual'
       setDirectCheckoutItem({
         id: product.id,
         name: `Suscripción Digital - ${product.name}`,
@@ -154,7 +173,7 @@ export default function Shop() {
         endpoint: '/api/v1/book/create-payment-intent-digital',
         payload: { subscription_type: subType }
       })
-      toast.success('Suscripción añadida al carrito')
+      toast.success(currentTierRank > 0 ? 'Upgrade añadido al carrito' : 'Suscripción añadida al carrito')
     } else {
       if (cart.some(item => item.isDirectCheckout)) {
           toast.error('Tu suscripción fue removida por seguridad (no se pueden mezclar productos físicos y suscripciones).', { duration: 5000 });
@@ -218,66 +237,111 @@ export default function Shop() {
 
             {/* Digital Products */}
             <div className="space-y-4">
-              {digitalProducts.map((product) => (
-                <div 
-                  key={product.id}
-                  onClick={() => setSelectedDigital(product.id)}
-                  className={`
-                    relative rounded-2xl p-4 border-2 transition-all cursor-pointer
-                    ${selectedDigital === product.id
-                      ? 'border-indigo-500 bg-indigo-50 shadow-md' 
-                      : product.recommended 
-                        ? 'bg-indigo-50 border-indigo-200 hover:border-indigo-300' 
-                        : 'bg-white border-gray-200 hover:border-gray-300'
-                    }
-                  `}
-                >
-                  {product.badge && (
-                    <span className="absolute -top-2 left-4 bg-indigo-700 text-white text-xs font-bold px-3 py-1 rounded-full">
-                      {product.badge}
-                    </span>
-                  )}
-                  
-                  <div className="flex items-center justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        {/* Radio button indicator */}
-                        <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
-                          selectedDigital === product.id 
-                            ? 'border-indigo-600 bg-indigo-600' 
-                            : 'border-gray-300 bg-white'
-                        }`}>
-                          {selectedDigital === product.id && (
-                            <div className="w-2 h-2 bg-white rounded-full"></div>
-                          )}
+              {digitalProducts.map((product) => {
+                const cardSubType = product.id.replace('digital-', '');
+                const cardRank = TIER_RANK[cardSubType] || 0;
+                const isCurrent = subscriptionType === cardSubType;
+                const isLower = currentTierRank > 0 && cardRank < currentTierRank;
+                const isDisabled = isCurrent || isLower;
+                return (
+                  <div
+                    key={product.id}
+                    onClick={() => !isDisabled && setSelectedDigital(product.id)}
+                    className={`
+                      relative rounded-2xl p-4 border-2 transition-all
+                      ${isDisabled
+                        ? 'cursor-not-allowed opacity-60 bg-gray-50 border-gray-200'
+                        : 'cursor-pointer ' + (selectedDigital === product.id
+                          ? 'border-indigo-500 bg-indigo-50 shadow-md'
+                          : product.recommended
+                            ? 'bg-indigo-50 border-indigo-200 hover:border-indigo-300'
+                            : 'bg-white border-gray-200 hover:border-gray-300')
+                      }
+                    `}
+                  >
+                    {isCurrent && (
+                      <span className="absolute -top-2 left-4 bg-green-600 text-white text-xs font-bold px-3 py-1 rounded-full">
+                        ✓ Plan activo
+                      </span>
+                    )}
+                    {isLower && !isCurrent && (
+                      <span className="absolute -top-2 left-4 bg-gray-400 text-white text-xs font-bold px-3 py-1 rounded-full">
+                        Ya incluido
+                      </span>
+                    )}
+                    {!isDisabled && product.badge && (
+                      <span className="absolute -top-2 left-4 bg-indigo-700 text-white text-xs font-bold px-3 py-1 rounded-full">
+                        {product.badge}
+                      </span>
+                    )}
+                    
+                    <div className="flex items-center justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          {/* Radio button indicator */}
+                          <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+                            isDisabled
+                              ? 'border-gray-300 bg-gray-200'
+                              : selectedDigital === product.id 
+                                ? 'border-indigo-600 bg-indigo-600' 
+                                : 'border-gray-300 bg-white'
+                          }`}>
+                            {!isDisabled && selectedDigital === product.id && (
+                              <div className="w-2 h-2 bg-white rounded-full"></div>
+                            )}
+                          </div>
+                          <h4 className="text-xl font-bold text-indigo-900">{product.name}</h4>
                         </div>
-                        <h4 className="text-xl font-bold text-indigo-900">{product.name}</h4>
+                        <p className="text-sm text-gray-600 mt-1 ml-7">{product.description}</p>
                       </div>
-                      <p className="text-sm text-gray-600 mt-1 ml-7">{product.description}</p>
-                    </div>
-                    <div className="text-right ml-4 flex flex-col items-end justify-center">
-                      <p className="text-2xl font-bold text-indigo-900">
-                        {product.price.toString().replace('.', ',')} €
-                        <span className="text-sm font-normal text-gray-600">{product.period}</span>
-                      </p>
-                      {product.savings && (
-                        <div className="mt-1 bg-indigo-100 text-indigo-700 text-xs font-bold px-3 py-1 rounded-full whitespace-nowrap">
-                          {product.savings}
-                        </div>
-                      )}
+                      <div className="text-right ml-4 flex flex-col items-end justify-center">
+                        <p className="text-2xl font-bold text-indigo-900">
+                          {product.price.toString().replace('.', ',')} €
+                          <span className="text-sm font-normal text-gray-600">{product.period}</span>
+                        </p>
+                        {product.savings && (
+                          <div className="mt-1 bg-indigo-100 text-indigo-700 text-xs font-bold px-3 py-1 rounded-full whitespace-nowrap">
+                            {product.savings}
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
 
             {/* CTA Button */}
-            <button 
-              onClick={() => handleAddToCart(getSelectedDigitalProduct())}
-              className="w-full cursor-pointer mt-6 bg-indigo-700 hover:bg-indigo-800 text-white font-bold py-4 rounded-2xl transition-colors text-lg"
-            >
-              Acceder a la biblioteca
-            </button>
+            {(() => {
+              const selected = getSelectedDigitalProduct();
+              const subType = selected?.id?.replace('digital-', '') || '';
+              const targetRank = TIER_RANK[subType] || 0;
+              const isCurrent = subscriptionType === subType;
+              const isLower = currentTierRank > 0 && targetRank < currentTierRank;
+              const isUpgrade = currentTierRank > 0 && targetRank > currentTierRank;
+              const btnLabel = isCurrent
+                ? '✓ Plan activo'
+                : isLower
+                  ? 'Plan no disponible'
+                  : isUpgrade
+                    ? 'Mejorar mi plan'
+                    : 'Acceder a la biblioteca';
+              return (
+                <button
+                  onClick={() => handleAddToCart(selected)}
+                  disabled={isCurrent || isLower}
+                  className={`w-full cursor-pointer mt-6 font-bold py-4 rounded-2xl transition-colors text-lg ${
+                    isCurrent
+                      ? 'bg-indigo-200 text-indigo-500 cursor-not-allowed'
+                      : isLower
+                        ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                        : 'bg-indigo-700 hover:bg-indigo-800 text-white cursor-pointer'
+                  }`}
+                >
+                  {btnLabel}
+                </button>
+              );
+            })()}
             <p className="text-center text-sm text-gray-600 mt-2">
               <span className="font-bold">Acceso inmediato.</span> Cancela cuando quieras en mensual.
             </p>
