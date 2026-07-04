@@ -299,7 +299,7 @@ function CursosPageContent() {
 
   if (!isSubscribed || noAccess) {
     return (
-      <div className="w-full max-w-7xl mx-auto p-6 md:p-12 min-h-screen">
+      <div className="flex-1 w-full max-w-7xl mx-auto p-6 md:p-12 min-h-screen">
         <h1 className="text-[#3932C0] text-5xl font-bold mb-16">Cursos</h1>
         <div className="text-center mb-12">
           <h2 className="text-[#3932C0] text-3xl font-bold mb-4">Aún no tienes acceso a los cursos</h2>
