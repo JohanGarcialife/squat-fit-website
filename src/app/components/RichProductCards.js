@@ -18,9 +18,7 @@ export default function RichProductCards({ onVerifyAccess, verifyLoading }) {
       subtitle: 'Tus recetas fit con sabor brutal para perder grasa sin sufrir.',
       rating: '4.7',
       ratingText: '+1000 lectores',
-      imageUrl: '/Group32.png',
-      phoneTag: 'La Cocina',
-      phoneSubTag: 'Vol. 1',
+      imageUrl: '/mockup_cocina.png',
       ideal: 'quieres comer rico y seguir perdiendo grasa.',
       benefits: 'Aprende a calcular tus macros sin liarte.',
       bullets: [
@@ -47,8 +45,7 @@ export default function RichProductCards({ onVerifyAccess, verifyLoading }) {
       subtitle: 'El programa para transformar tu físico paso a paso.',
       rating: '5.0',
       ratingText: '+2000 transformaciones',
-      imageUrl: '/Group32.png',
-      phoneTag: 'Tu Mejor Versión',
+      imageUrl: '/mockup_mejor_version.png',
       ideal: 'necesitas estructura, dirección y acompañamiento para cambiar de verdad.',
       benefits: 'aprende qué hacer en cada fase para mantener los resultados sin vivir a dieta.',
       bullets: [
@@ -75,9 +72,7 @@ export default function RichProductCards({ onVerifyAccess, verifyLoading }) {
       subtitle: 'El curso que te enseña a construir tu mejor físico paso a paso.',
       rating: '4.8',
       ratingText: '+260 alumnos',
-      imageUrl: '/cursosheronew.png',
-      phoneTag: 'Fuerte y Definid@',
-      phoneTopTag: 'Formación',
+      imageUrl: '/mockup_fuerte_definido.png',
       ideal: 'entrenas pero no ves cambios diarios.',
       benefits: '+50 vídeos didácticos con progresión semanal.',
       bullets: [
@@ -143,32 +138,13 @@ export default function RichProductCards({ onVerifyAccess, verifyLoading }) {
                     </div>
                   </div>
 
-                  {/* Mockup de Teléfono CSS */}
+                  {/* Imagen de Teléfono Maquetado */}
                   <div className="w-1/3 flex justify-end shrink-0 relative pt-1">
-                    <div className="relative w-[95px] h-[165px] border-[3px] border-black rounded-[20px] overflow-hidden bg-slate-900 shadow-md transform rotate-[-2deg]">
-                      {/* Speaker / Dynamic Island */}
-                      <div className="absolute top-1 left-1/2 transform -translate-x-1/2 w-6 h-1.5 bg-black rounded-full z-20"></div>
-                      
-                      {/* Tag superior (opcional) */}
-                      {card.phoneTopTag && (
-                        <div className="absolute top-3 left-1/2 transform -translate-x-1/2 bg-[#3932C0] text-white text-[7px] font-bold py-0.5 px-1.5 rounded-full z-20 whitespace-nowrap leading-none scale-90">
-                          {card.phoneTopTag}
-                        </div>
-                      )}
-
-                      {/* Screen Image */}
-                      <img src={card.imageUrl} className="w-full h-full object-cover" alt="phone mockup screen" />
-                      
-                      {/* Tag inferior */}
-                      <div className={`absolute bottom-2 left-1/2 transform -translate-x-1/2 w-[90%] text-white text-[7px] font-bold py-1 px-0.5 rounded text-center leading-none z-20 shadow ${
-                        card.textColor.includes('363C98') ? 'bg-[#363C98]' : 'bg-[#FF690B]'
-                      }`}>
-                        {card.phoneTag}
-                        {card.phoneSubTag && (
-                          <div className="text-[6px] font-normal opacity-90 mt-0.5">{card.phoneSubTag}</div>
-                        )}
-                      </div>
-                    </div>
+                    <img 
+                      src={card.imageUrl} 
+                      className="w-[95px] h-auto object-contain transform rotate-[-2deg] drop-shadow-md" 
+                      alt="phone mockup" 
+                    />
                   </div>
                 </div>
 
