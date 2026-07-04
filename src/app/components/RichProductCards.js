@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { Star, BookOpen, Utensils, Users, Play, RefreshCw, Compass, Award } from 'lucide-react';
+import { Star, BookOpen, Utensils, Users, Play, RefreshCw, Compass, Award, FileSignature } from 'lucide-react';
 
 export default function RichProductCards({ onVerifyAccess, verifyLoading }) {
   const cards = [
@@ -11,7 +11,7 @@ export default function RichProductCards({ onVerifyAccess, verifyLoading }) {
       title: (
         <>
           La Cocina <br />
-          <span className="text-[#FF690B]">Squat Fit</span>
+          Squat Fit
         </>
       ),
       textColor: 'text-[#FF690B]',
@@ -26,7 +26,7 @@ export default function RichProductCards({ onVerifyAccess, verifyLoading }) {
         'Plan estructurado para marcar y ganar forma muscular.'
       ],
       footerIcons: [
-        { icon: Compass, text: 'Navegación fácil' },
+        { icon: FileSignature, text: 'Navegación fácil' },
         { icon: Utensils, text: '+150 recetas' }
       ],
       btnText: 'Explorar el libro',
@@ -38,7 +38,7 @@ export default function RichProductCards({ onVerifyAccess, verifyLoading }) {
       title: (
         <>
           Tu Mejor <br />
-          <span className="text-[#FF690B]">Versión</span>
+          Versión
         </>
       ),
       textColor: 'text-[#FF690B]',
@@ -53,7 +53,7 @@ export default function RichProductCards({ onVerifyAccess, verifyLoading }) {
         'Seguimiento para ajustar el rumbo según tu evolución real.'
       ],
       footerIcons: [
-        { icon: Award, text: 'Método paso a paso' },
+        { icon: FileSignature, text: 'Método paso a paso' },
         { icon: Users, text: 'Acompañamiento' }
       ],
       btnText: 'Empezar mi cambio',
@@ -65,7 +65,7 @@ export default function RichProductCards({ onVerifyAccess, verifyLoading }) {
       title: (
         <>
           Fuerte y <br />
-          <span className="text-[#363C98]">Definid@</span>
+          Definid@
         </>
       ),
       textColor: 'text-[#363C98]',
@@ -123,26 +123,26 @@ export default function RichProductCards({ onVerifyAccess, verifyLoading }) {
                 {/* Cabecera: Título + Mockup de Teléfono */}
                 <div className="flex justify-between items-start mb-6">
                   <div className="w-2/3 pr-2">
-                    <h3 className={`text-3xl font-black tracking-tight leading-tight mb-2 ${card.textColor}`}>
+                    <h3 className={`text-4xl font-extrabold tracking-tight leading-tight mb-3 ${card.textColor}`}>
                       {card.title}
                     </h3>
-                    <p className="text-gray-400 text-xs mb-3 font-medium leading-tight">
+                    <p className={`text-sm font-semibold leading-snug mb-4 ${card.textColor}`}>
                       {card.subtitle}
                     </p>
                     
                     {/* Estrellas */}
-                    <div className="flex items-center gap-1.5 mt-2">
-                      <Star size={16} className="fill-[#FF690B] stroke-[#FF690B]" />
-                      <span className="text-sm font-bold text-slate-800">{card.rating}</span>
-                      <span className="text-gray-400 text-xs">| {card.ratingText}</span>
+                    <div className="flex items-center gap-1 mt-2">
+                      <Star size={18} className="fill-[#FF690B] stroke-[#FF690B]" />
+                      <span className="text-base font-bold text-slate-800 ml-1">{card.rating}</span>
+                      <span className="text-gray-400 text-sm ml-2">| {card.ratingText}</span>
                     </div>
                   </div>
 
                   {/* Imagen de Teléfono Maquetado */}
-                  <div className="w-1/3 flex justify-end shrink-0 relative pt-1">
+                  <div className="w-[110px] shrink-0 relative flex justify-end">
                     <img 
                       src={card.imageUrl} 
-                      className="w-[95px] h-auto object-contain transform rotate-[-2deg] drop-shadow-md" 
+                      className="w-full h-auto object-contain drop-shadow-md" 
                       alt="phone mockup" 
                     />
                   </div>
@@ -158,13 +158,13 @@ export default function RichProductCards({ onVerifyAccess, verifyLoading }) {
                   </p>
                   
                   <p className="text-slate-600 leading-snug">
-                    <span className="font-bold text-[#363C98]">Beneficios:</span> {card.benefits}
+                    <span className="font-bold text-[#FF690B]">Beneficios:</span> {card.benefits}
                   </p>
 
-                  <ul className="space-y-2 mt-4">
+                  <ul className="space-y-3 mt-4">
                     {card.bullets.map((bullet, idx) => (
-                      <li key={idx} className="flex items-start gap-2 text-slate-700 leading-tight">
-                        <span className="text-[#FF690B] mt-0.5 font-bold shrink-0">•</span>
+                      <li key={idx} className="flex items-start gap-2.5 text-slate-800 text-sm leading-snug">
+                        <span className="text-black font-black text-lg leading-none shrink-0">•</span>
                         <span>{bullet}</span>
                       </li>
                     ))}
@@ -175,13 +175,13 @@ export default function RichProductCards({ onVerifyAccess, verifyLoading }) {
               {/* Botón de acción y características en el pie */}
               <div className="space-y-5">
                 {/* Iconos del pie */}
-                <div className="flex items-center gap-6 text-xs text-gray-500 font-semibold border-t border-slate-50 pt-4">
+                <div className="flex items-center gap-6 text-xs font-bold border-t border-slate-100 pt-4">
                   {card.footerIcons.map((item, idx) => {
                     const Icon = item.icon;
                     return (
                       <div key={idx} className="flex items-center gap-1.5">
-                        <Icon size={16} className={card.textColor.includes('363C98') ? 'text-[#363C98]' : 'text-[#FF690B]'} />
-                        <span>{item.text}</span>
+                        <Icon size={18} className="text-[#363C98]" />
+                        <span className={card.textColor}>{item.text}</span>
                       </div>
                     );
                   })}
