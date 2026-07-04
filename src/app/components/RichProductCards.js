@@ -131,10 +131,13 @@ export default function RichProductCards({ onVerifyAccess, verifyLoading }) {
                     </p>
                     
                     {/* Estrellas */}
-                    <div className="flex items-center gap-1.5 mt-2">
-                      <Star size={20} className="fill-[#FF690B] stroke-[#FF690B]" />
-                      <span className="text-lg font-bold text-slate-800 ml-1">{card.rating}</span>
-                      <span className="text-gray-400 text-sm ml-2">| {card.ratingText}</span>
+                    <div className="flex items-start gap-1 mt-2">
+                      <Star size={20} className="fill-[#FF690B] stroke-[#FF690B] shrink-0 mt-0.5" />
+                      <div className="text-base font-bold text-slate-800 leading-snug ml-1">
+                        <span>{card.rating}</span>
+                        <span className="text-gray-300 mx-1.5 font-normal">|</span>
+                        <span className="text-gray-400 font-medium text-sm">{card.ratingText}</span>
+                      </div>
                     </div>
                   </div>
 
