@@ -112,34 +112,34 @@ export default function RichProductCards({ onVerifyAccess, verifyLoading }) {
       </div>
 
       {/* Grid de Tarjetas */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 w-full max-w-7xl px-4 md:px-0">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 w-full max-w-7xl px-4 md:px-0">
         {cards.map((card) => {
           return (
             <div
               key={card.id}
-              className="bg-white rounded-[32px] border border-slate-100 p-8 shadow-sm flex flex-col justify-between hover:shadow-md transition-all duration-300 w-full"
+              className="bg-white rounded-[36px] border border-slate-100 p-9 shadow-sm flex flex-col justify-between hover:shadow-md transition-all duration-300 w-full"
             >
               <div>
                 {/* Cabecera: Título + Mockup de Teléfono */}
                 <div className="flex justify-between items-start mb-6">
-                  <div className="w-2/3 pr-2">
+                  <div className="w-[60%] pr-2">
                     <h3 className={`text-4xl font-extrabold tracking-tight leading-tight mb-3 ${card.textColor}`}>
                       {card.title}
                     </h3>
-                    <p className={`text-sm font-semibold leading-snug mb-4 ${card.textColor}`}>
+                    <p className={`text-[15px] font-semibold leading-snug mb-4 ${card.textColor}`}>
                       {card.subtitle}
                     </p>
                     
                     {/* Estrellas */}
-                    <div className="flex items-center gap-1 mt-2">
-                      <Star size={18} className="fill-[#FF690B] stroke-[#FF690B]" />
-                      <span className="text-base font-bold text-slate-800 ml-1">{card.rating}</span>
+                    <div className="flex items-center gap-1.5 mt-2">
+                      <Star size={20} className="fill-[#FF690B] stroke-[#FF690B]" />
+                      <span className="text-lg font-bold text-slate-800 ml-1">{card.rating}</span>
                       <span className="text-gray-400 text-sm ml-2">| {card.ratingText}</span>
                     </div>
                   </div>
 
                   {/* Imagen de Teléfono Maquetado */}
-                  <div className="w-[110px] shrink-0 relative flex justify-end">
+                  <div className="w-[125px] shrink-0 relative flex justify-end">
                     <img 
                       src={card.imageUrl} 
                       className="w-full h-auto object-contain drop-shadow-md" 
@@ -152,18 +152,18 @@ export default function RichProductCards({ onVerifyAccess, verifyLoading }) {
                 <div className="h-px bg-slate-100 w-full mb-5" />
 
                 {/* Contenido principal */}
-                <div className="space-y-4 text-sm mb-8">
+                <div className="space-y-4 text-base mb-8">
                   <p className="text-slate-600 leading-snug">
-                    <span className="font-bold text-[#FF690B]">Ideal si:</span> {card.ideal}
+                    <span className={`font-bold ${card.textColor}`}>Ideal si:</span> {card.ideal}
                   </p>
                   
                   <p className="text-slate-600 leading-snug">
-                    <span className="font-bold text-[#FF690B]">Beneficios:</span> {card.benefits}
+                    <span className={`font-bold ${card.textColor}`}>Beneficios:</span> {card.benefits}
                   </p>
 
                   <ul className="space-y-3 mt-4">
                     {card.bullets.map((bullet, idx) => (
-                      <li key={idx} className="flex items-start gap-2.5 text-slate-800 text-sm leading-snug">
+                      <li key={idx} className="flex items-start gap-2.5 text-slate-800 text-[15px] leading-snug">
                         <span className="text-black font-black text-lg leading-none shrink-0">•</span>
                         <span>{bullet}</span>
                       </li>
@@ -175,12 +175,12 @@ export default function RichProductCards({ onVerifyAccess, verifyLoading }) {
               {/* Botón de acción y características en el pie */}
               <div className="space-y-5">
                 {/* Iconos del pie */}
-                <div className="flex items-center gap-6 text-xs font-bold border-t border-slate-100 pt-4">
+                <div className="flex items-center gap-6 text-sm font-bold border-t border-slate-100 pt-4">
                   {card.footerIcons.map((item, idx) => {
                     const Icon = item.icon;
                     return (
-                      <div key={idx} className="flex items-center gap-1.5">
-                        <Icon size={18} className="text-[#363C98]" />
+                      <div key={idx} className="flex items-center gap-2">
+                        <Icon size={20} className="text-[#363C98]" />
                         <span className={card.textColor}>{item.text}</span>
                       </div>
                     );
@@ -189,7 +189,7 @@ export default function RichProductCards({ onVerifyAccess, verifyLoading }) {
 
                 {/* Botón */}
                 <Link href={card.btnLink} className="block w-full">
-                  <button className={`w-full text-white font-bold py-3.5 px-6 rounded-2xl text-base transition-all shadow-md cursor-pointer ${card.btnBg}`}>
+                  <button className={`w-full text-white font-bold py-4 px-6 rounded-2xl text-lg transition-all shadow-md cursor-pointer ${card.btnBg}`}>
                     {card.btnText}
                   </button>
                 </Link>

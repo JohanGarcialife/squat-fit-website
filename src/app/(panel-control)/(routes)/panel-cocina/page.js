@@ -78,7 +78,7 @@ export default function CocinaPage() {
   });
 
   return (
-    <div className="w-full max-w-6xl mx-auto p-6 md:p-12 min-h-screen">
+    <div className="w-full max-w-7xl mx-auto p-6 md:p-12 min-h-screen">
       
       {/* Title */}
       <h1 className="text-[#3932C0] text-5xl font-bold mb-16">Cocina</h1>
