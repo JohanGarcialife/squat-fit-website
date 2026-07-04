@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { Star, BookOpen, Utensils, Users, Play, RefreshCw, Compass, Award, FileSignature } from 'lucide-react';
+import { Star, BookOpen, Utensils, Users, Play, RefreshCw, Compass, Award, ClipboardList } from 'lucide-react';
 
 export default function RichProductCards({ onVerifyAccess, verifyLoading }) {
   const cards = [
@@ -26,7 +26,7 @@ export default function RichProductCards({ onVerifyAccess, verifyLoading }) {
         'Plan estructurado para marcar y ganar forma muscular.'
       ],
       footerIcons: [
-        { icon: FileSignature, text: 'Navegación fácil' },
+        { icon: ClipboardList, text: 'Navegación fácil' },
         { icon: Utensils, text: '+150 recetas' }
       ],
       btnText: 'Explorar el libro',
@@ -53,7 +53,7 @@ export default function RichProductCards({ onVerifyAccess, verifyLoading }) {
         'Seguimiento para ajustar el rumbo según tu evolución real.'
       ],
       footerIcons: [
-        { icon: FileSignature, text: 'Método paso a paso' },
+        { icon: ClipboardList, text: 'Método paso a paso' },
         { icon: Users, text: 'Acompañamiento' }
       ],
       btnText: 'Empezar mi cambio',
@@ -131,13 +131,11 @@ export default function RichProductCards({ onVerifyAccess, verifyLoading }) {
                     </p>
                     
                     {/* Estrellas */}
-                    <div className="flex items-start gap-1 mt-2">
-                      <Star size={20} className="fill-[#FF690B] stroke-[#FF690B] shrink-0 mt-0.5" />
-                      <div className="text-base font-bold text-slate-800 leading-snug ml-1">
-                        <span>{card.rating}</span>
-                        <span className="text-gray-300 mx-1.5 font-normal">|</span>
-                        <span className="text-gray-400 font-medium text-sm">{card.ratingText}</span>
-                      </div>
+                    <div className="flex items-center gap-1.5 mt-2 flex-wrap text-sm text-gray-400 font-medium">
+                      <Star size={18} className="fill-[#FF690B] stroke-[#FF690B] shrink-0" />
+                      <span className="font-bold text-slate-800">{card.rating}</span>
+                      <span className="text-gray-300">|</span>
+                      <span>{card.ratingText}</span>
                     </div>
                   </div>
 
@@ -166,8 +164,8 @@ export default function RichProductCards({ onVerifyAccess, verifyLoading }) {
 
                   <ul className="space-y-3 mt-4">
                     {card.bullets.map((bullet, idx) => (
-                      <li key={idx} className="flex items-start gap-2.5 text-slate-800 text-[15px] leading-snug">
-                        <span className="text-black font-black text-lg leading-none shrink-0">•</span>
+                      <li key={idx} className="flex items-start gap-3 text-slate-800 text-[15px] leading-snug">
+                        <div className="w-1.5 h-1.5 rounded-full bg-black shrink-0 mt-2"></div>
                         <span>{bullet}</span>
                       </li>
                     ))}
@@ -178,13 +176,13 @@ export default function RichProductCards({ onVerifyAccess, verifyLoading }) {
               {/* Botón de acción y características en el pie */}
               <div className="space-y-5">
                 {/* Iconos del pie */}
-                <div className="flex items-center gap-6 text-sm font-bold border-t border-slate-100 pt-4">
+                <div className="flex items-center justify-between text-[13px] font-bold border-t border-slate-100 pt-4">
                   {card.footerIcons.map((item, idx) => {
                     const Icon = item.icon;
                     return (
-                      <div key={idx} className="flex items-center gap-2">
-                        <Icon size={20} className="text-[#363C98]" />
-                        <span className={card.textColor}>{item.text}</span>
+                      <div key={idx} className="flex items-center gap-1.5">
+                        <Icon size={18} className="text-[#363C98] shrink-0" />
+                        <span className={`${card.textColor} leading-none`}>{item.text}</span>
                       </div>
                     );
                   })}
