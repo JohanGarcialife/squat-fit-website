@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { Star, BookOpen, Utensils, Users, Play, RefreshCw, Compass, Award, ClipboardList } from 'lucide-react';
+import { Star, BookOpen, Utensils, Users, Video, RefreshCw, Compass, Award, ClipboardList } from 'lucide-react';
 
 export default function RichProductCards({ onVerifyAccess, verifyLoading }) {
   const cards = [
@@ -80,7 +80,7 @@ export default function RichProductCards({ onVerifyAccess, verifyLoading }) {
         'Entiende la ciencia sin tecnicismos y aplícala desde el día 1.'
       ],
       footerIcons: [
-        { icon: Play, text: 'Vídeos paso a paso' },
+        { icon: Video, text: 'Vídeos paso a paso' },
         { icon: RefreshCw, text: 'Actualizaciones' }
       ],
       btnText: 'Conocer el curso',
@@ -179,10 +179,12 @@ export default function RichProductCards({ onVerifyAccess, verifyLoading }) {
                 <div className="flex items-center justify-between text-[13px] font-bold border-t border-slate-100 pt-4">
                   {card.footerIcons.map((item, idx) => {
                     const Icon = item.icon;
+                    const iconColor = card.id === 'fuerte-definido' ? 'text-[#FF690B]' : 'text-[#363C98]';
+                    const textColor = card.id === 'fuerte-definido' ? 'text-[#363C98]' : 'text-[#FF690B]';
                     return (
                       <div key={idx} className="flex items-center gap-1.5">
-                        <Icon size={18} className="text-[#363C98] shrink-0" />
-                        <span className={`${card.textColor} leading-none`}>{item.text}</span>
+                        <Icon size={18} className={`${iconColor} shrink-0`} />
+                        <span className={`${textColor} leading-none`}>{item.text}</span>
                       </div>
                     );
                   })}
