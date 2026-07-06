@@ -6,62 +6,32 @@ export default function Description() {
       <div className="max-w-6xl mx-auto">
         <div className="grid md:grid-cols-2 gap-8">
           {/* Este libro es para ti si... */}
-          <div className="bg-[rgba(57,50,192,0.5)] rounded-[40px] p-10 md:p-12">
-            <h2 className="text-3xl md:text-7xl font-bold text-white mb-8">
+          <div className="bg-secondary/20 rounded-[40px] py-10 px-8 md:p-12">
+            <h2 className="text-4xl md:text-5xl font-bold text-black mb-7">
               Este libro es para ti si...
             </h2>
-            <ul className="space-y-4 text-white">
-              <li className="flex items-start gap-3">
-                <span className="text-xl mt-1">•</span>
-                <span className="text-2xl">Quieres comer bien sin obsesionarte</span>
-              </li>
-              <li className="flex items-start gap-3">
-                <span className="text-xl mt-1">•</span>
-                <span className="text-2xl">Buscas recetas ricas y fáciles</span>
-              </li>
-              <li className="flex items-start gap-3">
-                <span className="text-xl mt-1">•</span>
-                <span className="text-2xl">Te va la dieta flexible</span>
-              </li>
-              <li className="flex items-start gap-3">
-                <span className="text-xl mt-1">•</span>
-                <span className="text-2xl">Necesitas más constancia sin aburrirte</span>
-              </li>
-              <li className="flex items-start gap-3">
-                <span className="text-xl mt-1">•</span>
-                <span className="text-2xl">Quieres cenas, desayunos y postres que puedas repetir</span>
-              </li>
-              <li className="flex items-start gap-3">
-                <span className="text-xl mt-1">•</span>
-                <span className="text-2xl">Valoras recetas rápidas para el día a día</span>
-              </li>
+            <ul className="space-y-5 text-black text-xl md:text-2xl">
+              <li className="flex gap-3"><span aria-hidden="true">✅</span><span>Quieres comer bien sin obsesionarte</span></li>
+              <li className="flex gap-3"><span aria-hidden="true">✅</span><span>Buscas recetas ricas y fáciles</span></li>
+              <li className="flex gap-3"><span aria-hidden="true">✅</span><span>Te va la dieta flexible</span></li>
+              <li className="flex gap-3"><span aria-hidden="true">✅</span><span>Necesitas más constancia sin aburrirte</span></li>
+              <li className="flex gap-3"><span aria-hidden="true">✅</span><span>Quieres cenas, desayunos y postres que puedas repetir</span></li>
+              <li className="flex gap-3"><span aria-hidden="true">✅</span><span>Valoras recetas rápidas para el día a día</span></li>
             </ul>
           </div>
 
           {/* No es para ti si... */}
-          <div className="bg-orange-100 rounded-[40px] p-10 md:p-12">
-            <h2 className="text-3xl md:text-7xl font-bold text-black mb-8">
+          <div className="bg-primary/20 rounded-[40px] py-10 px-8 md:p-12">
+            <h2 className="text-4xl md:text-5xl font-bold text-black mb-7">
               No es para ti si...
             </h2>
-            <ul className="space-y-4 text-black mb-8">
-              <li className="flex items-start gap-3">
-                <span className="text-xl mt-1">•</span>
-                <span className="text-2xl">Quieres una dieta rígida y cerrada</span>
-              </li>
-              <li className="flex items-start gap-3">
-                <span className="text-xl mt-1">•</span>
-                <span className="text-2xl">Esperas resultados sin hábitos</span>
-              </li>
-              <li className="flex items-start gap-3">
-                <span className="text-xl mt-1">•</span>
-                <span className="text-2xl">No quieres cocinar nada</span>
-              </li>
-              <li className="flex items-start gap-3">
-                <span className="text-xl mt-1">•</span>
-                <span className="text-2xl">Prefieres recetas complicadas antes que prácticas</span>
-              </li>
+            <ul className="space-y-5 text-black text-xl md:text-2xl mb-8">
+              <li className="flex gap-3"><span aria-hidden="true">❌</span><span>Quieres una dieta rígida y cerrada</span></li>
+              <li className="flex gap-3"><span aria-hidden="true">❌</span><span>Esperas resultados sin hábitos</span></li>
+              <li className="flex gap-3"><span aria-hidden="true">❌</span><span>No quieres cocinar nada</span></li>
+              <li className="flex gap-3"><span aria-hidden="true">❌</span><span>Prefieres recetas complicadas antes que prácticas</span></li>
             </ul>
-            <p className="text-black font-bold text-center text-2xl md:text-2xl leading-relaxed">
+            <p className="text-black font-bold text-center text-xl md:text-2xl leading-relaxed">
               Si sientes que el problema no es "saber qué hacer" sino "mantenerlo sin aburrirte" aquí tienes tu solución práctica.
             </p>
           </div>

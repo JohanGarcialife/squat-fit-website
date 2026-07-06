@@ -2,6 +2,7 @@
 
 import React from 'react';
 import Image from 'next/image';
+import LandingButton from '../../../../components/LandingButton';
 
 export default function InvestmentSection() {
   const handleScrollToPlans = () => {
@@ -32,12 +33,9 @@ export default function InvestmentSection() {
           </div>
 
           <div className="pt-4">
-            <button
-              onClick={handleScrollToPlans}
-              className="bg-[#FF690B] text-white px-10 sm:px-12 py-4 rounded-full font-bold text-lg sm:text-xl shadow-lg hover:shadow-[#FF690B]/30 hover:scale-[1.03] active:scale-[0.98] transition-all duration-300 cursor-pointer flex items-center gap-2"
-            >
+            <LandingButton variant="orange" size="lg" autoShine onClick={handleScrollToPlans} className="flex items-center gap-2">
               <span>👉</span> Reserva tu plaza
-            </button>
+            </LandingButton>
           </div>
 
         </div>

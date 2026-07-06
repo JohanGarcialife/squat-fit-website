@@ -9,9 +9,10 @@ export default function Content() {
          <TimelineStepper />
          </div>
         <div className='md:w-1/2 flex flex-col items-center gap-4'>
-          <div className='bg-primary rounded-full py-2 px-10 w-fit'>
-
-          <p className='font-bold text-white text-2xl'>Contenido</p>
+          <div className='flex items-center gap-4'>
+            <span className='w-12 sm:w-20 h-[2px] bg-primary rounded-full'></span>
+            <p className='font-bold text-primary tracking-[0.2em] text-xl sm:text-3xl uppercase'>Contenido</p>
+            <span className='w-12 sm:w-20 h-[2px] bg-primary rounded-full'></span>
           </div>
           <p className='font-bold text-primary text-center md:text-start text-6xl max-w-[300px] '>Échale un vistazo al temario</p>
           <Image src="/Group103.png" width={221} height={145} alt='icons'  />

@@ -2,6 +2,7 @@
 import useWindowSize from '@/hooks/UseWindowSize';
 import Image from 'next/image'
 import React from 'react'
+import LandingButton from '../../components/LandingButton';
 
 export default function StartPlan() {
   const { width } = useWindowSize();
@@ -13,9 +14,9 @@ export default function StartPlan() {
         <p className='text-white text-xl text-center mb-10'>
             Plazas limitadas para un seguimiento personalizado
         </p>
-        <button className="text-primary bg-white px-8 py-4 rounded-xl font-bold text-xl hover:opacity-90 shadow-lg transition">
+        <LandingButton variant="orange-light" size="lg" autoShine>
             Reserva tu plaza
-        </button>
+        </LandingButton>
 
         {/* <div className='lg:flex lg:flex-row lg:gap-16 px-7 lg:px-10  mt-40 lg:mt-44 mb-20 flex flex-row flex-wrap gap-10 items-center justify-center'>
 <Image src="/partners/logo-trainologym.png" width={184} height={38} alt='Partner' />

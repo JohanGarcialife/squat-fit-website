@@ -2,6 +2,7 @@
 import useWindowSize from '@/hooks/UseWindowSize';
 import Image from 'next/image'
 import React from 'react'
+import LandingButton from '../../components/LandingButton';
 
 export default function HeroSection() {
   const { width } = useWindowSize();
@@ -18,7 +19,7 @@ export default function HeroSection() {
 <div className='flex flex-row w-full items-center lg:items-start lg:justify-center'>
 <div className='flex flex-row items-center justify-center lg:justify-start w-full'>
 
-<button className=' text-white px-8 py-4 rounded-xl mt-8 font-bold text-xl bg-secondary hover:opacity-90'>Reserva tu plaza</button>
+<LandingButton variant="blue" size="lg" autoShine className='mt-8'>Reserva tu plaza</LandingButton>
 </div>
 </div>
 

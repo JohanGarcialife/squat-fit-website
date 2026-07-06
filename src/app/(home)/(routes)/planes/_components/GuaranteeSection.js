@@ -4,23 +4,27 @@ import React from 'react';
 import Image from 'next/image';
 
 export default function GuaranteeSection() {
-  // Genera un círculo festoneado (scalloped circle) dinámicamente en SVG
+  // Genera un círculo festoneado (scalloped circle) dinámicamente en SVG.
+  // Coordenadas redondeadas a 2 decimales: los últimos decimales de Math.cos/sin
+  // pueden variar entre el motor JS del servidor y el del navegador, y eso
+  // provocaba un error de hidratación de React.
+  const round = (n) => Math.round(n * 100) / 100;
   const generateScallopPath = (cx, cy, r1, r2, points) => {
     let path = '';
     for (let i = 0; i < points; i++) {
       const angle = (i * 2 * Math.PI) / points;
       const nextAngle = ((i + 1) * 2 * Math.PI) / points;
       const midAngle = angle + (nextAngle - angle) / 2;
-      
-      const x1 = cx + r1 * Math.cos(angle);
-      const y1 = cy + r1 * Math.sin(angle);
-      
-      const xm = cx + r2 * Math.cos(midAngle);
-      const ym = cy + r2 * Math.sin(midAngle);
-      
-      const x2 = cx + r1 * Math.cos(nextAngle);
-      const y2 = cy + r1 * Math.sin(nextAngle);
-      
+
+      const x1 = round(cx + r1 * Math.cos(angle));
+      const y1 = round(cy + r1 * Math.sin(angle));
+
+      const xm = round(cx + r2 * Math.cos(midAngle));
+      const ym = round(cy + r2 * Math.sin(midAngle));
+
+      const x2 = round(cx + r1 * Math.cos(nextAngle));
+      const y2 = round(cy + r1 * Math.sin(nextAngle));
+
       if (i === 0) {
         path += `M ${x1} ${y1} Q ${xm} ${ym} ${x2} ${y2} `;
       } else {

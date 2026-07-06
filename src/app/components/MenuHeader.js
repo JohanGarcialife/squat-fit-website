@@ -48,19 +48,19 @@ export default function MenuHeader() {
                     />
                 </Link>
 
-                <div className='flex gap-9 text-secondary text-2xl justify-start'> {/* Enlaces ahora justificados a la izquierda dentro de su grupo */}
+                <div className='flex gap-5 text-secondary text-2xl justify-start'> {/* Enlaces ahora justificados a la izquierda dentro de su grupo */}
                     <Link href="/cocina">
-                        <p className={active === 'cocina' ? 'text-primary font-bold' : 'text-secondary'}>
+                        <p className={`px-4 py-1.5 rounded-2xl transition-colors ${active === 'cocina' ? 'text-primary font-bold bg-[#FF690B]/5' : 'text-secondary hover:text-primary hover:bg-[#FF690B]/5'}`}>
                             Cocina
                         </p>
                     </Link>
                     <Link href="/planes">
-                        <p className={active === 'planes' ? 'text-primary font-bold' : 'text-secondary'}>
+                        <p className={`px-4 py-1.5 rounded-2xl transition-colors ${active === 'planes' ? 'text-primary font-bold bg-[#FF690B]/5' : 'text-secondary hover:text-primary hover:bg-[#FF690B]/5'}`}>
                             Planes
                         </p>
                     </Link>
                     <Link href="/cursos">
-                        <p className={active === 'cursos' ? 'text-primary font-bold' : 'text-secondary'}>
+                        <p className={`px-4 py-1.5 rounded-2xl transition-colors ${active === 'cursos' ? 'text-primary font-bold bg-[#FF690B]/5' : 'text-secondary hover:text-primary hover:bg-[#FF690B]/5'}`}>
                             Cursos
                         </p>
                     </Link>
@@ -74,7 +74,10 @@ export default function MenuHeader() {
                 {isClient && isAuth ? (
                     <>
                     <Link href="/panel-control">
-                        <button className='bg-primary text-white px-6 py-2 rounded-[20px] font-bold text-xl hover:opacity-80 transition cursor-pointer'>Inicio</button>
+                        <button className='relative group overflow-hidden bg-secondary hover:bg-[#E7E6FF] hover:text-[#363C98] text-white px-6 py-2 rounded-[20px] font-bold text-xl hover:scale-105 active:scale-95 transition-all duration-300 cursor-pointer'>
+                            <span className="absolute inset-0 w-full h-full bg-white/20 -translate-x-full skew-x-12 group-hover:translate-x-full transition-transform duration-700 ease-out" aria-hidden="true" />
+                            Mi panel
+                        </button>
                     </Link>
                     <p className='text-secondary text-xl ml-2'>Hola, {user?.username}</p>
                         <button 
@@ -92,10 +95,16 @@ export default function MenuHeader() {
                 ) : (
                     <>
                         <Link href="/login">
-                            <button className='bg-background border-2 border-primary text-primary px-8 py-2 rounded-[20px] font-bold text-2xl hover:opacity-80 transition cursor-pointer'>Acceder</button>
+                            <button className='relative group overflow-hidden bg-background border-2 border-primary text-primary hover:bg-primary hover:text-white px-8 py-2 rounded-[20px] font-bold text-2xl hover:scale-105 active:scale-95 transition-all duration-300 cursor-pointer'>
+                                <span className="absolute inset-0 w-full h-full bg-white/20 -translate-x-full skew-x-12 group-hover:translate-x-full transition-transform duration-700 ease-out" aria-hidden="true" />
+                                Acceder
+                            </button>
                         </Link>
                         <Link href="/register">
-                            <button className='bg-primary text-background px-8 py-2 rounded-[20px] font-bold hover:opacity-80 text-2xl transition cursor-pointer'>Registro</button>
+                            <button className='relative group overflow-hidden bg-primary hover:bg-[#FFEDE0] hover:text-[#FF690B] text-background px-8 py-2 rounded-[20px] font-bold hover:scale-105 active:scale-95 text-2xl transition-all duration-300 cursor-pointer'>
+                                <span className="absolute inset-0 w-full h-full bg-white/20 -translate-x-full skew-x-12 group-hover:translate-x-full transition-transform duration-700 ease-out" aria-hidden="true" />
+                                Registro
+                            </button>
                         </Link>
                     </>
                 )}

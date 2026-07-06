@@ -1,4 +1,5 @@
 import React from 'react'
+import Reveal from '../../../components/Reveal'
 import HeroSection from './_components/HeroSection'
 import Benefits from './_components/Benefits'
 import Testimonials from './_components/Testimonials'
@@ -13,14 +14,14 @@ export default function page() {
   return (
     <div className='min-h-screen'>
         <HeroSection />
-        <Benefits />
-        <Testimonials />
-        <CourseContent />
-        <CoursesCarousel />
-       <GoalsAndBenefits />
-       <Content />
-       <CTO />
-       <FAQ />
+        <Reveal><Benefits /></Reveal>
+        <Reveal><Testimonials /></Reveal>
+        <Reveal><CourseContent /></Reveal>
+        <Reveal><CoursesCarousel /></Reveal>
+        <Reveal><GoalsAndBenefits /></Reveal>
+        <Reveal><Content /></Reveal>
+        <Reveal><CTO /></Reveal>
+        <Reveal><FAQ /></Reveal>
     </div>
   )
 }

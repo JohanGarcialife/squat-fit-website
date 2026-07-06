@@ -1,4 +1,5 @@
 import React from 'react';
+import Reveal from '../../../components/Reveal';
 import HeroPlanes from './_components/HeroPlanes';
 import MethodSection from './_components/MethodSection';
 import ThreePillars from './_components/ThreePillars';
@@ -14,15 +15,15 @@ export default function page() {
   return (
     <div className="min-h-screen bg-white">
       <HeroPlanes />
-      <MethodSection />
-      <ThreePillars />
-      <WhyWeFail />
-      <InvestmentSection />
-      <RelatableSection />
-      <StepsSection />
-      <PlanesTestimonials />
-      <GuaranteeSection />
-      <FinalCTA />
+      <Reveal><MethodSection /></Reveal>
+      <Reveal><ThreePillars /></Reveal>
+      <Reveal><WhyWeFail /></Reveal>
+      <Reveal><InvestmentSection /></Reveal>
+      <Reveal><RelatableSection /></Reveal>
+      <Reveal><StepsSection /></Reveal>
+      <Reveal><PlanesTestimonials /></Reveal>
+      <Reveal><GuaranteeSection /></Reveal>
+      <Reveal><FinalCTA /></Reveal>
     </div>
   );
 }

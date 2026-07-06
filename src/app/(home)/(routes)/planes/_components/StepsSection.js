@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { ClipboardList, Pencil, Calendar, Phone, CheckCircle2, Dumbbell, ArrowRight, Check } from 'lucide-react';
+import LandingButton from '../../../../components/LandingButton';
 
 export default function StepsSection() {
   const handleScrollToPlans = () => {
@@ -120,12 +121,9 @@ export default function StepsSection() {
         </div>
 
         {/* --- Botón CTA --- */}
-        <button
-          onClick={handleScrollToPlans}
-          className="bg-[#FF690B] text-white px-10 sm:px-12 py-4 rounded-full font-bold text-lg sm:text-xl shadow-lg hover:shadow-[#FF690B]/30 hover:scale-[1.03] active:scale-[0.98] transition-all duration-300 cursor-pointer"
-        >
+        <LandingButton variant="orange" size="lg" autoShine onClick={handleScrollToPlans}>
           Reserva tu plaza
-        </button>
+        </LandingButton>
 
         {/* --- Subtexto --- */}
         <span className="mt-4 text-slate-400 text-sm sm:text-base font-semibold tracking-wide text-center">

@@ -8,8 +8,10 @@ export default function HeroSection() {
     <div className='px-7 md:px-24 md:flex flex flex-col md:flex-row justify-center items-center py-24'>
 
         <div className='md:pl-14 md:w-1/2 mb-16 md:mb-0 flex flex-col items-center md:items-start '>
-        <div className='bg-primary w-fit px-4 py-2 text-2xl rounded-full'>
-            <p className='text-white font-bold'>Formación</p>
+        <div className='flex items-center gap-4'>
+            <span className='w-12 sm:w-20 h-[2px] bg-primary rounded-full'></span>
+            <p className='text-primary font-bold tracking-[0.2em] text-xl sm:text-3xl uppercase'>Formación</p>
+            <span className='w-12 sm:w-20 h-[2px] bg-primary rounded-full'></span>
         </div>
 
         <h2 className='font-bold text-secondary text-center md:text-start text-6xl md:text-8xl my-8'>Fuerte y definid@</h2>

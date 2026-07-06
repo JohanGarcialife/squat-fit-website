@@ -2,6 +2,7 @@
 import Image from 'next/image'
 import React from 'react'
 import { FaCheck } from 'react-icons/fa'
+import LandingButton from '../../components/LandingButton';
 
 export default function HowItWorks() {
   return (
@@ -89,9 +90,9 @@ export default function HowItWorks() {
 
         </div>
 
-        <button className='mt-12 w-full max-w-[300px] md:max-w-none md:w-auto bg-primary text-white font-bold text-xl px-12 py-4 rounded-xl shadow-[0_4px_20px_rgba(255,105,11,0.3)] hover:opacity-90 transition'>
+        <LandingButton variant="orange" size="lg" autoShine className='mt-12 w-full max-w-[300px] md:max-w-none md:w-auto'>
             Aplicar al programa
-        </button>
+        </LandingButton>
     </div>
   )
 }
