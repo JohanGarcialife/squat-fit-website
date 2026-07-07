@@ -3,8 +3,8 @@
 import React from 'react';
 import Link from 'next/link';
 
-const LINK_CLASS = 'text-[#FF690B] font-medium text-sm sm:text-base leading-relaxed hover:text-[#363C98] transition-colors';
-const HEADING_CLASS = 'text-[#363C98] font-bold text-base sm:text-lg mb-4 sm:mb-6';
+const LINK_CLASS = 'text-[#FF690B] font-medium text-[13px] sm:text-base leading-snug sm:leading-relaxed hover:text-[#363C98] transition-colors';
+const HEADING_CLASS = 'text-[#363C98] font-bold text-[15px] sm:text-lg leading-snug mb-4 sm:mb-6';
 
 export default function Footer() {
   return (
@@ -25,7 +25,7 @@ export default function Footer() {
           {/* Columna 1: Nuestros Cursos */}
           <div>
             <h4 className={HEADING_CLASS}>Nuestros cursos</h4>
-            <ul className="space-y-4">
+            <ul className="space-y-3 sm:space-y-4">
               <li><Link href="/cursos" className={LINK_CLASS}>Curso de la mujer</Link></li>
               <li><Link href="/cocina" className={LINK_CLASS}>Libros de Cocina</Link></li>
               <li><Link href="/cursos" className={LINK_CLASS}>Fuerte y Definid@</Link></li>
@@ -36,7 +36,7 @@ export default function Footer() {
           {/* Columna 2: Squat Fit */}
           <div>
             <h4 className={HEADING_CLASS}>Squat Fit</h4>
-            <ul className="space-y-4">
+            <ul className="space-y-3 sm:space-y-4">
               <li><Link href="/nosotros" className={LINK_CLASS}>Nosotros</Link></li>
               <li><Link href="/politicas" className={LINK_CLASS}>Políticas</Link></li>
               <li><Link href="/contacto" className={LINK_CLASS}>Contacto</Link></li>
@@ -46,7 +46,7 @@ export default function Footer() {
           {/* Columna 3: Otros */}
           <div>
             <h4 className={HEADING_CLASS}>Otros</h4>
-            <ul className="space-y-4">
+            <ul className="space-y-3 sm:space-y-4">
               <li><Link href="/profile-panel" className={LINK_CLASS}>Mi Cuenta</Link></li>
               <li><Link href="/login" className={LINK_CLASS}>Iniciar Sesión</Link></li>
               <li><Link href="/register" className={LINK_CLASS}>Registrarme</Link></li>

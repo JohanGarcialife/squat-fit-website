@@ -4,35 +4,53 @@ import React, { useEffect, useRef, useState } from 'react';
 
 // Envuelve una sección para que entre con un fundido + deslizamiento suave
 // la primera vez que aparece en pantalla al hacer scroll.
-// Respeta la preferencia de "reducir movimiento" del sistema del usuario.
+// Usa cálculo de posición por scroll (no IntersectionObserver): en Safari de
+// iOS el observer no disparaba de forma fiable y las secciones se quedaban
+// invisibles. Respeta la preferencia de "reducir movimiento".
 export default function Reveal({ children, delay = 0 }) {
   const ref = useRef(null);
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    const element = ref.current;
-    if (!element) return;
+    const el = ref.current;
+    if (!el) return;
 
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
       setVisible(true);
       return;
     }
 
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setVisible(true);
-          observer.disconnect();
-        }
-      },
-      // Umbral bajo: en secciones muy altas (o parcialmente recortadas en
-      // pantallas estrechas) un umbral mayor podía no dispararse nunca en iOS
-      // y la sección se quedaba invisible.
-      { threshold: 0.05, rootMargin: '0px 0px -40px 0px' }
-    );
+    let done = false;
+    const check = () => {
+      if (done) return;
+      const rect = el.getBoundingClientRect();
+      // Revelar cuando el borde superior entra en el 88% inferior de la pantalla
+      if (rect.top < window.innerHeight * 0.88 && rect.bottom > 0) {
+        done = true;
+        setVisible(true);
+        window.removeEventListener('scroll', onScroll);
+        window.removeEventListener('resize', onScroll);
+      }
+    };
 
-    observer.observe(element);
-    return () => observer.disconnect();
+    let ticking = false;
+    const onScroll = () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(() => {
+        ticking = false;
+        check();
+      });
+    };
+
+    check(); // por si ya está en pantalla al cargar
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll);
+
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('resize', onScroll);
+    };
   }, []);
 
   return (
