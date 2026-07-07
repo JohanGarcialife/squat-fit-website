@@ -3,7 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 
-const LINK_CLASS = 'text-[#FF690B] font-medium text-[13px] sm:text-base leading-snug sm:leading-relaxed hover:text-[#363C98] transition-colors';
+const LINK_CLASS = 'text-[#FF690B] font-medium text-xs sm:text-base leading-snug sm:leading-relaxed hover:text-[#363C98] transition-colors';
 const HEADING_CLASS = 'text-[#363C98] font-bold text-[15px] sm:text-lg leading-snug mb-4 sm:mb-6';
 
 export default function Footer() {
@@ -21,12 +21,12 @@ export default function Footer() {
         </div>
 
         {/* Las 3 columnas de enlaces: también 3 en móvil, con aire entre ellas */}
-        <div className="flex-1 grid grid-cols-3 gap-6 sm:gap-12 lg:gap-16 text-center sm:text-left">
-          {/* Columna 1: Nuestros Cursos */}
+        <div className="flex-1 grid grid-cols-3 gap-3 sm:gap-12 lg:gap-16 text-center sm:text-left">
+          {/* Columna 1: Cursos */}
           <div>
-            <h4 className={HEADING_CLASS}>Nuestros cursos</h4>
+            <h4 className={HEADING_CLASS}>Cursos</h4>
             <ul className="space-y-3 sm:space-y-4">
-              <li><Link href="/cursos" className={LINK_CLASS}>Curso de la mujer</Link></li>
+              <li><Link href="/cursos" className={LINK_CLASS}>Curso La Mujer</Link></li>
               <li><Link href="/cocina" className={LINK_CLASS}>Libros de Cocina</Link></li>
               <li><Link href="/cursos" className={LINK_CLASS}>Fuerte y Definid@</Link></li>
               <li><Link href="/cursos" className={LINK_CLASS}>Entrena en Casa</Link></li>
