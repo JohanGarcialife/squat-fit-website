@@ -13,7 +13,9 @@ const STEPS = [
 
 // Cada tarjeta tiene su propio detector: anima al entrar ELLA en pantalla.
 function StepCard({ step }) {
-  const [ref, visible] = useInView(0.8);
+  // Ratio bajo: la tarjeta anima cuando está más centrada, DESPUÉS de que el
+  // conector (arriba, con ratio alto) ya haya revelado su check.
+  const [ref, visible] = useInView(0.6);
   return (
     <div className='flex flex-col items-center text-center w-full md:w-1/3 relative z-10'>
       <div
@@ -47,7 +49,9 @@ function StepCard({ step }) {
 // rebote. Ratio bajo (0.65) para que dispare cuando el conector está más
 // centrado en pantalla y se vea la animación al llegar a él con el scroll.
 function MobileConnector() {
-  const [ref, visible] = useInView(0.65);
+  // Ratio alto: el conector (line + check) revela en cuanto asoma, ANTES que la
+  // tarjeta siguiente, que anima más tarde con su ratio bajo.
+  const [ref, visible] = useInView(0.9);
   return (
     <div ref={ref} className="flex md:hidden items-center justify-center w-full py-3 relative z-0">
       <div
@@ -56,7 +60,7 @@ function MobileConnector() {
         }`}
       ></div>
       <div
-        style={{ transitionDelay: `${visible ? 250 : 0}ms` }}
+        style={{ transitionDelay: `${visible ? 120 : 0}ms` }}
         className={`w-8 h-8 rounded-[10px] bg-primary flex items-center justify-center absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 transition-transform duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${
           visible ? 'scale-100' : 'scale-0'
         }`}
