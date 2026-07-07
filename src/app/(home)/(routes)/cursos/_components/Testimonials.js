@@ -84,7 +84,7 @@ const Testimonials = () => {
      className: 'center',
      centerMode: w < 1280,
      infinite: true,
-     centerPadding: w >= 1280 ? '0px' : w >= 640 ? '40px' : '20px',
+     centerPadding: w >= 1280 ? '0px' : w >= 640 ? '48px' : '38px',
      slidesToShow: w >= 1280 ? 2 : 1,
      speed: 300,
      arrows: false,
@@ -111,7 +111,7 @@ const Testimonials = () => {
                                     className="cursor-pointer px-3 py-5 "
                                     onClick={() => sliderRef.current && sliderRef.current.slickGoTo(index)}
                                 >
-                                    <div className="bg-[#3932C01A] h-full w-full lg:w-[420px] p-8 rounded-3xl shadow-lg border border-gray-100 hover:shadow-xl transition-shadow duration-300  flex flex-col items-center text-center">
+                                    <div className="bg-[#3932C01A] h-full w-full lg:w-[420px] p-8 rounded-3xl shadow-lg border border-[#3932C0]/15 hover:shadow-xl transition-shadow duration-300  flex flex-col items-center text-center">
                                         <div className="relative  mb-6">
                                             <Image
                                                 src={testimonial.image}
@@ -144,7 +144,7 @@ const Testimonials = () => {
                                     className="cursor-pointer px-3 py-5 "
                                     onClick={() => sliderRef.current && sliderRef.current.slickGoTo(index)}
                                 >
-                                    <div className="bg-[#3932C01A] h-full w-full lg:w-[420px] p-8 rounded-3xl shadow-lg border border-gray-100 hover:shadow-xl transition-shadow duration-300  flex flex-col items-center text-center">
+                                    <div className="bg-[#3932C01A] h-full w-full lg:w-[420px] p-8 rounded-3xl shadow-lg border border-[#3932C0]/15 hover:shadow-xl transition-shadow duration-300  flex flex-col items-center text-center">
                                       <div className='flex gap-5 flex-row items-center '>
 
                                         <div className="relative  mb-6">
@@ -178,65 +178,21 @@ const Testimonials = () => {
                         
                         }
 
-                        {isMobile ? (
-                            <div className="flex  items-center justify-between mt-4">
-                                <div
-                                    className="cursor-pointer"
-                                    onClick={() => sliderRef.current.slickPrev()}
-                                >
-                                    <svg
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        width="40"
-                                        height="40"
-                                        viewBox="0 0 24 24"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        strokeWidth="2"
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        className="icon icon-tabler icons-tabler-outline icon-tabler-chevron-compact-left"
-                                    >
-                                        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                                        <path d="M13 20l-3 -8l3 -8" />
-                                    </svg>
-                                </div>
-                                <div
-                                    className="cursor-pointer"
-                                    onClick={() => sliderRef.current.slickNext()}
-                                >
-                                    <svg
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        width="40"
-                                        height="40"
-                                        viewBox="0 0 24 24"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        strokeWidth="2"
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        className="icon icon-tabler icons-tabler-outline icon-tabler-chevron-compact-right"
-                                    >
-                                        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                                        <path d="M11 4l3 8l-3 8" />
-                                    </svg>
-                                </div>
-                            </div>
-                        ) : (
-                            <>
-                                <div
-                                    className="cursor-pointer absolute top-1/2 left-[-50px] -translate-y-1/2 z-10"
-                                    onClick={() => sliderRef.current.slickPrev()}
-                                >
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="icon icon-tabler icons-tabler-outline icon-tabler-chevron-compact-left"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M13 20l-3 -8l3 -8" /></svg>
-                                </div>
-                                <div
-                                    className="cursor-pointer absolute top-1/2 right-[-50px] -translate-y-1/2 z-10"
-                                    onClick={() => sliderRef.current.slickNext()}
-                                >
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="icon icon-tabler icons-tabler-outline icon-tabler-chevron-compact-right"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M11 4l3 8l-3 8" /></svg>
-                                </div>
-                            </>
-                        )}
+                        {/* Flechas circulares laterales: fondo naranja suave, icono naranja principal */}
+                        <button
+                            onClick={() => sliderRef.current && sliderRef.current.slickPrev()}
+                            aria-label="Anterior"
+                            className="cursor-pointer absolute top-1/2 left-0 sm:left-[-10px] -translate-y-1/2 z-20 bg-[#FFEDE0] text-[#FF690B] rounded-full p-2 shadow-md hover:scale-110 active:scale-95 transition-transform duration-200"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+                        </button>
+                        <button
+                            onClick={() => sliderRef.current && sliderRef.current.slickNext()}
+                            aria-label="Siguiente"
+                            className="cursor-pointer absolute top-1/2 right-0 sm:right-[-10px] -translate-y-1/2 z-20 bg-[#FFEDE0] text-[#FF690B] rounded-full p-2 shadow-md hover:scale-110 active:scale-95 transition-transform duration-200"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+                        </button>
                     </div>
                 </div>
             </div>
