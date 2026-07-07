@@ -11,19 +11,30 @@ const STEPS = [
   { n: 3, icon: '/icons/muscle.png', alt: 'Acompañamiento', strong: 'Diseñamos tu plan', rest: ' y empiezas con el acompañamiento' },
 ];
 
-// Cada tarjeta tiene su propio detector: así anima al entrar ELLA en pantalla
-// (antes un único detector en toda la sección disparaba todo de golpe y en
-// móvil los conectores ya habían animado antes de llegar a ellos con el scroll).
-function StepCard({ step }) {
-  const [ref, visible] = useInView(0.85);
+// Cada tarjeta tiene su propio detector: anima al entrar ELLA en pantalla.
+// showCheck: en escritorio, un check en el borde izquierdo (sobre la línea,
+// en el hueco entre tarjetas) que aparece con rebote.
+function StepCard({ step, showCheck }) {
+  const [ref, visible] = useInView(0.8);
   return (
     <div className='flex flex-col items-center text-center w-full md:w-1/3 relative z-10'>
       <div
         ref={ref}
-        className={`bg-white rounded-2xl md:rounded-3xl shadow-[0_4px_20px_rgb(0,0,0,0.06)] md:shadow-xl p-8 flex flex-col items-center justify-center min-h-[260px] w-full max-w-[300px] md:max-w-none md:w-[90%] lg:w-[80%] border border-gray-100 mx-auto transition-all duration-500 ease-out hover:scale-105 ${
+        className={`relative bg-white rounded-2xl md:rounded-3xl shadow-[0_4px_20px_rgb(0,0,0,0.06)] md:shadow-xl p-8 flex flex-col items-center justify-center min-h-[260px] w-full max-w-[300px] md:max-w-none md:w-[90%] lg:w-[80%] border border-gray-100 mx-auto transition-all duration-500 ease-out hover:scale-105 ${
           visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
         }`}
       >
+        {/* Check de escritorio, en el hueco a la izquierda de la tarjeta */}
+        {showCheck && (
+          <div
+            style={{ transitionDelay: `${visible ? 250 : 0}ms` }}
+            className={`hidden md:flex w-9 h-9 rounded-[12px] bg-primary shadow-md border-2 border-white items-center justify-center absolute -left-[calc(10%+18px)] top-[58%] -translate-y-1/2 z-20 transition-transform duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${
+              visible ? 'scale-100' : 'scale-0'
+            }`}
+          >
+            <FaCheck className='text-white text-sm' />
+          </div>
+        )}
         <div className='flex flex-row items-center justify-center gap-2 mb-4 md:mb-4'>
           <span className='w-8 h-8 rounded-full bg-primary/10 text-primary hidden md:flex items-center justify-center font-bold'>{step.n}</span>
           <p className='text-primary text-[32px] md:text-2xl font-bold'>Paso {step.n}</p>
@@ -45,10 +56,11 @@ function StepCard({ step }) {
   );
 }
 
-// Conector móvil: la línea se revela desde el centro y el check aparece con rebote,
-// cada uno al llegar a él con el scroll.
+// Conector móvil: la línea se revela desde el centro y el check aparece con
+// rebote. Ratio bajo (0.65) para que dispare cuando el conector está más
+// centrado en pantalla y se vea la animación al llegar a él con el scroll.
 function MobileConnector() {
-  const [ref, visible] = useInView(0.9);
+  const [ref, visible] = useInView(0.65);
   return (
     <div ref={ref} className="flex md:hidden items-center justify-center w-full py-3 relative z-0">
       <div
@@ -57,7 +69,7 @@ function MobileConnector() {
         }`}
       ></div>
       <div
-        style={{ transitionDelay: `${visible ? 200 : 0}ms` }}
+        style={{ transitionDelay: `${visible ? 250 : 0}ms` }}
         className={`w-8 h-8 rounded-[10px] bg-primary flex items-center justify-center absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 transition-transform duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${
           visible ? 'scale-100' : 'scale-0'
         }`}
@@ -69,8 +81,8 @@ function MobileConnector() {
 }
 
 export default function HowItWorks() {
-  // Detector solo para la línea horizontal de escritorio (que atraviesa las 3 tarjetas)
-  const [lineRef, lineVisible] = useInView(0.4);
+  // Detector para la línea horizontal de escritorio
+  const [lineRef, lineVisible] = useInView(0.5);
 
   return (
     <div className='w-full py-16 px-4 flex flex-col items-center bg-white'>
@@ -82,16 +94,16 @@ export default function HowItWorks() {
 
         {/* Línea conectora de escritorio: se revela desde el centro hacia los lados */}
         <div
-          className={`hidden md:block absolute top-[60%] left-[15%] w-[70%] h-1 bg-primary z-0 origin-center transition-transform duration-700 ease-out ${
+          className={`hidden md:block absolute top-[58%] left-[15%] w-[70%] h-1 bg-primary z-0 origin-center transition-transform duration-700 ease-out ${
             lineVisible ? 'scale-x-100' : 'scale-x-0'
           }`}
         ></div>
 
         <StepCard step={STEPS[0]} />
         <MobileConnector />
-        <StepCard step={STEPS[1]} />
+        <StepCard step={STEPS[1]} showCheck />
         <MobileConnector />
-        <StepCard step={STEPS[2]} />
+        <StepCard step={STEPS[2]} showCheck />
 
       </div>
 

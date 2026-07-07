@@ -48,7 +48,7 @@ export default function Comparision(props) {
               Un cambio físico que se mantiene
             </p>
             <p className="text-black text-center text-lg mt-8 max-w-[440px]">
-              Aprende a mantenerte sano y en forma; evita el efecto rebote y continúa progresando después de meses e incluso años, como cientos de miembros de nuestra comunidad.
+              Aprende a mantenerte en forma, evitar el efecto rebote y progresar igual que cientos de miembros de nuestra comunidad 👇🏼
             </p>
           </div>
           <div className="w-full">
@@ -68,7 +68,7 @@ export default function Comparision(props) {
           </div>
           <div className="lg:w-1/2 h-full flex flex-col items-start justify-center lg:max-w-[510px] ">
             <p className="text-primary font-bold text-6xl">Un cambio físico que se mantiene</p>
-            <p className="text-black text-lg mt-10">Aprende a mantenerte sano y en forma; evita el efecto rebote y continúa progresando después de meses e incluso años, como cientos de miembros de nuestra comunidad.</p>
+            <p className="text-black text-lg mt-10">Aprende a mantenerte en forma, evitar el efecto rebote y progresar igual que cientos de miembros de nuestra comunidad 👇🏼</p>
             <div className="w-full flex items-center justify-start gap-10">
               <LandingButton variant="orange" size="lg" autoShine className="mt-10 text-xl lg:text-2xl">
                 Reserva tu plaza
