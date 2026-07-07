@@ -91,10 +91,14 @@ html, body {
    el barrido de luz cruza el CTA solo, cada 4s. En escritorio no actúa
    (ahí el brillo va ligado al hover) y se desactiva si el usuario tiene
    "reducir movimiento" en su sistema. */
+/* Anima la propiedad `translate` (no `transform`): Tailwind v4 posiciona el
+   destello con `translate: var(--tw-translate-x)...`, así que la animación
+   debe tocar esa misma propiedad para que se vea en móvil. El sesgo (skew)
+   va por `transform` de la utilidad skew-x-12 y se mantiene estático. */
 @keyframes landing-sweep {
-  0% { transform: translateX(-100%) skewX(12deg); }
-  30% { transform: translateX(100%) skewX(12deg); }
-  100% { transform: translateX(100%) skewX(12deg); }
+  0% { translate: -100% 0; }
+  30% { translate: 100% 0; }
+  100% { translate: 100% 0; }
 }
 
 @media (hover: none) {

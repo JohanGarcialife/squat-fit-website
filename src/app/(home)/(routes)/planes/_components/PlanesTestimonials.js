@@ -60,48 +60,19 @@ export default function PlanesTestimonials() {
     };
   }, []);
 
+  // Configuración según ancho real (móvil primero si aún es desconocido):
+  // el motor "responsive" interno de slick no aplicaba bien en móvil y salían
+  // 3 tarjetas apretadas. speed bajo para que registre clics rápidos seguidos.
+  const w = width || 0;
   const settings = {
     className: 'center',
     centerMode: true,
     infinite: true,
-    centerPadding: '0px',
-    slidesToShow: isMobile ? 1 : 3,
-    speed: 500,
+    centerPadding: w >= 1280 ? '0px' : w >= 640 ? '40px' : '20px',
+    slidesToShow: w >= 1280 ? 3 : 1,
+    speed: 300,
     arrows: false,
-    responsive: [
-      {
-        breakpoint: 640,
-        settings: {
-          slidesToShow: 1,
-          centerMode: true,
-          centerPadding: '20px',
-        },
-      },
-      {
-        breakpoint: 768,
-        settings: {
-          slidesToShow: 1,
-          centerMode: true,
-          centerPadding: '40px',
-        },
-      },
-      {
-        breakpoint: 1024,
-        settings: {
-          slidesToShow: 1,
-          centerMode: true,
-          centerPadding: '60px',
-        },
-      },
-      {
-        breakpoint: 1280,
-        settings: {
-          slidesToShow: 3,
-          centerMode: true,
-          centerPadding: '0px',
-        },
-      },
-    ],
+    waitForAnimate: false, // registra clics rápidos sin esperar a que acabe la animación
   };
 
   const renderStars = (rating) => {
