@@ -39,10 +39,20 @@
 
 /* La web es de tema claro siempre: sin esto, a los usuarios con el móvil en
    modo oscuro les salía el fondo negro en zonas sin color declarado. */
+html {
+  background: #ffffff;
+  color-scheme: light;
+}
+
 body {
   background: var(--background);
   color: #171717;
-  color-scheme: light;
+}
+
+/* Cinturón de seguridad contra el desplazamiento lateral en móvil:
+   ningún elemento desbordado puede "ladear" la página. */
+html, body {
+  overflow-x: clip;
 }
 
 .slick-prev:before, .slick-next:before {

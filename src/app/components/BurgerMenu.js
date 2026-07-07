@@ -85,10 +85,14 @@ export default function BurgerMenu() {
         />
       )}
 
+      {/* Capa que recorta el drawer cuando está aparcado fuera de pantalla:
+          sin ella, iOS deja "arrastrar" la página hacia la zona invisible
+          (la web se veía ladeada y con bandas negras en móvil) */}
+      <div className={`fixed inset-0 z-50 overflow-hidden pointer-events-none ${show ? '' : 'invisible'}`} aria-hidden={!show}>
       {/* Drawer lateral: mismo concepto que el índice del panel
           (tarjeta crema flotante, cierre naranja, textos azules) */}
       <div
-        className={`fixed top-[20px] right-[20px] h-[calc(100vh-40px)] w-[300px] bg-[#FFF6F0] rounded-[40px] shadow-2xl z-50 flex flex-col py-8 px-6 transform transition-transform duration-300 ease-in-out overflow-y-auto ${
+        className={`pointer-events-auto absolute top-[20px] right-[20px] h-[calc(100vh-40px)] w-[300px] bg-[#FFF6F0] rounded-[40px] shadow-2xl flex flex-col py-8 px-6 transform transition-transform duration-300 ease-in-out overflow-y-auto ${
           show ? 'translate-x-0' : 'translate-x-[calc(100%+20px)]'
         }`}
       >
@@ -160,6 +164,7 @@ export default function BurgerMenu() {
             </>
           )}
         </div>
+      </div>
       </div>
        <ConfirmationModal
         isOpen={isModalOpen}
