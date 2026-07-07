@@ -9,16 +9,13 @@ export default function Comparision(props) {
   const { comparacion = [] } = props;
   const [currentIndex, setCurrentIndex] = useState(0);
 
+  // Dan la vuelta (loop) para que las flechas siempre estén disponibles
   const handleNext = () => {
-    if (currentIndex < comparacion.length - 1) {
-      setCurrentIndex(currentIndex + 1);
-    }
+    setCurrentIndex((i) => (i + 1) % comparacion.length);
   };
 
   const handlePrev = () => {
-    if (currentIndex > 0) {
-      setCurrentIndex(currentIndex - 1);
-    }
+    setCurrentIndex((i) => (i - 1 + comparacion.length) % comparacion.length);
   };
 
   if (comparacion.length === 0) {
@@ -54,8 +51,8 @@ export default function Comparision(props) {
           <div className="w-full">
             {slider}
           </div>
-          {/* Botón debajo de las fotos */}
-          <div className="w-full flex justify-center mt-10">
+          {/* Botón debajo de las fotos, con más separación del comparador */}
+          <div className="w-full flex justify-center mt-20">
             <LandingButton variant="orange" size="lg" autoShine className="w-[70%] max-w-[340px]">
               Reserva tu plaza
             </LandingButton>

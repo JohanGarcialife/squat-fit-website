@@ -72,17 +72,17 @@ export default function ComparisionCocina(props) {
           {/* Flechas */}
           <button
             onClick={() => sliderRef.current && sliderRef.current.slickPrev()}
-            className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/80 rounded-full p-1.5 shadow-md text-gray-500 hover:text-gray-700 hover:scale-110 transition-all duration-200 z-20 cursor-pointer"
+            className="absolute left-2 top-1/2 -translate-y-1/2 bg-[#FFEDE0] rounded-full p-1.5 text-[#FF690B] hover:scale-110 transition-transform duration-200 z-20 cursor-pointer"
             aria-label="Previous comparison"
           >
-            <ChevronLeft className="w-8 h-8" />
+            <ChevronLeft className="w-6 h-6" />
           </button>
           <button
             onClick={() => sliderRef.current && sliderRef.current.slickNext()}
-            className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/80 rounded-full p-1.5 shadow-md text-gray-500 hover:text-gray-700 hover:scale-110 transition-all duration-200 z-20 cursor-pointer"
+            className="absolute right-2 top-1/2 -translate-y-1/2 bg-[#FFEDE0] rounded-full p-1.5 text-[#FF690B] hover:scale-110 transition-transform duration-200 z-20 cursor-pointer"
             aria-label="Next comparison"
           >
-            <ChevronRight className="w-8 h-8" />
+            <ChevronRight className="w-6 h-6" />
           </button>
         </div>
       </div>

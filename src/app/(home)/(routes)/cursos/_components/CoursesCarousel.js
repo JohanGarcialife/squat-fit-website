@@ -141,81 +141,33 @@ const CoursesCarousel = () => {
 
             {isMobile ? (
               <div className="flex  items-center justify-between mt-4">
-                <div
-                  className="cursor-pointer"
+                <button
+                  aria-label="Anterior"
+                  className="cursor-pointer bg-[#FFEDE0] text-[#FF690B] rounded-full p-1.5 hover:scale-110 active:scale-95 transition-transform duration-200"
                   onClick={() => sliderRef.current.slickPrev()}>
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="40"
-                    height="40"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="icon icon-tabler icons-tabler-outline icon-tabler-chevron-compact-left">
-                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                    <path d="M13 20l-3 -8l3 -8" />
-                  </svg>
-                </div>
-                <div
-                  className="cursor-pointer"
+                  <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+                </button>
+                <button
+                  aria-label="Siguiente"
+                  className="cursor-pointer bg-[#FFEDE0] text-[#FF690B] rounded-full p-1.5 hover:scale-110 active:scale-95 transition-transform duration-200"
                   onClick={() => sliderRef.current.slickNext()}>
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="40"
-                    height="40"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="icon icon-tabler icons-tabler-outline icon-tabler-chevron-compact-right">
-                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                    <path d="M11 4l3 8l-3 8" />
-                  </svg>
-                </div>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+                </button>
               </div>
             ) : (
               <>
-                <div
-                  className="cursor-pointer absolute top-1/2 left-[-50px] -translate-y-1/2 z-10"
+                <button
+                  aria-label="Anterior"
+                  className="cursor-pointer absolute top-1/2 left-[-50px] -translate-y-1/2 z-10 bg-[#FFEDE0] text-[#FF690B] rounded-full p-1.5 hover:scale-110 active:scale-95 transition-transform duration-200"
                   onClick={() => sliderRef.current.slickPrev()}>
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="40"
-                    height="40"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="icon icon-tabler icons-tabler-outline icon-tabler-chevron-compact-left">
-                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                    <path d="M13 20l-3 -8l3 -8" />
-                  </svg>
-                </div>
-                <div
-                  className="cursor-pointer absolute top-1/2 right-[-50px] -translate-y-1/2 z-10"
+                  <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+                </button>
+                <button
+                  aria-label="Siguiente"
+                  className="cursor-pointer absolute top-1/2 right-[-50px] -translate-y-1/2 z-10 bg-[#FFEDE0] text-[#FF690B] rounded-full p-1.5 hover:scale-110 active:scale-95 transition-transform duration-200"
                   onClick={() => sliderRef.current.slickNext()}>
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="40"
-                    height="40"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="icon icon-tabler icons-tabler-outline icon-tabler-chevron-compact-right">
-                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                    <path d="M11 4l3 8l-3 8" />
-                  </svg>
-                </div>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+                </button>
               </>
             )}
           </div>

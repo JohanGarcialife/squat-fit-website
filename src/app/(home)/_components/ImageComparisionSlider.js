@@ -35,21 +35,13 @@ const ImageComparisonSlider = (props) => {
 
   return (
     <div className="relative mx-auto lg:w-[460px] sm:w-[390px]  sm:h-[485px] w-[290px]  h-[385px] lg:h-[570px]  overflow-visible group">
-      {/* Flechas de navegación */}
-      {currentIndex > 0 && (
-        <div onClick={onPrev} className="absolute -bottom-20 left-1 md:bottom-1/2 md:-left-28 -translate-y-1/2 cursor-pointer z-30">
-          <svg className="h-10 w-10 text-gray-400/80 hover:text-white transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-          </svg>
-        </div>
-      )}
-      {currentIndex < totalSlides - 1 && (
-        <div onClick={onNext} className="absolute -bottom-20 right-1 md:bottom-1/2 md:-right-28 -translate-y-1/2 cursor-pointer z-30">
-          <svg className="h-10 w-10 text-gray-400/80 hover:text-white transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-          </svg>
-        </div>
-      )}
+      {/* Flechas circulares laterales, gris suave (la sección tiene fondo crema) */}
+      <button onClick={onPrev} aria-label="Anterior" className="absolute top-1/2 left-1 md:-left-16 -translate-y-1/2 z-30 cursor-pointer bg-slate-100 text-slate-500 rounded-full p-1.5 hover:scale-110 active:scale-95 transition-transform duration-200">
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+      </button>
+      <button onClick={onNext} aria-label="Siguiente" className="absolute top-1/2 right-1 md:-right-16 -translate-y-1/2 z-30 cursor-pointer bg-slate-100 text-slate-500 rounded-full p-1.5 hover:scale-110 active:scale-95 transition-transform duration-200">
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+      </button>
 
       {/* Wrapper interior con border-radius y overflow-hidden */}
       <div
