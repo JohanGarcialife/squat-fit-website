@@ -37,16 +37,12 @@
   --color-blue-950: #363C98; /* Corporate Blue */
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
+/* La web es de tema claro siempre: sin esto, a los usuarios con el móvil en
+   modo oscuro les salía el fondo negro en zonas sin color declarado. */
 body {
   background: var(--background);
-  color: var(--foreground);
+  color: #171717;
+  color-scheme: light;
 }
 
 .slick-prev:before, .slick-next:before {

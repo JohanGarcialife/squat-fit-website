@@ -11,7 +11,9 @@ export default function Header() {
   return (
     <>
     
-    {width < 1024 ? <BurgerMenu /> : <MenuHeader />}
+    {/* Móvil primero: mientras el ancho es desconocido (SSR/carga), mostramos
+        el menú móvil — el 85% de la audiencia entra desde el teléfono. */}
+    {width >= 1024 ? <MenuHeader /> : <BurgerMenu />}
     </>
   )
 }
