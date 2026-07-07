@@ -57,55 +57,57 @@ function LoginContent() {
   };
 
   return (
-    <div className='min-h-screen text-2xl text-white bg-linear-to-b from-primary to-secondary flex flex-col md:flex-row px-3 gap-10 md:px-32 py-32'>
+    <div className='min-h-screen text-white bg-linear-to-b from-primary to-secondary flex flex-col md:flex-row md:items-center px-5 gap-8 md:px-24 lg:px-32 py-14 md:py-24'>
       <div className='md:w-1/2'>
-        <h2 className='md:text-8xl text-6xl font-bold text-center md:text-start'>Inicia Sesión</h2>
-        <p className='text-white text-3xl mt-12 max-w-[430px] text-center md:text-start'>Accede a tu cuenta y continúa tu entrenamiento con Squat Fit</p>
+        <h2 className='text-5xl md:text-7xl font-bold text-center md:text-start leading-tight'>Inicia Sesión</h2>
+        <p className='text-white/85 text-base md:text-lg mt-3 max-w-[420px] text-center md:text-start mx-auto md:mx-0'>Accede a tu cuenta con Squat Fit</p>
       </div>
-      <div className='md:w-1/2'>
-        <div className='bg-white/30 rounded-[60px] md:rounded-[80px] py-16 px-10 md:py-32 md:px-20  text-black flex flex-col gap-5'>
+      <div className='md:w-1/2 w-full max-w-md mx-auto'>
+        <div className='bg-white/15 backdrop-blur-sm rounded-3xl p-6 sm:p-8 shadow-xl flex flex-col gap-5'>
           <Formik
             initialValues={initialValues}
             validationSchema={validationSchema}
             onSubmit={handleSubmit}
           >
             {({ isSubmitting }) => (
-              <Form className='flex flex-col gap-5 mt-5'>
+              <Form className='flex flex-col gap-4'>
                 <div>
-                  <Field type="email" name="username" placeholder='E-mail' className='w-full text-white border border-gray-300 rounded-3xl p-5 text-lg focus:outline-none focus:ring-2 focus:ring-primary placeholder-white placeholder-opacity-50 placeholder:font-bold' />
-                  <ErrorMessage name="username" component="div" className="text-red-500 text-sm mt-1" />
+                  <Field type="email" name="username" placeholder='E-mail' className='w-full bg-white text-gray-800 rounded-2xl px-5 py-3.5 text-base focus:outline-none focus:ring-2 focus:ring-[#FF690B] placeholder-gray-400' />
+                  <ErrorMessage name="username" component="div" className="text-white text-sm mt-1.5 font-medium" />
                 </div>
-                <div className="relative border border-gray-300 rounded-3xl flex items-center justify-between">
-                  <Field
-                    type={isPasswordVisible ? 'text' : 'password'}
-                    name="password"
-                    placeholder='Contraseña'
-                    className='w-full text-white  p-5 text-lg focus:outline-none focus:ring-2 focus:ring-primary placeholder-white placeholder-opacity-50 placeholder:font-bold'
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setIsPasswordVisible(!isPasswordVisible)}
-                    className=" right-0  top-1/2 pr-5 text-white"
-                  >
-                    {isPasswordVisible ? <EyeOff className="h-6 w-6" /> : <Eye className="h-6 w-6" />}
-                  </button>
-                  <ErrorMessage name="password" component="div" className="text-red-500 absolute -bottom-5 left-0 text-sm mt-1" />
+                <div>
+                  <div className="relative flex items-center bg-white rounded-2xl">
+                    <Field
+                      type={isPasswordVisible ? 'text' : 'password'}
+                      name="password"
+                      placeholder='Contraseña'
+                      className='w-full bg-transparent text-gray-800 rounded-2xl px-5 py-3.5 text-base focus:outline-none focus:ring-2 focus:ring-[#FF690B] placeholder-gray-400'
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setIsPasswordVisible(!isPasswordVisible)}
+                      className="pr-4 text-gray-400 hover:text-gray-600"
+                      aria-label={isPasswordVisible ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                    >
+                      {isPasswordVisible ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                    </button>
+                  </div>
+                  <ErrorMessage name="password" component="div" className="text-white text-sm mt-1.5 font-medium" />
                 </div>
-                <button type="submit" disabled={isSubmitting} className='cursor-pointer bg-white text-primary rounded-3xl p-5 text-lg font-bold hover:bg-primary-dark transition duration-300 disabled:opacity-50'>
+                <button type="submit" disabled={isSubmitting} className='cursor-pointer bg-white text-primary rounded-2xl py-3.5 text-base font-bold hover:bg-[#FFEDE0] transition duration-300 disabled:opacity-50 mt-1'>
                   Iniciar Sesión
                 </button>
               </Form>
             )}
           </Formik>
-          <div className="flex justify-between items-center mt-5 text-2xl font-bold">
+          <div className="flex justify-between items-center gap-3 text-sm">
             <Link href={`/register${redirectParam}`}>
-              <p className='underline text-gris cursor-pointer'>Crear Cuenta</p>
+              <span className='text-white/85 underline hover:text-white cursor-pointer'>Crear cuenta</span>
             </Link>
             <Link href={`/forgot-password${redirectParam}`}>
-              <p className='underline text-gris cursor-pointer'>¿Olvidaste tu contraseña?</p>
+              <span className='text-white/85 underline hover:text-white cursor-pointer'>¿Olvidaste tu contraseña?</span>
             </Link>
           </div>
-
         </div>
       </div>
     </div>

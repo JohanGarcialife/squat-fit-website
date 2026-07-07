@@ -23,10 +23,21 @@ function RegisterContent() {
     confirmPassword: '',
   };
 
+  // Requisitos de la contraseña (mismos que muestra la lista en vivo)
+  const PASSWORD_RULES = [
+    { label: 'Al menos 8 caracteres', test: (v) => v.length >= 8 },
+    { label: '1 letra mayúscula', test: (v) => /[A-Z]/.test(v) },
+    { label: '1 letra minúscula', test: (v) => /[a-z]/.test(v) },
+    { label: '1 número', test: (v) => /[0-9]/.test(v) },
+    { label: '1 carácter especial', test: (v) => /[^A-Za-z0-9]/.test(v) },
+  ];
+
   const validationSchema = Yup.object({
     username: Yup.string().required('El nombre es obligatorio'),
     email: Yup.string().email('El formato del email no es válido').required('El email es obligatorio'),
-    password: Yup.string().min(6, 'La contraseña debe tener al menos 6 caracteres').required('La contraseña es obligatoria'),
+    password: Yup.string()
+      .required('La contraseña es obligatoria')
+      .test('reglas', 'La contraseña no cumple los requisitos', (v = '') => PASSWORD_RULES.every((r) => r.test(v))),
     confirmPassword: Yup.string()
       .oneOf([Yup.ref('password'), null], 'Las contraseñas deben coincidir')
       .required('Confirmar la contraseña es obligatorio'),
@@ -82,68 +93,87 @@ function RegisterContent() {
   };
 
   return (
-    <div className='min-h-screen text-2xl text-white bg-linear-to-b from-primary to-secondary flex flex-col md:flex-row px-3 gap-10 md:px-32 py-32'>
+    <div className='min-h-screen text-white bg-linear-to-b from-primary to-secondary flex flex-col md:flex-row md:items-center px-5 gap-8 md:px-24 lg:px-32 py-14 md:py-24'>
       <div className='md:w-1/2'>
-        <h2 className='md:text-8xl text-6xl font-bold text-center md:text-start'>Crea tu cuenta</h2>
-        <p className='text-white text-3xl mt-12 max-w-[430px] text-center md:text-start'>Únete a la comunidad Squat Fit, crea tu cuenta y accede a todas sus funciones</p>
+        <h2 className='text-5xl md:text-7xl font-bold text-center md:text-start leading-tight'>Crea tu cuenta</h2>
+        <p className='text-white/85 text-base md:text-lg mt-3 max-w-[420px] text-center md:text-start mx-auto md:mx-0'>Únete a la comunidad Squat Fit y accede a todo el contenido</p>
       </div>
-      <div className='md:w-1/2'>
-        <div className='bg-white/30 rounded-[60px] md:rounded-[80px] py-16 px-10 md:py-32 md:px-20  text-black flex flex-col gap-5'>
+      <div className='md:w-1/2 w-full max-w-md mx-auto'>
+        <div className='bg-white/15 backdrop-blur-sm rounded-3xl p-6 sm:p-8 shadow-xl flex flex-col gap-5'>
           <Formik
             initialValues={initialValues}
             validationSchema={validationSchema}
             onSubmit={handleSubmit}
           >
-            {({ isSubmitting }) => (
-              <Form className='flex flex-col gap-5 mt-5'>
+            {({ isSubmitting, values }) => (
+              <Form className='flex flex-col gap-4'>
                 <div>
-                  <Field type="text" name="username" placeholder='Nombre' className='w-full text-white border border-gray-300 rounded-3xl p-5 text-lg focus:outline-none focus:ring-2 focus:ring-primary placeholder-white placeholder-opacity-50 placeholder:font-bold' />
-                  <ErrorMessage name="username" component="div" className="text-red-500 text-sm mt-1" />
+                  <Field type="text" name="username" placeholder='Nombre' className='w-full bg-white text-gray-800 rounded-2xl px-5 py-3.5 text-base focus:outline-none focus:ring-2 focus:ring-[#FF690B] placeholder-gray-400' />
+                  <ErrorMessage name="username" component="div" className="text-white text-sm mt-1.5 font-medium" />
                 </div>
                 <div>
-                  <Field type="email" name="email" placeholder='E-mail' className='w-full text-white border border-gray-300 rounded-3xl p-5 text-lg focus:outline-none focus:ring-2 focus:ring-primary placeholder-white placeholder-opacity-50 placeholder:font-bold' />
-                  <ErrorMessage name="email" component="div" className="text-red-500 text-sm mt-1" />
+                  <Field type="email" name="email" placeholder='E-mail' className='w-full bg-white text-gray-800 rounded-2xl px-5 py-3.5 text-base focus:outline-none focus:ring-2 focus:ring-[#FF690B] placeholder-gray-400' />
+                  <ErrorMessage name="email" component="div" className="text-white text-sm mt-1.5 font-medium" />
                 </div>
-                <div className="relative flex items-center justify-between border border-gray-300 rounded-3xl">
-                  <Field
-                    type={isPasswordVisible ? 'text' : 'password'}
-                    name="password"
-                    placeholder='Contraseña'
-                    className='w-full text-white  p-5 text-lg focus:outline-none focus:ring-2 focus:ring-primary placeholder-white placeholder-opacity-50 placeholder:font-bold'
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setIsPasswordVisible(!isPasswordVisible)}
-                    className="absolute right-0 top-1/2 -translate-y-1/2 flex items-center pr-5 text-white"
-                  >
-                    {isPasswordVisible ? <EyeOff className="h-6 w-6" /> : <Eye className="h-6 w-6" />}
-                  </button>
-                  <ErrorMessage name="password" component="div" className="text-red-500 absolute -bottom-5 left-0 text-sm mt-1" />
+                <div>
+                  <div className="relative flex items-center bg-white rounded-2xl">
+                    <Field
+                      type={isPasswordVisible ? 'text' : 'password'}
+                      name="password"
+                      placeholder='Contraseña'
+                      className='w-full bg-transparent text-gray-800 rounded-2xl px-5 py-3.5 text-base focus:outline-none focus:ring-2 focus:ring-[#FF690B] placeholder-gray-400'
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setIsPasswordVisible(!isPasswordVisible)}
+                      className="pr-4 text-gray-400 hover:text-gray-600"
+                      aria-label={isPasswordVisible ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                    >
+                      {isPasswordVisible ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                    </button>
+                  </div>
+                  {/* Lista de requisitos en vivo: aparece al empezar a escribir */}
+                  {values.password.length > 0 && (
+                    <ul className="mt-2 space-y-1">
+                      {PASSWORD_RULES.map((rule) => {
+                        const ok = rule.test(values.password);
+                        return (
+                          <li key={rule.label} className={`flex items-center gap-2 text-sm transition-colors duration-200 ${ok ? 'text-green-200' : 'text-white/70'}`}>
+                            <span className="w-4 text-center font-bold">{ok ? '✓' : '✕'}</span>
+                            <span>{rule.label}</span>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  )}
                 </div>
-                <div className="relative border border-gray-300 rounded-3xl flex items-center justify-between">
-                  <Field
-                    type={isConfirmPasswordVisible ? 'text' : 'password'}
-                    name="confirmPassword"
-                    placeholder='Confirmar Contraseña'
-                    className='w-full text-white  p-5 text-lg focus:outline-none focus:ring-2 focus:ring-primary placeholder-white placeholder-opacity-50 placeholder:font-bold'
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setIsConfirmPasswordVisible(!isConfirmPasswordVisible)}
-                    className="absolute right-0 top-1/2 -translate-y-1/2 flex items-center pr-5 text-white"
-                  >
-                    {isConfirmPasswordVisible ? <EyeOff className="h-6 w-6" /> : <Eye className="h-6 w-6" />}
-                  </button>
-                  <ErrorMessage name="confirmPassword" component="div" className="text-red-500 absolute -bottom-5 left-0 text-sm mt-1" />
+                <div>
+                  <div className="relative flex items-center bg-white rounded-2xl">
+                    <Field
+                      type={isConfirmPasswordVisible ? 'text' : 'password'}
+                      name="confirmPassword"
+                      placeholder='Confirmar contraseña'
+                      className='w-full bg-transparent text-gray-800 rounded-2xl px-5 py-3.5 text-base focus:outline-none focus:ring-2 focus:ring-[#FF690B] placeholder-gray-400'
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setIsConfirmPasswordVisible(!isConfirmPasswordVisible)}
+                      className="pr-4 text-gray-400 hover:text-gray-600"
+                      aria-label={isConfirmPasswordVisible ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                    >
+                      {isConfirmPasswordVisible ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                    </button>
+                  </div>
+                  <ErrorMessage name="confirmPassword" component="div" className="text-white text-sm mt-1.5 font-medium" />
                 </div>
-                <button type="submit" disabled={isSubmitting} className='cursor-pointer bg-white text-primary rounded-3xl p-5 text-lg font-bold hover:bg-primary-dark transition duration-300 disabled:opacity-50'>
+                <button type="submit" disabled={isSubmitting} className='cursor-pointer bg-white text-primary rounded-2xl py-3.5 text-base font-bold hover:bg-[#FFEDE0] transition duration-300 disabled:opacity-50 mt-1'>
                   Registrarme
                 </button>
               </Form>
             )}
           </Formik>
-          <Link href={`/login${redirectParam}`}>
-            <p className='underline text-gris cursor-pointer text-2xl mt-5'>Iniciar Sesión</p>
+          <Link href={`/login${redirectParam}`} className='text-center'>
+            <span className='text-white/85 underline hover:text-white cursor-pointer text-sm'>¿Ya tienes cuenta? Inicia sesión</span>
           </Link>
         </div>
       </div>
