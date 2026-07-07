@@ -70,10 +70,9 @@ export default function PlanesTestimonials() {
     infinite: true,
     centerPadding: w >= 1280 ? '0px' : w >= 640 ? '48px' : '36px',
     slidesToShow: w >= 1280 ? 3 : 1,
-    speed: 300,
+    speed: 250,
     arrows: false,
     cssEase: 'cubic-bezier(0.25, 1, 0.5, 1)',
-    waitForAnimate: false, // registra clics rápidos sin esperar a que acabe la animación
   };
 
   const renderStars = (rating) => {

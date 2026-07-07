@@ -86,10 +86,9 @@ const TestimonialCarousel = () => {
      infinite: true,
      centerPadding: w >= 1024 ? '0px' : w >= 640 ? '60px' : '30px',
      slidesToShow: w >= 1024 ? 3 : 1,
-     speed: 300,
+     speed: 250,
      arrows: false,
      cssEase: 'cubic-bezier(0.25, 1, 0.5, 1)',
-     waitForAnimate: false,
    };
 
     return ( 

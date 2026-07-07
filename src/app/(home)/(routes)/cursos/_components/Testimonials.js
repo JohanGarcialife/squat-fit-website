@@ -86,10 +86,9 @@ const Testimonials = () => {
      infinite: true,
      centerPadding: w >= 1280 ? '0px' : w >= 640 ? '48px' : '38px',
      slidesToShow: w >= 1280 ? 2 : 1,
-     speed: 300,
+     speed: 250,
      arrows: false,
      cssEase: 'cubic-bezier(0.25, 1, 0.5, 1)',
-     waitForAnimate: false,
    };
 
     return ( 

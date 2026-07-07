@@ -103,8 +103,14 @@ html, body {
 }
 
 @media (hover: none) {
+  /* En pausa hasta que el botón entra en pantalla (AutoShineObserver añade
+     .shine-go). Así las pasadas empiezan a contar desde que se ve el botón. */
   .landing-autoshine {
-    animation: landing-sweep 8s ease-in-out 2.5s 4;
+    animation: landing-sweep 8s ease-in-out 0.6s 4;
+    animation-play-state: paused;
+  }
+  .landing-autoshine.shine-go {
+    animation-play-state: running;
   }
 }
 

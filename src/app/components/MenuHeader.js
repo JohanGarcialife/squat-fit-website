@@ -50,17 +50,17 @@ export default function MenuHeader() {
 
                 <div className='flex gap-5 text-secondary text-2xl justify-start'> {/* Enlaces ahora justificados a la izquierda dentro de su grupo */}
                     <Link href="/cocina">
-                        <p className={`px-4 py-1.5 rounded-2xl transition-colors ${active === 'cocina' ? 'text-primary font-bold bg-[#FF690B]/5' : 'text-secondary hover:text-primary hover:bg-[#FF690B]/5'}`}>
+                        <p className={`px-4 py-1.5 rounded-2xl transition-colors ${active === 'cocina' ? 'text-primary font-bold bg-[#FF690B]/10' : 'text-secondary hover:text-primary hover:bg-[#FF690B]/10'}`}>
                             Cocina
                         </p>
                     </Link>
                     <Link href="/planes">
-                        <p className={`px-4 py-1.5 rounded-2xl transition-colors ${active === 'planes' ? 'text-primary font-bold bg-[#FF690B]/5' : 'text-secondary hover:text-primary hover:bg-[#FF690B]/5'}`}>
+                        <p className={`px-4 py-1.5 rounded-2xl transition-colors ${active === 'planes' ? 'text-primary font-bold bg-[#FF690B]/10' : 'text-secondary hover:text-primary hover:bg-[#FF690B]/10'}`}>
                             Planes
                         </p>
                     </Link>
                     <Link href="/cursos">
-                        <p className={`px-4 py-1.5 rounded-2xl transition-colors ${active === 'cursos' ? 'text-primary font-bold bg-[#FF690B]/5' : 'text-secondary hover:text-primary hover:bg-[#FF690B]/5'}`}>
+                        <p className={`px-4 py-1.5 rounded-2xl transition-colors ${active === 'cursos' ? 'text-primary font-bold bg-[#FF690B]/10' : 'text-secondary hover:text-primary hover:bg-[#FF690B]/10'}`}>
                             Cursos
                         </p>
                     </Link>

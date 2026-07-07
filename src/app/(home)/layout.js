@@ -4,6 +4,7 @@ import Header from "../components/Header";
 import Footer from "../components/Footer";
 import FloatingCartWidget from "../components/FloatingCartWidget"; // Importar FloatingCartWidget
 import ToasterProvider from "@/components/ToasterProvider";
+import AutoShineObserver from "../components/AutoShineObserver";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -23,6 +24,7 @@ export default function RootLayout({ children }) {
       >
         <div className="min-h-screen bg-background ">
         <ToasterProvider />
+        <AutoShineObserver />
         <Header />
         {children}
         <Footer />
