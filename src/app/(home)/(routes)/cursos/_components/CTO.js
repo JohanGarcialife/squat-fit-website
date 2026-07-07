@@ -44,7 +44,7 @@ export default function CTO() {
                 <div 
                     key={plan.id} 
                     onClick={() => setSelectedPlanId(plan.id)}
-                    className={`relative flex flex-col items-center p-8 rounded-lg cursor-pointer transition-all duration-300 bg-white ${isSelected ? 'border-4 border-secondary shadow-2xl scale-105 z-10' : 'border border-gray-200 shadow-lg opacity-70 hover:opacity-100'}`}
+                    className={`relative flex flex-col items-center p-8 rounded-[20px] cursor-pointer transition-all duration-300 bg-white ${isSelected ? 'border-4 border-secondary shadow-2xl scale-105 z-10' : 'border border-gray-200 shadow-lg opacity-70 hover:opacity-100'}`}
                 >
                     {plan.label && (
                         <div className="absolute -top-4 bg-secondary text-white px-6 py-1 rounded-full text-sm font-medium">
@@ -59,13 +59,14 @@ export default function CTO() {
                         </div>
                         <div className="text-gray-500 mt-1">{plan.subtitle}</div>
                     </div>
-                    <button 
+                    <button
                         onClick={(e) => {
                             e.stopPropagation();
                             handleAddToCart(plan);
                         }}
-                        className="w-full bg-secondary text-white py-3 rounded-md font-bold text-lg hover:opacity-90 transition-opacity mt-auto shadow-md"
+                        className="relative group overflow-hidden w-full bg-[#363C98] text-white hover:bg-[#E7E6FF] hover:text-[#363C98] hover:scale-[1.02] active:scale-[0.98] py-3 rounded-[20px] font-bold text-lg transition-all duration-300 mt-auto shadow-md cursor-pointer"
                     >
+                        <span className="landing-autoshine absolute inset-0 w-full h-full bg-[#363C98]/15 -translate-x-full skew-x-12 group-hover:translate-x-full transition-transform duration-700 ease-out" aria-hidden="true" />
                         Empezar
                     </button>
                 </div>

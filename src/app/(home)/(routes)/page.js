@@ -6,6 +6,7 @@ import TestimonialCarousel from "../_components/TestimonialCarousel";
 import StartPlan from "../_components/StartPlan";
 import FourPillars from "../_components/FourPillars";
 import HowItWorks from "../_components/HowItWorks";
+import Reveal from "../../components/Reveal";
 
 export default function Home() {
 
@@ -47,12 +48,12 @@ export default function Home() {
     <main className="flex min-h-screen flex-col items-center justify-between">
       <div >
         <HeroSection />
-        <Comparision comparacion={comparacion} />
-        <Progress />
-        <FourPillars />
-        <HowItWorks />
-        <TestimonialCarousel />
-        <StartPlan />
+        <Reveal><Comparision comparacion={comparacion} /></Reveal>
+        <Reveal><Progress /></Reveal>
+        <Reveal><FourPillars /></Reveal>
+        <Reveal><HowItWorks /></Reveal>
+        <Reveal><TestimonialCarousel /></Reveal>
+        <Reveal><StartPlan /></Reveal>
       </div>
     </main>
   );

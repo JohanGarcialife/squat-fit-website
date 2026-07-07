@@ -4,25 +4,27 @@ import React, { useState } from 'react';
 import { Video, Mic, ChefHat } from 'lucide-react';
 import Image from 'next/image';
 
+// Recetas reales del documento "Lista de recetas para landing":
+// 4 por categoría; la quinta del documento pasa a engordar el contador "y X más".
 const vol1Steps = [
-  { number: 1, title: 'Desayunos', items: ['Tortitas de avena', 'Huevos revueltos fit', 'Batido de proteínas casero'] },
-  { number: 2, title: 'Comidas', items: ['Pollo al curry', 'Ensalada de quinoa', 'Pasta integral con atún'] },
-  { number: 3, title: 'Cenas', items: ['Salmón al horno', 'Crema de verduras', 'Tortilla francesa con pavo'] },
-  { number: 4, title: 'Postres', items: ['Mousse de chocolate fit', 'Helado de plátano', 'Yogur con frutas'] },
-  { number: 5, title: 'Snacks', items: ['Frutos secos', 'Barritas energéticas', 'Fruta fresca'] },
+  { number: 1, title: 'Desayunos', items: ['Tortitas de vainilla o chocolate', 'French toast + crema cacahuete casera', 'Quesadillas al pesto (+ tomate y queso)', 'Cereal proteico chocolate y cacahuete'], more: 11 },
+  { number: 2, title: 'Comidas', items: ['Boniato burger', 'KFC fit (pavo empanado estilo americano)', 'Ensalada burrito (pollo fajitas, aguacate y maíz)', 'Mega-wrap fit (pollo bbq y tortilla casera)'], more: 10 },
+  { number: 3, title: 'Cenas', items: ['Pizzas fit (barbacoa o jamón y queso)', 'Patatas supremas (ternera, queso y salsa burger)', 'Canelones de berenjena y pollo bbq', '"Slim" pasta carbonara'], more: 9 },
+  { number: 4, title: 'Snacks', items: ['Nachos al horno con guacamole y queso', 'Pan de ajo crunchy al airfryer', 'Croquetas cremosas de queso', 'Cinnamon rolls de choco blanco y canela'], more: 10 },
+  { number: 5, title: 'Postres', items: ['Tarta de queso casera (fresa u Oreo)', 'Volcán de chocolate', 'Brownie muerte por chocolate', 'Tarta pantera rosa Squat Fit'], more: 9 },
 ];
 
 const vol2Steps = [
-  { number: 1, title: 'Desayunos', items: ['Tostadas de aguacate', 'Avena nocturna', 'Tortilla de claras'] },
-  { number: 2, title: 'Comidas', items: ['Arroz con pavo', 'Lentejas estofadas', 'Wrap de pollo'] },
-  { number: 3, title: 'Cenas', items: ['Merluza a la plancha', 'Ensalada caprese', 'Sopa de pollo'] },
-  { number: 4, title: 'Postres', items: ['Brownie saludable', 'Galletas de avena', 'Batido de fresa'] },
-  { number: 5, title: 'Snacks', items: ['Hummus con zanahoria', 'Queso fresco batido', 'Manzana con crema de cacahuete'] },
+  { number: 1, title: 'Desayunos', items: ['French toast frutos del bosque y choco blanco', 'Parfait de frutos rojos', 'Menú McMuffin fit', 'Porridge cookies & cream'], more: 8 },
+  { number: 2, title: 'Comidas', items: ['Chicken burger spicy', 'Poké bowl de salmón', 'Ensalada burger con salsa Fit Mac', 'Cielito lindo fit (nachos + lasaña)'], more: 9 },
+  { number: 3, title: 'Cenas', items: ['Pita pizza (pesto, barbacoa o 3 quesos)', 'Musaka con queso fundido', 'Risotto de pollo y setas', 'Fondue del huerto (queso y verduras)'], more: 11 },
+  { number: 4, title: 'Snacks', items: ['Mini croissants de pizza', 'Quesadillas de pollo con salsa rosa', 'Tofu-cheese fingers', 'Dónuts fit (Lotus o Banoffee)'], more: 10 },
+  { number: 5, title: 'Postres', items: ['Tarta de tres chocolates', 'Coulant de pistacho', 'Tarta de kínder blanco', 'Red velvet con frosting de choco blanco'], more: 8 },
 ];
 
 export default function Temario() {
-  const [openStepVol1, setOpenStepVol1] = useState(1);
-  const [openStepVol2, setOpenStepVol2] = useState(1);
+  const [openStepVol1, setOpenStepVol1] = useState(null);
+  const [openStepVol2, setOpenStepVol2] = useState(null);
 
   const handleToggleVol1 = (stepNumber) => {
     setOpenStepVol1(openStepVol1 === stepNumber ? null : stepNumber);
@@ -32,6 +34,12 @@ export default function Temario() {
     setOpenStepVol2(openStepVol2 === stepNumber ? null : stepNumber);
   };
 
+  // Foto de la derecha: collage de la categoría abierta; si no hay ninguna, el libro.
+  const openVol1 = vol1Steps.find((s) => s.number === openStepVol1);
+  const vol1Image = openVol1 ? `/temario/vol1/${openVol1.title}.webp` : '/Libro1.png';
+  const openVol2 = vol2Steps.find((s) => s.number === openStepVol2);
+  const vol2Image = openVol2 ? `/temario/vol2/${openVol2.title}.webp` : '/Libro2.png';
+
   return (
     <section className="py-16 px-4 bg-white flex justify-center">
       <div className="max-w-7xl mx-auto w-full">
@@ -40,37 +48,44 @@ export default function Temario() {
         </h2>
 
         {/* Vol. 1 Section */}
-        <div className="flex flex-row gap-12 items-center mb-24">
+        <div className="flex flex-row gap-4 items-center mb-24">
           {/* Left Side - Timeline Vol 1 */}
           <div className="pl-6 w-1/2">
             <div className="flex justify-center mb-8 lg:justify-start lg:ml-12">
-               <span className="bg-orange-500 text-white px-6 py-2 rounded-xl text-5xl font-bold inline-block">
+               <span className="text-secondary text-5xl font-extrabold inline-block border-b-4 border-primary pb-2">
                 Vol. 1
               </span>
             </div>
            
-            <ol className="relative border-l-4 border-orange-200 ml-4 lg:ml-16">
+            <ol className="relative border-l-4 border-[#FFB489] ml-6 lg:ml-16">
               {vol1Steps.map((step, index) => {
                 const isOpen = openStepVol1 === step.number;
                 return (
                   <li key={step.number} className={`ml-8 ${index === vol1Steps.length - 1 ? 'mb-0' : 'mb-8'}`}>
-                    <span className="absolute -left-5 flex items-center justify-center w-10 h-10 bg-white border-4 border-orange-200 rounded-full text-2xl font-bold text-orange-200">
-                      {step.number}
-                    </span>
-                    <button
-                      onClick={() => handleToggleVol1(step.number)}
-                      className={`font-bold py-3 px-6 rounded-2xl inline-block text-left w-auto cursor-pointer transition-all text-lg md:text-5xl ${isOpen ? 'bg-primary text-white scale-105 shadow-md border-2 border-primary' : 'bg-orange-100 text-black hover:bg-orange-200 border-2 border-transparent'}`}
-                    >
-                      {step.title}
-                    </button>
-                    <div className={`overflow-hidden transition-all duration-300 ease-in-out ${isOpen ? 'max-h-40 opacity-100 mt-3' : 'max-h-0 opacity-0'}`}>
+                    <div className="relative">
+                      <span className="absolute -left-[58px] top-1/2 -translate-y-1/2 flex items-center justify-center w-12 h-12 bg-white border-4 border-[#FFB489] rounded-full text-3xl font-bold text-primary">
+                        {step.number}
+                      </span>
+                      <button
+                        onClick={() => handleToggleVol1(step.number)}
+                        className={`font-bold py-2.5 px-5 rounded-2xl inline-block text-left w-auto cursor-pointer transition-all text-lg md:text-3xl ${isOpen ? 'bg-primary text-white scale-105 shadow-md border-2 border-primary' : 'bg-[#FFEDE0] text-primary hover:bg-[#FFDFC9] border-2 border-transparent'}`}
+                      >
+                        {step.title}
+                      </button>
+                    </div>
+                    <div className={`overflow-hidden transition-all duration-300 ease-in-out ${isOpen ? 'max-h-80 opacity-100 mt-3' : 'max-h-0 opacity-0'}`}>
                       <ul className="space-y-2 pl-2">
                         {step.items.map((item, i) => (
                           <li key={i} className="flex items-center text-xl text-gray-600">
-                            <span className="flex-shrink-0 w-2 h-2 bg-orange-300 rounded-full mr-2"></span>
+                            <span className="flex-shrink-0 w-2 h-2 bg-[#FFB489] rounded-full mr-2"></span>
                             {item}
                           </li>
                         ))}
+                        {step.more && (
+                          <li className="flex items-center text-xl font-semibold text-primary pl-4">
+                            → y {step.more} recetas más
+                          </li>
+                        )}
                       </ul>
                     </div>
                   </li>
@@ -95,13 +110,13 @@ export default function Temario() {
                     <Mic className="w-8 h-8 text-white" />
                   </div>
                </div>
-               <Image src="/Libro1.png" width={500} height={500} alt="Libro Volumen 1" className="object-contain" />
+               <Image key={vol1Image} src={vol1Image} width={500} height={500} alt={openVol1 ? `Recetas de ${openVol1.title} - Vol. 1` : 'Libro Volumen 1'} className="object-contain transition-opacity duration-300" />
             </div>
           </div>
         </div>
 
         {/* Vol. 2 Section */}
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
+        <div className="grid lg:grid-cols-2 gap-4 items-center">
            {/* Left Side - Content Vol 2 (Desktop Order) */}
            <div className="flex flex-col items-center lg:items-end text-center lg:text-right order-2 lg:order-1">
              <h3 className="text-4xl md:text-6xl text-center font-bold text-orange-500 mb-4 leading-tight">
@@ -112,39 +127,46 @@ export default function Temario() {
                  <div className="absolute top-12 right-6 z-10 bg-indigo-900 p-3 rounded-xl shadow-lg transform rotate-12">
                      <ChefHat className="w-8 h-8 text-white" />
                  </div>
-               <Image src="/Libro2.png" width={500} height={500} alt="Libro Volumen 2" className="object-contain" />
+               <Image key={vol2Image} src={vol2Image} width={500} height={500} alt={openVol2 ? `Recetas de ${openVol2.title} - Vol. 2` : 'Libro Volumen 2'} className="object-contain transition-opacity duration-300" />
             </div>
           </div>
 
           {/* Right Side - Timeline Vol 2 (Desktop Order) */}
           <div className="pl-6 order-1 lg:order-2">
             <div className="flex justify-center mb-8 lg:justify-start lg:ml-12">
-               <span className="bg-orange-500 text-white px-6 py-2 rounded-xl text-5xl font-bold inline-block">
+               <span className="text-secondary text-5xl font-extrabold inline-block border-b-4 border-primary pb-2">
                 Vol. 2
               </span>
             </div>
-            <ol className="relative border-l-4 border-orange-200 ml-4 lg:ml-16">
+            <ol className="relative border-l-4 border-[#FFB489] ml-6 lg:ml-16">
               {vol2Steps.map((step, index) => {
                 const isOpen = openStepVol2 === step.number;
                 return (
                   <li key={step.number} className={`ml-8 ${index === vol2Steps.length - 1 ? 'mb-0' : 'mb-8'}`}>
-                    <span className="absolute -left-5 flex items-center justify-center w-10 h-10 bg-white border-4 border-orange-200 rounded-full text-xl font-bold text-orange-200">
-                      {step.number}
-                    </span>
-                    <button
-                      onClick={() => handleToggleVol2(step.number)}
-                      className={`font-bold py-3 px-6 rounded-2xl inline-block text-left w-auto cursor-pointer transition-all text-lg md:text-5xl ${isOpen ? 'bg-primary text-white scale-105 shadow-md border-2 border-primary' : 'bg-orange-100 text-black hover:bg-orange-200 border-2 border-transparent'}`}
-                    >
-                      {step.title}
-                    </button>
-                    <div className={`overflow-hidden transition-all duration-300 ease-in-out ${isOpen ? 'max-h-40 opacity-100 mt-3' : 'max-h-0 opacity-0'}`}>
+                    <div className="relative">
+                      <span className="absolute -left-[58px] top-1/2 -translate-y-1/2 flex items-center justify-center w-12 h-12 bg-white border-4 border-[#FFB489] rounded-full text-3xl font-bold text-primary">
+                        {step.number}
+                      </span>
+                      <button
+                        onClick={() => handleToggleVol2(step.number)}
+                        className={`font-bold py-2.5 px-5 rounded-2xl inline-block text-left w-auto cursor-pointer transition-all text-lg md:text-3xl ${isOpen ? 'bg-primary text-white scale-105 shadow-md border-2 border-primary' : 'bg-[#FFEDE0] text-primary hover:bg-[#FFDFC9] border-2 border-transparent'}`}
+                      >
+                        {step.title}
+                      </button>
+                    </div>
+                    <div className={`overflow-hidden transition-all duration-300 ease-in-out ${isOpen ? 'max-h-80 opacity-100 mt-3' : 'max-h-0 opacity-0'}`}>
                       <ul className="space-y-2 pl-2">
                         {step.items.map((item, i) => (
                           <li key={i} className="flex items-center text-lg text-gray-600">
-                            <span className="flex-shrink-0 w-2 h-2 bg-orange-300 rounded-full mr-2"></span>
+                            <span className="flex-shrink-0 w-2 h-2 bg-[#FFB489] rounded-full mr-2"></span>
                             {item}
                           </li>
                         ))}
+                        {step.more && (
+                          <li className="flex items-center text-lg font-semibold text-primary pl-4">
+                            → y {step.more} recetas más
+                          </li>
+                        )}
                       </ul>
                     </div>
                   </li>

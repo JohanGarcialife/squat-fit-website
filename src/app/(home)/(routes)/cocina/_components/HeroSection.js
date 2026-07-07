@@ -3,38 +3,40 @@ import Image from 'next/image'
 import React from 'react'
 
 export default function HeroSection() {
-    
-  return (
-    <div className='px-7 md:px-24 md:flex flex flex-col md:flex-row justify-center items-center py-24'>
 
-        <div className='md:pl-14 md:w-1/2 mb-16 md:mb-0 flex flex-col items-center md:items-start '>
-        <div className='bg-primary w-fit px-4 py-2 text-2xl rounded-full'>
-            <p className='text-white font-bold'>Colección completa</p>
+  return (
+    <div className='px-6 md:px-24 flex flex-col md:flex-row justify-center items-center py-12 md:py-24 gap-10 md:gap-0'>
+
+        <div className='md:pl-14 md:w-1/2 flex flex-col items-center md:items-start'>
+        <div className='flex items-center gap-4'>
+            <span className='w-12 sm:w-20 h-[2px] bg-primary rounded-full'></span>
+            <p className='text-primary font-bold tracking-[0.2em] text-xl sm:text-3xl uppercase text-center'>Colección completa</p>
+            <span className='w-12 sm:w-20 h-[2px] bg-primary rounded-full'></span>
         </div>
 
-        <h2 className='font-bold text-secondary text-center md:text-start text-6xl md:text-8xl my-8'>La Cocina Squat Fit 1 y 2</h2>
-        <p className='text-primary text-4xl max-w-[580px] font-bold mb-8'>Recetas fit con sabor real</p>
-        <p className='text-black text-2xl md:text-start text-center md:text-3xl max-w-[520px] md:mb-8'>Un sistema de recetas fáciles, saciantes y deliciosas para mejorar tu alimentación sin vivir en restricción.</p>
-<div className='flex flex-col md:flex-row items-center md:items-start gap-4'>
-<div className='text-center max-w-[150px]   '>
-  <p className='text-secondary font-bold text-4xl'>+150</p>
-  <p className='text-secondary'>Recetas para repetir</p>
-</div>
-<div className='text-center max-w-[150px]'>
-  <p className='text-secondary font-bold text-4xl'>2</p>
-  <p className='text-secondary'>Volumenes en la colección</p>
-</div>
-<div className='text-center max-w-[150px]'>
-  <p className='text-secondary font-bold text-4xl'>100% </p>
-  <p className='text-secondary'>Con sus macros incluidos</p> 
-</div>
-</div>
+        <h2 className='font-bold text-secondary text-center md:text-start text-4xl sm:text-6xl md:text-8xl my-6 md:my-8 leading-tight'>La Cocina Squat Fit 1 y 2</h2>
+        <p className='text-primary text-2xl sm:text-3xl md:text-4xl max-w-[580px] font-bold mb-4 md:mb-8 text-center md:text-start'>Recetas fit con sabor real</p>
+        <p className='text-black text-lg sm:text-xl md:text-3xl md:text-start text-center max-w-[520px] mb-8 leading-relaxed'>Un sistema de recetas fáciles, saciantes y deliciosas para mejorar tu alimentación sin vivir en restricción.</p>
+
+        {/* Cifras: siempre en fila de 3, como en el hero de la home */}
+        <div className='flex flex-row items-start justify-center md:justify-start gap-6 sm:gap-10 w-full'>
+          <div className='text-center max-w-[110px] sm:max-w-[150px]'>
+            <p className='text-secondary font-bold text-3xl sm:text-4xl'>+150</p>
+            <p className='text-secondary text-sm sm:text-base'>Recetas para repetir</p>
+          </div>
+          <div className='text-center max-w-[110px] sm:max-w-[150px]'>
+            <p className='text-secondary font-bold text-3xl sm:text-4xl'>2</p>
+            <p className='text-secondary text-sm sm:text-base'>Volúmenes en la colección</p>
+          </div>
+          <div className='text-center max-w-[110px] sm:max-w-[150px]'>
+            <p className='text-secondary font-bold text-3xl sm:text-4xl'>100%</p>
+            <p className='text-secondary text-sm sm:text-base'>Con sus macros incluidos</p>
+          </div>
+        </div>
       </div>
 
-        
-        <div className="  md:w-1/2">
-        
-       <Image src="/cocinaHero.png" width={700} height={700} alt='Cooking book'  />
+        <div className="md:w-1/2 w-full flex justify-center">
+          <Image src="/cocinaHero.png" width={700} height={700} alt='Cooking book' priority className='w-full max-w-[420px] md:max-w-none h-auto' />
         </div>
     </div>
   )

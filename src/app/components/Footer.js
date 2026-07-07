@@ -3,12 +3,15 @@
 import React from 'react';
 import Link from 'next/link';
 
+const LINK_CLASS = 'text-[#FF690B] font-medium text-sm sm:text-base leading-relaxed hover:text-[#363C98] transition-colors';
+const HEADING_CLASS = 'text-[#363C98] font-bold text-base sm:text-lg mb-4 sm:mb-6';
+
 export default function Footer() {
   return (
-    <footer className="w-full bg-white border-t border-slate-100 py-16 px-6 md:px-12 lg:px-24">
-      <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
-        {/* Columna Logo */}
-        <div className="flex flex-col space-y-4">
+    <footer className="w-full bg-white border-t border-slate-100 py-16 px-4 sm:px-6 md:px-12 lg:px-24">
+      <div className="max-w-7xl mx-auto lg:flex lg:items-start lg:gap-12">
+        {/* Logo: fila propia centrada en móvil, primera columna en escritorio */}
+        <div className="flex justify-center lg:justify-start lg:w-1/4 mb-10 lg:mb-0">
           <Link href="/" className="inline-block">
             <div className="text-4xl lg:text-5xl font-black tracking-wider leading-none">
               <span className="text-[#363C98]">SQUAT</span>
@@ -17,83 +20,42 @@ export default function Footer() {
           </Link>
         </div>
 
-        {/* Columna 1: Nuestros Cursos */}
-        <div>
-          <h4 className="text-[#363C98] font-bold text-lg mb-6">Nuestros cursos</h4>
-          <ul className="space-y-3">
-            <li>
-              <Link href="/cursos" className="text-[#FF690B] font-medium text-base hover:text-[#363C98] transition-colors">
-                Curso de la mujer
-              </Link>
-            </li>
-            <li>
-              <Link href="/cocina" className="text-[#FF690B] font-medium text-base hover:text-[#363C98] transition-colors">
-                Libros de Cocina
-              </Link>
-            </li>
-            <li>
-              <Link href="/cursos" className="text-[#FF690B] font-medium text-base hover:text-[#363C98] transition-colors">
-                Fuerte y Definid@
-              </Link>
-            </li>
-            <li>
-              <Link href="/cursos" className="text-[#FF690B] font-medium text-base hover:text-[#363C98] transition-colors">
-                Entrena en Casa
-              </Link>
-            </li>
-          </ul>
-        </div>
+        {/* Las 3 columnas de enlaces: también 3 en móvil, con aire entre ellas */}
+        <div className="flex-1 grid grid-cols-3 gap-6 sm:gap-12 lg:gap-16 text-center sm:text-left">
+          {/* Columna 1: Nuestros Cursos */}
+          <div>
+            <h4 className={HEADING_CLASS}>Nuestros cursos</h4>
+            <ul className="space-y-4">
+              <li><Link href="/cursos" className={LINK_CLASS}>Curso de la mujer</Link></li>
+              <li><Link href="/cocina" className={LINK_CLASS}>Libros de Cocina</Link></li>
+              <li><Link href="/cursos" className={LINK_CLASS}>Fuerte y Definid@</Link></li>
+              <li><Link href="/cursos" className={LINK_CLASS}>Entrena en Casa</Link></li>
+            </ul>
+          </div>
 
-        {/* Columna 2: Squat Fit */}
-        <div>
-          <h4 className="text-[#363C98] font-bold text-lg mb-6">Squat Fit</h4>
-          <ul className="space-y-3">
-            <li>
-              <Link href="/nosotros" className="text-[#FF690B] font-medium text-base hover:text-[#363C98] transition-colors">
-                Nosotros
-              </Link>
-            </li>
-            <li>
-              <Link href="/politicas" className="text-[#FF690B] font-medium text-base hover:text-[#363C98] transition-colors">
-                Políticas
-              </Link>
-            </li>
-            <li>
-              <Link href="/contacto" className="text-[#FF690B] font-medium text-base hover:text-[#363C98] transition-colors">
-                Contacto
-              </Link>
-            </li>
-          </ul>
-        </div>
+          {/* Columna 2: Squat Fit */}
+          <div>
+            <h4 className={HEADING_CLASS}>Squat Fit</h4>
+            <ul className="space-y-4">
+              <li><Link href="/nosotros" className={LINK_CLASS}>Nosotros</Link></li>
+              <li><Link href="/politicas" className={LINK_CLASS}>Políticas</Link></li>
+              <li><Link href="/contacto" className={LINK_CLASS}>Contacto</Link></li>
+            </ul>
+          </div>
 
-        {/* Columna 3: Otros */}
-        <div>
-          <h4 className="text-[#363C98] font-bold text-lg mb-6">Otros</h4>
-          <ul className="space-y-3">
-            <li>
-              <Link href="/profile-panel" className="text-[#FF690B] font-medium text-base hover:text-[#363C98] transition-colors">
-                Mi Cuenta
-              </Link>
-            </li>
-            <li>
-              <Link href="/login" className="text-[#FF690B] font-medium text-base hover:text-[#363C98] transition-colors">
-                Iniciar Sesión
-              </Link>
-            </li>
-            <li>
-              <Link href="/register" className="text-[#FF690B] font-medium text-base hover:text-[#363C98] transition-colors">
-                Registrarme
-              </Link>
-            </li>
-            <li>
-              <Link href="/cart" className="text-[#FF690B] font-medium text-base hover:text-[#363C98] transition-colors">
-                Carrito
-              </Link>
-            </li>
-          </ul>
+          {/* Columna 3: Otros */}
+          <div>
+            <h4 className={HEADING_CLASS}>Otros</h4>
+            <ul className="space-y-4">
+              <li><Link href="/profile-panel" className={LINK_CLASS}>Mi Cuenta</Link></li>
+              <li><Link href="/login" className={LINK_CLASS}>Iniciar Sesión</Link></li>
+              <li><Link href="/register" className={LINK_CLASS}>Registrarme</Link></li>
+              <li><Link href="/cart" className={LINK_CLASS}>Carrito</Link></li>
+            </ul>
+          </div>
         </div>
       </div>
-      
+
       {/* Copyright */}
       <div className="max-w-7xl mx-auto mt-16 pt-8 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between text-slate-400 text-sm">
         <p>© {new Date().getFullYear()} Squat Fit. Todos los derechos reservados.</p>

@@ -1,489 +1,321 @@
 'use client'
-import Image from 'next/image'
 import React, { useState } from 'react'
-import { useRouter } from 'next/navigation'
 import { useCartStore } from '@/stores/cart.store'
 import { useAuthStore } from '@/stores/auth.store'
-import { BookOpen, FileText } from 'lucide-react'
 import { toast } from 'react-hot-toast'
+
+// Sección de precios de Cocina Squat Fit: 4 tarjetas
+// (Impreso Vol 1 · Pack impreso · Digital de por vida · Bundle "Lo quiero todo").
+// Diseño portado de la página Divi de WordPress; la compra va por el
+// carrito/Stripe del proyecto, no por enlaces de WooCommerce.
+
+// Colores del diseño
+const C = {
+  print: '#FF690B',       // naranja de marca (impreso)
+  printSoft: '#FFB489',   // naranja suave (bordes/líneas)
+  digital: '#363C98',     // índigo (digital)
+  digitalSoft: '#AFB1DD', // azul suave
+  hero: '#363C98',        // índigo (bundle / mejor valor)
+  heroText: '#2A2F78',
+  grayEdge: '#d4d4d4',
+}
+
+const PERMANENT_PRICE = 149
+
+function formatPrice(n) {
+  if (n === null || n === undefined) return '—'
+  const num = typeof n === 'string' ? parseFloat(n) : n
+  return Number.isInteger(num) ? String(num) : num.toFixed(2).replace('.', ',')
+}
+
+function PricingCard({
+  tag, tagColor, edgeOff, edgeOn, title, titleColor, price, per, save,
+  desc, ctaLabel, ctaColor, badge, selected, onSelect, onCta, disabled, disabledLabel,
+}) {
+  return (
+    <div
+      onClick={onSelect}
+      tabIndex={0}
+      style={{
+        borderColor: selected ? edgeOn : edgeOff,
+        boxShadow: selected ? `0 0 0 1px ${edgeOn}, 0 14px 32px rgba(0,0,0,.10)` : undefined,
+      }}
+      className={`relative flex flex-col bg-white border-2 rounded-[20px] px-6 py-7 text-center min-h-[340px] w-full max-w-[400px] sm:max-w-none cursor-pointer transition-all duration-300 ${
+        selected ? '-translate-y-1' : 'hover:-translate-y-1 hover:shadow-xl'
+      }`}
+    >
+      {badge && (
+        <span
+          className="absolute -top-3.5 left-1/2 -translate-x-1/2 text-white text-xs font-semibold tracking-wide px-4 py-1.5 rounded-full whitespace-nowrap"
+          style={{ background: C.hero }}
+        >
+          {badge}
+        </span>
+      )}
+
+      {/* Antetítulo con rayitas laterales */}
+      <span
+        className="flex items-center justify-center gap-2.5 text-[13px] font-bold tracking-[0.09em] uppercase mb-3.5"
+        style={{ color: tagColor }}
+      >
+        <span className="w-7 h-[2px] rounded-full transition-colors duration-300" style={{ background: selected ? edgeOn : edgeOff }} />
+        {tag}
+        <span className="w-7 h-[2px] rounded-full transition-colors duration-300" style={{ background: selected ? edgeOn : edgeOff }} />
+      </span>
+
+      <h3 className="text-[22px] font-bold leading-tight mb-3.5" style={{ color: titleColor }}>
+        {title}
+      </h3>
+
+      <div className="flex items-baseline justify-center gap-1 mb-1.5">
+        <span className="text-lg font-semibold" style={{ color: tagColor }}>€</span>
+        <span className="text-[40px] font-bold leading-none text-[#1f1f1f]">{price}</span>
+        <span className="text-[13px] text-gray-500 ml-1">{per}</span>
+      </div>
+
+      {save && (
+        <p className="text-[13px] mb-3">
+          <s className="text-[#b7b7b7]">{save.before}</s> · <b className="text-[#1a8a5a] font-semibold">{save.label}</b>
+        </p>
+      )}
+
+      <div
+        className="border-t border-dashed my-3.5 transition-colors duration-300"
+        style={{ borderColor: selected ? edgeOn : edgeOff }}
+      />
+
+      <p className="text-sm leading-relaxed text-gray-500 mb-5 flex-1">{desc}</p>
+
+      <button
+        onClick={(e) => { e.stopPropagation(); onCta() }}
+        disabled={disabled}
+        className={`relative group overflow-hidden block w-full text-white text-[15px] font-semibold py-3.5 px-3.5 rounded-[14px] transition-all duration-300 ${
+          disabled
+            ? 'opacity-50 cursor-not-allowed'
+            : 'hover:scale-[1.02] active:scale-[0.98] hover:brightness-95 cursor-pointer'
+        }`}
+        style={{ background: ctaColor }}
+      >
+        {!disabled && (
+          <span className="landing-autoshine absolute inset-0 w-full h-full bg-white/20 -translate-x-full skew-x-12 group-hover:translate-x-full transition-transform duration-700 ease-out" aria-hidden="true" />
+        )}
+        {disabled ? disabledLabel : ctaLabel}
+      </button>
+    </div>
+  )
+}
 
 export default function Shop() {
   const { addToCart, setDirectCheckoutItem, cart } = useCartStore()
-  const { isSubscribed, subscriptionType } = useAuthStore()
-  const router = useRouter()
-  
-  // Tier ranking: higher number = higher tier
-  const TIER_RANK = { monthly: 1, annual: 2, permanent: 3 };
-  const currentTierRank = TIER_RANK[subscriptionType] || 0;
-  
-  // State to track selected products
-  const [selectedDigital, setSelectedDigital] = useState('digital-annual') // Default to annual
-  const [selectedPhysical, setSelectedPhysical] = useState('book-pack') // Default to pack
-  
-  // Digital Library Products
-  const digitalProducts = [
-    {
-      id: 'digital-monthly',
-      name: 'Mensual',
-      price: 9.99,
-      period: '/mes',
-      description: 'Acceso completo a la biblioteca sin permanencia',
-      type: 'digital',
-      badge: null,
-      recommended: false,
-      features: [
-        'Acceso completo a la biblioteca digital',
-        'Todas las recetas de Vol. 1 y 2',
-        'Contenido actualizado regularmente',
-        'Sin compromiso de permanencia'
-      ]
-    },
-    {
-      id: 'digital-annual',
-      name: 'Anual',
-      price: 89.99,
-      period: '/año',
-      description: 'Muy rentable si lo usas de verdad',
-      type: 'digital',
-      badge: 'Recomendado',
-      savings: 'Ahorra 50 €/año',
-      recommended: true,
-      features: [
-        'Acceso completo a la biblioteca digital',
-        'Todas las recetas de Vol. 1 y 2',
-        'Contenido actualizado regularmente',
-        'Ahorra más de 30€ vs mensual'
-      ]
-    },
-    {
-      id: 'digital-permanent',
-      name: 'Permanente',
-      price: 159,
-      period: '/único',
-      description: 'Recetas actuales y futuras x siempre',
-      type: 'digital',
-      badge: null,
-      savings: 'Ahorra +120 €',
-      recommended: false,
-      features: [
-        'Acceso de por vida',
-        'Todas las recetas de Vol. 1 y 2',
-        'Contenido actualizado',
-        'Sin pagos recurrentes'
-      ]
-    }
-  ]
+  const { subscriptionType } = useAuthStore()
 
-  // Dynamic Physical Book Products
-  const [physicalProducts, setPhysicalProducts] = useState([])
-  const [isLoadingPhysical, setIsLoadingPhysical] = useState(true)
+  const TIER_RANK = { monthly: 1, annual: 2, permanent: 3 }
+  const currentTierRank = TIER_RANK[subscriptionType] || 0
+  const hasPermanent = subscriptionType === 'permanent'
+
+  const [selectedCard, setSelectedCard] = useState('bundle')
+
+  // Productos físicos reales desde la API (volumen suelto y pack)
+  const [vol1, setVol1] = useState(null)
+  const [pack, setPack] = useState(null)
+  const [bundle, setBundle] = useState(null)
 
   React.useEffect(() => {
-    async function fetchPhysicalProducts() {
+    async function fetchProducts() {
       try {
+        const API = process.env.NEXT_PUBLIC_API_URL || 'https://squatfit-api-cyrc2g3zra-no.a.run.app'
         const [booksRes, packsRes] = await Promise.all([
-          fetch('https://squatfit-api-cyrc2g3zra-no.a.run.app/api/v1/book/all'),
-          fetch('https://squatfit-api-cyrc2g3zra-no.a.run.app/api/v1/book/packs')
+          fetch(`${API}/api/v1/book/all`),
+          fetch(`${API}/api/v1/book/packs`),
         ])
         const booksData = await booksRes.json()
         const packsData = await packsRes.json()
 
-        const formattedProducts = []
-
-        // Format Books (using their versions)
+        // Primer volumen físico disponible
         if (Array.isArray(booksData)) {
-          booksData.forEach((b) => {
-            if (b.versions && b.versions.length > 0) {
-              const version = b.versions[0]
-              formattedProducts.push({
-                id: version.version_id, // Mandatory UUID for Version
-                name: b.title || version.version_title,
-                price: version.version_price,
-                description: b.subtitle || 'Libro físico impreso',
-                type: 'version',
-                badge: null,
-                popular: false,
-                image: version.version_image || b.image || '/LibrosFisicos.png',
-                features: ['Libro físico', 'Recetas fit', 'Envío incluido']
-              })
-            }
-          })
-        }
-
-        // Format Packs
-        if (Array.isArray(packsData)) {
-          packsData.forEach((p) => {
-            formattedProducts.push({
-              id: p.id, // Mandatory UUID for Pack
-              name: p.name,
-              price: parseFloat(p.price),
-              description: p.description || 'Pack de libros impresos',
-              type: 'pack',
-              badge: 'Más popular',
-              savings: 'Ahorra 10 €',
-              popular: true,
-              image: p.image || '/LibrosFisicos.png',
-              features: ['Libros físicos', 'Recetas fit', 'Envío incluido']
+          const withVersion = booksData.find((b) => b.versions?.length > 0)
+          if (withVersion) {
+            const v = withVersion.versions[0]
+            setVol1({
+              id: v.version_id,
+              type: 'version',
+              name: v.version_title || withVersion.title,
+              price: v.version_price,
+              image: v.version_image || withVersion.image || '/LibrosFisicos.png',
             })
-          })
+          }
         }
 
-        const visibleProducts = formattedProducts.slice(-3);
-        setPhysicalProducts(visibleProducts);
-        if (visibleProducts.length > 0) {
-          // Find popular one, fallback to first
-          const defaultProd = visibleProducts.find(p => p.popular) || visibleProducts[0];
-          setSelectedPhysical(defaultProd.id);
+        if (Array.isArray(packsData) && packsData.length > 0) {
+          // El bundle (físico + digital) se identifica por nombre; hasta que
+          // exista en el backend, la tarjeta se muestra como "muy pronto".
+          const bundlePack = packsData.find((p) => /todo|bundle|digital/i.test(p.name))
+          const printPack = packsData.find((p) => p !== bundlePack) || packsData[0]
+          if (printPack) {
+            setPack({
+              id: printPack.id,
+              type: 'pack',
+              name: printPack.name,
+              price: parseFloat(printPack.price),
+              image: printPack.image || '/LibrosFisicos.png',
+            })
+          }
+          if (bundlePack) {
+            setBundle({
+              id: bundlePack.id,
+              type: 'pack',
+              name: bundlePack.name,
+              price: parseFloat(bundlePack.price),
+              image: bundlePack.image || '/LibrosFisicos.png',
+            })
+          }
         }
       } catch (error) {
-        console.error("Error fetching physical products:", error)
-        toast.error("Error cargando el catálogo de libros físicos")
-      } finally {
-        setIsLoadingPhysical(false)
+        console.error('Error cargando el catálogo:', error)
+        toast.error('Error cargando el catálogo de libros')
       }
     }
-    fetchPhysicalProducts()
+    fetchProducts()
   }, [])
 
-  const handleAddToCart = (product) => {
-    if (product.type === 'digital') {
-      // Extraer tipo de plan
-      const subType = product.id.replace('digital-', '') // ej: 'annual'
-      const targetTierRank = TIER_RANK[subType] || 0;
+  const addPhysical = (product) => {
+    if (!product) return
+    if (cart.some((item) => item.isDirectCheckout)) {
+      toast.error('Tu suscripción fue removida por seguridad (no se pueden mezclar productos físicos y suscripciones).', { duration: 5000 })
+    }
+    addToCart({
+      id: product.id,
+      type: product.type,
+      name: `Libro Físico - ${product.name}`,
+      price: product.price,
+      image: product.image,
+    })
+    toast.success('Añadido al carrito')
+  }
 
-      // Bloquear si es mismo tier o inferior al actual
-      if (currentTierRank > 0 && targetTierRank <= currentTierRank) {
-        if (targetTierRank === currentTierRank) {
-          toast.error('Ya tienes este plan activo.');
-        } else {
-          toast.error('No puedes adquirir un plan inferior al que ya tienes activo.');
-        }
-        return;
-      }
+  const buyDigitalPermanent = () => {
+    if (hasPermanent) {
+      toast.error('Ya tienes el acceso de por vida activo.')
+      return
+    }
+    if (cart.length > 0 && !cart.some((item) => item.isDirectCheckout)) {
+      toast.error('Tus productos físicos fueron removidos por seguridad (no se pueden mezclar suscripciones y productos).', { duration: 5000 })
+    }
+    setDirectCheckoutItem({
+      id: 'digital-permanent',
+      name: 'Suscripción Digital - Permanente',
+      price: PERMANENT_PRICE,
+      image: '/Group32.png',
+      endpoint: '/api/v1/book/create-payment-intent-digital',
+      payload: { subscription_type: 'permanent' },
+    })
+    toast.success(currentTierRank > 0 ? 'Upgrade añadido al carrito' : 'Acceso de por vida añadido al carrito')
+  }
 
-      if (cart.length > 0 && !cart.some(item => item.isDirectCheckout)) {
-          toast.error('Tus productos físicos fueron removidos por seguridad (no se pueden mezclar suscripciones y productos).', { duration: 5000 });
-      }
-
-      setDirectCheckoutItem({
-        id: product.id,
-        name: `Suscripción Digital - ${product.name}`,
-        price: product.price,
-        image: product.image || '/Group32.png',
-        endpoint: '/api/v1/book/create-payment-intent-digital',
-        payload: { subscription_type: subType }
-      })
-      toast.success(currentTierRank > 0 ? 'Upgrade añadido al carrito' : 'Suscripción añadida al carrito')
+  const buyBundle = () => {
+    if (bundle) {
+      addPhysical(bundle)
     } else {
-      if (cart.some(item => item.isDirectCheckout)) {
-          toast.error('Tu suscripción fue removida por seguridad (no se pueden mezclar productos físicos y suscripciones).', { duration: 5000 });
-      }
-
-      addToCart({
-        id: product.id, 
-        type: product.type || 'version',
-        name: `Libro Físico - ${product.name}`,
-        price: product.price,
-        image: product.image || '/LibrosFisicos.png'
-      })
-      toast.success('Libro añadido al carrito')
+      toast('Disponible muy pronto 🙌', { icon: '⏳' })
     }
   }
-  
-  // Get selected products
-  const getSelectedDigitalProduct = () => digitalProducts.find(p => p.id === selectedDigital)
-  const getSelectedPhysicalProduct = () => physicalProducts.find(p => p.id === selectedPhysical)
 
   return (
     <section id="shop" className="py-16 px-4 bg-gray-50">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="text-center mb-4">
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-indigo-900 mb-4">
-            Elige cómo quieres disfrutar<br />Cocina Squat Fit
+      <div className="max-w-[1120px] mx-auto">
+        {/* Cabecera */}
+        <div className="text-center mb-8">
+          <h2 className="text-3xl md:text-4xl font-bold text-[#1f1f1f] mb-2">
+            Elige cómo quieres disfrutar de Cocina Squat Fit
           </h2>
-          <p className="text-gray-700 text-lg max-w-3xl mx-auto">
-            Acceso digital por suscripción o compra del libro impreso.<br />
-            Dos experiencias distintas, sin líos.
+          <p className="text-gray-500 text-base">
+            Libros físicos, biblioteca digital de por vida, o todo junto.
           </p>
         </div>
 
-        {/* Main Grid - Two Columns */}
-        <div className="grid lg:grid-cols-2 gap-8 mt-24">
-          
-          {/* BIBLIOTECA DIGITAL - Left Column */}
-          <div className="bg-white rounded-3xl shadow-lg p-8 relative">
-            {/* Header with Image */}
-            <div className="flex items-start justify-between mb-6">
-              <div>
-                <h3 className="text-7xl font-bold text-indigo-900 mb-2">
-                  Biblioteca<br />Digital
-                </h3>
-                <p className="text-indigo-700 text-3xl">
-                  Todo el contenido en digital,<br />
-                  siempre actualizado.
-                </p>
-              </div>
-              <div className="flex-shrink-0 ">
-                <Image 
-                  src="/Mockuptelefono1.png" 
-                  alt="Biblioteca Digital"
-                  width={150}
-                  height={300}
-                  className="object-contain absolute -top-20 right-0 z-20"
-                />
-              </div>
-            </div>
+        {/* Las 4 tarjetas */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-[18px] items-stretch justify-items-center sm:justify-items-stretch pt-4">
 
-            {/* Digital Products */}
-            <div className="space-y-4">
-              {digitalProducts.map((product) => {
-                const cardSubType = product.id.replace('digital-', '');
-                const cardRank = TIER_RANK[cardSubType] || 0;
-                const isCurrent = subscriptionType === cardSubType;
-                const isLower = currentTierRank > 0 && cardRank < currentTierRank;
-                const isDisabled = isCurrent || isLower;
-                return (
-                  <div
-                    key={product.id}
-                    onClick={() => !isDisabled && setSelectedDigital(product.id)}
-                    className={`
-                      relative rounded-2xl p-4 border-2 transition-all
-                      ${isDisabled
-                        ? 'cursor-not-allowed opacity-60 bg-gray-50 border-gray-200'
-                        : 'cursor-pointer ' + (selectedDigital === product.id
-                          ? 'border-indigo-500 bg-indigo-50 shadow-md'
-                          : product.recommended
-                            ? 'bg-indigo-50 border-indigo-200 hover:border-indigo-300'
-                            : 'bg-white border-gray-200 hover:border-gray-300')
-                      }
-                    `}
-                  >
-                    {isCurrent && (
-                      <span className="absolute -top-2 left-4 bg-green-600 text-white text-xs font-bold px-3 py-1 rounded-full">
-                        ✓ Plan activo
-                      </span>
-                    )}
-                    {isLower && !isCurrent && (
-                      <span className="absolute -top-2 left-4 bg-gray-400 text-white text-xs font-bold px-3 py-1 rounded-full">
-                        Ya incluido
-                      </span>
-                    )}
-                    {!isDisabled && product.badge && (
-                      <span className="absolute -top-2 left-4 bg-indigo-700 text-white text-xs font-bold px-3 py-1 rounded-full">
-                        {product.badge}
-                      </span>
-                    )}
-                    
-                    <div className="flex items-center justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2">
-                          {/* Radio button indicator */}
-                          <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
-                            isDisabled
-                              ? 'border-gray-300 bg-gray-200'
-                              : selectedDigital === product.id 
-                                ? 'border-indigo-600 bg-indigo-600' 
-                                : 'border-gray-300 bg-white'
-                          }`}>
-                            {!isDisabled && selectedDigital === product.id && (
-                              <div className="w-2 h-2 bg-white rounded-full"></div>
-                            )}
-                          </div>
-                          <h4 className="text-xl font-bold text-indigo-900">{product.name}</h4>
-                        </div>
-                        <p className="text-sm text-gray-600 mt-1 ml-7">{product.description}</p>
-                      </div>
-                      <div className="text-right ml-4 flex flex-col items-end justify-center">
-                        <p className="text-2xl font-bold text-indigo-900">
-                          {product.price.toString().replace('.', ',')} €
-                          <span className="text-sm font-normal text-gray-600">{product.period}</span>
-                        </p>
-                        {product.savings && (
-                          <div className="mt-1 bg-indigo-100 text-indigo-700 text-xs font-bold px-3 py-1 rounded-full whitespace-nowrap">
-                            {product.savings}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
+          {/* 1. Impreso Vol 1 (simple) */}
+          <PricingCard
+            tag="Impreso"
+            tagColor={C.print}
+            edgeOff={C.grayEdge}
+            edgeOn={C.printSoft}
+            title={vol1 ? vol1.name : 'Volumen 1'}
+            titleColor={C.print}
+            price={vol1 ? formatPrice(vol1.price) : '—'}
+            per="+ envío"
+            desc="El libro físico del Volumen 1, para tu cocina."
+            ctaLabel="Comprar ahora"
+            ctaColor={C.print}
+            selected={selectedCard === 'vol1'}
+            onSelect={() => setSelectedCard('vol1')}
+            onCta={() => addPhysical(vol1)}
+            disabled={!vol1}
+            disabledLabel="No disponible"
+          />
 
-            {/* CTA Button */}
-            {(() => {
-              const selected = getSelectedDigitalProduct();
-              const subType = selected?.id?.replace('digital-', '') || '';
-              const targetRank = TIER_RANK[subType] || 0;
-              const isCurrent = subscriptionType === subType;
-              const isLower = currentTierRank > 0 && targetRank < currentTierRank;
-              const isUpgrade = currentTierRank > 0 && targetRank > currentTierRank;
-              const btnLabel = isCurrent
-                ? '✓ Plan activo'
-                : isLower
-                  ? 'Plan no disponible'
-                  : isUpgrade
-                    ? 'Mejorar mi plan'
-                    : 'Acceder a la biblioteca';
-              return (
-                <button
-                  onClick={() => handleAddToCart(selected)}
-                  disabled={isCurrent || isLower}
-                  className={`w-full cursor-pointer mt-6 font-bold py-4 rounded-2xl transition-colors text-lg ${
-                    isCurrent
-                      ? 'bg-indigo-200 text-indigo-500 cursor-not-allowed'
-                      : isLower
-                        ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                        : 'bg-indigo-700 hover:bg-indigo-800 text-white cursor-pointer'
-                  }`}
-                >
-                  {btnLabel}
-                </button>
-              );
-            })()}
-            <p className="text-center text-sm text-gray-600 mt-2">
-              <span className="font-bold">Acceso inmediato.</span> Cancela cuando quieras en mensual.
-            </p>
-          </div>
+          {/* 2. Pack impreso (completa) */}
+          <PricingCard
+            tag="Impreso"
+            tagColor={C.print}
+            edgeOff={C.printSoft}
+            edgeOn={C.print}
+            title={pack ? pack.name : 'Pack Vol. 1 y 2'}
+            titleColor={C.print}
+            price={pack ? formatPrice(pack.price) : '—'}
+            per="+ envío"
+            desc="Los dos volúmenes físicos en un solo pedido."
+            ctaLabel="Comprar el pack"
+            ctaColor={C.print}
+            selected={selectedCard === 'pack'}
+            onSelect={() => setSelectedCard('pack')}
+            onCta={() => addPhysical(pack)}
+            disabled={!pack}
+            disabledLabel="No disponible"
+          />
 
-          {/* LIBROS EN PAPEL - Right Column */}
-          <div className="bg-white rounded-3xl shadow-lg p-8 relative">
-            {/* Header with Image */}
-            <div className="flex items-start justify-between mb-6">
-              <div>
-                <h3 className="text-7xl font-bold text-orange-600 mb-2">
-                  Libros en<br />papel
-                </h3>
-                <p className="text-orange-600 text-3xl">
-                  Libro impreso. Compra única.<br />
-                  Sin suscripción.
-                </p>
-              </div>
-              <div className="flex-shrink-0">
-                <Image 
-                  src="/LibrosFisicos.png" 
-                  alt="Libros en papel"
-                  width={350}
-                  height={350}
-                  className="object-contain absolute -top-30 -right-20 z-20"
-                />
-              </div>
-            </div>
+          {/* 3. Digital de por vida (simple) */}
+          <PricingCard
+            tag="Digital"
+            tagColor={C.digital}
+            edgeOff={C.grayEdge}
+            edgeOn={C.digitalSoft}
+            title="Digital de por vida"
+            titleColor={C.digital}
+            price={formatPrice(PERMANENT_PRICE)}
+            per="pago único"
+            desc="Toda la biblioteca, ahora y siempre: Vol. 1, 2, el 3 (próximamente) y futuros. Recetas siempre actualizadas."
+            ctaLabel={currentTierRank > 0 && !hasPermanent ? 'Mejorar a de por vida' : 'Acceso de por vida'}
+            ctaColor={C.digital}
+            selected={selectedCard === 'digital'}
+            onSelect={() => setSelectedCard('digital')}
+            onCta={buyDigitalPermanent}
+            disabled={hasPermanent}
+            disabledLabel="✓ Ya lo tienes"
+          />
 
-            {/* Physical Products */}
-            <div className="space-y-4">
-              {isLoadingPhysical ? (
-                <>
-                  <div className="animate-pulse flex items-center p-4 border-2 border-gray-200 rounded-2xl h-24 bg-gray-50">
-                    <div className="rounded-full bg-gray-200 h-5 w-5 mr-4"></div>
-                    <div className="flex-1 space-y-2">
-                       <div className="h-4 bg-gray-200 rounded w-1/3"></div>
-                       <div className="h-3 bg-gray-200 rounded w-2/3"></div>
-                    </div>
-                  </div>
-                  <div className="animate-pulse flex items-center p-4 border-2 border-gray-200 rounded-2xl h-24 bg-gray-50">
-                    <div className="rounded-full bg-gray-200 h-5 w-5 mr-4"></div>
-                    <div className="flex-1 space-y-2">
-                       <div className="h-4 bg-gray-200 rounded w-1/3"></div>
-                       <div className="h-3 bg-gray-200 rounded w-2/3"></div>
-                    </div>
-                  </div>
-                </>
-              ) : (
-                physicalProducts.map((product) => (
-                  <div 
-                    key={product.id}
-                    onClick={() => setSelectedPhysical(product.id)}
-                    className={`
-                      relative rounded-2xl p-4 border-2 transition-all cursor-pointer
-                      ${selectedPhysical === product.id
-                        ? 'border-orange-500 bg-orange-50 shadow-md' 
-                        : product.popular 
-                          ? 'bg-orange-50 border-orange-200 hover:border-orange-300' 
-                          : 'bg-white border-gray-200 hover:border-gray-300'
-                      }
-                    `}
-                  >
-                    {product.badge && (
-                      <span className="absolute -top-2 left-4 bg-orange-500 text-white text-xs font-bold px-3 py-1 rounded-full">
-                        {product.badge}
-                      </span>
-                    )}
-                    
-                    <div className="flex items-center justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2">
-                          {/* Radio button indicator */}
-                          <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
-                            selectedPhysical === product.id 
-                              ? 'border-orange-600 bg-orange-600' 
-                              : 'border-gray-300 bg-white'
-                          }`}>
-                            {selectedPhysical === product.id && (
-                              <div className="w-2 h-2 bg-white rounded-full"></div>
-                            )}
-                          </div>
-                          <h4 className="text-xl font-bold text-orange-600">{product.name}</h4>
-                        </div>
-                        <p className="text-sm text-gray-600 mt-1 ml-7">{product.description}</p>
-                      </div>
-                      <div className="text-right ml-4 flex flex-col items-end justify-center">
-                      <p className="text-2xl font-bold text-orange-600">
-                        {product.price.toString().replace('.', ',')} €
-                      </p>
-                      {product.savings && (
-                        <div className="mt-1 bg-orange-100 text-orange-600 text-xs font-bold px-3 py-1 rounded-full whitespace-nowrap">
-                          {product.savings}
-                        </div>
-                      )}
-                    </div>
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
+          {/* 4. Bundle / hero (completa) */}
+          <PricingCard
+            tag="Impreso + Digital"
+            tagColor={C.heroText}
+            edgeOff={C.digitalSoft}
+            edgeOn={C.hero}
+            title="Lo quiero todo"
+            titleColor={C.heroText}
+            price={bundle ? formatPrice(bundle.price) : '159'}
+            per="+ envío"
+            save={{ before: '238 €', label: 'ahorras 79 €' }}
+            desc="Los dos libros físicos + la biblioteca digital completa y siempre actualizada, para siempre."
+            ctaLabel="Lo quiero todo"
+            ctaColor={C.hero}
+            badge="Mejor valor"
+            selected={selectedCard === 'bundle'}
+            onSelect={() => setSelectedCard('bundle')}
+            onCta={buyBundle}
+          />
 
-            {/* CTA Button */}
-            <button 
-              onClick={() => handleAddToCart(getSelectedPhysicalProduct())}
-              disabled={isLoadingPhysical || !getSelectedPhysicalProduct()}
-              className="w-full cursor-pointer mt-6 bg-orange-500 hover:bg-orange-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-bold py-4 rounded-2xl transition-colors text-lg"
-            >
-              Comprar libro impreso
-            </button>
-          </div>
-        </div>
-
-        {/* Difference Section */}
-        <div className="mt-16 text-center">
-          <h3 className="text-3xl md:text-4xl font-bold text-indigo-900 mb-12">
-            ¿Cuál es la diferencia?
-          </h3>
-          
-          <div className="grid md:grid-cols-2 gap-12 max-w-4xl mx-auto">
-            {/* Biblioteca Digital */}
-            <div className="flex flex-col items-center">
-              <div className="bg-indigo-100 p-6 rounded-2xl mb-4">
-                <FileText className="w-16 h-16 text-indigo-700" strokeWidth={2} />
-              </div>
-              <h4 className="text-xl font-bold text-indigo-900 mb-3">Biblioteca digital</h4>
-              <p className="text-gray-700 text-center">
-                acceso online al contenido digital completo mientras dure la suscripción.
-              </p>
-            </div>
-
-            {/* Libro Impreso */}
-            <div className="flex flex-col items-center">
-              <div className="bg-orange-100 p-6 rounded-2xl mb-4">
-                <BookOpen className="w-16 h-16 text-orange-600" strokeWidth={2} />
-              </div>
-              <h4 className="text-xl font-bold text-orange-600 mb-3">Libro impreso</h4>
-              <p className="text-gray-700 text-center">
-                el libro físico en papel, sin acceso digital y sin actualizaciones.
-              </p>
-            </div>
-          </div>
         </div>
       </div>
     </section>

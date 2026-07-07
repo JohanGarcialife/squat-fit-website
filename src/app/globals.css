@@ -81,6 +81,38 @@ body {
   color: rgba(255,105,11,0.5);
 }
 
+/* Auto-brillo de los botones landing: en pantallas táctiles (sin cursor)
+   el barrido de luz cruza el CTA solo, cada 4s. En escritorio no actúa
+   (ahí el brillo va ligado al hover) y se desactiva si el usuario tiene
+   "reducir movimiento" en su sistema. */
+@keyframes landing-sweep {
+  0% { transform: translateX(-100%) skewX(12deg); }
+  30% { transform: translateX(100%) skewX(12deg); }
+  100% { transform: translateX(100%) skewX(12deg); }
+}
+
+@media (hover: none) {
+  .landing-autoshine {
+    animation: landing-sweep 4s ease-out 2s infinite;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .landing-autoshine {
+    animation: none;
+  }
+}
+
+/* Carrusel de comparaciones antes/después: las laterales van más pegadas
+   a la central que en los sliders por defecto (menos margen y menos encogido) */
+.comparision-carousel .slick-slide > div {
+  margin: 0 2px;
+  transform: scale(0.9);
+}
+.comparision-carousel .slick-slide.slick-current > div {
+  transform: scale(1);
+}
+
 /* Prevenir selección de texto y arrastre accidental (UI Bug Fix) */
 img, a, button {
   user-select: none;

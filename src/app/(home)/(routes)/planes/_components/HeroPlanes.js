@@ -19,11 +19,11 @@ export default function HeroPlanes() {
 
       {/* --- Indicador: NUESTROS PLANES --- */}
       <div className="flex items-center justify-center gap-4 mb-8 animate-fade-in opacity-0 [animation-fill-mode:forwards] [animation-delay:100ms] duration-700">
-        <span className="w-10 sm:w-16 h-[2px] bg-primary rounded-full"></span>
-        <span className="text-primary font-bold tracking-[0.2em] text-xs sm:text-sm uppercase">
+        <span className="w-12 sm:w-20 h-[2px] bg-primary rounded-full"></span>
+        <span className="text-primary font-bold tracking-[0.2em] text-xl sm:text-3xl uppercase">
           NUESTROS PLANES
         </span>
-        <span className="w-10 sm:w-16 h-[2px] bg-primary rounded-full"></span>
+        <span className="w-12 sm:w-20 h-[2px] bg-primary rounded-full"></span>
       </div>
 
       {/* --- Título Principal --- */}
@@ -40,10 +40,10 @@ export default function HeroPlanes() {
       <div className="flex flex-col items-center justify-center animate-fade-in opacity-0 [animation-fill-mode:forwards] [animation-delay:700ms] duration-700">
         <button
           onClick={handleScrollToPlans}
-          className="relative group overflow-hidden bg-gradient-to-r from-[#FF690B] to-[#363C98] text-white px-10 sm:px-14 py-4 sm:py-5 rounded-full font-bold text-xl sm:text-2xl shadow-xl hover:shadow-[#FF690B]/20 hover:scale-[1.03] active:scale-[0.98] transition-all duration-300 cursor-pointer"
+          className="relative group overflow-hidden bg-gradient-to-r from-[#FF690B] to-[#363C98] text-white px-10 sm:px-14 py-4 sm:py-5 rounded-[27px] font-bold text-xl sm:text-2xl shadow-xl hover:shadow-[#FF690B]/20 hover:scale-[1.03] active:scale-[0.98] transition-all duration-300 cursor-pointer"
         >
           {/* Inner hover flash effect */}
-          <span className="absolute inset-0 w-full h-full bg-white/10 -translate-x-full skew-x-12 group-hover:translate-x-full transition-transform duration-1000 ease-out" />
+          <span className="landing-autoshine absolute inset-0 w-full h-full bg-white/10 -translate-x-full skew-x-12 group-hover:translate-x-full transition-transform duration-1000 ease-out" aria-hidden="true" />
           Reserva tu plaza
         </button>
 

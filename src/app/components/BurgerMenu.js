@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { useAuthStore } from '../../stores/auth.store';
 import { useCartStore } from '@/stores/cart.store';
 import ConfirmationModal from './ConfirmationModal';
@@ -13,6 +13,7 @@ export default function BurgerMenu() {
   const { cart } = useCartStore();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const router = useRouter();
+  const pathname = usePathname();
 
   // Hydration fix for client-side state
   const [isClient, setIsClient] = useState(false);
@@ -76,76 +77,90 @@ export default function BurgerMenu() {
         </div>
       </div>
 
-      {show &&
-        <div className='fixed inset-0 z-50' >
-          <div className='w-full h-screen bg-linear-to-b from-primary to-secondary opacity-90 px-5 pb-32 pt-10 flex flex-col overflow-y-auto'>
-            <div className='flex justify-end'>
-              <div className="cursor-pointer" onClick={() => setShow(false)}>
-                <Image
-                  src="/icons/Close.png"
-                  width={32}
-                  height={32}
-                  alt="Close"
-                  className='cursor-pointer'
-                />
-              </div>
-            </div>
-            <nav className='flex flex-col items-start justify-center gap-4 mt-10'> {/* Cambiado items-center a items-start */}
-              <Link href="/cocina" className='text-5xl font-bold text-white' onClick={() => setShow(false)}>Cocina</Link>
-              <Link href="/planes" className='text-5xl font-bold text-white' onClick={() => setShow(false)}>Planes</Link>
-              <Link href="/cursos" className='text-5xl font-bold text-white' onClick={() => setShow(false)}>Cursos</Link>
-               <Link href="/politicas">
-                    <p
-                        className='cursor-pointer text-5xl font-bold text-white'
-                         onClick={() => setShow(false)}
-                    >
-                        Políticas
-                    </p>
-                </Link>
-                <Link href="/nosotros">
-                    <p
-                        className='cursor-pointer text-5xl font-bold text-white'
-                         onClick={() => setShow(false)}
-                    >
-                        Nosotros
-                    </p>
-                </Link>
-            </nav>
-            
-            <div className="mt-10 flex flex-col items-center gap-4">
-              {isClient && isAuth ? (
-                <>
-                <Link href="/panel-control" onClick={() => setShow(false)} className='w-full text-center'>
-                    <div className='flex justify-center bg-white py-2 px-4 rounded-xl cursor-pointer'>
-                      <p className='text-5xl font-bold text-primary'>Inicio</p>
-                    </div>
-                </Link>
-                <div className='w-full text-center py-2'>
-                  <p className='text-white text-3xl'>Hola, {user?.username}</p>
-                </div>
-                  <div className="cursor-pointer" onClick={() => setIsModalOpen(true)} className='flex justify-center py-2 px-4 border border-white rounded-xl cursor-pointer mt-4 w-full'>
-                    <p className='text-3xl font-bold text-white'>Logout</p>
-                  </div>
-                </>
-              ) : (
-                <>
-                  <Link href="/login" onClick={() => setShow(false)} className='w-full'>
-                    <div className='flex justify-center py-2 px-4 border border-white rounded-xl cursor-pointer'>
-                      <p className='text-5xl font-bold text-white'>Acceder</p>
-                    </div>
-                  </Link>
-                  <Link href="/register" onClick={() => setShow(false)} className='w-full'>
-                    <div className='flex justify-center py-2 px-4 border border-white rounded-xl cursor-pointer'>
-                      <p className='text-5xl font-bold text-white'>Registro</p>
-                    </div>
-                  </Link>
-                </>
-              )}
-            </div>
+      {/* Fondo oscurecido al abrir */}
+      {show && (
+        <div
+          className='fixed inset-0 bg-black/20 z-40 transition-opacity'
+          onClick={() => setShow(false)}
+        />
+      )}
 
-          </div>
+      {/* Drawer lateral: mismo concepto que el índice del panel
+          (tarjeta crema flotante, cierre naranja, textos azules) */}
+      <div
+        className={`fixed top-[20px] right-[20px] h-[calc(100vh-40px)] w-[300px] bg-[#FFF6F0] rounded-[40px] shadow-2xl z-50 flex flex-col py-8 px-6 transform transition-transform duration-300 ease-in-out overflow-y-auto ${
+          show ? 'translate-x-0' : 'translate-x-[calc(100%+20px)]'
+        }`}
+      >
+        {/* Cabecera: etiqueta + cerrar */}
+        <div className='flex items-center justify-between mb-8'>
+          <span className='text-xs font-bold text-[#3932C0] uppercase tracking-widest opacity-50'>
+            Menú
+          </span>
+          <button onClick={() => setShow(false)} className='text-[#FF690B] hover:opacity-80 transition-opacity cursor-pointer' aria-label='Cerrar menú'>
+            <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M18 6l-12 12" /><path d="M6 6l12 12" />
+            </svg>
+          </button>
         </div>
-      }
+
+        {/* Navegación */}
+        <nav className='flex flex-col gap-1'>
+          {[
+            { href: '/cocina', label: 'Cocina' },
+            { href: '/planes', label: 'Planes' },
+            { href: '/cursos', label: 'Cursos' },
+            { href: '/politicas', label: 'Políticas' },
+            { href: '/nosotros', label: 'Nosotros' },
+          ].map((item) => {
+            const isActive = pathname?.startsWith(item.href);
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                onClick={() => setShow(false)}
+                className={`font-bold text-2xl py-3 px-3 rounded-2xl active:scale-[0.98] transition-all ${
+                  isActive
+                    ? 'text-primary bg-[#FF690B]/5'
+                    : 'text-secondary hover:bg-[#FF690B]/5 hover:text-primary'
+                }`}
+              >
+                {item.label}
+              </Link>
+            );
+          })}
+        </nav>
+
+        {/* Zona de cuenta, anclada abajo */}
+        <div className='mt-auto pt-8 flex flex-col gap-3'>
+          {isClient && isAuth ? (
+            <>
+              <p className='text-[#3932C0]/80 text-lg font-medium text-center'>Hola, {user?.username}</p>
+              <Link href="/panel-control" onClick={() => setShow(false)} className='w-full'>
+                <div className='flex justify-center bg-secondary py-3 px-4 rounded-[20px] shadow-md cursor-pointer active:scale-95 transition-transform'>
+                  <p className='text-xl font-bold text-white'>Mi panel</p>
+                </div>
+              </Link>
+              <div onClick={() => setIsModalOpen(true)} className='flex justify-center py-3 px-4 border-2 border-primary rounded-[20px] cursor-pointer active:scale-95 transition-transform w-full'>
+                <p className='text-xl font-bold text-primary'>Cerrar sesión</p>
+              </div>
+            </>
+          ) : (
+            <>
+              <Link href="/login" onClick={() => setShow(false)} className='w-full'>
+                <div className='flex justify-center py-3 px-4 border-2 border-primary rounded-[20px] cursor-pointer active:scale-95 transition-transform'>
+                  <p className='text-xl font-bold text-primary'>Acceder</p>
+                </div>
+              </Link>
+              <Link href="/register" onClick={() => setShow(false)} className='w-full'>
+                <div className='flex justify-center py-3 px-4 bg-primary rounded-[20px] shadow-md cursor-pointer active:scale-95 transition-transform'>
+                  <p className='text-xl font-bold text-white'>Registro</p>
+                </div>
+              </Link>
+            </>
+          )}
+        </div>
+      </div>
        <ConfirmationModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}

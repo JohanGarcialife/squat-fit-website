@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import LandingButton from '../../../../components/LandingButton';
 
 export default function FinalCTA() {
   const handleScrollToPlans = () => {
@@ -25,12 +26,9 @@ export default function FinalCTA() {
 
         {/* --- Botón Blanco CTA --- */}
         <div>
-          <button
-            onClick={handleScrollToPlans}
-            className="bg-white text-[#FF690B] px-10 sm:px-14 py-4 sm:py-5 rounded-full font-bold text-lg sm:text-xl shadow-lg hover:shadow-white/10 hover:scale-[1.03] active:scale-[0.98] transition-all duration-300 cursor-pointer"
-          >
+          <LandingButton variant="orange-light" size="xl" autoShine onClick={handleScrollToPlans}>
             Reserva tu plaza
-          </button>
+          </LandingButton>
         </div>
 
       </div>
