@@ -42,7 +42,7 @@ export default function HeroSection() {
       </div>
 
       {/* Right */}
-      <div className=' w-full h-[530px] lg:h-[650px] xl:h-[900px] relative overflow-hidden'>
+      <div className=' w-full h-[320px] sm:h-[520px] lg:h-[650px] xl:h-[900px] relative overflow-hidden'>
         {/* Móvil primero: si el ancho aún es desconocido, pintamos la versión móvil */}
         {(!width || width < 425) && <Image src="/mobileCoach.png" width={330} height={214} alt='Coach'  className='absolute z-20 left-5 bottom-0'/>  }
         {width < 768 && width >= 425 && <Image src="/mobileCoach.png" width={530} height={514} alt='Coach'  className='absolute z-20 left-0 bottom-0'/>  }

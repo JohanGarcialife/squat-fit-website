@@ -66,15 +66,19 @@ export default function BurgerMenu() {
       <div className='flex items-center gap-4'>
         {/* Carrito eliminado de aquí */}
 
-        <div className={show ? "hidden" : "block"} onClick={() => setShow(true)}>
+        <button
+          className={`${show ? 'hidden' : 'block'} p-2 rounded-xl bg-[#FF690B]/10 active:scale-90 transition-transform cursor-pointer`}
+          onClick={() => setShow(true)}
+          aria-label='Abrir menú'
+        >
           <Image
             src="/icons/menu.png"
-            width={40}
-            height={30}
+            width={28}
+            height={21}
             alt="Menu"
             className='cursor-pointer'
           />
-        </div>
+        </button>
       </div>
 
       {/* Fondo oscurecido al abrir */}
@@ -96,11 +100,17 @@ export default function BurgerMenu() {
           show ? 'translate-x-0' : 'translate-x-[calc(100%+20px)]'
         }`}
       >
-        {/* Cabecera: etiqueta + cerrar */}
+        {/* Cabecera: logo (lleva a la home) + cerrar */}
         <div className='flex items-center justify-between mb-8'>
-          <span className='text-xs font-bold text-[#3932C0] uppercase tracking-widest opacity-50'>
-            Menú
-          </span>
+          <Link href="/" onClick={() => setShow(false)}>
+            <Image
+              src="/Logo-horizontal.png"
+              width={150}
+              height={36}
+              alt="Squat Fit — Inicio"
+              className='object-contain'
+            />
+          </Link>
           <button onClick={() => setShow(false)} className='text-[#FF690B] hover:opacity-80 transition-opacity cursor-pointer' aria-label='Cerrar menú'>
             <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <path d="M18 6l-12 12" /><path d="M6 6l12 12" />
