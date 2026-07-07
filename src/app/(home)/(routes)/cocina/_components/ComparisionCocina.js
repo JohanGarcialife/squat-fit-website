@@ -3,6 +3,7 @@ import React, { useRef, useState } from 'react'
 import dynamic from 'next/dynamic'
 import ImageComparisonSlider from './ImageComparisionSlider'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
+import useResizeRemountKey from '@/hooks/useResizeRemountKey'
 import 'slick-carousel/slick/slick.css'
 import 'slick-carousel/slick/slick-theme.css'
 
@@ -17,6 +18,8 @@ export default function ComparisionCocina(props) {
   const { comparacion = [] } = props
   const sliderRef = useRef(null)
   const [current, setCurrent] = useState(0)
+  // Re-montar el carrusel al terminar de redimensionar (slick no recalcula bien en vivo)
+  const resizeKey = useResizeRemountKey()
 
   if (comparacion.length === 0) {
     return null
@@ -32,6 +35,7 @@ export default function ComparisionCocina(props) {
     arrows: false,
     swipe: false,
     draggable: false,
+    initialSlide: current,
     beforeChange: (_, next) => setCurrent(next),
     responsive: [
       // Móvil: la central más grande y las laterales solo asomándose
@@ -44,7 +48,7 @@ export default function ComparisionCocina(props) {
     <section className="py-16 px-4 bg-white">
       <div className="max-w-7xl mx-auto">
         <div className="relative max-w-6xl mx-auto">
-          <Slider {...settings} ref={sliderRef}>
+          <Slider key={resizeKey} {...settings} ref={sliderRef}>
             {comparacion.map((item, index) => (
               <div key={index} className="px-1 py-4 outline-none">
                 <ImageComparisonSlider

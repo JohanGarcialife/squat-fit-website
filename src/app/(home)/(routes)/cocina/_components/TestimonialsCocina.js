@@ -1,8 +1,9 @@
 'use client';
 
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import useResizeRemountKey from '@/hooks/useResizeRemountKey';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
 
@@ -22,6 +23,9 @@ const testimonials = [
 
 const TestimonialsCocina = () => {
   const sliderRef = useRef(null);
+  const [current, setCurrent] = useState(0);
+  // Re-montar el carrusel al terminar de redimensionar (slick no recalcula bien en vivo)
+  const resizeKey = useResizeRemountKey();
 
   const settings = {
     className: 'center',
@@ -31,6 +35,8 @@ const TestimonialsCocina = () => {
     slidesToShow: 3,
     speed: 500,
     arrows: false,
+    initialSlide: current,
+    beforeChange: (_, next) => setCurrent(next),
     responsive: [
       { breakpoint: 640, settings: { slidesToShow: 1, centerMode: true, centerPadding: '20px' } },
       { breakpoint: 1024, settings: { slidesToShow: 1, centerMode: true, centerPadding: '60px' } },
@@ -54,7 +60,7 @@ const TestimonialsCocina = () => {
 
         {/* Carrusel */}
         <div className="relative max-w-6xl mx-auto">
-          <Slider {...settings} ref={sliderRef}>
+          <Slider key={resizeKey} {...settings} ref={sliderRef}>
             {testimonials.map((testimonial, index) => (
               <div
                 key={index}
