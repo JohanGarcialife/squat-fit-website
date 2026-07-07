@@ -25,7 +25,10 @@ export default function Reveal({ children, delay = 0 }) {
           observer.disconnect();
         }
       },
-      { threshold: 0.12, rootMargin: '0px 0px -40px 0px' }
+      // Umbral bajo: en secciones muy altas (o parcialmente recortadas en
+      // pantallas estrechas) un umbral mayor podía no dispararse nunca en iOS
+      // y la sección se quedaba invisible.
+      { threshold: 0.05, rootMargin: '0px 0px -40px 0px' }
     );
 
     observer.observe(element);

@@ -92,7 +92,7 @@ export default function BurgerMenu() {
       {/* Drawer lateral: mismo concepto que el índice del panel
           (tarjeta crema flotante, cierre naranja, textos azules) */}
       <div
-        className={`pointer-events-auto absolute top-[20px] right-[20px] h-[calc(100vh-40px)] w-[300px] bg-[#FFF6F0] rounded-[40px] shadow-2xl flex flex-col py-8 px-6 transform transition-transform duration-300 ease-in-out overflow-y-auto ${
+        className={`pointer-events-auto absolute top-[20px] right-[20px] h-[calc(100dvh-40px)] w-[300px] bg-[#FFF6F0] rounded-[40px] shadow-2xl flex flex-col py-8 px-6 transform transition-transform duration-300 ease-in-out overflow-y-auto ${
           show ? 'translate-x-0' : 'translate-x-[calc(100%+20px)]'
         }`}
       >

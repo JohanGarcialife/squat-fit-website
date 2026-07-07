@@ -45,8 +45,10 @@ export default function Home() {
   
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between">
-      <div >
+    <main className="flex min-h-screen flex-col items-center justify-between w-full">
+      {/* max-w + clip: si un hijo se pasa de ancho, se recorta en vez de
+          descentrar toda la página (pasaba en iPhone) */}
+      <div className="w-full max-w-[100vw] overflow-x-clip">
         <HeroSection />
         <Reveal><Comparision comparacion={comparacion} /></Reveal>
         <Reveal><Progress /></Reveal>
