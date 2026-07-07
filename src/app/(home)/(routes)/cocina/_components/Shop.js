@@ -97,7 +97,7 @@ function PricingCard({
         style={{ background: ctaColor }}
       >
         {!disabled && (
-          <span className="landing-autoshine absolute inset-0 w-full h-full bg-white/20 -translate-x-full skew-x-12 group-hover:translate-x-full transition-transform duration-700 ease-out" aria-hidden="true" />
+          <span className="landing-autoshine absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/40 to-transparent -translate-x-full skew-x-12 group-hover:translate-x-full transition-transform duration-700 ease-out" aria-hidden="true" />
         )}
         {disabled ? disabledLabel : ctaLabel}
       </button>

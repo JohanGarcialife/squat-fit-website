@@ -2,6 +2,7 @@
 import React, { useState } from 'react'
 import ImageComparisonSlider from './ImageComparisionSlider'
 import useWindowSize from '@/hooks/UseWindowSize';
+import LandingButton from '../../components/LandingButton';
 
 export default function Comparision(props) {
   const { width } = useWindowSize();
@@ -50,10 +51,9 @@ export default function Comparision(props) {
               Aprende a mantenerte sano y en forma; evita el efecto rebote y continua progresando después de meses en incluso años.
             </p>
             <div className="w-full flex flex-col items-center justify-center ">
-              <button className="relative group overflow-hidden mt-10 w-[70%] text-white px-6 py-3 rounded-[27px] bg-gradient-to-r from-primary to-secondary font-bold shadow-md hover:scale-[1.03] active:scale-[0.98] transition-all duration-300 cursor-pointer">
-                <span className="landing-autoshine absolute inset-0 w-full h-full bg-white/10 -translate-x-full skew-x-12 group-hover:translate-x-full transition-transform duration-700 ease-out" aria-hidden="true" />
+              <LandingButton variant="orange" size="lg" autoShine className="mt-10 w-[70%]">
                 Reserva tu plaza
-              </button>
+              </LandingButton>
               <div className="hidden items-center w-full text-secondary mt-10 justify-center gap-3 cursor-pointer text-2xl">
                 <p className="">Saber más</p>
 
@@ -79,10 +79,9 @@ export default function Comparision(props) {
             <p className="text-primary font-bold text-6xl">Un cambio físico que se mantiene</p>
             <p className="text-black text-lg mt-10">Aprende a mantenerte sano y en forma; evita el efecto rebote y continua progresando después de meses en incluso años.</p>
             <div className="w-full flex items-center justify-start gap-10">
-              <button className="relative group overflow-hidden mt-10 text-white px-12 py-4 rounded-[27px] bg-gradient-to-r from-primary to-secondary font-bold text-xl lg:text-2xl shadow-md hover:scale-[1.03] active:scale-[0.98] transition-all duration-300 cursor-pointer">
-                <span className="landing-autoshine absolute inset-0 w-full h-full bg-white/10 -translate-x-full skew-x-12 group-hover:translate-x-full transition-transform duration-700 ease-out" aria-hidden="true" />
+              <LandingButton variant="orange" size="lg" autoShine className="mt-10 text-xl lg:text-2xl">
                 Reserva tu plaza
-              </button>
+              </LandingButton>
               <div className="hidden items-center text-secondary mt-10 justify-center gap-3 cursor-pointer text-2xl">
                 <p className="">Saber más</p>
 

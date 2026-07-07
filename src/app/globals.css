@@ -87,23 +87,24 @@ html, body {
   color: rgba(255,105,11,0.5);
 }
 
-/* Auto-brillo de los botones landing: en pantallas táctiles (sin cursor)
-   el barrido de luz cruza el CTA solo, cada 4s. En escritorio no actúa
-   (ahí el brillo va ligado al hover) y se desactiva si el usuario tiene
-   "reducir movimiento" en su sistema. */
+/* Auto-brillo de los botones landing: en pantallas táctiles (sin cursor) el
+   barrido de luz cruza el CTA solo. Suave y espaciado: cada pasada dura ~2,3s
+   con ~5,7s de pausa entre pasadas, y tras 4 pasadas se detiene (para que no
+   distraiga en bucle infinito). En escritorio no actúa (ahí el brillo va
+   ligado al hover) y se desactiva con "reducir movimiento" del sistema. */
 /* Anima la propiedad `translate` (no `transform`): Tailwind v4 posiciona el
    destello con `translate: var(--tw-translate-x)...`, así que la animación
    debe tocar esa misma propiedad para que se vea en móvil. El sesgo (skew)
    va por `transform` de la utilidad skew-x-12 y se mantiene estático. */
 @keyframes landing-sweep {
   0% { translate: -100% 0; }
-  30% { translate: 100% 0; }
+  29% { translate: 100% 0; }
   100% { translate: 100% 0; }
 }
 
 @media (hover: none) {
   .landing-autoshine {
-    animation: landing-sweep 4s ease-out 2s infinite;
+    animation: landing-sweep 8s ease-in-out 2.5s 4;
   }
 }
 
