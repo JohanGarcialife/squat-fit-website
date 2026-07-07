@@ -4,6 +4,7 @@ import dynamic from 'next/dynamic'
 import ImageComparisonSlider from './ImageComparisionSlider'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import useResizeRemountKey from '@/hooks/useResizeRemountKey'
+import useWindowSize from '@/hooks/UseWindowSize'
 import 'slick-carousel/slick/slick.css'
 import 'slick-carousel/slick/slick-theme.css'
 
@@ -20,6 +21,10 @@ export default function ComparisionCocina(props) {
   const [current, setCurrent] = useState(0)
   // Re-montar el carrusel al terminar de redimensionar (slick no recalcula bien en vivo)
   const resizeKey = useResizeRemountKey()
+  // Configuración según ancho real (móvil primero si aún es desconocido):
+  // el motor "responsive" interno de slick no aplicaba bien en móvil.
+  const { width } = useWindowSize()
+  const w = width || 0
 
   if (comparacion.length === 0) {
     return null
@@ -29,7 +34,8 @@ export default function ComparisionCocina(props) {
     className: 'center comparision-carousel',
     centerMode: true,
     infinite: true,
-    centerPadding: '22%',
+    // Móvil: la central grande (86%) y las laterales solo asomándose
+    centerPadding: w >= 1024 ? '22%' : w >= 640 ? '14%' : '7%',
     slidesToShow: 1,
     speed: 500,
     arrows: false,
@@ -37,11 +43,6 @@ export default function ComparisionCocina(props) {
     draggable: false,
     initialSlide: current,
     beforeChange: (_, next) => setCurrent(next),
-    responsive: [
-      // Móvil: la central más grande y las laterales solo asomándose
-      { breakpoint: 640, settings: { centerPadding: '7%', swipe: false, draggable: false } },
-      { breakpoint: 1024, settings: { centerPadding: '14%', swipe: false, draggable: false } },
-    ],
   }
 
   return (

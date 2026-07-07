@@ -4,6 +4,7 @@ import React, { useRef, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import useResizeRemountKey from '@/hooks/useResizeRemountKey';
+import useWindowSize from '@/hooks/UseWindowSize';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
 
@@ -26,21 +27,21 @@ const TestimonialsCocina = () => {
   const [current, setCurrent] = useState(0);
   // Re-montar el carrusel al terminar de redimensionar (slick no recalcula bien en vivo)
   const resizeKey = useResizeRemountKey();
+  // Configuración según ancho real (móvil primero si aún es desconocido):
+  // el motor "responsive" interno de slick no aplicaba bien en móvil.
+  const { width } = useWindowSize();
+  const w = width || 0;
 
   const settings = {
     className: 'center',
     centerMode: true,
     infinite: true,
-    centerPadding: '0px',
-    slidesToShow: 3,
+    centerPadding: w >= 1024 ? '0px' : w >= 640 ? '60px' : '20px',
+    slidesToShow: w >= 1024 ? 3 : 1,
     speed: 500,
     arrows: false,
     initialSlide: current,
     beforeChange: (_, next) => setCurrent(next),
-    responsive: [
-      { breakpoint: 640, settings: { slidesToShow: 1, centerMode: true, centerPadding: '20px' } },
-      { breakpoint: 1024, settings: { slidesToShow: 1, centerMode: true, centerPadding: '60px' } },
-    ],
   };
 
   return (
