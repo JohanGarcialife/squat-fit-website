@@ -26,7 +26,7 @@ export default function Footer() {
           <div>
             <h4 className={HEADING_CLASS}>Cursos</h4>
             <ul className="space-y-3 sm:space-y-4">
-              <li><Link href="/cursos" className={LINK_CLASS}>Curso La Mujer</Link></li>
+              <li><Link href="/cursos" className={LINK_CLASS}>Curso de La Mujer</Link></li>
               <li><Link href="/cocina" className={LINK_CLASS}>Libros de Cocina</Link></li>
               <li><Link href="/cursos" className={LINK_CLASS}>Fuerte y Definid@</Link></li>
               <li><Link href="/cursos" className={LINK_CLASS}>Entrena en Casa</Link></li>

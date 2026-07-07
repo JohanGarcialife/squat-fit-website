@@ -77,50 +77,19 @@ const Testimonials = () => {
         };
     }, []);
 
+   // Configuración por ancho real (móvil primero): el motor "responsive" de
+   // slick no aplicaba en móvil y salían varias tarjetas con avatares aplastados.
+   const w = width || 0;
    const settings = {
-  className: 'center',
-  centerMode: true,
-  infinite: true,
-  centerPadding: '0px',
- slidesToShow: isMobile ? 1 : 3,         // valor por defecto para pantallas grandes
-  speed: 500,
-  arrows: false,
-
-  responsive: [
-    /* Breakpoint más pequeño primero */
-    {
-      breakpoint: 640,
-      settings: {
-        slidesToShow: 1,
-        centerMode: true,
-        centerPadding: '20px',
-      },
-    },
-    {
-      breakpoint: 768,
-      settings: {
-        slidesToShow: 1,
-        centerMode: true,
-        centerPadding: '40px',
-      },
-    },
-    {
-      breakpoint: 1024,
-      settings: {
-        slidesToShow: 1,
-        centerMode: true,
-        centerPadding: '60px',
-      },
-    },
-    {
-      breakpoint: 1280,
-      settings: {
-        slidesToShow: 2,
-        centerMode: false,
-      },
-    },
-  ],
-};
+     className: 'center',
+     centerMode: w < 1280,
+     infinite: true,
+     centerPadding: w >= 1280 ? '0px' : w >= 640 ? '40px' : '20px',
+     slidesToShow: w >= 1280 ? 2 : 1,
+     speed: 300,
+     arrows: false,
+     waitForAnimate: false,
+   };
 
     return ( 
         <div className="w-screen py-16 bg-white">

@@ -19,22 +19,24 @@ import Link from 'next/link';
 //   <LandingButton variant="orange" size="lg" onClick={...}>Reserva tu plaza</LandingButton>
 //   <LandingButton variant="blue" href="/cursos">Ver cursos</LandingButton>
 
+// El barrido (sweep) usa un color que contraste con el fondo del botón:
+// destello claro sobre botón oscuro, destello de color sobre botón claro.
 const VARIANTS = {
   orange: {
     button: 'bg-[#FF690B] text-white hover:bg-[#FFEDE0] hover:text-[#FF690B] hover:shadow-[#FF690B]/30',
-    sweep: 'bg-[#FF690B]/15',
+    sweep: 'bg-white/45',
   },
   'orange-light': {
     button: 'bg-[#FFEDE0] text-[#FF690B] hover:bg-[#FF690B] hover:text-white hover:shadow-[#FF690B]/30',
-    sweep: 'bg-white/25',
+    sweep: 'bg-[#FF690B]/35',
   },
   blue: {
     button: 'bg-[#363C98] text-white hover:bg-[#E7E6FF] hover:text-[#363C98] hover:shadow-[#363C98]/30',
-    sweep: 'bg-[#363C98]/15',
+    sweep: 'bg-white/45',
   },
   'blue-light': {
     button: 'bg-[#E7E6FF] text-[#363C98] hover:bg-[#363C98] hover:text-white hover:shadow-[#363C98]/30',
-    sweep: 'bg-white/25',
+    sweep: 'bg-[#363C98]/30',
   },
 };
 
