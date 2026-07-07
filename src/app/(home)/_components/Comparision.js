@@ -43,31 +43,22 @@ export default function Comparision(props) {
     <div className="bg-[#FFF9F2] px-5 xl:px-32 w-full flex flex-col lg:flex-row items-center justify-between py-20">
       {width < 1024 ? (
         <>
-          <div className="lg:w-1/2 h-full flex flex-col items-start justify-center lg:max-w-[510px] mb-10">
-            <p className="text-primary lg:text-start text-center font-bold text-4xl lg:text-6xl">
+          <div className="w-full flex flex-col items-center justify-center mb-10">
+            <p className="text-primary text-center font-bold text-4xl">
               Un cambio físico que se mantiene
             </p>
-            <p className="text-black lg:text-start text-center text-2xl mt-10">
-              Aprende a mantenerte sano y en forma; evita el efecto rebote y continua progresando después de meses en incluso años.
+            <p className="text-black text-center text-lg mt-8 max-w-[440px]">
+              Aprende a mantenerte sano y en forma; evita el efecto rebote y continúa progresando después de meses e incluso años, como cientos de miembros de nuestra comunidad.
             </p>
-            <div className="w-full flex flex-col items-center justify-center ">
-              <LandingButton variant="orange" size="lg" autoShine className="mt-10 w-[70%]">
-                Reserva tu plaza
-              </LandingButton>
-              <div className="hidden items-center w-full text-secondary mt-10 justify-center gap-3 cursor-pointer text-2xl">
-                <p className="">Saber más</p>
-
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="icon icon-tabler icons-tabler-outline icon-tabler-arrow-narrow-right">
-                  <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                  <path d="M5 12l14 0" />
-                  <path d="M15 16l4 -4" />
-                  <path d="M15 8l4 4" />
-                </svg>
-              </div>
-            </div>
           </div>
-          <div className="lg:w-1/2 w-full">
+          <div className="w-full">
             {slider}
+          </div>
+          {/* Botón debajo de las fotos */}
+          <div className="w-full flex justify-center mt-10">
+            <LandingButton variant="orange" size="lg" autoShine className="w-[70%] max-w-[340px]">
+              Reserva tu plaza
+            </LandingButton>
           </div>
         </>
       ) : (
@@ -77,7 +68,7 @@ export default function Comparision(props) {
           </div>
           <div className="lg:w-1/2 h-full flex flex-col items-start justify-center lg:max-w-[510px] ">
             <p className="text-primary font-bold text-6xl">Un cambio físico que se mantiene</p>
-            <p className="text-black text-lg mt-10">Aprende a mantenerte sano y en forma; evita el efecto rebote y continua progresando después de meses en incluso años.</p>
+            <p className="text-black text-lg mt-10">Aprende a mantenerte sano y en forma; evita el efecto rebote y continúa progresando después de meses e incluso años, como cientos de miembros de nuestra comunidad.</p>
             <div className="w-full flex items-center justify-start gap-10">
               <LandingButton variant="orange" size="lg" autoShine className="mt-10 text-xl lg:text-2xl">
                 Reserva tu plaza
