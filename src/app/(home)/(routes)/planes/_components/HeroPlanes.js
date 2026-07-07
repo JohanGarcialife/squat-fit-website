@@ -19,11 +19,11 @@ export default function HeroPlanes() {
 
       {/* --- Indicador: NUESTROS PLANES --- */}
       <div className="flex items-center justify-center gap-4 mb-8 animate-fade-in opacity-0 [animation-fill-mode:forwards] [animation-delay:100ms] duration-700">
-        <span className="w-12 sm:w-20 h-[2px] bg-primary rounded-full"></span>
-        <span className="text-primary font-bold tracking-[0.2em] text-xl sm:text-3xl uppercase">
+        <span className="w-8 sm:w-20 h-[2px] bg-primary rounded-full"></span>
+        <span className="text-primary font-bold tracking-[0.2em] text-base sm:text-3xl uppercase whitespace-nowrap">
           NUESTROS PLANES
         </span>
-        <span className="w-12 sm:w-20 h-[2px] bg-primary rounded-full"></span>
+        <span className="w-8 sm:w-20 h-[2px] bg-primary rounded-full"></span>
       </div>
 
       {/* --- Título Principal --- */}

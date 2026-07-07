@@ -9,9 +9,9 @@ export default function HeroSection() {
 
         <div className='md:pl-14 md:w-1/2 flex flex-col items-center md:items-start'>
         <div className='flex items-center gap-4'>
-            <span className='w-12 sm:w-20 h-[2px] bg-primary rounded-full'></span>
-            <p className='text-primary font-bold tracking-[0.2em] text-xl sm:text-3xl uppercase text-center'>Colección completa</p>
-            <span className='w-12 sm:w-20 h-[2px] bg-primary rounded-full'></span>
+            <span className='w-8 sm:w-20 h-[2px] bg-primary rounded-full'></span>
+            <p className='text-primary font-bold tracking-[0.2em] text-base sm:text-3xl uppercase whitespace-nowrap text-center'>Colección completa</p>
+            <span className='w-8 sm:w-20 h-[2px] bg-primary rounded-full'></span>
         </div>
 
         <h2 className='font-bold text-secondary text-center md:text-start text-4xl sm:text-6xl md:text-8xl my-6 md:my-8 leading-tight'>La Cocina Squad Fit 1 y 2</h2>

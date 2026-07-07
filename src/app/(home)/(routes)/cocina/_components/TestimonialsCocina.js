@@ -50,9 +50,9 @@ const TestimonialsCocina = () => {
         {/* Antetítulo */}
         <div className="w-full flex flex-col items-center mb-12">
           <div className="flex items-center gap-4 mb-4">
-            <span className="w-12 sm:w-20 h-[2px] bg-primary rounded-full"></span>
-            <p className="text-primary font-bold tracking-[0.2em] text-xl sm:text-3xl uppercase">Testimonios</p>
-            <span className="w-12 sm:w-20 h-[2px] bg-primary rounded-full"></span>
+            <span className="w-8 sm:w-20 h-[2px] bg-primary rounded-full"></span>
+            <p className="text-primary font-bold tracking-[0.2em] text-base sm:text-3xl uppercase whitespace-nowrap">Testimonios</p>
+            <span className="w-8 sm:w-20 h-[2px] bg-primary rounded-full"></span>
           </div>
           <h2 className="text-4xl md:text-6xl font-bold text-center text-secondary">
             Que te lo digan ellos

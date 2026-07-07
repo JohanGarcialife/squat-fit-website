@@ -99,11 +99,11 @@ export default function PlanesTestimonials() {
         {/* --- Cabecera --- */}
         <div className="w-full flex flex-col items-center mb-16 text-center">
           <div className="flex items-center gap-4 mb-4">
-            <span className="w-12 sm:w-20 h-[2px] bg-primary rounded-full"></span>
-            <span className="text-primary font-bold tracking-[0.2em] text-xl sm:text-3xl uppercase">
+            <span className="w-8 sm:w-20 h-[2px] bg-primary rounded-full"></span>
+            <span className="text-primary font-bold tracking-[0.2em] text-base sm:text-3xl uppercase whitespace-nowrap">
               TESTIMONIOS
             </span>
-            <span className="w-12 sm:w-20 h-[2px] bg-primary rounded-full"></span>
+            <span className="w-8 sm:w-20 h-[2px] bg-primary rounded-full"></span>
           </div>
           <h2 className="text-[#363C98] font-extrabold text-4xl sm:text-6xl tracking-tight mt-2">
             Que te lo digan ellos
