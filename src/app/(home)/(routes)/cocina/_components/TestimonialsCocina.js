@@ -36,7 +36,7 @@ const TestimonialsCocina = () => {
     className: 'center',
     centerMode: true,
     infinite: true,
-    centerPadding: w >= 1024 ? '0px' : w >= 640 ? '60px' : '20px',
+    centerPadding: w >= 1024 ? '0px' : w >= 640 ? '48px' : '38px',
     slidesToShow: w >= 1024 ? 3 : 1,
     speed: 500,
     arrows: false,
@@ -69,7 +69,7 @@ const TestimonialsCocina = () => {
                 onClick={() => sliderRef.current && sliderRef.current.slickGoTo(index)}
               >
                 {/* Altura fija para que el carrusel no salte entre reseñas */}
-                <div className="bg-[#3932C01A] rounded-3xl p-8 md:p-10 shadow-sm min-h-[280px] w-full max-w-[460px] mx-auto flex flex-col items-center justify-center text-center">
+                <div className="bg-[#3932C01A] border border-[#3932C0]/15 rounded-3xl p-8 md:p-10 shadow-sm min-h-[280px] w-full max-w-[460px] mx-auto flex flex-col items-center justify-center text-center">
                   <blockquote>
                     <p className="text-lg md:text-xl text-secondary font-medium mb-6 leading-relaxed">
                       "{testimonial.quote}"
@@ -86,14 +86,14 @@ const TestimonialsCocina = () => {
           {/* Flechas */}
           <button
             onClick={() => sliderRef.current && sliderRef.current.slickPrev()}
-            className="absolute left-0 top-1/2 -translate-y-1/2 bg-white/80 rounded-full p-1.5 shadow-md text-gray-500 hover:text-gray-700 hover:scale-110 transition-all duration-200 z-20 cursor-pointer"
+            className="absolute left-0 top-1/2 -translate-y-1/2 bg-[#FFEDE0] rounded-full p-2 shadow-md text-[#FF690B] hover:scale-110 transition-all duration-200 z-20 cursor-pointer"
             aria-label="Previous testimonial"
           >
             <ChevronLeft className="w-8 h-8" />
           </button>
           <button
             onClick={() => sliderRef.current && sliderRef.current.slickNext()}
-            className="absolute right-0 top-1/2 -translate-y-1/2 bg-white/80 rounded-full p-1.5 shadow-md text-gray-500 hover:text-gray-700 hover:scale-110 transition-all duration-200 z-20 cursor-pointer"
+            className="absolute right-0 top-1/2 -translate-y-1/2 bg-[#FFEDE0] rounded-full p-2 shadow-md text-[#FF690B] hover:scale-110 transition-all duration-200 z-20 cursor-pointer"
             aria-label="Next testimonial"
           >
             <ChevronRight className="w-8 h-8" />

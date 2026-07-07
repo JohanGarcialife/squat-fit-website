@@ -68,7 +68,7 @@ export default function PlanesTestimonials() {
     className: 'center',
     centerMode: true,
     infinite: true,
-    centerPadding: w >= 1280 ? '0px' : w >= 640 ? '40px' : '20px',
+    centerPadding: w >= 1280 ? '0px' : w >= 640 ? '48px' : '36px',
     slidesToShow: w >= 1280 ? 3 : 1,
     speed: 300,
     arrows: false,
@@ -151,38 +151,21 @@ export default function PlanesTestimonials() {
             ))}
           </Slider>
 
-          {/* --- Flechas de Navegación --- */}
-          {isMobile ? (
-            <div className="flex items-center justify-between mt-8 max-w-[200px] mx-auto">
-              <button
-                className="cursor-pointer p-3 bg-slate-50 rounded-full border border-slate-100 hover:bg-slate-100 active:scale-95 transition-all text-slate-600"
-                onClick={() => sliderRef.current && sliderRef.current.slickPrev()}
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
-              </button>
-              <button
-                className="cursor-pointer p-3 bg-slate-50 rounded-full border border-slate-100 hover:bg-slate-100 active:scale-95 transition-all text-slate-600"
-                onClick={() => sliderRef.current && sliderRef.current.slickNext()}
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6"/></svg>
-              </button>
-            </div>
-          ) : (
-            <>
-              <button
-                className="cursor-pointer absolute top-1/2 left-[-20px] lg:left-[-40px] -translate-y-1/2 z-10 p-3 bg-white rounded-full shadow-lg border border-slate-100 hover:scale-110 active:scale-95 transition-all text-[#363C98]"
-                onClick={() => sliderRef.current && sliderRef.current.slickPrev()}
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
-              </button>
-              <button
-                className="cursor-pointer absolute top-1/2 right-[-20px] lg:right-[-40px] -translate-y-1/2 z-10 p-3 bg-white rounded-full shadow-lg border border-slate-100 hover:scale-110 active:scale-95 transition-all text-[#363C98]"
-                onClick={() => sliderRef.current && sliderRef.current.slickNext()}
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6"/></svg>
-              </button>
-            </>
-          )}
+          {/* Flechas circulares laterales: fondo naranja suave, icono naranja principal */}
+          <button
+            onClick={() => sliderRef.current && sliderRef.current.slickPrev()}
+            aria-label="Anterior"
+            className="cursor-pointer absolute top-1/2 left-0 lg:left-[-20px] -translate-y-1/2 z-20 bg-[#FFEDE0] text-[#FF690B] rounded-full p-2 shadow-md hover:scale-110 active:scale-95 transition-transform duration-200"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+          </button>
+          <button
+            onClick={() => sliderRef.current && sliderRef.current.slickNext()}
+            aria-label="Siguiente"
+            className="cursor-pointer absolute top-1/2 right-0 lg:right-[-20px] -translate-y-1/2 z-20 bg-[#FFEDE0] text-[#FF690B] rounded-full p-2 shadow-md hover:scale-110 active:scale-95 transition-transform duration-200"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+          </button>
 
         </div>
 
