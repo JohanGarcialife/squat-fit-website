@@ -40,6 +40,7 @@ const TestimonialsCocina = () => {
     slidesToShow: w >= 1024 ? 3 : 1,
     speed: 500,
     arrows: false,
+    cssEase: 'cubic-bezier(0.25, 1, 0.5, 1)',
     initialSlide: current,
     beforeChange: (_, next) => setCurrent(next),
   };
@@ -86,17 +87,17 @@ const TestimonialsCocina = () => {
           {/* Flechas */}
           <button
             onClick={() => sliderRef.current && sliderRef.current.slickPrev()}
-            className="absolute left-0 top-1/2 -translate-y-1/2 bg-[#FFEDE0] rounded-full p-2 shadow-md text-[#FF690B] hover:scale-110 transition-all duration-200 z-20 cursor-pointer"
+            className="absolute left-0 top-1/2 -translate-y-1/2 bg-[#FFEDE0] rounded-full p-1.5 text-[#FF690B] hover:scale-110 transition-all duration-200 z-20 cursor-pointer"
             aria-label="Previous testimonial"
           >
-            <ChevronLeft className="w-8 h-8" />
+            <ChevronLeft className="w-6 h-6" />
           </button>
           <button
             onClick={() => sliderRef.current && sliderRef.current.slickNext()}
-            className="absolute right-0 top-1/2 -translate-y-1/2 bg-[#FFEDE0] rounded-full p-2 shadow-md text-[#FF690B] hover:scale-110 transition-all duration-200 z-20 cursor-pointer"
+            className="absolute right-0 top-1/2 -translate-y-1/2 bg-[#FFEDE0] rounded-full p-1.5 text-[#FF690B] hover:scale-110 transition-all duration-200 z-20 cursor-pointer"
             aria-label="Next testimonial"
           >
-            <ChevronRight className="w-8 h-8" />
+            <ChevronRight className="w-6 h-6" />
           </button>
         </div>
       </div>

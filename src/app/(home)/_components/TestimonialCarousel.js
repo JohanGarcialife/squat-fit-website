@@ -88,6 +88,7 @@ const TestimonialCarousel = () => {
      slidesToShow: w >= 1024 ? 3 : 1,
      speed: 300,
      arrows: false,
+     cssEase: 'cubic-bezier(0.25, 1, 0.5, 1)',
      waitForAnimate: false,
    };
 
@@ -131,16 +132,16 @@ const TestimonialCarousel = () => {
                         <button
                             onClick={() => sliderRef.current && sliderRef.current.slickPrev()}
                             aria-label="Anterior"
-                            className="cursor-pointer absolute top-1/2 left-0 lg:left-[-10px] -translate-y-1/2 z-20 bg-[#FFEDE0] text-[#FF690B] rounded-full p-2 shadow-md hover:scale-110 active:scale-95 transition-transform duration-200"
+                            className="cursor-pointer absolute top-1/2 left-0 lg:left-[-10px] -translate-y-1/2 z-20 bg-[#FFEDE0] text-[#FF690B] rounded-full p-1.5 hover:scale-110 active:scale-95 transition-transform duration-200"
                         >
-                            <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
                         </button>
                         <button
                             onClick={() => sliderRef.current && sliderRef.current.slickNext()}
                             aria-label="Siguiente"
-                            className="cursor-pointer absolute top-1/2 right-0 lg:right-[-10px] -translate-y-1/2 z-20 bg-[#FFEDE0] text-[#FF690B] rounded-full p-2 shadow-md hover:scale-110 active:scale-95 transition-transform duration-200"
+                            className="cursor-pointer absolute top-1/2 right-0 lg:right-[-10px] -translate-y-1/2 z-20 bg-[#FFEDE0] text-[#FF690B] rounded-full p-1.5 hover:scale-110 active:scale-95 transition-transform duration-200"
                         >
-                            <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6"/></svg>
                         </button>
                     </div>
                 </div>
