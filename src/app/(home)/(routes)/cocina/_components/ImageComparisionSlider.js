@@ -11,7 +11,7 @@ const ImageComparisonSlider = (props) => {
     isActive = true,
     beforeGrayscale = 0.5,
     beforeTitle = 'Versión clásica',
-    afterTitle = 'Versión Squat Fit',
+    afterTitle = 'Versión Squad Fit',
   } = props;
   const [isDragging, setIsDragging] = useState(false);
   const [sliderPosition, setSliderPosition] = useState(50);

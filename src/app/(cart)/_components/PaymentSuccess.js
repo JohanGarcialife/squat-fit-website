@@ -82,7 +82,7 @@ export default function PaymentSuccess() {
                 <Play size={24} className="text-white" fill="white" />
               </div>
               <span className="font-bold text-orange-700 text-base">Cursos en Video</span>
-              <span className="text-orange-500 text-sm">Tus clases de Squat Fit</span>
+              <span className="text-orange-500 text-sm">Tus clases de Squad Fit</span>
               <ArrowRight size={16} className="text-orange-400 group-hover:translate-x-1 transition-transform" />
             </div>
           </Link>

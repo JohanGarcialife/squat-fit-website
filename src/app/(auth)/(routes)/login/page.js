@@ -60,7 +60,7 @@ function LoginContent() {
     <div className='min-h-screen text-white bg-linear-to-b from-primary to-secondary flex flex-col md:flex-row md:items-center px-5 gap-8 md:px-24 lg:px-32 py-14 md:py-24'>
       <div className='md:w-1/2'>
         <h2 className='text-5xl md:text-7xl font-bold text-center md:text-start leading-tight'>Inicia Sesión</h2>
-        <p className='text-white/85 text-base md:text-lg mt-3 max-w-[420px] text-center md:text-start mx-auto md:mx-0'>Accede a tu cuenta con Squat Fit</p>
+        <p className='text-white/85 text-base md:text-lg mt-3 max-w-[420px] text-center md:text-start mx-auto md:mx-0'>Accede a tu cuenta con Squad Fit</p>
       </div>
       <div className='md:w-1/2 w-full max-w-md mx-auto'>
         <div className='bg-white/15 backdrop-blur-sm rounded-3xl p-6 sm:p-8 shadow-xl flex flex-col gap-5'>

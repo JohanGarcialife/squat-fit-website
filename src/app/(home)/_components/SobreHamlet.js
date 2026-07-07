@@ -39,7 +39,7 @@ const SobreHamlet = () => {
               <div className="animate-fadeIn p-4 text-gray-800 leading-relaxed max-w-2xl">
                 <h1 className="text-8xl font-bold text-secondary mb-6">Sobre Hamlet</h1>
                 <p className="mb-4 text-2xl">
-                  Soy Hamlet Sosa, conocido también como Hamlet Squat Fit, tengo 32 años y vivo en Alicante, ES.
+                  Soy Hamlet Sosa, conocido también como Hamlet Squad Fit, tengo 32 años y vivo en Alicante, ES.
                 </p>
                 <p className="mb-4 text-2xl">
                   Desde pequeño he estado metido en la cocina o el gimnasio lo cual me ha dado una tremenda ventaja para diseñar recetas fit y disfrutar lo que como mientras pierdo grasa.
@@ -65,7 +65,7 @@ const SobreHamlet = () => {
         
               <Image 
                     src="/hamlet.png" 
-                    alt="Hamlet de Squat Fit"
+                    alt="Hamlet de Squad Fit"
                     width={550}
                     height={528}
                     className="w-full object-cover"

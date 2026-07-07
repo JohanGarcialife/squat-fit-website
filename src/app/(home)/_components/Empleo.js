@@ -71,7 +71,7 @@ export default function Empleo() {
           <h1 className="text-8xl font-bold text-[#3B3B98] mb-8">Empleo</h1>
           <div className="space-y-6 text-gray-700 text-3xl leading-relaxed">
             <p>
-              En Squat Fit estamos construyendo un proyecto a largo plazo, con
+              En Squad Fit estamos construyendo un proyecto a largo plazo, con
               impacto real en la vida de las personas.
             </p>
             <p>
@@ -90,7 +90,7 @@ export default function Empleo() {
             
                  <Image
                   src="/empleo.png" // Reutilizamos la imagen existente o la que el usuario prefiera
-                  alt="Equipo Squat Fit"
+                  alt="Equipo Squad Fit"
                   width={528}
                   height={528}
                   className="object-contain"
@@ -105,7 +105,7 @@ export default function Empleo() {
           Lo que solemos buscar
         </h2>
         <p className="text-gray-700 mb-6 text-3xl">
-          Estos son los perfiles que más sentido tienen dentro de Squat Fit:
+          Estos son los perfiles que más sentido tienen dentro de Squad Fit:
         </p>
         <ul className="list-disc list-inside space-y-2 text-gray-800 font-medium text-3xl ml-4">
           <li>Setter (ventas por mensaje)</li>
@@ -191,7 +191,7 @@ export default function Empleo() {
                 as="textarea"
               />
               <FormInput
-                label="¿Por qué te interesa colaborar con Squat Fit?"
+                label="¿Por qué te interesa colaborar con Squad Fit?"
                 name="interes"
                 as="textarea"
               />

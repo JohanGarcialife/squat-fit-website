@@ -11,8 +11,8 @@ const inter = Inter({
 });
 
 export const metadata = {
-  title: "Squat Fit",
-  description: "Squat Fit Website",
+  title: "Squad Fit",
+  description: "Squad Fit Website",
 };
 
 export default function RootLayout({ children }) {

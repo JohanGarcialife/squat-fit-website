@@ -76,7 +76,7 @@ export default function BookReaderPage({ params, searchParams }) {
           return;
         }
 
-        setBookTitle(bookData.title || 'Cocina Squat Fit');
+        setBookTitle(bookData.title || 'Cocina Squad Fit');
 
         // Buscar la versión específica en la respuesta
         const version = bookData.versions?.find(v =>

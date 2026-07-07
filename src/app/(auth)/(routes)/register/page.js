@@ -50,7 +50,7 @@ function RegisterContent() {
       // Split "Nombre" into firstName and lastName
       const nameParts = username.trim().split(/\s+/);
       const firstName = nameParts[0] || 'Usuario';
-      const lastName = nameParts.length > 1 ? nameParts.slice(1).join(' ') : 'SquatFit';
+      const lastName = nameParts.length > 1 ? nameParts.slice(1).join(' ') : 'SquadFit';
 
       // Generate a valid username from email (alphanumeric only)
       const generatedUsername = email.split('@')[0].replace(/[^a-zA-Z0-9_]/g, '_');
@@ -96,7 +96,7 @@ function RegisterContent() {
     <div className='min-h-screen text-white bg-linear-to-b from-primary to-secondary flex flex-col md:flex-row md:items-center px-5 gap-8 md:px-24 lg:px-32 py-14 md:py-24'>
       <div className='md:w-1/2'>
         <h2 className='text-5xl md:text-7xl font-bold text-center md:text-start leading-tight'>Crea tu cuenta</h2>
-        <p className='text-white/85 text-base md:text-lg mt-3 max-w-[420px] text-center md:text-start mx-auto md:mx-0'>Únete a la comunidad Squat Fit y accede a todo el contenido</p>
+        <p className='text-white/85 text-base md:text-lg mt-3 max-w-[420px] text-center md:text-start mx-auto md:mx-0'>Únete a la comunidad Squad Fit y accede a todo el contenido</p>
       </div>
       <div className='md:w-1/2 w-full max-w-md mx-auto'>
         <div className='bg-white/15 backdrop-blur-sm rounded-3xl p-6 sm:p-8 shadow-xl flex flex-col gap-5'>

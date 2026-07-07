@@ -81,7 +81,7 @@ export default function BurgerMenu() {
               src="/Logo-horizontal.png"
               width={150}
               height={36}
-              alt="Squat Fit — Inicio"
+              alt="Squad Fit — Inicio"
               className='object-contain'
             />
           </Link>

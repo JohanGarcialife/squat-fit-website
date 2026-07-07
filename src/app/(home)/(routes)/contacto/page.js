@@ -145,7 +145,7 @@ ${values.mensaje}
             /* --- ALERTA DE LOGUEO PARA USUARIOS NO AUTENTICADOS --- */
             <div className="bg-[#FFF6F0] rounded-2xl p-6 border border-orange-100 flex flex-col space-y-4 items-center text-center">
               <p className="text-[#363C98] font-bold text-lg">
-                Para poder enviarnos un mensaje de contacto directo, necesitas iniciar sesión en tu cuenta de Squat Fit.
+                Para poder enviarnos un mensaje de contacto directo, necesitas iniciar sesión en tu cuenta de Squad Fit.
               </p>
               <div className="flex gap-4 w-full justify-center">
                 <Link href="/login?redirect=/contacto" className="bg-[#3932C0] hover:bg-[#2e28a0] text-white font-bold py-2.5 px-6 rounded-xl transition-all text-sm">
@@ -335,7 +335,7 @@ ${values.mensaje}
           <div className="relative w-72 h-72 md:w-80 md:h-80 rounded-full overflow-hidden border-8 border-orange-100 shadow-xl">
             <Image
               src="/empleo.png"
-              alt="María Squat Fit"
+              alt="María Squad Fit"
               fill
               priority
               className="object-cover"

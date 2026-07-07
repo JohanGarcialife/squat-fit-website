@@ -304,7 +304,7 @@ function CursosPageContent() {
         <div className="text-center mb-12">
           <h2 className="text-[#3932C0] text-3xl font-bold mb-4">Aún no tienes acceso a los cursos</h2>
           <p className="text-gray-500 text-lg max-w-xl mx-auto leading-relaxed">
-            Suscríbete a <strong>Squat Fit</strong> para desbloquear todos los cursos en video y transformar tu cuerpo con nuestras metodologías.
+            Suscríbete a <strong>Squad Fit</strong> para desbloquear todos los cursos en video y transformar tu cuerpo con nuestras metodologías.
           </p>
         </div>
         

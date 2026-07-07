@@ -14,7 +14,7 @@ export default function Footer() {
         <div className="flex justify-center lg:justify-start lg:w-1/4 mb-10 lg:mb-0">
           <Link href="/" className="inline-block">
             <div className="text-4xl lg:text-5xl font-black tracking-wider leading-none">
-              <span className="text-[#363C98]">SQUAT</span>
+              <span className="text-[#363C98]">SQUAD</span>
               <span className="text-[#FF690B]">FIT</span>
             </div>
           </Link>
@@ -33,9 +33,9 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Columna 2: Squat Fit */}
+          {/* Columna 2: Squad Fit */}
           <div>
-            <h4 className={HEADING_CLASS}>Squat Fit</h4>
+            <h4 className={HEADING_CLASS}>Squad Fit</h4>
             <ul className="space-y-3 sm:space-y-4">
               <li><Link href="/nosotros" className={LINK_CLASS}>Nosotros</Link></li>
               <li><Link href="/politicas" className={LINK_CLASS}>Políticas</Link></li>
@@ -58,7 +58,7 @@ export default function Footer() {
 
       {/* Copyright */}
       <div className="max-w-7xl mx-auto mt-16 pt-8 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between text-slate-400 text-sm">
-        <p>© {new Date().getFullYear()} Squat Fit. Todos los derechos reservados.</p>
+        <p>© {new Date().getFullYear()} Squad Fit. Todos los derechos reservados.</p>
       </div>
     </footer>
   );

@@ -11,7 +11,7 @@ const vol1Steps = [
   { number: 2, title: 'Comidas', items: ['Boniato burger', 'KFC fit (pavo empanado estilo americano)', 'Ensalada burrito (pollo fajitas, aguacate y maíz)', 'Mega-wrap fit (pollo bbq y tortilla casera)'], more: 10 },
   { number: 3, title: 'Cenas', items: ['Pizzas fit (barbacoa o jamón y queso)', 'Patatas supremas (ternera, queso y salsa burger)', 'Canelones de berenjena y pollo bbq', '"Slim" pasta carbonara'], more: 9 },
   { number: 4, title: 'Snacks', items: ['Nachos al horno con guacamole y queso', 'Pan de ajo crunchy al airfryer', 'Croquetas cremosas de queso', 'Cinnamon rolls de choco blanco y canela'], more: 10 },
-  { number: 5, title: 'Postres', items: ['Tarta de queso casera (fresa u Oreo)', 'Volcán de chocolate', 'Brownie muerte por chocolate', 'Tarta pantera rosa Squat Fit'], more: 9 },
+  { number: 5, title: 'Postres', items: ['Tarta de queso casera (fresa u Oreo)', 'Volcán de chocolate', 'Brownie muerte por chocolate', 'Tarta pantera rosa Squad Fit'], more: 9 },
 ];
 
 const vol2Steps = [

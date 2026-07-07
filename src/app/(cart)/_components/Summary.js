@@ -137,7 +137,7 @@ export default function Summary(props) {
                                 Reference image shows "Curso de la mujer" as title and "Suscripción online" as subtitle
                                 But our items are named "Mensual", "Anual".
                                 Let's standardise the display title for digital items if possible or use item.name */}
-                            {isDigital(item) ? 'Cocina Squat Fit Digital' : item.name}
+                            {isDigital(item) ? 'Cocina Squad Fit Digital' : item.name}
                         </h3>
                         {/* Subtitle / Description based on reference */}
                         <p className="text-indigo-400 text-sm mb-6">
@@ -240,7 +240,7 @@ export default function Summary(props) {
                         src="/LogotipoSquatfit.png" // Placeholder or existing logo
                         layout="fill"
                         objectFit="contain"
-                        alt="Logo Squat Fit"
+                        alt="Logo Squad Fit"
                      />
                 </div>
                 

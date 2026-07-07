@@ -47,17 +47,17 @@ export default function InfoPage() {
         {activeTab === 'sobre-nosotros' && (
           <div className="animate-fadeIn">
             <header className="py-10 text-center lg:text-left">
-              <h2 className="text-5xl lg:text-7xl font-bold text-[#3B3B98]">¡Hola y bienvenido a Squat Fit!</h2>
+              <h2 className="text-5xl lg:text-7xl font-bold text-[#3B3B98]">¡Hola y bienvenido a Squad Fit!</h2>
             </header>
             <section className="py-8">
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
                 <div className="text-center lg:text-left">
                   <h3 className="text-3xl font-bold text-orange-500 mb-4">Sobre nosotros</h3>
                   <p className="mb-4 text-xl">Somos un equipo apasionado por el fitness y la salud, y estamos aquí para ayudarte a alcanzar tus metas de una manera divertida y sostenible.</p>
-                  <p className="text-xl">En Squat Fit, creemos que el entrenamiento y una buena dieta son claves no sólo para un cuerpo en forma sino también para una mente sana, y una vida equilibrada y feliz.</p>
+                  <p className="text-xl">En Squad Fit, creemos que el entrenamiento y una buena dieta son claves no sólo para un cuerpo en forma sino también para una mente sana, y una vida equilibrada y feliz.</p>
                 </div>
                 <div className="flex justify-center">
-                  <Image src="/nosotros.png" alt="Equipo de Squat Fit" width={450} height={450} />
+                  <Image src="/nosotros.png" alt="Equipo de Squad Fit" width={450} height={450} />
                 </div>
               </div>
             </section>
@@ -81,12 +81,12 @@ export default function InfoPage() {
             <div className="flex flex-col lg:flex-row items-start gap-10">
               <div className="text-gray-800 leading-relaxed max-w-2xl">
                 <h2 className="text-5xl font-bold text-secondary mb-6">Sobre María</h2>
-                <p className="mb-4 text-xl">Soy María Casas, conocida también como María Squat Fit, tengo 31 años y vivo en Alicante, ES.</p>
+                <p className="mb-4 text-xl">Soy María Casas, conocida también como María Squad Fit, tengo 31 años y vivo en Alicante, ES.</p>
                 <p className="mb-4 text-xl">Mientras estudiaba farmacia, empecé a interesarme en el fitness: en el metabolismo, el ambiente hormonal, así como en el papel de la nutrición y el entrenamiento en el cuerpo humano.</p>
                 <p className="mb-4 text-xl">Esta experiencia me llevó a cambiar mi trabajo de farmacéutica por mi nueva pasión: el fitness. Empecé a dar clases y a crecer exponencialmente en redes sociales.</p>
                 <p className="mb-4 text-xl">A día de hoy, llevo 8 años entrenando y +5 años en el mundo de la nutrición. Me dedico al asesoramiento nutricional y deportivo.</p>
               </div>
-              <Image src="/Maria.png" alt="María de Squat Fit" width={400} height={400} className="object-cover rounded-2xl" />
+              <Image src="/Maria.png" alt="María de Squad Fit" width={400} height={400} className="object-cover rounded-2xl" />
             </div>
             <Achievements />
           </div>
@@ -97,11 +97,11 @@ export default function InfoPage() {
             <div className="flex flex-col lg:flex-row items-start gap-10">
               <div className="text-gray-800 leading-relaxed max-w-2xl">
                 <h2 className="text-5xl font-bold text-secondary mb-6">Sobre Hamlet</h2>
-                <p className="mb-4 text-xl">Soy Hamlet Sosa, conocido también como Hamlet Squat Fit, tengo 32 años y vivo en Alicante, ES.</p>
+                <p className="mb-4 text-xl">Soy Hamlet Sosa, conocido también como Hamlet Squad Fit, tengo 32 años y vivo en Alicante, ES.</p>
                 <p className="mb-4 text-xl">Desde pequeño he estado metido en la cocina o el gimnasio lo cual me ha dado una tremenda ventaja para diseñar recetas fit y disfrutar lo que como mientras pierdo grasa.</p>
                 <p className="mb-4 text-xl">Mi objetivo es inspirar a la mayor cantidad de personas a que vivan de una manera saludable, que se diviertan en el proceso y construyan la mejor versión de sí mismos.</p>
               </div>
-              <Image src="/hamlet.png" alt="Hamlet de Squat Fit" width={400} height={400} className="object-cover rounded-2xl" />
+              <Image src="/hamlet.png" alt="Hamlet de Squad Fit" width={400} height={400} className="object-cover rounded-2xl" />
             </div>
           </div>
         )}
@@ -112,7 +112,7 @@ export default function InfoPage() {
             <p className="mb-6">En cumplimiento del Reglamento (UE) 2016/679 (RGPD) y la Ley Orgánica 3/2018 (LOPDGDD), le informamos sobre el tratamiento de sus datos personales.</p>
             <h3 className="text-xl font-bold text-black mb-3">Responsable del tratamiento</h3>
             <div className="mb-6">
-              <p>Empresa: Squat Fit SLU | CIF: B19463066</p>
+              <p>Empresa: Squad Fit SLU | CIF: B19463066</p>
               <p>Dirección: Av Maisonnave 41, 3 B, 03003, Alicante, España</p>
               <p>Contacto: hola@squatfit.es</p>
             </div>

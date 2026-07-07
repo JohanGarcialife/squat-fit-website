@@ -14,7 +14,7 @@ export default function HeroSection() {
             <span className='w-12 sm:w-20 h-[2px] bg-primary rounded-full'></span>
         </div>
 
-        <h2 className='font-bold text-secondary text-center md:text-start text-4xl sm:text-6xl md:text-8xl my-6 md:my-8 leading-tight'>La Cocina Squat Fit 1 y 2</h2>
+        <h2 className='font-bold text-secondary text-center md:text-start text-4xl sm:text-6xl md:text-8xl my-6 md:my-8 leading-tight'>La Cocina Squad Fit 1 y 2</h2>
         <p className='text-primary text-2xl sm:text-3xl md:text-4xl max-w-[580px] font-bold mb-4 md:mb-8 text-center md:text-start'>Recetas fit con sabor real</p>
         <p className='text-black text-lg sm:text-xl md:text-3xl md:text-start text-center max-w-[520px] mb-8 leading-relaxed'>Un sistema de recetas fáciles, saciantes y deliciosas para mejorar tu alimentación sin vivir en restricción.</p>
 

@@ -84,7 +84,7 @@ export default function OrderSummary(props) {
       <div className="flex flex-col items-center mb-8">
          <Link href="/" className="mb-4">
             <div className="w-20 h-20 relative">
-                 <Image src="/LogotipoSquatfit.png" layout="fill" objectFit="contain" alt="Logo Squat Fit" />
+                 <Image src="/LogotipoSquatfit.png" layout="fill" objectFit="contain" alt="Logo Squad Fit" />
             </div>
          </Link>
          
