@@ -166,8 +166,8 @@ export default function BurgerMenu() {
       <Link href="/">
         <Image
           src="/LogoSquadFit-horizontal.png"
-          width={210}
-          height={50}
+          width={192}
+          height={46}
           alt="Logo"
           className='object-contain'
         />
@@ -180,9 +180,9 @@ export default function BurgerMenu() {
         aria-label='Abrir menú'
       >
         <svg width="27" height="20" viewBox="0 0 27 20" fill="none" aria-hidden="true">
-          <line x1="2.5" y1="2.5" x2="24.5" y2="2.5" stroke="currentColor" strokeWidth="3.2" strokeLinecap="round" />
-          <line x1="2.5" y1="10" x2="24.5" y2="10" stroke="currentColor" strokeWidth="3.2" strokeLinecap="round" />
-          <line x1="2.5" y1="17.5" x2="24.5" y2="17.5" stroke="currentColor" strokeWidth="3.2" strokeLinecap="round" />
+          <line x1="2.8" y1="3" x2="24.2" y2="3" stroke="currentColor" strokeWidth="4" strokeLinecap="round" />
+          <line x1="2.8" y1="10" x2="24.2" y2="10" stroke="currentColor" strokeWidth="4" strokeLinecap="round" />
+          <line x1="2.8" y1="17" x2="24.2" y2="17" stroke="currentColor" strokeWidth="4" strokeLinecap="round" />
         </svg>
       </button>
 
