@@ -52,34 +52,29 @@ export default function BurgerMenu() {
   }
 
   return (
-    <div className='flex flex-row items-center justify-between px-5 py-4'>
+    <div className='flex flex-row items-center justify-between px-5 py-2.5'>
       <Link href="/">
         <Image
           src="/Logo-horizontal.png"
-          width={210}
-          height={50}
+          width={185}
+          height={44}
           alt="Logo"
           className='object-contain'
         />
       </Link>
-      
-      <div className='flex items-center gap-4'>
-        {/* Carrito eliminado de aquí */}
 
-        <button
-          className={`${show ? 'hidden' : 'block'} p-2 rounded-xl bg-[#FF690B]/10 active:scale-90 transition-transform cursor-pointer`}
-          onClick={() => setShow(true)}
-          aria-label='Abrir menú'
-        >
-          <Image
-            src="/icons/menu.png"
-            width={28}
-            height={21}
-            alt="Menu"
-            className='cursor-pointer'
-          />
-        </button>
-      </div>
+      {/* Botón menú: icono de líneas, sin fondo */}
+      <button
+        className={`${show ? 'hidden' : 'block'} text-[#FF690B] p-1 active:scale-90 transition-transform cursor-pointer`}
+        onClick={() => setShow(true)}
+        aria-label='Abrir menú'
+      >
+        <svg width="22" height="16" viewBox="0 0 22 16" fill="none" aria-hidden="true">
+          <line x1="2" y1="2" x2="20" y2="2" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
+          <line x1="2" y1="8" x2="20" y2="8" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
+          <line x1="2" y1="14" x2="20" y2="14" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
+        </svg>
+      </button>
 
       {/* Fondo oscurecido al abrir */}
       {show && (
