@@ -57,22 +57,24 @@ export default function BurgerMenu() {
   // abría solo dentro de la barra en vez de por delante de toda la página.
   const overlay = (
     <>
-      {/* Fondo oscurecido al abrir */}
-      {show && (
-        <div
-          className='fixed inset-0 bg-black/20 z-[60] transition-opacity'
-          onClick={() => setShow(false)}
-        />
-      )}
+      {/* Fondo oscurecido: se desvanece con la MISMA transición que el drawer
+          (antes se desmontaba de golpe y el menú quedaba flotando al salir) */}
+      <div
+        className={`fixed inset-0 bg-black/25 z-[60] transition-opacity duration-300 ${show ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+        onClick={() => setShow(false)}
+        aria-hidden={!show}
+      />
 
       {/* Capa que recorta el drawer cuando está aparcado fuera de pantalla */}
-      <div className={`fixed inset-0 z-[60] overflow-hidden pointer-events-none ${show ? '' : 'invisible'}`} aria-hidden={!show}>
+      <div className='fixed inset-0 z-[60] overflow-hidden pointer-events-none'>
       {/* Drawer lateral: mismo concepto que el índice del panel
-          (tarjeta crema flotante, cierre naranja, textos azules) */}
+          (tarjeta crema flotante, cierre naranja, textos azules).
+          Se desliza y desvanece a la vez para una salida limpia. */}
       <div
-        className={`pointer-events-auto absolute top-[20px] right-[20px] h-[calc(100dvh-40px)] w-[300px] bg-[#FFF6F0] rounded-[40px] shadow-2xl flex flex-col py-8 px-6 transform transition-transform duration-300 ease-in-out overflow-y-auto ${
-          show ? 'translate-x-0' : 'translate-x-[calc(100%+20px)]'
+        className={`pointer-events-auto absolute top-[20px] right-[20px] h-[calc(100dvh-40px)] w-[300px] bg-[#FFF6F0] rounded-[40px] shadow-2xl flex flex-col py-8 px-6 transition-[transform,opacity] duration-300 ease-in-out overflow-y-auto ${
+          show ? 'translate-x-0 opacity-100' : 'translate-x-[calc(100%+20px)] opacity-0'
         }`}
+        aria-hidden={!show}
       >
         {/* Cabecera: logo (lleva a la home) + cerrar */}
         <div className='flex items-center justify-between mb-8'>

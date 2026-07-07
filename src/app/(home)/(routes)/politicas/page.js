@@ -74,7 +74,7 @@ const ContenidoAvisoLegal = () => {
       <p className="mb-4">El titular de este portal web/app móvil es:</p>
 
       <div className="mb-8">
-        <p>Empresa: Squad Fit SLU</p>
+        <p>Empresa: Squat Fit SLU</p>
         <p>CIF: B19463066</p>
         <p>Dirección: Av Maisonnave 41, 3 B</p>
         <p>03003, Alicante, España</p>
@@ -197,7 +197,7 @@ const ContenidoPrivacidad = () => (
     <p className="mb-6">En cumplimiento del Reglamento (UE) 2016/679 (RGPD) y la Ley Orgánica 3/2018 (LOPDGDD), le informamos sobre el tratamiento de sus datos personales.</p>
     <h2 className="text-xl font-bold text-black mb-3">Responsable del tratamiento</h2>
     <div className="mb-6">
-      <p>Empresa: Squad Fit SLU | CIF: B19463066</p>
+      <p>Empresa: Squat Fit SLU | CIF: B19463066</p>
       <p>Dirección: Av Maisonnave 41, 3 B, 03003, Alicante, España</p>
       <p>Contacto: hola@squatfit.es</p>
     </div>
@@ -222,7 +222,7 @@ const ContenidoPrivacidad = () => (
 const ContenidoTerminos = () => (
   <div className="animate-fadeIn">
     <h1 className="text-4xl font-bold text-[#3B3B98] mb-6">Términos y Condiciones</h1>
-    <p className="mb-6">Los presentes Términos y Condiciones regulan el acceso y uso de los servicios ofrecidos por Squad Fit SLU. Al contratar cualquier servicio, el usuario acepta estos términos.</p>
+    <p className="mb-6">Los presentes Términos y Condiciones regulan el acceso y uso de los servicios ofrecidos por Squat Fit SLU. Al contratar cualquier servicio, el usuario acepta estos términos.</p>
     <h2 className="text-xl font-bold text-black mb-3">1. Objeto</h2>
     <p className="mb-6">Squad Fit ofrece servicios de asesoramiento en nutrición, planes de entrenamiento y formación en línea. El acceso requiere registro y, en su caso, el pago del precio correspondiente.</p>
     <h2 className="text-xl font-bold text-black mb-3">2. Condiciones de acceso</h2>

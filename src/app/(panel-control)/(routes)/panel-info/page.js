@@ -112,7 +112,7 @@ export default function InfoPage() {
             <p className="mb-6">En cumplimiento del Reglamento (UE) 2016/679 (RGPD) y la Ley Orgánica 3/2018 (LOPDGDD), le informamos sobre el tratamiento de sus datos personales.</p>
             <h3 className="text-xl font-bold text-black mb-3">Responsable del tratamiento</h3>
             <div className="mb-6">
-              <p>Empresa: Squad Fit SLU | CIF: B19463066</p>
+              <p>Empresa: Squat Fit SLU | CIF: B19463066</p>
               <p>Dirección: Av Maisonnave 41, 3 B, 03003, Alicante, España</p>
               <p>Contacto: hola@squatfit.es</p>
             </div>
