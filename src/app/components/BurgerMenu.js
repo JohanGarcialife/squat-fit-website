@@ -80,7 +80,7 @@ export default function BurgerMenu() {
         <div className='flex items-center justify-between mb-8'>
           <Link href="/" onClick={() => setShow(false)}>
             <Image
-              src="/Logo-horizontal.png"
+              src="/LogoSquadFit-horizontal.png"
               width={150}
               height={36}
               alt="Squad Fit — Inicio"
@@ -165,7 +165,7 @@ export default function BurgerMenu() {
     <div className='flex flex-row items-center justify-between px-5 py-2.5'>
       <Link href="/">
         <Image
-          src="/Logo-horizontal.png"
+          src="/LogoSquadFit-horizontal.png"
           width={210}
           height={50}
           alt="Logo"

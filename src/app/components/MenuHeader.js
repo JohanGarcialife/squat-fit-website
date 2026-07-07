@@ -41,7 +41,7 @@ export default function MenuHeader() {
             <div className='flex items-center gap-16'> {/* Aumentado el gap para separar logo de enlaces */}
                 <Link href="/">
                     <Image
-                        src="/Logo-horizontal.png"
+                        src="/LogoSquadFit-horizontal.png"
                         width={250}
                         height={60}
                         alt="Logo"
