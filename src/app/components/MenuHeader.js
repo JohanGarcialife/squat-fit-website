@@ -36,7 +36,7 @@ export default function MenuHeader() {
 
     return (
         <>
-        <div className='flex justify-between items-center px-10 pt-7'>
+        <div className='flex justify-between items-center px-10 py-4'>
             {/* Grupo de Logo y Enlaces de Navegación */}
             <div className='flex items-center gap-16'> {/* Aumentado el gap para separar logo de enlaces */}
                 <Link href="/">

@@ -12,9 +12,7 @@ const STEPS = [
 ];
 
 // Cada tarjeta tiene su propio detector: anima al entrar ELLA en pantalla.
-// showCheck: en escritorio, un check en el borde izquierdo (sobre la línea,
-// en el hueco entre tarjetas) que aparece con rebote.
-function StepCard({ step, showCheck }) {
+function StepCard({ step }) {
   const [ref, visible] = useInView(0.8);
   return (
     <div className='flex flex-col items-center text-center w-full md:w-1/3 relative z-10'>
@@ -24,17 +22,6 @@ function StepCard({ step, showCheck }) {
           visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
         }`}
       >
-        {/* Check de escritorio, en el hueco a la izquierda de la tarjeta */}
-        {showCheck && (
-          <div
-            style={{ transitionDelay: `${visible ? 250 : 0}ms` }}
-            className={`hidden md:flex w-9 h-9 rounded-[12px] bg-primary shadow-md border-2 border-white items-center justify-center absolute -left-[calc(10%+18px)] top-[58%] -translate-y-1/2 z-20 transition-transform duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${
-              visible ? 'scale-100' : 'scale-0'
-            }`}
-          >
-            <FaCheck className='text-white text-sm' />
-          </div>
-        )}
         <div className='flex flex-row items-center justify-center gap-2 mb-4 md:mb-4'>
           <span className='w-8 h-8 rounded-full bg-primary/10 text-primary hidden md:flex items-center justify-center font-bold'>{step.n}</span>
           <p className='text-primary text-[32px] md:text-2xl font-bold'>Paso {step.n}</p>
@@ -99,11 +86,25 @@ export default function HowItWorks() {
           }`}
         ></div>
 
+        {/* Checks de escritorio: anclados a la línea, centrados en los huecos
+            entre tarjetas (33% y 66% del ancho de la fila) */}
+        {[33.33, 66.66].map((leftPct, i) => (
+          <div
+            key={i}
+            style={{ left: `${leftPct}%`, transitionDelay: lineVisible ? `${450 + i * 130}ms` : '0ms' }}
+            className={`hidden md:flex w-9 h-9 rounded-[12px] bg-primary shadow-md border-2 border-white items-center justify-center absolute top-[58%] -translate-x-1/2 -translate-y-1/2 z-20 transition-transform duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${
+              lineVisible ? 'scale-100' : 'scale-0'
+            }`}
+          >
+            <FaCheck className='text-white text-sm' />
+          </div>
+        ))}
+
         <StepCard step={STEPS[0]} />
         <MobileConnector />
-        <StepCard step={STEPS[1]} showCheck />
+        <StepCard step={STEPS[1]} />
         <MobileConnector />
-        <StepCard step={STEPS[2]} showCheck />
+        <StepCard step={STEPS[2]} />
 
       </div>
 
