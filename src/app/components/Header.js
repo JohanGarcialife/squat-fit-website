@@ -29,7 +29,7 @@ export default function Header() {
 
   return (
     <div
-      className={`sticky top-0 z-40 bg-background transition-transform duration-300 ${
+      className={`sticky top-0 z-40 bg-background shadow-[0_2px_12px_rgba(0,0,0,0.06)] transition-transform duration-300 ${
         hidden ? '-translate-y-full' : 'translate-y-0'
       }`}
     >

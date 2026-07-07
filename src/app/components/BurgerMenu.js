@@ -1,5 +1,6 @@
 'use client';
 import React, { useState, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter, usePathname } from 'next/navigation';
@@ -51,43 +52,21 @@ export default function BurgerMenu() {
     router.push('/');
   }
 
-  return (
-    <div className='flex flex-row items-center justify-between px-5 py-2.5'>
-      <Link href="/">
-        <Image
-          src="/Logo-horizontal.png"
-          width={185}
-          height={44}
-          alt="Logo"
-          className='object-contain'
-        />
-      </Link>
-
-      {/* Botón menú: icono de líneas, sin fondo */}
-      <button
-        className={`${show ? 'hidden' : 'block'} text-[#FF690B] p-1 active:scale-90 transition-transform cursor-pointer`}
-        onClick={() => setShow(true)}
-        aria-label='Abrir menú'
-      >
-        <svg width="22" height="16" viewBox="0 0 22 16" fill="none" aria-hidden="true">
-          <line x1="2" y1="2" x2="20" y2="2" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
-          <line x1="2" y1="8" x2="20" y2="8" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
-          <line x1="2" y1="14" x2="20" y2="14" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
-        </svg>
-      </button>
-
+  // El overlay se renderiza con un portal a <body> para escapar del header
+  // sticky: al llevar transform, atrapaba el `fixed` del drawer y el menú se
+  // abría solo dentro de la barra en vez de por delante de toda la página.
+  const overlay = (
+    <>
       {/* Fondo oscurecido al abrir */}
       {show && (
         <div
-          className='fixed inset-0 bg-black/20 z-40 transition-opacity'
+          className='fixed inset-0 bg-black/20 z-[60] transition-opacity'
           onClick={() => setShow(false)}
         />
       )}
 
-      {/* Capa que recorta el drawer cuando está aparcado fuera de pantalla:
-          sin ella, iOS deja "arrastrar" la página hacia la zona invisible
-          (la web se veía ladeada y con bandas negras en móvil) */}
-      <div className={`fixed inset-0 z-50 overflow-hidden pointer-events-none ${show ? '' : 'invisible'}`} aria-hidden={!show}>
+      {/* Capa que recorta el drawer cuando está aparcado fuera de pantalla */}
+      <div className={`fixed inset-0 z-[60] overflow-hidden pointer-events-none ${show ? '' : 'invisible'}`} aria-hidden={!show}>
       {/* Drawer lateral: mismo concepto que el índice del panel
           (tarjeta crema flotante, cierre naranja, textos azules) */}
       <div
@@ -171,12 +150,41 @@ export default function BurgerMenu() {
         </div>
       </div>
       </div>
-       <ConfirmationModal
+      <ConfirmationModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onConfirm={handleLogoutConfirmed}
         message="¿Estás seguro de que quieres cerrar sesión?"
       />
+    </>
+  );
+
+  return (
+    <div className='flex flex-row items-center justify-between px-5 py-2.5'>
+      <Link href="/">
+        <Image
+          src="/Logo-horizontal.png"
+          width={210}
+          height={50}
+          alt="Logo"
+          className='object-contain'
+        />
+      </Link>
+
+      {/* Botón menú: icono de líneas, sin fondo */}
+      <button
+        className={`${show ? 'invisible' : 'block'} text-[#FF690B] p-1 active:scale-90 transition-transform cursor-pointer`}
+        onClick={() => setShow(true)}
+        aria-label='Abrir menú'
+      >
+        <svg width="27" height="20" viewBox="0 0 27 20" fill="none" aria-hidden="true">
+          <line x1="2.5" y1="2.5" x2="24.5" y2="2.5" stroke="currentColor" strokeWidth="3.2" strokeLinecap="round" />
+          <line x1="2.5" y1="10" x2="24.5" y2="10" stroke="currentColor" strokeWidth="3.2" strokeLinecap="round" />
+          <line x1="2.5" y1="17.5" x2="24.5" y2="17.5" stroke="currentColor" strokeWidth="3.2" strokeLinecap="round" />
+        </svg>
+      </button>
+
+      {isClient && createPortal(overlay, document.body)}
     </div>
   )
 }
