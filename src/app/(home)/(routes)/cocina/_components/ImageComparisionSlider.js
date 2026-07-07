@@ -66,7 +66,7 @@ const ImageComparisonSlider = (props) => {
       {/* Foto comparadora */}
       <div
         ref={containerRef}
-        className="relative w-full h-[385px] sm:h-[485px] lg:h-[570px] rounded-[45px] overflow-hidden shadow-2xl select-none touch-none"
+        className="relative w-full h-[385px] sm:h-[485px] lg:h-[570px] rounded-[32px] overflow-hidden shadow-2xl select-none touch-none"
       >
         {/* Imagen del 'Después' (base, lado derecho) */}
         <Image
