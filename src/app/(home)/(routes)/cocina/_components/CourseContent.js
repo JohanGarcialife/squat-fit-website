@@ -3,7 +3,7 @@ import React from "react";
 import Image from "next/image";
 import useWindowSize from "@/hooks/UseWindowSize";
 import FeatureIcon from "@/app/components/FeatureIcon";
-import { Salad, Lightbulb, BadgePercent, Soup } from "lucide-react";
+import { Salad, Lightbulb, MousePointerClick, Soup } from "lucide-react";
 
 export default function CourseContent() {
    const { width } = useWindowSize();
@@ -44,12 +44,12 @@ export default function CourseContent() {
           </div>
           <div className="flex flex-col justify-between">
             <div className="flex items-start gap-3">
-              <FeatureIcon icon={BadgePercent} />
+              <FeatureIcon icon={MousePointerClick} />
               <div>
                 <p className="text-3xl text-black font-bold">Navegación fácil</p>
                 <p className=" text-2xl text-black max-w-[273px] ">              
 
-Con descuentos en suplementos e ingredientes top.
+Ves las recetas y compras los productos desde la propia app, fácil y rápido.
                 </p>
               </div>
             </div>
@@ -103,11 +103,11 @@ Con descuentos en suplementos e ingredientes top.
           </div>
           <div className="flex flex-col justify-between">
             <div className="flex items-start gap-3">
-              <FeatureIcon icon={BadgePercent} />
+              <FeatureIcon icon={MousePointerClick} />
               <div>
                 <p className="text-3xl text-black font-bold">Navegación fácil</p>
                 <p className=" text-2xl text-black max-w-[273px] ">
-Con descuentos en suplementos e ingredientes top.
+Ves las recetas y compras los productos desde la propia app, fácil y rápido.
                 </p>
               </div>
             </div>
