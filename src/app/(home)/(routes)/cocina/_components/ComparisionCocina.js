@@ -52,12 +52,6 @@ export default function ComparisionCocina(props) {
           <Slider key={resizeKey} {...settings} ref={sliderRef}>
             {comparacion.map((item, index) => (
               <div key={index} className="px-1 py-4 outline-none">
-                {/* Subtítulo ENCIMA (propio de recetas); la home lo pone debajo */}
-                {item.text && (
-                  <div className="mb-4 mx-auto max-w-[92%] bg-white text-secondary font-semibold text-center text-base md:text-xl p-3 rounded-xl shadow-lg border border-gray-200 select-none">
-                    <p>{item.text}</p>
-                  </div>
-                )}
                 <BeforeAfterSlider
                   beforeSrc={item.beforeSrc}
                   afterSrc={item.afterSrc}
@@ -67,6 +61,7 @@ export default function ComparisionCocina(props) {
                   beforeTitle={item.beforeTitle}
                   afterTitle={item.afterTitle}
                   widthClass="w-full sm:w-[390px] lg:w-[460px]"
+                  shadowClass="shadow-[0_8px_24px_-8px_rgba(0,0,0,0.35)]"
                 />
               </div>
             ))}
