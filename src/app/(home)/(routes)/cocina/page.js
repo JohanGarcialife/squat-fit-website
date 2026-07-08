@@ -36,8 +36,8 @@ export default function page() {
        // French toast
        beforeSrc: "/recetasImages/3 antes.jpg",
        afterSrc: "/recetasImages/3 despues.jpg",
-       beforeTitle: "De quemar el desayuno",
-       afterTitle: "A clavar la receta",
+       beforeTitle: "De difícil de mantener",
+       afterTitle: "A fácil de repetir",
        beforeGrayscale: 0.5,
     },
     {
@@ -60,8 +60,8 @@ export default function page() {
        // Pancakes
        beforeSrc: "/recetasImages/6 antes.jpg",
        afterSrc: "/recetasImages/6 despues.jpg",
-       beforeTitle: "De difícil de mantener",
-       afterTitle: "A fácil de repetir",
+       beforeTitle: "De quemar el desayuno",
+       afterTitle: "A clavar la receta",
        beforeGrayscale: 0.45,
     }
   ]
