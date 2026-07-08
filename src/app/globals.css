@@ -97,7 +97,7 @@ html, body {
    `transform` de la utilidad skew-x-12 y se mantiene estático. */
 @keyframes landing-sweep {
   0% { translate: -100% 0; }
-  32% { translate: 100% 0; }
+  28% { translate: 100% 0; }
   100% { translate: 100% 0; }
 }
 
@@ -107,7 +107,11 @@ html, body {
    arranque de forma fiable. Antes de verse, el destello queda oculto a la
    izquierda por -translate-x-full, así que no hay salto. */
 .landing-autoshine.shine-go {
-  animation: landing-sweep 5s ease-in-out 0.3s 4;
+  /* 7s por ciclo: el barrido cruza en el 28% (~2s) y luego ~5s de espera antes
+     de la siguiente pasada. Nº de pasadas: 5 por defecto, pero AutoShineObserver
+     lo sube (2 más por cada pantalla que el botón esté más abajo) para que a los
+     CTAs de más abajo les dé tiempo a brillar cuando llegas a ellos. */
+  animation: landing-sweep 7s ease-in-out 0.4s 5;
 }
 
 @media (prefers-reduced-motion: reduce) {

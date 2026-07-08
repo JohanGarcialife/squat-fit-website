@@ -2,12 +2,27 @@
 
 import { useEffect, useRef, useState } from 'react';
 
-// Cuenta ascendente animada (0 → value) al montar el componente (arranca tras
-// un pequeño retardo para que se vea el crecimiento). Pensado para los números
-// del hero, que están arriba y se ven en cuanto carga la página: los tres
-// montan a la vez, así que suben simultáneamente y dan sensación de dinamismo.
-export default function CountUp({ value, duration = 1600, startDelay = 250, format = (v) => `${Math.round(v)}`, className }) {
-  const [display, setDisplay] = useState(() => format(0));
+// Cuenta ascendente animada al montar el componente. Pensada para los números
+// del hero: los tres montan a la vez, así que suben simultáneamente.
+//
+// Para que no se vea frenético:
+//   - startFraction: arranca desde un número CERCANO al final (p. ej. 0.7 →
+//     empieza en el 70% del valor), reduciendo el recorrido.
+//   - step: redondea a saltos (p. ej. de 10 en 10) para que las cifras no
+//     parpadeen por todos los números intermedios.
+//   - duration algo más larga = subida más pausada.
+export default function CountUp({
+  value,
+  duration = 1600,
+  startDelay = 250,
+  startFraction = 0.7,
+  step = 1,
+  format = (v) => `${Math.round(v)}`,
+  className,
+}) {
+  const from = value * startFraction;
+  const snap = (v) => Math.round(v / step) * step;
+  const [display, setDisplay] = useState(() => format(snap(from)));
   const started = useRef(false);
 
   useEffect(() => {
@@ -19,8 +34,11 @@ export default function CountUp({ value, duration = 1600, startDelay = 250, form
     const tick = (now) => {
       if (t0 === null) t0 = now;
       const p = Math.min(1, (now - t0) / duration);
-      const eased = 1 - Math.pow(1 - p, 3); // easeOutCubic
-      setDisplay(format(value * eased));
+      // easeOutQuad: aterriza suave (el último tramo más lento que los otros)
+      // pero sin la cola tan larga del cubic, para que no se sienta brusco.
+      const eased = 1 - Math.pow(1 - p, 2);
+      const currentRaw = from + (value - from) * eased;
+      setDisplay(format(p < 1 ? snap(currentRaw) : value));
       if (p < 1) rafId = requestAnimationFrame(tick);
     };
 
@@ -32,7 +50,7 @@ export default function CountUp({ value, duration = 1600, startDelay = 250, form
       clearTimeout(timer);
       if (rafId) cancelAnimationFrame(rafId);
     };
-  }, [value, duration, startDelay]);
+  }, [value, duration, startDelay, startFraction, step]);
 
   return <span className={className}>{display}</span>;
 }

@@ -27,15 +27,15 @@ export default function HeroSection() {
 
 <div className='flex flex-row items-start justify-between mt-10 lg:gap-20 gap-2 w-full'>
 <div className='flex flex-col items-center justify-center text-center'>
-  <CountUp value={1700} format={(v) => `+${Math.round(v)}`} className='text-3xl lg:text-5xl font-bold text-secondary' />
+  <CountUp value={2000} step={25} format={(v) => `+${Math.round(v)}`} className='text-3xl lg:text-5xl font-bold text-secondary' />
   <p className='text-secondary  lg:text-lg'>Vidas cambiadas</p>
 </div>
 <div className='flex flex-col items-center justify-center text-center'>
-  <CountUp value={1000000} format={(v) => { const n = Math.round(v); return n >= 1e6 ? '+1M' : n >= 1000 ? `+${Math.round(n/1000)}K` : `+${n}`; }} className='text-3xl lg:text-5xl font-bold text-secondary' />
+  <CountUp value={1800000} step={10000} format={(v) => { const n = Math.round(v); return n >= 1e6 ? `+${parseFloat((n/1e6).toFixed(2))}M` : n >= 1000 ? `+${Math.round(n/1000)}K` : `+${n}`; }} className='text-3xl lg:text-5xl font-bold text-secondary' />
   <p className='text-secondary  lg:text-lg'>Seguidores en redes</p>
 </div>
 <div className='flex flex-col items-center justify-center text-center'>
-  <CountUp value={250} format={(v) => `+${Math.round(v)}`} className='text-3xl lg:text-5xl font-bold text-secondary' />
+  <CountUp value={250} step={5} format={(v) => `+${Math.round(v)}`} className='text-3xl lg:text-5xl font-bold text-secondary' />
   <p className='text-secondary  lg:text-lg'>Alumnos aprendiendo</p>
 </div>
 </div>

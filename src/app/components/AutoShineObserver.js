@@ -16,9 +16,16 @@ export default function AutoShineObserver() {
       (entries) => {
         entries.forEach((e) => {
           if (e.isIntersecting) {
-            e.target
-              .querySelectorAll('.landing-autoshine')
-              .forEach((span) => span.classList.add('shine-go'));
+            // Cuanto más abajo está el botón en la página, más pasadas de brillo
+            // (2 extra por cada "pantalla" de profundidad), para que a los CTAs
+            // de más abajo les dé tiempo a brillar cuando llegas a ellos.
+            const absY = e.target.getBoundingClientRect().top + window.scrollY;
+            const depth = Math.min(4, Math.floor(absY / Math.max(1, window.innerHeight)));
+            const iterations = 5 + depth * 2; // 5, 7, 9, 11, 13
+            e.target.querySelectorAll('.landing-autoshine').forEach((span) => {
+              span.style.animationIterationCount = String(iterations);
+              span.classList.add('shine-go');
+            });
             io.unobserve(e.target);
           }
         });
