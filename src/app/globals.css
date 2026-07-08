@@ -114,6 +114,27 @@ html, body {
   animation: landing-sweep 7s ease-in-out 0.4s 5;
 }
 
+/* "Pop"/acercamiento de cada número al incrementarse (contador por pasos, p. ej.
+   los Volúmenes de la cocina que solo saltan 0→1→2): entra en grande y difuso
+   y se asienta, dando sensación de conteo pausado. */
+@keyframes count-pop {
+  0% { transform: scale(1.6); opacity: 0.35; }
+  70% { transform: scale(0.97); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* Badges antes/después del comparador de recetas: el borde que da al divisor
+   se difumina (máscara degradada) para que el texto parezca continuar bajo el
+   divisor en vez de cortarse en seco. -webkit- para que funcione en iOS. */
+.badge-fade-r {
+  -webkit-mask-image: linear-gradient(to right, #000 78%, transparent);
+  mask-image: linear-gradient(to right, #000 78%, transparent);
+}
+.badge-fade-l {
+  -webkit-mask-image: linear-gradient(to left, #000 78%, transparent);
+  mask-image: linear-gradient(to left, #000 78%, transparent);
+}
+
 @media (prefers-reduced-motion: reduce) {
   /* !important para ganar a la regla .landing-autoshine.shine-go (más específica) */
   .landing-autoshine,

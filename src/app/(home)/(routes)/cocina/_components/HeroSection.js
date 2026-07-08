@@ -1,6 +1,7 @@
-
+'use client'
 import Image from 'next/image'
 import React from 'react'
+import CountUp from '../../../../components/CountUp'
 
 export default function HeroSection() {
 
@@ -21,15 +22,15 @@ export default function HeroSection() {
         {/* Cifras: siempre en fila de 3, como en el hero de la home */}
         <div className='flex flex-row items-start justify-center md:justify-start gap-6 sm:gap-10 w-full'>
           <div className='text-center max-w-[110px] sm:max-w-[150px]'>
-            <p className='text-secondary font-bold text-3xl sm:text-4xl'>+150</p>
+            <CountUp value={150} step={5} format={(v) => `+${Math.round(v)}`} className='text-secondary font-bold text-3xl sm:text-4xl' />
             <p className='text-secondary text-sm sm:text-base'>Recetas para repetir</p>
           </div>
           <div className='text-center max-w-[110px] sm:max-w-[150px]'>
-            <p className='text-secondary font-bold text-3xl sm:text-4xl'>2</p>
+            <CountUp value={2} popSteps popStepMs={700} className='text-secondary font-bold text-3xl sm:text-4xl' />
             <p className='text-secondary text-sm sm:text-base'>Volúmenes en la colección</p>
           </div>
           <div className='text-center max-w-[110px] sm:max-w-[150px]'>
-            <p className='text-secondary font-bold text-3xl sm:text-4xl'>100%</p>
+            <CountUp value={100} step={5} format={(v) => `${Math.round(v)}%`} className='text-secondary font-bold text-3xl sm:text-4xl' />
             <p className='text-secondary text-sm sm:text-base'>Con sus macros incluidos</p>
           </div>
         </div>

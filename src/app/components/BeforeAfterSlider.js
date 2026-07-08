@@ -80,7 +80,7 @@ export default function BeforeAfterSlider({
           Después
         </span>
         {showTitles && (
-          <span className="absolute bottom-6 right-6 text-white font-semibold text-xs sm:text-sm bg-black/35 backdrop-blur-sm px-3 py-1 rounded-full drop-shadow select-none">
+          <span className="absolute bottom-5 right-4 text-white font-semibold text-[11px] sm:text-sm bg-black/60 backdrop-blur-sm px-3 py-1 rounded-full drop-shadow select-none badge-fade-l">
             {afterTitle}
           </span>
         )}
@@ -103,7 +103,7 @@ export default function BeforeAfterSlider({
           Antes
         </span>
         {showTitles && (
-          <span className="absolute bottom-6 left-6 text-white font-semibold text-xs sm:text-sm bg-black/35 backdrop-blur-sm px-3 py-1 rounded-full drop-shadow select-none">
+          <span className="absolute bottom-5 left-4 text-white font-semibold text-[11px] sm:text-sm bg-black/30 backdrop-blur-sm px-3 py-1 rounded-full drop-shadow select-none badge-fade-r">
             {beforeTitle}
           </span>
         )}
