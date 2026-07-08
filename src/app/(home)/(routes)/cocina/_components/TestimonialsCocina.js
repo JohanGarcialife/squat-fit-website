@@ -5,6 +5,7 @@ import dynamic from 'next/dynamic';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import useResizeRemountKey from '@/hooks/useResizeRemountKey';
 import useWindowSize from '@/hooks/UseWindowSize';
+import useSlickWrapSpeed from '@/hooks/useSlickWrapSpeed';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
 
@@ -31,6 +32,7 @@ const TestimonialsCocina = () => {
   // el motor "responsive" interno de slick no aplicaba bien en móvil.
   const { width } = useWindowSize();
   const w = width || 0;
+  const { speed, onBeforeChange, next, prev } = useSlickWrapSpeed(testimonials.length, sliderRef);
 
   const settings = {
     className: 'center',
@@ -38,11 +40,11 @@ const TestimonialsCocina = () => {
     infinite: true,
     centerPadding: w >= 1024 ? '0px' : w >= 640 ? '48px' : '38px',
     slidesToShow: w >= 1024 ? 3 : 1,
-    speed: 250,
+    speed,
     arrows: false,
     cssEase: 'cubic-bezier(0.25, 1, 0.5, 1)',
     initialSlide: current,
-    beforeChange: (_, next) => setCurrent(next),
+    beforeChange: (cur, idx) => { setCurrent(idx); onBeforeChange(cur, idx); },
   };
 
   return (
@@ -86,14 +88,14 @@ const TestimonialsCocina = () => {
 
           {/* Flechas */}
           <button
-            onClick={() => sliderRef.current && sliderRef.current.slickPrev()}
+            onClick={prev}
             className="absolute left-0 top-1/2 -translate-y-1/2 bg-[#FFEDE0] rounded-full p-1.5 text-[#FF690B] hover:scale-110 transition-all duration-200 z-20 cursor-pointer"
             aria-label="Previous testimonial"
           >
             <ChevronLeft className="w-6 h-6" />
           </button>
           <button
-            onClick={() => sliderRef.current && sliderRef.current.slickNext()}
+            onClick={next}
             className="absolute right-0 top-1/2 -translate-y-1/2 bg-[#FFEDE0] rounded-full p-1.5 text-[#FF690B] hover:scale-110 transition-all duration-200 z-20 cursor-pointer"
             aria-label="Next testimonial"
           >

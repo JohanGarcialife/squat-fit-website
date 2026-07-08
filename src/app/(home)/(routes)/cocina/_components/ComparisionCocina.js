@@ -1,7 +1,7 @@
 'use client'
 import React, { useRef, useState } from 'react'
 import dynamic from 'next/dynamic'
-import ImageComparisonSlider from './ImageComparisionSlider'
+import BeforeAfterSlider from '../../../../components/BeforeAfterSlider'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import useResizeRemountKey from '@/hooks/useResizeRemountKey'
 import useWindowSize from '@/hooks/UseWindowSize'
@@ -52,14 +52,21 @@ export default function ComparisionCocina(props) {
           <Slider key={resizeKey} {...settings} ref={sliderRef}>
             {comparacion.map((item, index) => (
               <div key={index} className="px-1 py-4 outline-none">
-                <ImageComparisonSlider
+                {/* Subtítulo ENCIMA (propio de recetas); la home lo pone debajo */}
+                {item.text && (
+                  <div className="mb-4 mx-auto max-w-[92%] bg-white text-secondary font-semibold text-center text-base md:text-xl p-3 rounded-xl shadow-lg border border-gray-200 select-none">
+                    <p>{item.text}</p>
+                  </div>
+                )}
+                <BeforeAfterSlider
                   beforeSrc={item.beforeSrc}
                   afterSrc={item.afterSrc}
-                  text={item.text}
                   isActive={index === current}
-                  beforeGrayscale={item.beforeGrayscale}
+                  beforeGrayscale={item.beforeGrayscale ?? 0.5}
+                  showTitles
                   beforeTitle={item.beforeTitle}
                   afterTitle={item.afterTitle}
+                  widthClass="w-full sm:w-[390px] lg:w-[460px]"
                 />
               </div>
             ))}

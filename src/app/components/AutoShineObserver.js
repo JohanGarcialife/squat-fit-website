@@ -3,20 +3,27 @@ import { useEffect } from 'react';
 
 // Arranca el auto-brillo de los botones (.landing-autoshine) SOLO cuando el
 // botón entra en pantalla, no al cargar la página. Así el contador de pasadas
-// empieza desde que el usuario ve cada botón (los CTAs de más abajo también se
-// ven brillar, en vez de agotar sus pasadas antes de llegar a ellos).
+// empieza desde que el usuario ve cada botón.
+//
+// IMPORTANTE: la clase .landing-autoshine vive en el SPAN del destello, que
+// está desplazado -100% (fuera del botón) y recortado por overflow-hidden. Si
+// observamos ese span, el IntersectionObserver lo ve siempre fuera de pantalla
+// y nunca dispara. Por eso observamos el BOTÓN contenedor y, cuando entra en
+// pantalla, añadimos .shine-go al span de dentro.
 export default function AutoShineObserver() {
   useEffect(() => {
     const io = new IntersectionObserver(
       (entries) => {
         entries.forEach((e) => {
           if (e.isIntersecting) {
-            e.target.classList.add('shine-go');
+            e.target
+              .querySelectorAll('.landing-autoshine')
+              .forEach((span) => span.classList.add('shine-go'));
             io.unobserve(e.target);
           }
         });
       },
-      { threshold: 0.6 }
+      { threshold: 0.4 }
     );
 
     let scheduled = false;
@@ -24,7 +31,10 @@ export default function AutoShineObserver() {
       scheduled = false;
       document
         .querySelectorAll('.landing-autoshine:not(.shine-go)')
-        .forEach((el) => io.observe(el));
+        .forEach((span) => {
+          const host = span.closest('button, a') || span.parentElement;
+          if (host) io.observe(host);
+        });
     };
     const schedule = () => {
       if (!scheduled) {

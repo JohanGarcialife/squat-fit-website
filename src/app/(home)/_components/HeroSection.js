@@ -3,6 +3,7 @@ import useWindowSize from '@/hooks/UseWindowSize';
 import Image from 'next/image'
 import React from 'react'
 import LandingButton from '../../components/LandingButton';
+import CountUp from '../../components/CountUp';
 
 export default function HeroSection() {
   const { width } = useWindowSize();
@@ -15,7 +16,7 @@ export default function HeroSection() {
         <div >
 
 <p className='text-secondary text-center lg:text-start xl:max-w-[510px] max-w-screen font-bold text-5xl lg:text-6xl xl:text-7xl lg:leading-28 '>Logra tu mejor versión</p>
-<p className='text-black lg:max-w-[510px] text-center lg:text-start text-2xl mt-4'>El programa de dieta, entreno y mentalidad para un cambio físico real y duradero</p>
+<p className='text-black lg:max-w-[510px] text-center lg:text-start text-[1.35rem] lg:text-2xl mt-4'>El programa de dieta, entreno y mentalidad para un cambio físico real y duradero</p>
 <div className='flex flex-row w-full items-center lg:items-start lg:justify-center'>
 <div className='flex flex-row items-center justify-center lg:justify-start w-full'>
 
@@ -26,15 +27,15 @@ export default function HeroSection() {
 
 <div className='flex flex-row items-start justify-between mt-10 lg:gap-20 gap-2 w-full'>
 <div className='flex flex-col items-center justify-center text-center'>
-  <p className='text-3xl lg:text-5xl font-bold text-secondary'>+1700</p>
+  <CountUp value={1700} format={(v) => `+${Math.round(v)}`} className='text-3xl lg:text-5xl font-bold text-secondary' />
   <p className='text-secondary  lg:text-lg'>Vidas cambiadas</p>
 </div>
 <div className='flex flex-col items-center justify-center text-center'>
-  <p className='text-3xl lg:text-5xl font-bold text-secondary'>+1M</p>
+  <CountUp value={1000000} format={(v) => { const n = Math.round(v); return n >= 1e6 ? '+1M' : n >= 1000 ? `+${Math.round(n/1000)}K` : `+${n}`; }} className='text-3xl lg:text-5xl font-bold text-secondary' />
   <p className='text-secondary  lg:text-lg'>Seguidores en redes</p>
 </div>
 <div className='flex flex-col items-center justify-center text-center'>
-  <p className='text-3xl lg:text-5xl font-bold text-secondary'>+250</p>
+  <CountUp value={250} format={(v) => `+${Math.round(v)}`} className='text-3xl lg:text-5xl font-bold text-secondary' />
   <p className='text-secondary  lg:text-lg'>Alumnos aprendiendo</p>
 </div>
 </div>

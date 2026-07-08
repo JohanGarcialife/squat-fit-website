@@ -5,6 +5,7 @@ import Image from 'next/image';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
 import useWindowSize from '@/hooks/UseWindowSize';
+import useSlickWrapSpeed from '@/hooks/useSlickWrapSpeed';
 
 const Slider = dynamic(() => import('react-slick'), { ssr: false });
 
@@ -63,6 +64,7 @@ const Testimonials = () => {
     const sliderRef = useRef(null);
     const [isMobile, setIsMobile] = useState(false);
      const { width } = useWindowSize();
+     const { speed, onBeforeChange, next, prev } = useSlickWrapSpeed(testimonials.length, sliderRef);
 
     useEffect(() => {
         const handleResize = () => {
@@ -86,7 +88,8 @@ const Testimonials = () => {
      infinite: true,
      centerPadding: w >= 1280 ? '0px' : w >= 640 ? '48px' : '38px',
      slidesToShow: w >= 1280 ? 2 : 1,
-     speed: 250,
+     speed,
+     beforeChange: onBeforeChange,
      arrows: false,
      cssEase: 'cubic-bezier(0.25, 1, 0.5, 1)',
    };
@@ -180,14 +183,14 @@ const Testimonials = () => {
 
                         {/* Flechas circulares laterales: fondo naranja suave, icono naranja principal */}
                         <button
-                            onClick={() => sliderRef.current && sliderRef.current.slickPrev()}
+                            onClick={prev}
                             aria-label="Anterior"
                             className="cursor-pointer absolute top-1/2 left-0 sm:left-[-10px] -translate-y-1/2 z-20 bg-[#FFEDE0] text-[#FF690B] rounded-full p-1.5 hover:scale-110 active:scale-95 transition-transform duration-200"
                         >
                             <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
                         </button>
                         <button
-                            onClick={() => sliderRef.current && sliderRef.current.slickNext()}
+                            onClick={next}
                             aria-label="Siguiente"
                             className="cursor-pointer absolute top-1/2 right-0 sm:right-[-10px] -translate-y-1/2 z-20 bg-[#FFEDE0] text-[#FF690B] rounded-full p-1.5 hover:scale-110 active:scale-95 transition-transform duration-200"
                         >

@@ -87,31 +87,27 @@ html, body {
   color: rgba(255,105,11,0.5);
 }
 
-/* Auto-brillo de los botones landing: en pantallas táctiles (sin cursor) el
-   barrido de luz cruza el CTA solo. Suave y espaciado: cada pasada dura ~2,3s
-   con ~5,7s de pausa entre pasadas, y tras 4 pasadas se detiene (para que no
-   distraiga en bucle infinito). En escritorio no actúa (ahí el brillo va
-   ligado al hover) y se desactiva con "reducir movimiento" del sistema. */
+/* Auto-brillo de los botones landing: un barrido de luz cruza el CTA solo
+   cuando entra en pantalla (en móvil Y escritorio, para que se vea siempre;
+   en escritorio además está el brillo ligado al hover). Tras 4 pasadas se
+   detiene para no distraer en bucle. Se desactiva con "reducir movimiento". */
 /* Anima la propiedad `translate` (no `transform`): Tailwind v4 posiciona el
    destello con `translate: var(--tw-translate-x)...`, así que la animación
-   debe tocar esa misma propiedad para que se vea en móvil. El sesgo (skew)
-   va por `transform` de la utilidad skew-x-12 y se mantiene estático. */
+   debe tocar esa misma propiedad para que se vea. El sesgo (skew) va por
+   `transform` de la utilidad skew-x-12 y se mantiene estático. */
 @keyframes landing-sweep {
   0% { translate: -100% 0; }
-  29% { translate: 100% 0; }
+  32% { translate: 100% 0; }
   100% { translate: 100% 0; }
 }
 
-@media (hover: none) {
-  /* La animación NO se declara hasta que el botón entra en pantalla
-     (AutoShineObserver añade .shine-go). Declararla en ese momento —en vez de
-     dejarla en pausa y solo cambiar el play-state— hace que Safari iOS la
-     arranque de forma fiable (cambiar play-state por clase a veces no dispara
-     la animación en iOS). Antes de verse, el destello queda oculto a la
-     izquierda por la utilidad -translate-x-full, así que no hay salto. */
-  .landing-autoshine.shine-go {
-    animation: landing-sweep 7s ease-in-out 0.3s 4;
-  }
+/* La animación NO se declara hasta que el botón entra en pantalla
+   (AutoShineObserver añade .shine-go). Declararla en ese momento —en vez de
+   dejarla en pausa y solo cambiar el play-state— hace que Safari iOS la
+   arranque de forma fiable. Antes de verse, el destello queda oculto a la
+   izquierda por -translate-x-full, así que no hay salto. */
+.landing-autoshine.shine-go {
+  animation: landing-sweep 5s ease-in-out 0.3s 4;
 }
 
 @media (prefers-reduced-motion: reduce) {
