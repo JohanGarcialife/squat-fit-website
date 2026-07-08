@@ -17,7 +17,8 @@ export default function HeroSection() {
 
         <h2 className='font-bold text-secondary text-center md:text-start text-4xl sm:text-6xl md:text-8xl my-6 md:my-8 leading-tight'>La Cocina Squad Fit 1 y 2</h2>
         <p className='text-primary text-2xl sm:text-3xl md:text-4xl max-w-[580px] font-bold mb-4 md:mb-8 text-center md:text-start'>Recetas fit con sabor real</p>
-        <p className='text-black text-lg sm:text-xl md:text-3xl md:text-start text-center max-w-[520px] mb-8 leading-relaxed'>Un sistema de recetas fáciles, saciantes y deliciosas para mejorar tu alimentación sin vivir en restricción.</p>
+        <p className='text-black text-lg sm:text-xl md:text-3xl md:text-start text-center max-w-[520px] mb-4 leading-relaxed'>Un sistema de recetas fáciles, saciantes y deliciosas para mejorar tu alimentación sin vivir en restricción.</p>
+        <p className='text-secondary text-base sm:text-lg md:text-xl md:text-start text-center max-w-[520px] mb-8 font-medium'>📚 Una <span className='text-primary font-bold'>biblioteca viva</span>: hoy 2 volúmenes y el Volumen&nbsp;3 ya está en camino.</p>
 
         {/* Cifras: siempre en fila de 3, como en el hero de la home */}
         <div className='flex flex-row items-start justify-center md:justify-start gap-6 sm:gap-10 w-full'>
@@ -27,7 +28,7 @@ export default function HeroSection() {
           </div>
           <div className='text-center max-w-[110px] sm:max-w-[150px]'>
             <CountUp value={2} popSteps popStepMs={700} className='text-secondary font-bold text-3xl sm:text-4xl' />
-            <p className='text-secondary text-sm sm:text-base'>Volúmenes en la colección</p>
+            <p className='text-secondary text-sm sm:text-base'>Volúmenes (y sumando)</p>
           </div>
           <div className='text-center max-w-[110px] sm:max-w-[150px]'>
             <CountUp value={100} step={5} format={(v) => `${Math.round(v)}%`} className='text-secondary font-bold text-3xl sm:text-4xl' />
