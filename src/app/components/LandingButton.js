@@ -25,19 +25,19 @@ import Link from 'next/link';
 const VARIANTS = {
   orange: {
     button: 'bg-[#FF690B] text-white hover:bg-[#FFEDE0] hover:text-[#FF690B] hover:shadow-[#FF690B]/30',
-    sweep: 'bg-gradient-to-r from-transparent via-[#FFEDE0]/50 to-transparent',
+    sweep: 'bg-gradient-to-r from-transparent via-white/60 to-transparent',
   },
   'orange-light': {
     button: 'bg-[#FFEDE0] text-[#FF690B] hover:bg-[#FF690B] hover:text-white hover:shadow-[#FF690B]/30',
-    sweep: 'bg-gradient-to-r from-transparent via-[#FF690B]/35 to-transparent',
+    sweep: 'bg-gradient-to-r from-transparent via-[#FF690B]/45 to-transparent',
   },
   blue: {
     button: 'bg-[#363C98] text-white hover:bg-[#E7E6FF] hover:text-[#363C98] hover:shadow-[#363C98]/30',
-    sweep: 'bg-gradient-to-r from-transparent via-[#E7E6FF]/50 to-transparent',
+    sweep: 'bg-gradient-to-r from-transparent via-white/55 to-transparent',
   },
   'blue-light': {
     button: 'bg-[#E7E6FF] text-[#363C98] hover:bg-[#363C98] hover:text-white hover:shadow-[#363C98]/30',
-    sweep: 'bg-gradient-to-r from-transparent via-[#363C98]/30 to-transparent',
+    sweep: 'bg-gradient-to-r from-transparent via-[#363C98]/45 to-transparent',
   },
 };
 

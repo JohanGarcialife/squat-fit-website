@@ -111,7 +111,7 @@ export default function BurgerMenu() {
                 onClick={() => setShow(false)}
                 className={`font-bold text-2xl py-3 px-3 rounded-2xl active:scale-[0.98] transition-all ${
                   isActive
-                    ? 'text-primary bg-[#FF690B]/10'
+                    ? 'text-primary bg-[#FFEDE0]'
                     : 'text-secondary hover:bg-[#FF690B]/10 hover:text-primary'
                 }`}
               >

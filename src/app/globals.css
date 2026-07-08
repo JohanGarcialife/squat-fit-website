@@ -103,20 +103,22 @@ html, body {
 }
 
 @media (hover: none) {
-  /* En pausa hasta que el botón entra en pantalla (AutoShineObserver añade
-     .shine-go). Así las pasadas empiezan a contar desde que se ve el botón. */
-  .landing-autoshine {
-    animation: landing-sweep 8s ease-in-out 0.6s 4;
-    animation-play-state: paused;
-  }
+  /* La animación NO se declara hasta que el botón entra en pantalla
+     (AutoShineObserver añade .shine-go). Declararla en ese momento —en vez de
+     dejarla en pausa y solo cambiar el play-state— hace que Safari iOS la
+     arranque de forma fiable (cambiar play-state por clase a veces no dispara
+     la animación en iOS). Antes de verse, el destello queda oculto a la
+     izquierda por la utilidad -translate-x-full, así que no hay salto. */
   .landing-autoshine.shine-go {
-    animation-play-state: running;
+    animation: landing-sweep 7s ease-in-out 0.3s 4;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .landing-autoshine {
-    animation: none;
+  /* !important para ganar a la regla .landing-autoshine.shine-go (más específica) */
+  .landing-autoshine,
+  .landing-autoshine.shine-go {
+    animation: none !important;
   }
 }
 

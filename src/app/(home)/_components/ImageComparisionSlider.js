@@ -34,12 +34,13 @@ const ImageComparisonSlider = (props) => {
   }, []);
 
   return (
-    <div className="relative mx-auto lg:w-[460px] sm:w-[390px]  sm:h-[485px] w-[290px]  h-[385px] lg:h-[570px]  overflow-visible group">
-      {/* Flechas circulares laterales, gris suave (la sección tiene fondo crema) */}
-      <button onClick={onPrev} aria-label="Anterior" className="absolute top-1/2 left-1 md:-left-16 -translate-y-1/2 z-30 cursor-pointer bg-slate-100 text-slate-500 rounded-full p-1.5 hover:scale-110 active:scale-95 transition-transform duration-200">
+    <div className="relative mx-auto lg:w-[460px] sm:w-[390px]  sm:h-[485px] w-[260px]  h-[385px] lg:h-[570px]  overflow-visible group">
+      {/* Flechas circulares laterales, gris suave (la sección tiene fondo crema).
+          Van FUERA de la foto para no confundirse con el divisor arrastrable. */}
+      <button onClick={onPrev} aria-label="Anterior" className="absolute top-1/2 -left-9 md:-left-16 -translate-y-1/2 z-30 cursor-pointer bg-slate-100 text-slate-500 rounded-full p-1.5 hover:scale-110 active:scale-95 transition-transform duration-200">
         <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
       </button>
-      <button onClick={onNext} aria-label="Siguiente" className="absolute top-1/2 right-1 md:-right-16 -translate-y-1/2 z-30 cursor-pointer bg-slate-100 text-slate-500 rounded-full p-1.5 hover:scale-110 active:scale-95 transition-transform duration-200">
+      <button onClick={onNext} aria-label="Siguiente" className="absolute top-1/2 -right-9 md:-right-16 -translate-y-1/2 z-30 cursor-pointer bg-slate-100 text-slate-500 rounded-full p-1.5 hover:scale-110 active:scale-95 transition-transform duration-200">
         <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6"/></svg>
       </button>
 
@@ -53,7 +54,8 @@ const ImageComparisonSlider = (props) => {
         onTouchMove={(e) => handleMouseMove(e.touches[0])}
         onTouchEnd={handleMouseUp}
       >
-        {/* Imagen del 'Antes' */}
+        {/* Imagen del 'Antes' (base) + etiqueta arriba a la derecha: se queda en
+            el lado derecho y la tapa el 'Después' al arrastrar el divisor */}
         <Image
           src={beforeSrc}
           alt="Antes"
@@ -61,10 +63,14 @@ const ImageComparisonSlider = (props) => {
           className="object-cover pointer-events-none"
           priority
         />
+        <span className="absolute top-5 right-6 z-[5] text-white font-bold text-sm sm:text-base uppercase tracking-widest drop-shadow-[0_1px_4px_rgba(0,0,0,0.65)] select-none pointer-events-none">
+          Antes
+        </span>
 
-        {/* Imagen del 'Después' */}
+        {/* Imagen del 'Después' (capa recortada al lado izquierdo) + etiqueta:
+            desaparece si arrastras el divisor del todo hacia la izquierda */}
         <div
-          className="absolute top-0 left-0 w-full h-full pointer-events-none"
+          className="absolute top-0 left-0 w-full h-full pointer-events-none z-[6]"
           style={{ clipPath: `inset(0 ${100 - sliderPosition}% 0 0)` }}
         >
           <Image
@@ -74,6 +80,9 @@ const ImageComparisonSlider = (props) => {
             className="object-cover"
             priority
           />
+          <span className="absolute top-5 left-6 text-white font-bold text-sm sm:text-base uppercase tracking-widest drop-shadow-[0_1px_4px_rgba(0,0,0,0.65)] select-none">
+            Después
+          </span>
         </div>
 
         {/* Divisor arrastrable */}
