@@ -22,13 +22,21 @@ export default function CartPage() {
 
   useEffect(() => {
     setIsClient(true);
-    
+
     // Detect Stripe redirect success
     const params = new URLSearchParams(window.location.search);
     if (params.get('redirect_status') === 'succeeded' || params.get('success') === 'true') {
       setSuccess(true);
       setStep(3); // Render the success screen
       useCartStore.getState().clearCart();
+      return;
+    }
+
+    // El carrito se ve y se edita en el pop-up, así que al pulsar "Finalizar
+    // compra" se entra directo en los datos de envío. El guard de auth de más
+    // abajo devuelve al paso 1 si no hay sesión.
+    if (params.get('step') === '2') {
+      setStep(2);
     }
   }, []);
 

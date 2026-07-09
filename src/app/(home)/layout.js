@@ -3,6 +3,7 @@ import "../globals.css";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import FloatingCartWidget from "../components/FloatingCartWidget"; // Importar FloatingCartWidget
+import CartDrawer from "../components/CartDrawer";
 import ToasterProvider from "@/components/ToasterProvider";
 import AutoShineObserver from "../components/AutoShineObserver";
 
@@ -29,6 +30,7 @@ export default function RootLayout({ children }) {
         {children}
         <Footer />
         <FloatingCartWidget /> {/* Renderizar el FloatingCartWidget aquí */}
+        <CartDrawer />
         </div>
         {/* Chivato temporal de maquetación: añadir ?debug=1 a la URL para ver
             en pantalla qué elementos desbordan el ancho (QUITAR tras depurar) */}

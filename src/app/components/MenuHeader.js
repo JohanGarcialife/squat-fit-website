@@ -6,12 +6,14 @@ import Link from 'next/link'
 import { useRouter, usePathname } from 'next/navigation';
 import { useAuthStore } from '../../stores/auth.store';
 import { useCartStore } from '@/stores/cart.store';
+import { useUiStore } from '@/stores/ui.store';
 import ConfirmationModal from './ConfirmationModal';
 
 export default function MenuHeader() {
     const pathname = usePathname();
     const { isAuth, logout, user } = useAuthStore();
     const { cart } = useCartStore();
+    const { openCart } = useUiStore();
     const router = useRouter();
     
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -27,6 +29,8 @@ export default function MenuHeader() {
     useEffect(() => {
         setIsClient(true);
     }, []);
+
+    const totalItems = cart.reduce((acc, item) => acc + item.quantity, 0);
 
     const handleLogout = () => {
         logout();
@@ -69,7 +73,25 @@ export default function MenuHeader() {
 
             {/* Iconos de Carrito y Botones de Autenticación */}
             <div className='flex gap-5 items-center'>
-                {/* Carrito eliminado de aquí */}
+                {/* Carrito: abre el pop-up. Solo aparece si hay algo dentro. */}
+                {isClient && totalItems > 0 && (
+                    <button
+                        onClick={openCart}
+                        aria-label={`Ver carrito (${totalItems})`}
+                        className='relative text-secondary hover:text-primary active:scale-90 transition cursor-pointer'
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                            <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                            <circle cx="6" cy="19" r="2" />
+                            <circle cx="17" cy="19" r="2" />
+                            <path d="M17 17h-11v-14h-2" />
+                            <path d="M6 5l14 1l-1 7h-13" />
+                        </svg>
+                        <span className='absolute -top-1.5 -right-2 min-w-[18px] h-[18px] px-1 rounded-full bg-primary text-white text-[11px] font-bold flex items-center justify-center'>
+                            {totalItems}
+                        </span>
+                    </button>
+                )}
 
                 {isClient && isAuth ? (
                     <>
