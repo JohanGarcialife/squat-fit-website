@@ -57,12 +57,12 @@ function LoginContent() {
   };
 
   return (
-    <div className='min-h-screen text-white bg-linear-to-b from-primary to-secondary flex flex-col md:flex-row md:items-center px-5 gap-8 md:px-24 lg:px-32 py-14 md:py-24'>
-      <div className='md:w-1/2'>
-        <h2 className='text-5xl md:text-7xl font-bold text-center md:text-start leading-tight'>Inicia Sesión</h2>
-        <p className='text-white/85 text-base md:text-lg mt-3 max-w-[420px] text-center md:text-start mx-auto md:mx-0'>Accede a tu cuenta con Squad Fit</p>
-      </div>
-      <div className='md:w-1/2 w-full max-w-md mx-auto'>
+    <div className='min-h-screen text-white bg-linear-to-b from-primary to-secondary flex flex-col items-center justify-center px-5 py-14'>
+      <div className='w-full max-w-md mx-auto'>
+        <div className='text-center mb-8'>
+          <h2 className='text-5xl md:text-6xl font-bold leading-tight'>Inicia Sesión</h2>
+          <p className='text-white/85 text-base md:text-lg mt-3'>Accede a tu cuenta con Squad Fit</p>
+        </div>
         <div className='bg-white/15 backdrop-blur-sm rounded-3xl p-6 sm:p-8 shadow-xl flex flex-col gap-5'>
           <Formik
             initialValues={initialValues}
@@ -76,17 +76,17 @@ function LoginContent() {
                   <ErrorMessage name="username" component="div" className="text-white text-sm mt-1.5 font-medium" />
                 </div>
                 <div>
-                  <div className="relative flex items-center bg-white rounded-2xl">
+                  <div className="relative">
                     <Field
                       type={isPasswordVisible ? 'text' : 'password'}
                       name="password"
                       placeholder='Contraseña'
-                      className='w-full bg-transparent text-gray-800 rounded-2xl px-5 py-3.5 text-base focus:outline-none focus:ring-2 focus:ring-[#FF690B] placeholder-gray-400'
+                      className='w-full bg-white text-gray-800 rounded-2xl px-5 py-3.5 pr-12 text-base focus:outline-none focus:ring-2 focus:ring-[#FF690B] placeholder-gray-400'
                     />
                     <button
                       type="button"
                       onClick={() => setIsPasswordVisible(!isPasswordVisible)}
-                      className="pr-4 text-gray-400 hover:text-gray-600"
+                      className="absolute inset-y-0 right-0 flex items-center pr-4 text-gray-400 hover:text-gray-600"
                       aria-label={isPasswordVisible ? 'Ocultar contraseña' : 'Mostrar contraseña'}
                     >
                       {isPasswordVisible ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
