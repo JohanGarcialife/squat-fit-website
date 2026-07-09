@@ -6,15 +6,19 @@ import Link from 'next/link'
 import { useRouter, usePathname } from 'next/navigation';
 import { useAuthStore } from '../../stores/auth.store';
 import { useCartStore } from '@/stores/cart.store';
+import { useUiStore } from '@/stores/ui.store';
 import ConfirmationModal from './ConfirmationModal';
 
 export default function BurgerMenu() {
   const [show, setShow] = useState(false)
   const { isAuth, logout, user } = useAuthStore();
   const { cart } = useCartStore();
+  const { openCart } = useUiStore();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
+
+  const totalItems = cart.reduce((acc, item) => acc + item.quantity, 0);
 
   // Hydration fix for client-side state
   const [isClient, setIsClient] = useState(false);
@@ -173,18 +177,42 @@ export default function BurgerMenu() {
         />
       </Link>
 
-      {/* Botón menú: icono de líneas, sin fondo */}
-      <button
-        className={`${show ? 'invisible' : 'block'} text-[#FF690B] p-1 active:scale-90 transition-transform cursor-pointer`}
-        onClick={() => setShow(true)}
-        aria-label='Abrir menú'
-      >
-        <svg width="27" height="20" viewBox="0 0 27 20" fill="none" aria-hidden="true">
-          <line x1="2.8" y1="3" x2="24.2" y2="3" stroke="currentColor" strokeWidth="4" strokeLinecap="round" />
-          <line x1="2.8" y1="10" x2="24.2" y2="10" stroke="currentColor" strokeWidth="4" strokeLinecap="round" />
-          <line x1="2.8" y1="17" x2="24.2" y2="17" stroke="currentColor" strokeWidth="4" strokeLinecap="round" />
-        </svg>
-      </button>
+      {/* Carrito + menú. Ambos se ocultan con el drawer abierto: quedan debajo
+          del overlay y se verían atenuados en vez de desaparecer. */}
+      <div className={`${show ? 'invisible' : 'flex'} items-center gap-4`}>
+        {/* Carrito: abre el pop-up. Solo aparece si hay algo dentro, igual que en MenuHeader. */}
+        {isClient && totalItems > 0 && (
+          <button
+            onClick={openCart}
+            aria-label={`Ver carrito (${totalItems})`}
+            className='relative text-secondary hover:text-primary active:scale-90 transition cursor-pointer'
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+              <circle cx="6" cy="19" r="2" />
+              <circle cx="17" cy="19" r="2" />
+              <path d="M17 17h-11v-14h-2" />
+              <path d="M6 5l14 1l-1 7h-13" />
+            </svg>
+            <span className='absolute -top-1.5 -right-2 min-w-[18px] h-[18px] px-1 rounded-full bg-primary text-white text-[11px] font-bold flex items-center justify-center'>
+              {totalItems}
+            </span>
+          </button>
+        )}
+
+        {/* Botón menú: icono de líneas, sin fondo */}
+        <button
+          className='text-[#FF690B] p-1 active:scale-90 transition-transform cursor-pointer'
+          onClick={() => setShow(true)}
+          aria-label='Abrir menú'
+        >
+          <svg width="27" height="20" viewBox="0 0 27 20" fill="none" aria-hidden="true">
+            <line x1="2.8" y1="3" x2="24.2" y2="3" stroke="currentColor" strokeWidth="4" strokeLinecap="round" />
+            <line x1="2.8" y1="10" x2="24.2" y2="10" stroke="currentColor" strokeWidth="4" strokeLinecap="round" />
+            <line x1="2.8" y1="17" x2="24.2" y2="17" stroke="currentColor" strokeWidth="4" strokeLinecap="round" />
+          </svg>
+        </button>
+      </div>
 
       {isClient && createPortal(overlay, document.body)}
     </div>
