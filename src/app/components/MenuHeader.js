@@ -73,11 +73,12 @@ export default function MenuHeader() {
 
             {/* Iconos de Carrito y Botones de Autenticación */}
             <div className='flex gap-5 items-center'>
-                {/* Carrito: abre el pop-up. Solo aparece si hay algo dentro. */}
-                {isClient && totalItems > 0 && (
+                {/* Carrito: abre el pop-up. Siempre visible, aunque esté vacío; el
+                    badge solo sale si hay unidades. */}
+                {isClient && (
                     <button
                         onClick={openCart}
-                        aria-label={`Ver carrito (${totalItems})`}
+                        aria-label={totalItems > 0 ? `Ver carrito (${totalItems})` : 'Ver carrito (vacío)'}
                         className='relative text-secondary hover:text-primary active:scale-90 transition cursor-pointer'
                     >
                         <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -87,9 +88,11 @@ export default function MenuHeader() {
                             <path d="M17 17h-11v-14h-2" />
                             <path d="M6 5l14 1l-1 7h-13" />
                         </svg>
-                        <span className='absolute -top-1.5 -right-2 min-w-[18px] h-[18px] px-1 rounded-full bg-primary text-white text-[11px] font-bold flex items-center justify-center'>
-                            {totalItems}
-                        </span>
+                        {totalItems > 0 && (
+                            <span className='absolute -top-1.5 -right-2 min-w-[18px] h-[18px] px-1 rounded-full bg-primary text-white text-[11px] font-bold flex items-center justify-center'>
+                                {totalItems}
+                            </span>
+                        )}
                     </button>
                 )}
 
