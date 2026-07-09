@@ -25,6 +25,7 @@ export default function CTO() {
       name: `Curso - Plan ${plan.title}`,
       price: plan.price,
       image: '/CursosHero.png',
+      description: 'Acceso al curso online', // antes salía "Volumen físico" en el carrito
       endpoint: '/api/v1/course/create-payment-intent',
       payload: { course_id: plan.id } // Backend expects: { course_id: "uuid" }. Assumes plan.id is mapped to a UUID.
     })

@@ -188,7 +188,7 @@ export default function Shop() {
       type: product.type,
       name: `Libro Físico - ${product.name}`,
       price: product.price,
-      image: product.image,
+      image: product.image || '/LibrosFisicos.png',
     })
     toast.success('Añadido al carrito')
   }

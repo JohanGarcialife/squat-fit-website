@@ -123,7 +123,7 @@ export default function Summary(props) {
                     {/* Product Image */}
                     <div className="relative w-32 h-32 md:w-36 md:h-36 shrink-0 bg-gray-50 rounded-xl overflow-hidden self-center sm:self-start">
                     <Image
-                        src={item.image}
+                        src={item.image || '/LibrosFisicos.png'}
                         alt={item.name}
                         layout="fill"
                         className="object-contain p-2"
@@ -176,29 +176,27 @@ export default function Summary(props) {
                                         <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-white pointer-events-none" />
                                     </div>
                                 ) : (
-                                    /* Physical Item: Quantity Selector */
-                                    <div className="relative group">
-                                         <div className="bg-indigo-900 text-white pl-4 pr-10 py-2 rounded-lg font-medium text-sm flex items-center min-w-[80px] cursor-pointer">
-                                            {item.quantity}
-                                        </div>
-                                         <div className="absolute top-full left-0 w-full bg-white border border-indigo-100 rounded-lg shadow-lg hidden group-hover:block z-10 overflow-hidden">
-                                            {[1, 2, 3, 4, 5].map(num => (
-                                                <button 
-                                                    key={num}
-                                                    onClick={() => updateQuantity(item.id, num)}
-                                                    className="w-full text-left px-4 py-2 hover:bg-indigo-50 text-indigo-900 text-sm"
-                                                >
-                                                    {num}
-                                                </button>
-                                            ))}
-                                            <button 
-                                                onClick={() => removeFromCart(item.id)}
-                                                className="w-full text-left px-4 py-2 hover:bg-red-50 text-red-500 text-sm border-t border-gray-100"
-                                            >
-                                                Eliminar
-                                            </button>
-                                         </div>
-                                        <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-white pointer-events-none" />
+                                    /* Físico: botones +/- (máx. 9). El botón "x" de arriba elimina. */
+                                    <div className="flex items-center gap-2">
+                                        <button
+                                            type="button"
+                                            onClick={() => updateQuantity(item.id, Math.max(1, item.quantity - 1))}
+                                            disabled={item.quantity <= 1}
+                                            className="w-9 h-9 rounded-lg bg-indigo-900 text-white text-2xl leading-none font-bold flex items-center justify-center hover:bg-indigo-800 transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+                                            aria-label="Quitar una unidad"
+                                        >
+                                            −
+                                        </button>
+                                        <span className="min-w-[2ch] text-center text-indigo-900 font-bold text-lg">{item.quantity}</span>
+                                        <button
+                                            type="button"
+                                            onClick={() => updateQuantity(item.id, Math.min(9, item.quantity + 1))}
+                                            disabled={item.quantity >= 9}
+                                            className="w-9 h-9 rounded-lg bg-indigo-900 text-white text-2xl leading-none font-bold flex items-center justify-center hover:bg-indigo-800 transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+                                            aria-label="Añadir una unidad"
+                                        >
+                                            +
+                                        </button>
                                     </div>
                                 )}
                             </div>
