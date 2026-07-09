@@ -1,5 +1,5 @@
 'use client'
-import React from 'react'
+import React, { useState } from 'react'
 import Image from 'next/image'
 import { Formik, Form, Field, ErrorMessage } from 'formik'
 import * as Yup from 'yup'
@@ -10,8 +10,9 @@ const validationSchema = Yup.object({
   apellidos: Yup.string().required('Los apellidos son obligatorios'),
   edad: Yup.number()
     .typeError('Debe ser un número válido')
-    .positive('Debe ser una edad válida')
     .integer('Debe ser un número entero')
+    .min(16, 'La edad mínima es 16 años')
+    .max(99, 'La edad máxima es 99 años')
     .required('La edad es obligatoria'),
   pais: Yup.string().required('El país de residencia es obligatorio'),
   ocupacion: Yup.string().required('La ocupación es obligatoria'),
@@ -20,8 +21,9 @@ const validationSchema = Yup.object({
   expectativa: Yup.string().required('La expectativa salarial es obligatoria'),
 })
 
-// Componente reutilizable para Input
-const FormInput = ({ label, name, type = 'text', as = 'input', ...props }) => (
+// Componente reutilizable para Input. `example` = placeholder de ejemplo
+// (item 16: los placeholders son ejemplos, no el propio nombre del campo).
+const FormInput = ({ label, name, type = 'text', as = 'input', example, ...props }) => (
   <div className="flex flex-col">
     <label htmlFor={name} className="text-[#FF6B00] text-sm mb-1 font-medium">
       {label}*
@@ -30,7 +32,7 @@ const FormInput = ({ label, name, type = 'text', as = 'input', ...props }) => (
       as={as}
       type={type}
       name={name}
-      placeholder={label}
+      placeholder={example || label}
       className={`border rounded-lg p-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#FF6B00] border-orange-200 ${
         as === 'textarea' ? 'h-32 resize-none' : ''
       }`}
@@ -45,6 +47,9 @@ const FormInput = ({ label, name, type = 'text', as = 'input', ...props }) => (
 )
 
 export default function Empleo() {
+  // Modal "rellena todos los campos" al intentar enviar incompleto (item 17)
+  const [showIncomplete, setShowIncomplete] = useState(false)
+
   const initialValues = {
     nombre: '',
     apellidos: '',
@@ -155,12 +160,12 @@ export default function Empleo() {
           validationSchema={validationSchema}
           onSubmit={handleSubmit}
         >
-          {({ isSubmitting }) => (
+          {({ isSubmitting, isValid, dirty, validateForm, setTouched, values }) => (
             <Form className="space-y-6">
-              <FormInput label="Nombre" name="nombre" />
-              <FormInput label="Apellidos" name="apellidos" />
-              <FormInput label="Edad" name="edad" type="number" min="0" />
-              <FormInput label="País de residencia" name="pais" />
+              <FormInput label="Nombre" name="nombre" example="Ej: María" />
+              <FormInput label="Apellidos" name="apellidos" example="Ej: García López" />
+              <FormInput label="Edad" name="edad" type="number" min="16" max="99" example="Ej: 28 (entre 16 y 99)" />
+              <FormInput label="País de residencia" name="pais" example="Ej: España" />
               
               <div className="flex flex-col">
                 <label htmlFor="ocupacion" className="text-[#FF6B00] text-sm mb-1 font-medium">
@@ -189,21 +194,37 @@ export default function Empleo() {
                 label="Breve presentación"
                 name="presentacion"
                 as="textarea"
+                example="Cuéntanos brevemente quién eres y a qué te dedicas…"
               />
               <FormInput
                 label="¿Por qué te interesa colaborar con Squad Fit?"
                 name="interes"
                 as="textarea"
+                example="Ej: Me identifico con el proyecto y quiero aportar en…"
               />
               <FormInput
                 label="Expectativa salarial"
                 name="expectativa"
+                example="Ej: 1.200 €/mes o por comisión"
               />
 
+              {/* Botón gris hasta que el formulario esté completo y válido; si
+                  se intenta enviar incompleto, se marca todo y sale el modal. */}
               <button
                 type="submit"
-                disabled={isSubmitting}
-                className="w-full bg-[#3B3B98] text-white font-bold py-4 rounded-lg hover:bg-[#2E2E80] transition-colors mt-8 shadow-lg cursor-pointer disabled:opacity-50"
+                onClick={async (e) => {
+                  const errors = await validateForm()
+                  if (Object.keys(errors).length > 0) {
+                    e.preventDefault()
+                    setTouched(Object.keys(values).reduce((acc, k) => ({ ...acc, [k]: true }), {}))
+                    setShowIncomplete(true)
+                  }
+                }}
+                className={`w-full font-bold py-4 rounded-lg transition-colors mt-8 shadow-lg cursor-pointer ${
+                  isValid && dirty
+                    ? 'bg-[#3B3B98] text-white hover:bg-[#2E2E80]'
+                    : 'bg-gray-300 text-gray-500'
+                }`}
               >
                 {isSubmitting ? 'Enviando...' : 'Enviar solicitud'}
               </button>
@@ -211,6 +232,28 @@ export default function Empleo() {
           )}
         </Formik>
       </div>
+
+      {showIncomplete && (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 px-5"
+          onClick={() => setShowIncomplete(false)}
+        >
+          <div
+            className="bg-white rounded-2xl p-7 max-w-sm w-full text-center shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <p className="text-gray-800 text-lg font-semibold mb-5">
+              Rellena todos los campos para poder enviar tu solicitud
+            </p>
+            <button
+              onClick={() => setShowIncomplete(false)}
+              className="bg-[#FF690B] text-white font-bold px-8 py-2.5 rounded-full hover:bg-[#e55e09] transition-colors cursor-pointer"
+            >
+              Entendido
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

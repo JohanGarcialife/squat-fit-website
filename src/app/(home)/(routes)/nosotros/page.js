@@ -1,5 +1,5 @@
 'use client'
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Achievements from '../../_components/Achievements';
 import Education from '../../_components/Education';
@@ -9,6 +9,11 @@ import Empleo from '../../_components/Empleo';
 // Componente principal de la página "Nosotros" con Tabs
 export default function NosotrosPage() {
   const [activeTab, setActiveTab] = useState('la-empresa');
+
+  // Al entrar a Nosotros, empezar arriba (antes podía quedarse abajo)
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   // Definición de las tabs según el diseño
   const tabs = [
@@ -22,8 +27,9 @@ export default function NosotrosPage() {
     <> {/* Fragmento para permitir múltiples elementos hermanos */}
         <main className="w-full px-4 sm:px-6 lg:px-16 py-10 font-sans">
         
-        {/* Navegación de TABS */}
-        <nav className="flex items-end w-full overflow-x-auto no-scrollbar mb-10">
+        {/* Navegación de TABS: reparten el ancho a partes iguales para que
+            quepan sin scroll horizontal (antes desbordaban en móvil) */}
+        <nav className="flex items-end w-full mb-10">
           {tabs.map((tab) => {
             const isActive = activeTab === tab.id;
             return (
@@ -31,10 +37,10 @@ export default function NosotrosPage() {
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
                 className={`
-                  whitespace-nowrap px-6 py-3 text-base sm:text-lg font-medium transition-all duration-200 rounded-t-2xl
-                  ${isActive 
-                    ? 'text-orange-500 bg-white border-t-2 border-l-2 border-r-2 border-orange-500 -mb-[2px] z-10 font-bold' 
-                    : 'text-[#3B3B98] hover:text-blue-800 mb-0 border-b-2 w-full border-primary'
+                  flex-1 min-w-0 text-center whitespace-nowrap px-1.5 sm:px-6 py-2.5 sm:py-3 text-xs sm:text-lg font-medium transition-all duration-200 rounded-t-2xl
+                  ${isActive
+                    ? 'text-orange-500 bg-white border-t-2 border-l-2 border-r-2 border-orange-500 -mb-[2px] z-10 font-bold'
+                    : 'text-[#3B3B98] hover:text-blue-800 mb-0 border-b-2 border-primary'
                   }
                 `}
               >
@@ -87,7 +93,7 @@ const ContenidoEmpresa = () => {
     <div className="animate-fadeIn">
       {/* Sección del Título Principal */}
       <header className="py-12 text-center lg:text-left">
-        <h1 className="text-8xl sm:text-5xl lg:text-8xl font-bold text-[#3B3B98]">
+        <h1 className="text-4xl sm:text-5xl lg:text-8xl font-bold text-[#3B3B98]">
           ¡Hola y bienvenido a Squad Fit!
         </h1>
       </header>
