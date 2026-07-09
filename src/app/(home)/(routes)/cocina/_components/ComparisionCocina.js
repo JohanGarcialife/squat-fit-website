@@ -62,6 +62,8 @@ export default function ComparisionCocina(props) {
                   afterTitle={item.afterTitle}
                   widthClass="w-full sm:w-[390px] lg:w-[460px]"
                   shadowClass="shadow-[0_8px_24px_-8px_rgba(0,0,0,0.35)]"
+                  sizes="(min-width: 1024px) 460px, (min-width: 640px) 390px, 86vw"
+                  priority={index === 0}
                 />
               </div>
             ))}

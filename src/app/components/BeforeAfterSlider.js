@@ -15,6 +15,12 @@ import Image from 'next/image';
 // ANTES siempre a la IZQUIERDA (el 'después' es la base a la derecha y el
 // 'antes' se recorta sobre él por la izquierda). El arrastre sobrevive aunque
 // el dedo/cursor salga de la foto (escucha en toda la ventana mientras dura).
+//
+// Rendimiento: 'sizes' debe describir el ancho REAL de la foto en pantalla. Sin
+// él, con 'fill', Next asume 100vw y sirve variantes de hasta 3840px para una
+// foto que nunca pasa de ~460px. Y 'priority' solo debe ir en el primer slide:
+// slick monta todos los slides (y clona con centerMode+infinite), así que
+// ponerlo en todos hacía que el navegador precargara la galería entera.
 export default function BeforeAfterSlider({
   beforeSrc,
   afterSrc,
@@ -26,6 +32,8 @@ export default function BeforeAfterSlider({
   widthClass = 'w-full',
   shadow = true,
   shadowClass = 'shadow-2xl',
+  sizes = '(min-width: 1024px) 60vw, 90vw',
+  priority = false,
 }) {
   const [isDragging, setIsDragging] = useState(false);
   const [sliderPosition, setSliderPosition] = useState(50);
@@ -68,7 +76,14 @@ export default function BeforeAfterSlider({
       className={`relative mx-auto ${widthClass} h-[385px] sm:h-[485px] lg:h-[570px] rounded-[32px] overflow-hidden ${shadow ? shadowClass : ''} select-none touch-none`}
     >
       {/* Base: 'Después' (lado derecho) */}
-      <Image src={afterSrc} alt="Después" fill className="object-cover pointer-events-none" priority />
+      <Image
+        src={afterSrc}
+        alt="Después"
+        fill
+        sizes={sizes}
+        className="object-cover pointer-events-none"
+        priority={priority}
+      />
 
       {/* Etiquetas del 'Después': recortadas al lado derecho del divisor, así
           desaparecen si arrastras del todo a la derecha */}
@@ -95,9 +110,10 @@ export default function BeforeAfterSlider({
           src={beforeSrc}
           alt="Antes"
           fill
+          sizes={sizes}
           className="object-cover"
           style={beforeGrayscale ? { filter: `grayscale(${beforeGrayscale})` } : undefined}
-          priority
+          priority={priority}
         />
         <span className="absolute top-5 left-6 text-white font-bold text-sm sm:text-base uppercase tracking-widest drop-shadow-[0_1px_4px_rgba(0,0,0,0.65)] select-none">
           Antes

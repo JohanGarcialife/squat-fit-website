@@ -6,6 +6,9 @@ const nextConfig = {
   // Sin la variable se comporta igual que siempre (.next).
   distDir: process.env.NEXT_DIST || '.next',
   images: {
+    // AVIF antes que WebP: sobre fotos comprime bastante mejor. Next negocia por
+    // Accept, así que un navegador sin AVIF sigue recibiendo WebP.
+    formats: ['image/avif', 'image/webp'],
     remotePatterns: [
       {
         protocol: 'https',

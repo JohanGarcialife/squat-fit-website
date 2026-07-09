@@ -55,6 +55,8 @@ export default function Comparision(props) {
                 afterSrc={item.afterSrc}
                 isActive={index === current}
                 shadowClass="shadow-[0_8px_24px_-8px_rgba(0,0,0,0.35)]"
+                sizes="(min-width: 1024px) 55vw, (min-width: 640px) 365px, 70vw"
+                priority={index === 0}
               />
             </div>
           ))}
