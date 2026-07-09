@@ -3,6 +3,86 @@
 import React from 'react';
 import { ClipboardList, Pencil, Calendar, Phone, CheckCircle2, Dumbbell, ArrowRight, Check } from 'lucide-react';
 import LandingButton from '../../../../components/LandingButton';
+import useInView from '@/hooks/useInView';
+
+// Cada tarjeta tiene su propio detector: anima al entrar ELLA en pantalla.
+// Ratio bajo (0.6): la tarjeta anima cuando está más centrada, DESPUÉS de que
+// el conector de arriba (ratio alto) ya haya revelado su check.
+function StepCard({ step }) {
+  const [ref, visible] = useInView(0.6);
+  return (
+    <div
+      ref={ref}
+      className={`relative w-full lg:w-[30%] bg-white border border-slate-100 rounded-[32px] p-8 sm:p-10 shadow-[0_15px_45px_rgba(0,0,0,0.03)] flex flex-col items-center text-center transition-all duration-500 ease-out hover:-translate-y-1.5 hover:shadow-[0_20px_50px_rgba(54,60,152,0.04)] z-10 ${
+        visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+      }`}
+    >
+      <span className="text-[#FF690B] font-extrabold text-2xl sm:text-3xl mb-6">
+        {step.number}
+      </span>
+
+      {/* Icono: aparece con un pequeño rebote tras la tarjeta */}
+      <div
+        style={{ transitionDelay: visible ? '200ms' : '0ms' }}
+        className={`mb-6 flex justify-center transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${
+          visible ? 'scale-100 opacity-100' : 'scale-0 opacity-0'
+        }`}
+      >
+        {step.icon}
+      </div>
+
+      <p className="text-slate-800 text-lg sm:text-xl font-medium leading-relaxed">
+        <span className="font-extrabold text-slate-900">{step.title}</span> {step.subtitle}
+      </p>
+    </div>
+  );
+}
+
+// Conectores: la línea se revela desde el centro y el check aparece con rebote.
+// Ratio alto (0.9) para que el check salga ANTES que la tarjeta siguiente.
+// Van en componentes separados (uno por breakpoint) porque el que está oculto
+// mide 0 y su detector nunca dispara, igual que en el HowItWorks de la home.
+function DesktopConnector() {
+  const [ref, visible] = useInView(0.9);
+  return (
+    <div ref={ref} className="hidden lg:flex items-center justify-center flex-1 h-8 relative mx-4 min-w-[50px]">
+      <div
+        className={`w-full h-[4px] bg-[#FF690B] origin-center transition-transform duration-500 ease-out ${
+          visible ? 'scale-x-100' : 'scale-x-0'
+        }`}
+      />
+      <div
+        style={{ transitionDelay: visible ? '120ms' : '0ms' }}
+        className={`w-8 h-8 rounded-full bg-[#FF690B] flex items-center justify-center shadow-md border-2 border-white absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 transition-transform duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${
+          visible ? 'scale-100' : 'scale-0'
+        }`}
+      >
+        <Check className="text-white w-4 h-4" strokeWidth={3} />
+      </div>
+    </div>
+  );
+}
+
+function MobileConnector() {
+  const [ref, visible] = useInView(0.9);
+  return (
+    <div ref={ref} className="flex lg:hidden flex-col items-center justify-center h-16 w-8 relative my-2">
+      <div
+        className={`h-full w-[4px] bg-[#FF690B] origin-center transition-transform duration-500 ease-out ${
+          visible ? 'scale-y-100' : 'scale-y-0'
+        }`}
+      />
+      <div
+        style={{ transitionDelay: visible ? '120ms' : '0ms' }}
+        className={`w-8 h-8 rounded-full bg-[#FF690B] flex items-center justify-center shadow-md border-2 border-white absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 transition-transform duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${
+          visible ? 'scale-100' : 'scale-0'
+        }`}
+      >
+        <Check className="text-white w-4 h-4" strokeWidth={3} />
+      </div>
+    </div>
+  );
+}
 
 export default function StepsSection() {
   const handleScrollToPlans = () => {
@@ -82,37 +162,13 @@ export default function StepsSection() {
           
           {steps.map((step, idx) => (
             <React.Fragment key={idx}>
-              {/* Tarjeta de Paso */}
-              <div className="relative w-full lg:w-[30%] bg-white border border-slate-100 rounded-[32px] p-8 sm:p-10 shadow-[0_15px_45px_rgba(0,0,0,0.03)] flex flex-col items-center text-center transition-all duration-300 hover:-translate-y-1.5 hover:shadow-[0_20px_50px_rgba(54,60,152,0.04)] z-10">
-                <span className="text-[#FF690B] font-extrabold text-2xl sm:text-3xl mb-6">
-                  {step.number}
-                </span>
-                
-                <div className="mb-6 flex justify-center">
-                  {step.icon}
-                </div>
-
-                <p className="text-slate-800 text-lg sm:text-xl font-medium leading-relaxed">
-                  <span className="font-extrabold text-slate-900">{step.title}</span> {step.subtitle}
-                </p>
-              </div>
+              <StepCard step={step} />
 
               {/* Conector (solo entre pasos) */}
               {idx < steps.length - 1 && (
                 <>
-                  {/* Desktop connector line */}
-                  <div className="hidden lg:flex items-center justify-center flex-1 h-[4px] bg-[#FF690B] relative mx-4 min-w-[50px]">
-                    <div className="w-8 h-8 rounded-full bg-[#FF690B] flex items-center justify-center shadow-md border-2 border-white">
-                      <Check className="text-white w-4 h-4" strokeWidth={3} />
-                    </div>
-                  </div>
-
-                  {/* Mobile connector line */}
-                  <div className="flex lg:hidden flex-col items-center justify-center h-16 w-[4px] bg-[#FF690B] relative my-2">
-                    <div className="w-8 h-8 rounded-full bg-[#FF690B] flex items-center justify-center shadow-md border-2 border-white absolute top-1/2 -translate-y-1/2">
-                      <Check className="text-white w-4 h-4" strokeWidth={3} />
-                    </div>
-                  </div>
+                  <DesktopConnector />
+                  <MobileConnector />
                 </>
               )}
             </React.Fragment>
