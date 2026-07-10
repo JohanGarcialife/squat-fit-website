@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import LandingButton from '../../../../components/LandingButton';
 
 export default function HeroPlanes() {
   const handleScrollToPlans = () => {
@@ -19,11 +20,11 @@ export default function HeroPlanes() {
 
       {/* --- Indicador: NUESTROS PLANES --- */}
       <div className="flex items-center justify-center gap-4 mb-8 animate-fade-in opacity-0 [animation-fill-mode:forwards] [animation-delay:100ms] duration-700">
-        <span className="w-12 sm:w-20 h-[2px] bg-primary rounded-full"></span>
-        <span className="text-primary font-bold tracking-[0.2em] text-xl sm:text-3xl uppercase">
+        <span className="w-8 sm:w-20 h-[2px] bg-primary rounded-full"></span>
+        <span className="text-primary font-bold tracking-[0.2em] text-base sm:text-3xl uppercase whitespace-nowrap">
           NUESTROS PLANES
         </span>
-        <span className="w-12 sm:w-20 h-[2px] bg-primary rounded-full"></span>
+        <span className="w-8 sm:w-20 h-[2px] bg-primary rounded-full"></span>
       </div>
 
       {/* --- Título Principal --- */}
@@ -36,16 +37,12 @@ export default function HeroPlanes() {
         Un programa de nutrición y entreno para lograr tu objetivo y mantener resultados.
       </p>
 
-      {/* --- Botón con Degradado --- */}
+      {/* --- Botón CTA (naranja de sistema; el degradado quedaba fuera de la
+           familia de botones de la web) --- */}
       <div className="flex flex-col items-center justify-center animate-fade-in opacity-0 [animation-fill-mode:forwards] [animation-delay:700ms] duration-700">
-        <button
-          onClick={handleScrollToPlans}
-          className="relative group overflow-hidden bg-gradient-to-r from-[#FF690B] to-[#363C98] text-white px-10 sm:px-14 py-4 sm:py-5 rounded-[27px] font-bold text-xl sm:text-2xl shadow-xl hover:shadow-[#FF690B]/20 hover:scale-[1.03] active:scale-[0.98] transition-all duration-300 cursor-pointer"
-        >
-          {/* Inner hover flash effect */}
-          <span className="landing-autoshine absolute inset-0 w-full h-full bg-white/10 -translate-x-full skew-x-12 group-hover:translate-x-full transition-transform duration-1000 ease-out" aria-hidden="true" />
+        <LandingButton variant="orange" size="xl" autoShine onClick={handleScrollToPlans} className="text-xl sm:text-2xl">
           Reserva tu plaza
-        </button>
+        </LandingButton>
 
         {/* --- Subtexto --- */}
         <span className="mt-4 text-slate-400 text-sm sm:text-base font-medium tracking-wide">

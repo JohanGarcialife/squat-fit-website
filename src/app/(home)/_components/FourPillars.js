@@ -64,7 +64,7 @@ function PillarItem({ src, alt, title, text, index }) {
       {/* 3º: cuerpo */}
       <p
         style={{ transitionDelay: `${visible ? delay + 400 : 0}ms` }}
-        className={`text-[#FF690B] text-lg font-medium transition-all duration-500 ease-out ${
+        className={`text-[#FF690B] text-lg font-medium max-w-[260px] mx-auto transition-all duration-500 ease-out ${
           visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-3'
         }`}
       >
@@ -76,7 +76,7 @@ function PillarItem({ src, alt, title, text, index }) {
 
 export default function FourPillars() {
   return (
-    <div className='relative w-screen lg:flex lg:flex-row flex-col justify-center px-4 lg:px-10 py-20 bg-[#FFF9F2]'>
+    <div className='relative w-screen lg:flex lg:flex-row flex-col justify-center px-8 lg:px-10 py-20 bg-[#FFF9F2]'>
       <div className='w-full max-w-7xl mx-auto'>
         <h2 className='text-[#FF690B] text-4xl md:text-5xl font-bold text-center mb-16'>
           Los 4 pilares del programa

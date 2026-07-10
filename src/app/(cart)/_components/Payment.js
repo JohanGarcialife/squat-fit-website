@@ -125,7 +125,7 @@ export default function Payment(props) {
   const appearance = useMemo(() => ({
     theme: 'stripe',
     variables: {
-      colorPrimary: '#FF7F50', // Naranja SquatFit
+      colorPrimary: '#FF7F50', // Naranja SquadFit
       colorBackground: '#ffffff',
       colorText: '#30313d',
       colorDanger: '#df1b41',

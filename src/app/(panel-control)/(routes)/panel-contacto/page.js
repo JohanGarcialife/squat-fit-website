@@ -311,7 +311,7 @@ ${values.mensaje}
             <div className="relative w-72 h-72 md:w-80 md:h-80 rounded-full overflow-hidden border-8 border-orange-100 shadow-xl">
               <Image
                 src="/empleo.png"
-                alt="María Squat Fit"
+                alt="María Squad Fit"
                 fill
                 priority
                 className="object-cover"

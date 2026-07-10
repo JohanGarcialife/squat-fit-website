@@ -127,7 +127,7 @@ export default function CocinaPage() {
               Aún no tienes acceso a la biblioteca
             </h2>
             <p className="text-gray-500 text-lg max-w-xl mx-auto leading-relaxed">
-              Suscríbete a la <strong>Biblioteca Digital de Squat Fit</strong> para acceder a todas las recetas y contenido exclusivo de cocina fit.
+              Suscríbete a la <strong>Biblioteca Digital de Squad Fit</strong> para acceder a todas las recetas y contenido exclusivo de cocina fit.
             </p>
           </div>
           

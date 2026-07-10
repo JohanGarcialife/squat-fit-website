@@ -20,42 +20,48 @@ export default function page() {
        // Avena
        beforeSrc: "/recetasImages/1 antes.jpg",
        afterSrc: "/recetasImages/1 despues.jpg",
-       text: "Recetas que encajan en tu vida real.",
+       beforeTitle: "De comer aburrido",
+       afterTitle: "A comer con gusto",
        beforeGrayscale: 0.62,
     },
     {
        // Sandwich
        beforeSrc: "/recetasImages/2 antes.jpg",
        afterSrc: "/recetasImages/2 despues.jpg",
-       text: "De improvisar a tener un sistema.",
+       beforeTitle: "De un apaño",
+       afterTitle: "A un plato de verdad",
        beforeGrayscale: 0.5,
     },
     {
        // French toast
        beforeSrc: "/recetasImages/3 antes.jpg",
        afterSrc: "/recetasImages/3 despues.jpg",
-       text: "Más saciedad + menos kcal = más disfrute.",
+       beforeTitle: "De difícil de mantener",
+       afterTitle: "A fácil de repetir",
        beforeGrayscale: 0.5,
     },
     {
        // Ensalada
        beforeSrc: "/recetasImages/4 antes.jpg",
        afterSrc: "/recetasImages/4 despues.jpg",
-       text: "Comer bien no debería ser aburrido.",
+       beforeTitle: "De comidas penosas",
+       afterTitle: "A un plato que apetece",
        beforeGrayscale: 0.38,
     },
     {
        // Burger
        beforeSrc: "/recetasImages/5 antes.jpg",
        afterSrc: "/recetasImages/5 despues.jpg",
-       text: "Tu dieta flexible ejecutada a la perfección.",
+       beforeTitle: "De pequeña y grasienta",
+       afterTitle: "A saciante y deliciosa",
        beforeGrayscale: 0.5,
     },
     {
        // Pancakes
        beforeSrc: "/recetasImages/6 antes.jpg",
        afterSrc: "/recetasImages/6 despues.jpg",
-       text: "Menos fricción en cocina = más constancia.",
+       beforeTitle: "De quemar el desayuno",
+       afterTitle: "A clavar la receta",
        beforeGrayscale: 0.45,
     }
   ]

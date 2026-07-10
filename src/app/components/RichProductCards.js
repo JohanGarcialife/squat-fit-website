@@ -11,7 +11,7 @@ export default function RichProductCards({ onVerifyAccess, verifyLoading }) {
       title: (
         <>
           La Cocina <br />
-          Squat Fit
+          Squad Fit
         </>
       ),
       textColor: 'text-[#FF690B]',

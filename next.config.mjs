@@ -1,6 +1,14 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Permite builds independientes por instancia (dos URLs en paralelo):
+  //   NEXT_DIST=.next-a npm run build && NEXT_DIST=.next-a PORT=3000 npm run start
+  //   NEXT_DIST=.next-b npm run build && NEXT_DIST=.next-b PORT=4000 npm run start
+  // Sin la variable se comporta igual que siempre (.next).
+  distDir: process.env.NEXT_DIST || '.next',
   images: {
+    // AVIF antes que WebP: sobre fotos comprime bastante mejor. Next negocia por
+    // Accept, así que un navegador sin AVIF sigue recibiendo WebP.
+    formats: ['image/avif', 'image/webp'],
     remotePatterns: [
       {
         protocol: 'https',

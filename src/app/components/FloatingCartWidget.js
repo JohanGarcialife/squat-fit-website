@@ -2,10 +2,11 @@
 
 import React, { useEffect, useState } from 'react';
 import { useCartStore } from '@/stores/cart.store';
-import Link from 'next/link';
+import { useUiStore } from '@/stores/ui.store';
 
 export default function FloatingCartWidget() {
   const { cart } = useCartStore();
+  const { openCart } = useUiStore();
   const [isClient, setIsClient] = useState(false); // Para manejar hidratación
 
   useEffect(() => {
@@ -21,8 +22,8 @@ export default function FloatingCartWidget() {
   }
 
   return (
-    <Link 
-      href="/cart" 
+    <button
+      onClick={openCart}
       className="fixed bottom-8 right-8 z-50 bg-indigo-800 text-white rounded-md p-2 shadow-lg flex items-center justify-center gap-2 hover:bg-indigo-900 transition-colors cursor-pointer"
       aria-label="Ver carrito"
     >
@@ -36,6 +37,6 @@ export default function FloatingCartWidget() {
       </svg>
       {totalItems > 0 && <span className="text-sm font-bold">{totalItems}</span>}
       {subtotal > 0 && <span className="text-sm font-bold">€{subtotal.toFixed(2)}</span>}
-    </Link>
+    </button>
   );
 }

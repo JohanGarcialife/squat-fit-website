@@ -23,7 +23,7 @@ export const useCartStore = create(
         if (productInCart) {
           const updatedCart = currentCart.map((item) =>
             item.id === product.id
-              ? { ...item, quantity: item.quantity + 1 }
+              ? { ...item, quantity: Math.min(9, item.quantity + 1) }
               : item
           )
           set({ cart: updatedCart })
@@ -68,12 +68,12 @@ export const useCartStore = create(
       updateQuantity: (productId, quantity) => {
         const updatedCart = get().cart.map((item) =>
           item.id === productId
-            ? { ...item, quantity: Math.max(1, quantity) }
+            ? { ...item, quantity: Math.min(9, Math.max(1, quantity)) }
             : item
         )
         set({ cart: updatedCart })
       },
-      
+
       // Vacía completamente el carrito
       clearCart: () => {
         set({ cart: [] })

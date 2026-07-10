@@ -1,8 +1,10 @@
 'use client'
 import React, { useRef, useState } from 'react'
 import dynamic from 'next/dynamic'
-import ImageComparisonSlider from './ImageComparisionSlider'
+import BeforeAfterSlider from '../../../../components/BeforeAfterSlider'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
+import useResizeRemountKey from '@/hooks/useResizeRemountKey'
+import useWindowSize from '@/hooks/UseWindowSize'
 import 'slick-carousel/slick/slick.css'
 import 'slick-carousel/slick/slick-theme.css'
 
@@ -17,6 +19,12 @@ export default function ComparisionCocina(props) {
   const { comparacion = [] } = props
   const sliderRef = useRef(null)
   const [current, setCurrent] = useState(0)
+  // Re-montar el carrusel al terminar de redimensionar (slick no recalcula bien en vivo)
+  const resizeKey = useResizeRemountKey()
+  // Configuración según ancho real (móvil primero si aún es desconocido):
+  // el motor "responsive" interno de slick no aplicaba bien en móvil.
+  const { width } = useWindowSize()
+  const w = width || 0
 
   if (comparacion.length === 0) {
     return null
@@ -26,35 +34,36 @@ export default function ComparisionCocina(props) {
     className: 'center comparision-carousel',
     centerMode: true,
     infinite: true,
-    centerPadding: '22%',
+    // Móvil: la central grande (86%) y las laterales solo asomándose
+    centerPadding: w >= 1024 ? '22%' : w >= 640 ? '14%' : '7%',
     slidesToShow: 1,
     speed: 500,
     arrows: false,
     swipe: false,
     draggable: false,
+    initialSlide: current,
     beforeChange: (_, next) => setCurrent(next),
-    responsive: [
-      // Móvil: la central más grande y las laterales solo asomándose
-      { breakpoint: 640, settings: { centerPadding: '7%', swipe: false, draggable: false } },
-      { breakpoint: 1024, settings: { centerPadding: '14%', swipe: false, draggable: false } },
-    ],
   }
 
   return (
     <section className="py-16 px-4 bg-white">
       <div className="max-w-7xl mx-auto">
         <div className="relative max-w-6xl mx-auto">
-          <Slider {...settings} ref={sliderRef}>
+          <Slider key={resizeKey} {...settings} ref={sliderRef}>
             {comparacion.map((item, index) => (
               <div key={index} className="px-1 py-4 outline-none">
-                <ImageComparisonSlider
+                <BeforeAfterSlider
                   beforeSrc={item.beforeSrc}
                   afterSrc={item.afterSrc}
-                  text={item.text}
                   isActive={index === current}
-                  beforeGrayscale={item.beforeGrayscale}
+                  beforeGrayscale={item.beforeGrayscale ?? 0.5}
+                  showTitles
                   beforeTitle={item.beforeTitle}
                   afterTitle={item.afterTitle}
+                  widthClass="w-full sm:w-[390px] lg:w-[460px]"
+                  shadowClass="shadow-[0_8px_24px_-8px_rgba(0,0,0,0.35)]"
+                  sizes="(min-width: 1024px) 460px, (min-width: 640px) 390px, 86vw"
+                  priority={index === 0}
                 />
               </div>
             ))}
@@ -67,17 +76,17 @@ export default function ComparisionCocina(props) {
           {/* Flechas */}
           <button
             onClick={() => sliderRef.current && sliderRef.current.slickPrev()}
-            className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/80 rounded-full p-1.5 shadow-md text-gray-500 hover:text-gray-700 hover:scale-110 transition-all duration-200 z-20 cursor-pointer"
+            className="absolute left-2 top-1/2 -translate-y-1/2 bg-[#FFEDE0] rounded-full p-1.5 text-[#FF690B] hover:scale-110 transition-transform duration-200 z-20 cursor-pointer"
             aria-label="Previous comparison"
           >
-            <ChevronLeft className="w-8 h-8" />
+            <ChevronLeft className="w-6 h-6" />
           </button>
           <button
             onClick={() => sliderRef.current && sliderRef.current.slickNext()}
-            className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/80 rounded-full p-1.5 shadow-md text-gray-500 hover:text-gray-700 hover:scale-110 transition-all duration-200 z-20 cursor-pointer"
+            className="absolute right-2 top-1/2 -translate-y-1/2 bg-[#FFEDE0] rounded-full p-1.5 text-[#FF690B] hover:scale-110 transition-transform duration-200 z-20 cursor-pointer"
             aria-label="Next comparison"
           >
-            <ChevronRight className="w-8 h-8" />
+            <ChevronRight className="w-6 h-6" />
           </button>
         </div>
       </div>

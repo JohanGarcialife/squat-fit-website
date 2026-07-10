@@ -3,7 +3,9 @@ import "../globals.css";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import FloatingCartWidget from "../components/FloatingCartWidget"; // Importar FloatingCartWidget
+import CartDrawer from "../components/CartDrawer";
 import ToasterProvider from "@/components/ToasterProvider";
+import AutoShineObserver from "../components/AutoShineObserver";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -11,8 +13,8 @@ const inter = Inter({
 });
 
 export const metadata = {
-  title: "Squat Fit",
-  description: "Squat Fit Website",
+  title: "Squad Fit",
+  description: "Squad Fit Website",
 };
 
 export default function RootLayout({ children }) {
@@ -23,10 +25,12 @@ export default function RootLayout({ children }) {
       >
         <div className="min-h-screen bg-background ">
         <ToasterProvider />
+        <AutoShineObserver />
         <Header />
         {children}
         <Footer />
         <FloatingCartWidget /> {/* Renderizar el FloatingCartWidget aquí */}
+        <CartDrawer />
         </div>
       </body>
     </html>

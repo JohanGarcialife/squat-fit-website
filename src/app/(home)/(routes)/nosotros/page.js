@@ -1,5 +1,5 @@
 'use client'
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Achievements from '../../_components/Achievements';
 import Education from '../../_components/Education';
@@ -9,6 +9,11 @@ import Empleo from '../../_components/Empleo';
 // Componente principal de la página "Nosotros" con Tabs
 export default function NosotrosPage() {
   const [activeTab, setActiveTab] = useState('la-empresa');
+
+  // Al entrar a Nosotros, empezar arriba (antes podía quedarse abajo)
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   // Definición de las tabs según el diseño
   const tabs = [
@@ -22,8 +27,9 @@ export default function NosotrosPage() {
     <> {/* Fragmento para permitir múltiples elementos hermanos */}
         <main className="w-full px-4 sm:px-6 lg:px-16 py-10 font-sans">
         
-        {/* Navegación de TABS */}
-        <nav className="flex items-end w-full overflow-x-auto no-scrollbar mb-10">
+        {/* Navegación de TABS: reparten el ancho a partes iguales para que
+            quepan sin scroll horizontal (antes desbordaban en móvil) */}
+        <nav className="flex items-end w-full mb-10">
           {tabs.map((tab) => {
             const isActive = activeTab === tab.id;
             return (
@@ -31,10 +37,10 @@ export default function NosotrosPage() {
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
                 className={`
-                  whitespace-nowrap px-6 py-3 text-base sm:text-lg font-medium transition-all duration-200 rounded-t-2xl
-                  ${isActive 
-                    ? 'text-orange-500 bg-white border-t-2 border-l-2 border-r-2 border-orange-500 -mb-[2px] z-10 font-bold' 
-                    : 'text-[#3B3B98] hover:text-blue-800 mb-0 border-b-2 w-full border-primary'
+                  flex-1 min-w-0 text-center whitespace-nowrap px-1.5 sm:px-6 py-2.5 sm:py-3 text-xs sm:text-lg font-medium transition-all duration-200 rounded-t-2xl
+                  ${isActive
+                    ? 'text-orange-500 bg-white border-t-2 border-l-2 border-r-2 border-orange-500 -mb-[2px] z-10 font-bold'
+                    : 'text-[#3B3B98] hover:text-blue-800 mb-0 border-b-2 border-primary'
                   }
                 `}
               >
@@ -68,7 +74,7 @@ export default function NosotrosPage() {
         <div className="w-full mt-10">
           <Image 
             src="/equipo.png"
-            alt="El equipo de Squat Fit"
+            alt="El equipo de Squad Fit"
             width={1920}
             height={600}
             className="w-full object-cover"
@@ -87,8 +93,8 @@ const ContenidoEmpresa = () => {
     <div className="animate-fadeIn">
       {/* Sección del Título Principal */}
       <header className="py-12 text-center lg:text-left">
-        <h1 className="text-8xl sm:text-5xl lg:text-8xl font-bold text-[#3B3B98]">
-          ¡Hola y bienvenido a Squat Fit!
+        <h1 className="text-4xl sm:text-5xl lg:text-8xl font-bold text-[#3B3B98]">
+          ¡Hola y bienvenido a Squad Fit!
         </h1>
       </header>
 
@@ -101,13 +107,13 @@ const ContenidoEmpresa = () => {
               Somos un equipo apasionado por el fitness y la salud, y estamos aquí para ayudarte a alcanzar tus metas de una manera divertida y sostenible.
             </p>
             <p className="text-3xl">
-              En Squat Fit, creemos que el entrenamiento y una buena dieta son claves no sólo para un cuerpo en forma sino también para una mente sana, y una vida equilibrada y feliz.
+              En Squad Fit, creemos que el entrenamiento y una buena dieta son claves no sólo para un cuerpo en forma sino también para una mente sana, y una vida equilibrada y feliz.
             </p>
           </div>
           <div className="flex justify-center">
             <Image 
               src="/nosotros.png" // Corregido a IMG-Maria-Hamlet-.png
-              alt="Equipo de Squat Fit"
+              alt="Equipo de Squad Fit"
               width={500}
               height={500}
               
@@ -147,7 +153,7 @@ const ContenidoEmpresa = () => {
           Si estás listo para transformar tu vida y divertirte mientras lo haces, ¡estás en la comunidad perfecta! Únete y descubre con nosotros cómo alcanzar tus objetivos de fitness y salud.
         </p>
         <p className="mb-8 text-3xl  mx-auto">
-          Gracias por confiar en nosotros y por permitirnos ser parte de tu viaje hacia una vida más saludable y activa. Juntos, haremos que cada Squat cuente. ¡Nos vemos en Squat Fit!
+          Gracias por confiar en nosotros y por permitirnos ser parte de tu viaje hacia una vida más saludable y activa. Juntos, haremos que cada Squat cuente. ¡Nos vemos en Squad Fit!
         </p>
       </section>
     </div>
@@ -189,7 +195,7 @@ const ContenidoSobreMaria = () => {
       <div className="animate-fadeIn p-4 text-gray-800 leading-relaxed max-w-2xl">
         <h1 className="text-8xl font-bold text-secondary mb-6">Sobre María</h1>
         <p className="mb-4 text-2xl">
-          Soy María Casas, conocida también como María Squat Fit, tengo 31 años y vivo en Alicante, ES.
+          Soy María Casas, conocida también como María Squad Fit, tengo 31 años y vivo en Alicante, ES.
         </p>
         <p className="mb-4 text-2xl">
           Mientras estudiaba farmacia, empecé a interesarme en el fitness: en el metabolismo, el ambiente hormonal, así como en el papel de la nutrición y el entrenamiento en el cuerpo humano.
@@ -212,7 +218,7 @@ const ContenidoSobreMaria = () => {
 
       <Image 
             src="/Maria.png" 
-            alt="María de Squat Fit"
+            alt="María de Squad Fit"
             width={550}
             height={528}
             className="w-full object-cover"

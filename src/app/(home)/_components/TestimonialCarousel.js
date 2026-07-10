@@ -5,6 +5,7 @@ import Image from 'next/image';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
 import useWindowSize from '@/hooks/UseWindowSize';
+import useSlickWrapSpeed from '@/hooks/useSlickWrapSpeed';
 
 const Slider = dynamic(() => import('react-slick'), { ssr: false });
 
@@ -63,6 +64,7 @@ const TestimonialCarousel = () => {
     const sliderRef = useRef(null);
     const [isMobile, setIsMobile] = useState(false);
      const { width } = useWindowSize();
+     const { speed, onBeforeChange, next, prev } = useSlickWrapSpeed(testimonials.length, sliderRef);
 
     useEffect(() => {
         const handleResize = () => {
@@ -77,43 +79,20 @@ const TestimonialCarousel = () => {
         };
     }, []);
 
+   // Configuración por ancho real (móvil primero): el motor "responsive" de
+   // slick no aplicaba en móvil y salían 3 tarjetas con avatares aplastados.
+   const w = width || 0;
    const settings = {
-  className: 'center',
-  centerMode: true,
-  infinite: true,
-  centerPadding: '0px',
-  slidesToShow: 3,         // valor por defecto para pantallas grandes
-  speed: 500,
-  arrows: false,
-
-  responsive: [
-    /* Breakpoint más pequeño primero */
-    {
-      breakpoint: 640,
-      settings: {
-        slidesToShow: 1,
-        centerMode: true,
-        centerPadding: '40px',
-      },
-    },
-    {
-      breakpoint: 768,
-      settings: {
-        slidesToShow: 1,
-        centerMode: true,
-        centerPadding: '60px',
-      },
-    },
-    {
-      breakpoint: 1024,
-      settings: {
-        slidesToShow: 1,
-        centerMode: true,
-        centerPadding: '100px',
-      },
-    }
-  ],
-};
+     className: 'center',
+     centerMode: true,
+     infinite: true,
+     centerPadding: w >= 1024 ? '0px' : w >= 640 ? '60px' : '30px',
+     slidesToShow: w >= 1024 ? 3 : 1,
+     speed,
+     beforeChange: onBeforeChange,
+     arrows: false,
+     cssEase: 'cubic-bezier(0.25, 1, 0.5, 1)',
+   };
 
     return ( 
         <div className="w-screen py-16 bg-white">
@@ -121,54 +100,20 @@ const TestimonialCarousel = () => {
                 <div>
                    <h2 className="text-secondary font-bold text-center text-5xl md:text-6xl mb-12">Lo que dicen mis clientes</h2>
                     <div className="relative">
-                        {width < 480 ? <Slider {...settings} ref={sliderRef}>
-                            {testimonials.map((testimonial, index) => (
-                                <div
-                                    key={index}
-                                    className="cursor-pointer px-3 py-5 "
-                                    onClick={() => sliderRef.current && sliderRef.current.slickGoTo(index)}
-                                >
-                                    <div className="bg-[#3932C01A] h-full w-full lg:w-[420px] p-8 rounded-3xl shadow-lg border border-gray-100 hover:shadow-xl transition-shadow duration-300  flex flex-col items-center text-center">
-                                        <div className="relative  mb-6">
-                                            <Image
-                                                src={testimonial.image}
-                                                alt={testimonial.name}
-                                                width={80}
-                                                height={80}
-                                                className="rounded-full h-24 w-24 mx-auto border-4 border-violet-100"
-                                            />
-                                        </div>
-                                        <h3 className="text-xl font-bold mb-3 text-gray-800">
-                                            {testimonial.name}
-                                        </h3>
-                                        <div className="text-yellow-400 mb-4 text-lg">
-                                            {'★'.repeat(testimonial.rating)}
-                                        </div>
-                                        <p className="text-gray-600 leading-relaxed flex-grow">
-                                            {testimonial.text}
-                                        </p>
-                                    </div>
-                                </div>
-                            ))}
-                        </Slider>
-
-                        :
-
                         <Slider {...settings} ref={sliderRef}>
                             {testimonials.map((testimonial, index) => (
                                 <div
                                     key={index}
-                                    className="cursor-pointer px-3 py-5 "
+                                    className="cursor-pointer px-3 py-5 outline-none"
                                     onClick={() => sliderRef.current && sliderRef.current.slickGoTo(index)}
                                 >
-                                    <div className="bg-[#3932C01A] h-full w-full lg:w-[420px] p-8 rounded-3xl shadow-lg border border-gray-100 hover:shadow-xl transition-shadow duration-300  flex flex-col items-center text-center">
-                                        <div className="relative  mb-6">
+                                    <div className="bg-[#3932C01A] h-full w-full max-w-[420px] mx-auto p-8 rounded-3xl shadow-lg border border-[#3932C0]/15 hover:shadow-xl transition-shadow duration-300 flex flex-col items-center text-center min-h-[320px]">
+                                        <div className="relative w-24 h-24 mb-6 flex-shrink-0 rounded-full overflow-hidden border-4 border-violet-100">
                                             <Image
                                                 src={testimonial.image}
                                                 alt={testimonial.name}
-                                                width={80}
-                                                height={80}
-                                                className="rounded-full h-24 w-24 mx-auto border-4 border-violet-100"
+                                                fill
+                                                className="object-cover"
                                             />
                                         </div>
                                         <h3 className="text-xl font-bold mb-3 text-gray-800">
@@ -184,68 +129,22 @@ const TestimonialCarousel = () => {
                                 </div>
                             ))}
                         </Slider>
-                        
-                        }
 
-                        {isMobile ? (
-                            <div className="flex  items-center justify-between mt-4">
-                                <div
-                                    className="cursor-pointer"
-                                    onClick={() => sliderRef.current.slickPrev()}
-                                >
-                                    <svg
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        width="40"
-                                        height="40"
-                                        viewBox="0 0 24 24"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        strokeWidth="2"
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        className="icon icon-tabler icons-tabler-outline icon-tabler-chevron-compact-left"
-                                    >
-                                        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                                        <path d="M13 20l-3 -8l3 -8" />
-                                    </svg>
-                                </div>
-                                <div
-                                    className="cursor-pointer"
-                                    onClick={() => sliderRef.current.slickNext()}
-                                >
-                                    <svg
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        width="40"
-                                        height="40"
-                                        viewBox="0 0 24 24"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        strokeWidth="2"
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        className="icon icon-tabler icons-tabler-outline icon-tabler-chevron-compact-right"
-                                    >
-                                        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                                        <path d="M11 4l3 8l-3 8" />
-                                    </svg>
-                                </div>
-                            </div>
-                        ) : (
-                            <>
-                                <div
-                                    className="cursor-pointer absolute top-1/2 left-[-50px] -translate-y-1/2 z-10"
-                                    onClick={() => sliderRef.current.slickPrev()}
-                                >
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="icon icon-tabler icons-tabler-outline icon-tabler-chevron-compact-left"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M13 20l-3 -8l3 -8" /></svg>
-                                </div>
-                                <div
-                                    className="cursor-pointer absolute top-1/2 right-[-50px] -translate-y-1/2 z-10"
-                                    onClick={() => sliderRef.current.slickNext()}
-                                >
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="icon icon-tabler icons-tabler-outline icon-tabler-chevron-compact-right"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M11 4l3 8l-3 8" /></svg>
-                                </div>
-                            </>
-                        )}
+                        {/* Flechas circulares laterales: fondo naranja suave, icono naranja principal */}
+                        <button
+                            onClick={prev}
+                            aria-label="Anterior"
+                            className="cursor-pointer absolute top-1/2 left-0 lg:left-[-10px] -translate-y-1/2 z-20 bg-[#FFEDE0] text-[#FF690B] rounded-full p-1.5 hover:scale-110 active:scale-95 transition-transform duration-200"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+                        </button>
+                        <button
+                            onClick={next}
+                            aria-label="Siguiente"
+                            className="cursor-pointer absolute top-1/2 right-0 lg:right-[-10px] -translate-y-1/2 z-20 bg-[#FFEDE0] text-[#FF690B] rounded-full p-1.5 hover:scale-110 active:scale-95 transition-transform duration-200"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+                        </button>
                     </div>
                 </div>
             </div>

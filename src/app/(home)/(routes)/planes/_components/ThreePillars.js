@@ -1,40 +1,9 @@
 'use client';
 
-import React, { useEffect, useRef, useState } from 'react';
+import React from 'react';
 import { Users, Brain, Heart } from 'lucide-react';
 import LandingButton from '../../../../components/LandingButton';
-
-// Detecta cuándo un elemento entra en pantalla (una sola vez).
-// En móvil las tarjetas van apiladas, así que cada una se anima al llegar a ella.
-function useInView(threshold = 0.25) {
-  const ref = useRef(null);
-  const [visible, setVisible] = useState(false);
-
-  useEffect(() => {
-    const element = ref.current;
-    if (!element) return;
-
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      setVisible(true);
-      return;
-    }
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setVisible(true);
-          observer.disconnect();
-        }
-      },
-      { threshold }
-    );
-
-    observer.observe(element);
-    return () => observer.disconnect();
-  }, [threshold]);
-
-  return [ref, visible];
-}
+import useInView from '@/hooks/useInView';
 
 const PILLARS = [
   {

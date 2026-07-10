@@ -25,6 +25,7 @@ export default function CTO() {
       name: `Curso - Plan ${plan.title}`,
       price: plan.price,
       image: '/CursosHero.png',
+      description: 'Acceso al curso online', // antes salía "Volumen físico" en el carrito
       endpoint: '/api/v1/course/create-payment-intent',
       payload: { course_id: plan.id } // Backend expects: { course_id: "uuid" }. Assumes plan.id is mapped to a UUID.
     })
@@ -66,7 +67,7 @@ export default function CTO() {
                         }}
                         className="relative group overflow-hidden w-full bg-[#363C98] text-white hover:bg-[#E7E6FF] hover:text-[#363C98] hover:scale-[1.02] active:scale-[0.98] py-3 rounded-[20px] font-bold text-lg transition-all duration-300 mt-auto shadow-md cursor-pointer"
                     >
-                        <span className="landing-autoshine absolute inset-0 w-full h-full bg-[#363C98]/15 -translate-x-full skew-x-12 group-hover:translate-x-full transition-transform duration-700 ease-out" aria-hidden="true" />
+                        <span className="landing-autoshine absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-[#E7E6FF]/50 to-transparent -translate-x-full skew-x-12 group-hover:translate-x-full transition-transform duration-700 ease-out" aria-hidden="true" />
                         Empezar
                     </button>
                 </div>

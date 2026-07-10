@@ -19,22 +19,25 @@ import Link from 'next/link';
 //   <LandingButton variant="orange" size="lg" onClick={...}>Reserva tu plaza</LandingButton>
 //   <LandingButton variant="blue" href="/cursos">Ver cursos</LandingButton>
 
+// El barrido (sweep) es un gradiente que cruza el botón: destello claro sobre
+// botón oscuro, destello de color sobre botón claro. El gradiente (bordes
+// transparentes, centro con color) se lee como un brillo, no como una banda.
 const VARIANTS = {
   orange: {
     button: 'bg-[#FF690B] text-white hover:bg-[#FFEDE0] hover:text-[#FF690B] hover:shadow-[#FF690B]/30',
-    sweep: 'bg-[#FF690B]/15',
+    sweep: 'bg-gradient-to-r from-transparent via-white/60 to-transparent',
   },
   'orange-light': {
     button: 'bg-[#FFEDE0] text-[#FF690B] hover:bg-[#FF690B] hover:text-white hover:shadow-[#FF690B]/30',
-    sweep: 'bg-white/25',
+    sweep: 'bg-gradient-to-r from-transparent via-[#FF690B]/45 to-transparent',
   },
   blue: {
     button: 'bg-[#363C98] text-white hover:bg-[#E7E6FF] hover:text-[#363C98] hover:shadow-[#363C98]/30',
-    sweep: 'bg-[#363C98]/15',
+    sweep: 'bg-gradient-to-r from-transparent via-white/55 to-transparent',
   },
   'blue-light': {
     button: 'bg-[#E7E6FF] text-[#363C98] hover:bg-[#363C98] hover:text-white hover:shadow-[#363C98]/30',
-    sweep: 'bg-white/25',
+    sweep: 'bg-gradient-to-r from-transparent via-[#363C98]/45 to-transparent',
   },
 };
 

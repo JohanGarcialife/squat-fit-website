@@ -2,6 +2,8 @@
 import React from "react";
 import Image from "next/image";
 import useWindowSize from "@/hooks/UseWindowSize";
+import FeatureIcon from "@/app/components/FeatureIcon";
+import { Salad, Lightbulb, MousePointerClick, Soup } from "lucide-react";
 
 export default function CourseContent() {
    const { width } = useWindowSize();
@@ -23,13 +25,7 @@ export default function CourseContent() {
           </h2>
           <div className="flex flex-col justify-between">
             <div className="flex items-start gap-3">
-              <Image
-                src="/icons/movie_edit.png"
-                alt="Icon"
-                width={52}
-                height={52}
-                priority
-              />
+              <FeatureIcon icon={Salad} />
               <div>
                 <p className="text-3xl text-black font-bold">Rico y saludable</p>
                 <p className=" text-2xl text-black max-w-[273px] ">
@@ -38,13 +34,7 @@ export default function CourseContent() {
               </div>
             </div>
             <div className="flex items-start gap-3">
-              <Image
-                src="/icons/chat_info.png"
-                alt="Icon"
-                width={52}
-                height={52}
-                priority
-              />
+              <FeatureIcon icon={Lightbulb} />
               <div>
                 <p className="text-3xl text-black font-bold">Didáctico</p>
                 <p className=" text-2xl text-black max-w-[273px] ">
@@ -54,31 +44,19 @@ export default function CourseContent() {
           </div>
           <div className="flex flex-col justify-between">
             <div className="flex items-start gap-3">
-              <Image
-                src="/icons/edit_document.png"
-                alt="Icon"
-                width={52}
-                height={52}
-                priority
-              />
+              <FeatureIcon icon={MousePointerClick} />
               <div>
                 <p className="text-3xl text-black font-bold">Navegación fácil</p>
                 <p className=" text-2xl text-black max-w-[273px] ">              
 
-Con descuentos en suplementos e ingredientes top.
+Ves las recetas y compras los productos desde la propia app, fácil y rápido.
                 </p>
               </div>
             </div>
 
 
             <div className="flex items-start gap-3">
-              <Image
-                src="/icons/contract_edit.png"
-                alt="Icon"
-                width={52}
-                height={52}
-                priority
-              />
+              <FeatureIcon icon={Soup} />
               <div>
                 <p className="text-3xl text-black font-bold">Recetas saciantes</p>
                 <p className=" text-2xl text-black max-w-[273px] mb-6">
@@ -101,70 +79,46 @@ Con descuentos en suplementos e ingredientes top.
 
         <div className="absolute inset-0 z-10 grid md:grid-cols-3 grid-cols-1  p-10 md:p-20 w-full gap-16 md:gap-14">
           <h2 className="text-5xl pt-16 md:pt-0 text-center md:text-start md:text-6xl font-bold text-black md:pr-24">
-            Qué incluye el curso
+            Qué incluye el libro
           </h2>
           <div className="flex flex-col justify-between">
             <div className="flex items-start gap-3">
-              <Image
-                src="/icons/movie_edit.png"
-                alt="Icon"
-                width={52}
-                height={52}
-                priority
-              />
+              <FeatureIcon icon={Salad} />
               <div>
-                <p className="text-3xl text-black font-bold">Clases en vídeo</p>
+                <p className="text-3xl text-black font-bold">Rico y saludable</p>
                 <p className=" text-2xl text-black max-w-[273px] ">
-                  24+ horas de clases prácticas y 3 horas de clases teóricas.
+                  +70 recetas ricas con sustituciones y adaptaciones.
                 </p>
               </div>
             </div>
             <div className="flex items-start gap-3">
-              <Image
-                src="/icons/chat_info.png"
-                alt="Icon"
-                width={52}
-                height={52}
-                priority
-              />
+              <FeatureIcon icon={Lightbulb} />
               <div>
-                <p className="text-3xl text-black font-bold">Soporte</p>
+                <p className="text-3xl text-black font-bold">Didáctico</p>
                 <p className=" text-2xl text-black max-w-[273px] ">
-                 Atención 24/7 para las preguntas que tengas acerca del curso.
+                 Consejos de alimentos a elegir a la hora de hacer la compra.
                 </p>
               </div>
             </div>
           </div>
           <div className="flex flex-col justify-between">
             <div className="flex items-start gap-3">
-              <Image
-                src="/icons/edit_document.png"
-                alt="Icon"
-                width={52}
-                height={52}
-                priority
-              />
+              <FeatureIcon icon={MousePointerClick} />
               <div>
-                <p className="text-3xl text-black font-bold">Apuntes</p>
-                <p className=" text-2xl text-black max-w-[273px] ">              
-Material de apoyo con fines de repasar el contenido
+                <p className="text-3xl text-black font-bold">Navegación fácil</p>
+                <p className=" text-2xl text-black max-w-[273px] ">
+Ves las recetas y compras los productos desde la propia app, fácil y rápido.
                 </p>
               </div>
             </div>
 
 
             <div className="flex items-start gap-3">
-              <Image
-                src="/icons/contract_edit.png"
-                alt="Icon"
-                width={52}
-                height={52}
-                priority
-              />
+              <FeatureIcon icon={Soup} />
               <div>
-                <p className="text-3xl text-black font-bold">Ponte a prueba</p>
+                <p className="text-3xl text-black font-bold">Recetas saciantes</p>
                 <p className=" text-2xl text-black max-w-[273px] mb-6">
-                  Al final harás un examen para obtener tu diploma
+                  Raciones grandes que te dejarán lleno y satisfecho.
                 </p>
               </div>
             </div>

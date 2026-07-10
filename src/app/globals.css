@@ -37,16 +37,22 @@
   --color-blue-950: #363C98; /* Corporate Blue */
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* La web es de tema claro siempre: sin esto, a los usuarios con el móvil en
+   modo oscuro les salía el fondo negro en zonas sin color declarado. */
+html {
+  background: #ffffff;
+  color-scheme: light;
 }
 
 body {
   background: var(--background);
-  color: var(--foreground);
+  color: #171717;
+}
+
+/* Cinturón de seguridad contra el desplazamiento lateral en móvil:
+   ningún elemento desbordado puede "ladear" la página. */
+html, body {
+  overflow-x: clip;
 }
 
 .slick-prev:before, .slick-next:before {
@@ -81,25 +87,59 @@ body {
   color: rgba(255,105,11,0.5);
 }
 
-/* Auto-brillo de los botones landing: en pantallas táctiles (sin cursor)
-   el barrido de luz cruza el CTA solo, cada 4s. En escritorio no actúa
-   (ahí el brillo va ligado al hover) y se desactiva si el usuario tiene
-   "reducir movimiento" en su sistema. */
+/* Auto-brillo de los botones landing: un barrido de luz cruza el CTA solo
+   cuando entra en pantalla (en móvil Y escritorio, para que se vea siempre;
+   en escritorio además está el brillo ligado al hover). Tras 4 pasadas se
+   detiene para no distraer en bucle. Se desactiva con "reducir movimiento". */
+/* Anima la propiedad `translate` (no `transform`): Tailwind v4 posiciona el
+   destello con `translate: var(--tw-translate-x)...`, así que la animación
+   debe tocar esa misma propiedad para que se vea. El sesgo (skew) va por
+   `transform` de la utilidad skew-x-12 y se mantiene estático. */
 @keyframes landing-sweep {
-  0% { transform: translateX(-100%) skewX(12deg); }
-  30% { transform: translateX(100%) skewX(12deg); }
-  100% { transform: translateX(100%) skewX(12deg); }
+  0% { translate: -100% 0; }
+  28% { translate: 100% 0; }
+  100% { translate: 100% 0; }
 }
 
-@media (hover: none) {
-  .landing-autoshine {
-    animation: landing-sweep 4s ease-out 2s infinite;
-  }
+/* La animación NO se declara hasta que el botón entra en pantalla
+   (AutoShineObserver añade .shine-go). Declararla en ese momento —en vez de
+   dejarla en pausa y solo cambiar el play-state— hace que Safari iOS la
+   arranque de forma fiable. Antes de verse, el destello queda oculto a la
+   izquierda por -translate-x-full, así que no hay salto. */
+.landing-autoshine.shine-go {
+  /* 7s por ciclo: el barrido cruza en el 28% (~2s) y luego ~5s de espera antes
+     de la siguiente pasada. Nº de pasadas: 5 por defecto, pero AutoShineObserver
+     lo sube (2 más por cada pantalla que el botón esté más abajo) para que a los
+     CTAs de más abajo les dé tiempo a brillar cuando llegas a ellos. */
+  animation: landing-sweep 7s ease-in-out 0.4s 5;
+}
+
+/* "Pop"/acercamiento de cada número al incrementarse (contador por pasos, p. ej.
+   los Volúmenes de la cocina que solo saltan 0→1→2): entra en grande y difuso
+   y se asienta, dando sensación de conteo pausado. */
+@keyframes count-pop {
+  0% { transform: scale(1.6); opacity: 0.35; }
+  70% { transform: scale(0.97); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* Badges antes/después del comparador de recetas: el borde que da al divisor
+   se difumina (máscara degradada) para que el texto parezca continuar bajo el
+   divisor en vez de cortarse en seco. -webkit- para que funcione en iOS. */
+.badge-fade-r {
+  -webkit-mask-image: linear-gradient(to right, #000 78%, transparent);
+  mask-image: linear-gradient(to right, #000 78%, transparent);
+}
+.badge-fade-l {
+  -webkit-mask-image: linear-gradient(to left, #000 78%, transparent);
+  mask-image: linear-gradient(to left, #000 78%, transparent);
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .landing-autoshine {
-    animation: none;
+  /* !important para ganar a la regla .landing-autoshine.shine-go (más específica) */
+  .landing-autoshine,
+  .landing-autoshine.shine-go {
+    animation: none !important;
   }
 }
 
@@ -107,7 +147,8 @@ body {
    a la central que en los sliders por defecto (menos margen y menos encogido) */
 .comparision-carousel .slick-slide > div {
   margin: 0 2px;
-  transform: scale(0.9);
+  transform: scale(0.78);
+  transition: transform 0.4s ease;
 }
 .comparision-carousel .slick-slide.slick-current > div {
   transform: scale(1);

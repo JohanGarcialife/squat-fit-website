@@ -4,7 +4,7 @@ import { useCartStore } from '@/stores/cart.store'
 import { useAuthStore } from '@/stores/auth.store'
 import { toast } from 'react-hot-toast'
 
-// Sección de precios de Cocina Squat Fit: 4 tarjetas
+// Sección de precios de Cocina Squad Fit: 4 tarjetas
 // (Impreso Vol 1 · Pack impreso · Digital de por vida · Bundle "Lo quiero todo").
 // Diseño portado de la página Divi de WordPress; la compra va por el
 // carrito/Stripe del proyecto, no por enlaces de WooCommerce.
@@ -97,7 +97,7 @@ function PricingCard({
         style={{ background: ctaColor }}
       >
         {!disabled && (
-          <span className="landing-autoshine absolute inset-0 w-full h-full bg-white/20 -translate-x-full skew-x-12 group-hover:translate-x-full transition-transform duration-700 ease-out" aria-hidden="true" />
+          <span className="landing-autoshine absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/40 to-transparent -translate-x-full skew-x-12 group-hover:translate-x-full transition-transform duration-700 ease-out" aria-hidden="true" />
         )}
         {disabled ? disabledLabel : ctaLabel}
       </button>
@@ -188,7 +188,7 @@ export default function Shop() {
       type: product.type,
       name: `Libro Físico - ${product.name}`,
       price: product.price,
-      image: product.image,
+      image: product.image || '/LibrosFisicos.png',
     })
     toast.success('Añadido al carrito')
   }
@@ -226,7 +226,7 @@ export default function Shop() {
         {/* Cabecera */}
         <div className="text-center mb-8">
           <h2 className="text-3xl md:text-4xl font-bold text-[#1f1f1f] mb-2">
-            Elige cómo quieres disfrutar de Cocina Squat Fit
+            Elige cómo quieres disfrutar de Cocina Squad Fit
           </h2>
           <p className="text-gray-500 text-base">
             Libros físicos, biblioteca digital de por vida, o todo junto.

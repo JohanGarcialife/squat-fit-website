@@ -6,6 +6,7 @@ import Image from 'next/image';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
 import useWindowSize from '@/hooks/UseWindowSize';
+import useSlickWrapSpeed from '@/hooks/useSlickWrapSpeed';
 
 const Slider = dynamic(() => import('react-slick'), { ssr: false });
 
@@ -46,6 +47,7 @@ export default function PlanesTestimonials() {
   const sliderRef = useRef(null);
   const [isMobile, setIsMobile] = useState(false);
   const { width } = useWindowSize();
+  const { speed, onBeforeChange, next, prev } = useSlickWrapSpeed(testimonials.length, sliderRef);
 
   useEffect(() => {
     const handleResize = () => {
@@ -60,48 +62,20 @@ export default function PlanesTestimonials() {
     };
   }, []);
 
+  // Configuración según ancho real (móvil primero si aún es desconocido):
+  // el motor "responsive" interno de slick no aplicaba bien en móvil y salían
+  // 3 tarjetas apretadas. speed bajo para que registre clics rápidos seguidos.
+  const w = width || 0;
   const settings = {
     className: 'center',
     centerMode: true,
     infinite: true,
-    centerPadding: '0px',
-    slidesToShow: isMobile ? 1 : 3,
-    speed: 500,
+    centerPadding: w >= 1280 ? '0px' : w >= 640 ? '48px' : '36px',
+    slidesToShow: w >= 1280 ? 3 : 1,
+    speed,
+    beforeChange: onBeforeChange,
     arrows: false,
-    responsive: [
-      {
-        breakpoint: 640,
-        settings: {
-          slidesToShow: 1,
-          centerMode: true,
-          centerPadding: '20px',
-        },
-      },
-      {
-        breakpoint: 768,
-        settings: {
-          slidesToShow: 1,
-          centerMode: true,
-          centerPadding: '40px',
-        },
-      },
-      {
-        breakpoint: 1024,
-        settings: {
-          slidesToShow: 1,
-          centerMode: true,
-          centerPadding: '60px',
-        },
-      },
-      {
-        breakpoint: 1280,
-        settings: {
-          slidesToShow: 3,
-          centerMode: true,
-          centerPadding: '0px',
-        },
-      },
-    ],
+    cssEase: 'cubic-bezier(0.25, 1, 0.5, 1)',
   };
 
   const renderStars = (rating) => {
@@ -128,11 +102,11 @@ export default function PlanesTestimonials() {
         {/* --- Cabecera --- */}
         <div className="w-full flex flex-col items-center mb-16 text-center">
           <div className="flex items-center gap-4 mb-4">
-            <span className="w-12 sm:w-20 h-[2px] bg-primary rounded-full"></span>
-            <span className="text-primary font-bold tracking-[0.2em] text-xl sm:text-3xl uppercase">
+            <span className="w-8 sm:w-20 h-[2px] bg-primary rounded-full"></span>
+            <span className="text-primary font-bold tracking-[0.2em] text-base sm:text-3xl uppercase whitespace-nowrap">
               TESTIMONIOS
             </span>
-            <span className="w-12 sm:w-20 h-[2px] bg-primary rounded-full"></span>
+            <span className="w-8 sm:w-20 h-[2px] bg-primary rounded-full"></span>
           </div>
           <h2 className="text-[#363C98] font-extrabold text-4xl sm:text-6xl tracking-tight mt-2">
             Que te lo digan ellos
@@ -180,38 +154,21 @@ export default function PlanesTestimonials() {
             ))}
           </Slider>
 
-          {/* --- Flechas de Navegación --- */}
-          {isMobile ? (
-            <div className="flex items-center justify-between mt-8 max-w-[200px] mx-auto">
-              <button
-                className="cursor-pointer p-3 bg-slate-50 rounded-full border border-slate-100 hover:bg-slate-100 active:scale-95 transition-all text-slate-600"
-                onClick={() => sliderRef.current && sliderRef.current.slickPrev()}
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
-              </button>
-              <button
-                className="cursor-pointer p-3 bg-slate-50 rounded-full border border-slate-100 hover:bg-slate-100 active:scale-95 transition-all text-slate-600"
-                onClick={() => sliderRef.current && sliderRef.current.slickNext()}
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6"/></svg>
-              </button>
-            </div>
-          ) : (
-            <>
-              <button
-                className="cursor-pointer absolute top-1/2 left-[-20px] lg:left-[-40px] -translate-y-1/2 z-10 p-3 bg-white rounded-full shadow-lg border border-slate-100 hover:scale-110 active:scale-95 transition-all text-[#363C98]"
-                onClick={() => sliderRef.current && sliderRef.current.slickPrev()}
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
-              </button>
-              <button
-                className="cursor-pointer absolute top-1/2 right-[-20px] lg:right-[-40px] -translate-y-1/2 z-10 p-3 bg-white rounded-full shadow-lg border border-slate-100 hover:scale-110 active:scale-95 transition-all text-[#363C98]"
-                onClick={() => sliderRef.current && sliderRef.current.slickNext()}
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6"/></svg>
-              </button>
-            </>
-          )}
+          {/* Flechas circulares laterales: fondo naranja suave, icono naranja principal */}
+          <button
+            onClick={prev}
+            aria-label="Anterior"
+            className="cursor-pointer absolute top-1/2 left-0 lg:left-[-20px] -translate-y-1/2 z-20 bg-[#FFEDE0] text-[#FF690B] rounded-full p-1.5 hover:scale-110 active:scale-95 transition-transform duration-200"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+          </button>
+          <button
+            onClick={next}
+            aria-label="Siguiente"
+            className="cursor-pointer absolute top-1/2 right-0 lg:right-[-20px] -translate-y-1/2 z-20 bg-[#FFEDE0] text-[#FF690B] rounded-full p-1.5 hover:scale-110 active:scale-95 transition-transform duration-200"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+          </button>
 
         </div>
 

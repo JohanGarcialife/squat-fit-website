@@ -29,7 +29,7 @@ export default function MethodSection() {
           <div className="relative w-full max-w-[420px] aspect-[4/5] sm:max-w-[500px]">
             <Image
               src="/PlanesHeroImage.png"
-              alt="El método Squat Fit"
+              alt="El método Squad Fit"
               fill
               priority
               sizes="(max-w-768px) 100vw, 50vw"

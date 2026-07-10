@@ -124,12 +124,18 @@ export default function CheckoutForm({ setStep, onValidationChange, submitRef })
                   <label htmlFor="phone" className="text-orange-500 text-sm ml-1">Teléfono*</label>
                   <PhoneInput
                     country={'es'}
+                    preferredCountries={['es', 'pt', 'gb', 'fr', 'mx', 'ar', 'co', 'cl']}
+                    enableSearch
+                    disableSearchIcon
+                    searchPlaceholder="Buscar país..."
+                    searchNotFound="Sin resultados"
                     value={formData.phone}
                     onChange={(phone) => setFieldValue('phone', phone)}
-                    inputClass="!w-full !border !border-orange-300 !rounded-2xl !pl-14 !pr-5 !py-3 !placeholder-orange-300 !text-black !outline-none focus:!border-orange-500 focus:!ring-1 focus:!ring-orange-500 !transition-all"
+                    inputClass="!w-full !border !border-orange-300 !rounded-2xl !pl-16 !pr-5 !py-3 !placeholder-orange-300 !text-black !outline-none focus:!border-orange-500 focus:!ring-1 focus:!ring-orange-500 !transition-all"
                     containerClass="!w-full"
-                    buttonClass="!bg-transparent !border-0 !rounded-l-2xl !pl-4"
-                    dropdownClass="!rounded-b-2xl !text-black"
+                    buttonClass="!bg-transparent !border-0 !rounded-l-2xl !pl-3"
+                    dropdownClass="!rounded-b-2xl !text-black !max-h-60"
+                    searchClass="!text-black"
                     dropdownStyle={{ color: 'black' }}
                     inputStyle={{ color: 'black' }}
                     inputProps={{ id: 'phone' }}

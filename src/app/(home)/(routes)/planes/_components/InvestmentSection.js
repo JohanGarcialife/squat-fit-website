@@ -45,7 +45,7 @@ export default function InvestmentSection() {
           <div className="relative w-full max-w-[480px] aspect-square sm:max-w-[550px]">
             <Image
               src="/InvestmentRightImage.png"
-              alt="Planificación y Progreso Squat Fit"
+              alt="Planificación y Progreso Squad Fit"
               fill
               priority
               sizes="(max-w-768px) 100vw, 50vw"

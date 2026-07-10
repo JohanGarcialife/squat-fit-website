@@ -2,6 +2,8 @@
 import React from "react";
 import Image from "next/image";
 import useWindowSize from "@/hooks/UseWindowSize";
+import FeatureIcon from "@/app/components/FeatureIcon";
+import { Clapperboard, Headset, NotebookPen, GraduationCap } from "lucide-react";
 
 export default function CourseContent() {
    const { width } = useWindowSize();
@@ -23,13 +25,7 @@ export default function CourseContent() {
           </h2>
           <div className="flex flex-col justify-between">
             <div className="flex items-start gap-3">
-              <Image
-                src="/icons/movie_edit.png"
-                alt="Icon"
-                width={52}
-                height={52}
-                priority
-              />
+              <FeatureIcon icon={Clapperboard} />
               <div>
                 <p className="text-3xl text-black font-bold">Clases en vídeo</p>
                 <p className=" text-2xl text-black max-w-[273px] ">
@@ -38,13 +34,7 @@ export default function CourseContent() {
               </div>
             </div>
             <div className="flex items-start gap-3">
-              <Image
-                src="/icons/chat_info.png"
-                alt="Icon"
-                width={52}
-                height={52}
-                priority
-              />
+              <FeatureIcon icon={Headset} />
               <div>
                 <p className="text-3xl text-black font-bold">Soporte</p>
                 <p className=" text-2xl text-black max-w-[273px] ">
@@ -55,13 +45,7 @@ export default function CourseContent() {
           </div>
           <div className="flex flex-col justify-between">
             <div className="flex items-start gap-3">
-              <Image
-                src="/icons/edit_document.png"
-                alt="Icon"
-                width={52}
-                height={52}
-                priority
-              />
+              <FeatureIcon icon={NotebookPen} />
               <div>
                 <p className="text-3xl text-black font-bold">Apuntes</p>
                 <p className=" text-2xl text-black max-w-[273px] ">              
@@ -72,13 +56,7 @@ Material de apoyo con fines de repasar el contenido
 
 
             <div className="flex items-start gap-3">
-              <Image
-                src="/icons/contract_edit.png"
-                alt="Icon"
-                width={52}
-                height={52}
-                priority
-              />
+              <FeatureIcon icon={GraduationCap} />
               <div>
                 <p className="text-3xl text-black font-bold">Ponte a prueba</p>
                 <p className=" text-2xl text-black max-w-[273px] mb-6">
@@ -106,13 +84,7 @@ Material de apoyo con fines de repasar el contenido
           </h2>
           <div className="flex flex-col justify-between">
             <div className="flex items-start gap-3">
-              <Image
-                src="/icons/movie_edit.png"
-                alt="Icon"
-                width={52}
-                height={52}
-                priority
-              />
+              <FeatureIcon icon={Clapperboard} />
               <div>
                 <p className="text-3xl text-black font-bold">Clases en vídeo</p>
                 <p className=" text-2xl text-black max-w-[273px] ">
@@ -121,13 +93,7 @@ Material de apoyo con fines de repasar el contenido
               </div>
             </div>
             <div className="flex items-start gap-3">
-              <Image
-                src="/icons/chat_info.png"
-                alt="Icon"
-                width={52}
-                height={52}
-                priority
-              />
+              <FeatureIcon icon={Headset} />
               <div>
                 <p className="text-3xl text-black font-bold">Soporte</p>
                 <p className=" text-2xl text-black max-w-[273px] ">
@@ -138,13 +104,7 @@ Material de apoyo con fines de repasar el contenido
           </div>
           <div className="flex flex-col justify-between">
             <div className="flex items-start gap-3">
-              <Image
-                src="/icons/edit_document.png"
-                alt="Icon"
-                width={52}
-                height={52}
-                priority
-              />
+              <FeatureIcon icon={NotebookPen} />
               <div>
                 <p className="text-3xl text-black font-bold">Apuntes</p>
                 <p className=" text-2xl text-black max-w-[273px] ">              
@@ -155,13 +115,7 @@ Material de apoyo con fines de repasar el contenido
 
 
             <div className="flex items-start gap-3">
-              <Image
-                src="/icons/contract_edit.png"
-                alt="Icon"
-                width={52}
-                height={52}
-                priority
-              />
+              <FeatureIcon icon={GraduationCap} />
               <div>
                 <p className="text-3xl text-black font-bold">Ponte a prueba</p>
                 <p className=" text-2xl text-black max-w-[273px] mb-6">

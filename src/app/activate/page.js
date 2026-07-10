@@ -95,7 +95,7 @@ function ActivateContent() {
             <h2 className="text-4xl font-bold text-green-600">¡Cuenta Activada!</h2>
             <p className="text-gray-600 text-lg font-medium">{message}</p>
             <p className="text-gray-400 text-sm mt-2">
-              Ya tienes acceso completo a la plataforma Squat Fit.
+              Ya tienes acceso completo a la plataforma Squad Fit.
             </p>
           </div>
           <div className="w-full mt-4 flex flex-col gap-4">
