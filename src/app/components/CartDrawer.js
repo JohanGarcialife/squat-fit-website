@@ -68,12 +68,14 @@ export default function CartDrawer() {
         className={`absolute inset-0 bg-black/25 transition-opacity duration-300 ${isCartOpen ? 'opacity-100' : 'opacity-0'}`}
       />
 
-      {/* Panel */}
+      {/* Panel. En móvil deja asomar la página por la izquierda (como el menú),
+          en vez de taparla entera. En escritorio el 86% supera el tope de
+          420px, así que ahí no cambia nada. */}
       <aside
         role="dialog"
         aria-modal="true"
         aria-label="Carrito"
-        className={`absolute right-0 top-0 h-full w-full max-w-[420px] bg-white shadow-2xl flex flex-col transition-transform duration-300 ease-out ${isCartOpen ? 'translate-x-0' : 'translate-x-full'}`}
+        className={`absolute right-0 top-0 h-full w-[86%] max-w-[420px] bg-white shadow-2xl flex flex-col transition-transform duration-300 ease-out ${isCartOpen ? 'translate-x-0' : 'translate-x-full'}`}
       >
         <header className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
           <h2 className="text-secondary text-xl font-extrabold">
