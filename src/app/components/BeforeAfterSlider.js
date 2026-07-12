@@ -69,6 +69,9 @@ export default function BeforeAfterSlider({
   const startDragging = (e) => {
     if (!isActive) return;
     if (e.cancelable) e.preventDefault();
+    // Evita que slick interprete el arrastre del mango como un swipe de slide:
+    // sobre el divisor se revela antes/después, fuera de él se pasa de foto.
+    e.stopPropagation();
     setIsDragging(true);
   };
 

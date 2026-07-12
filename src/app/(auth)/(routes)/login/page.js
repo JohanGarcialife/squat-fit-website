@@ -16,6 +16,9 @@ function LoginContent() {
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   // Login en dos pasos: primero el email, luego se revela la contraseña.
   const [showPassword, setShowPassword] = useState(false);
+  // Modal cuando el email no tiene cuenta (invitación a crear una).
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [checkedEmail, setCheckedEmail] = useState('');
 
   const redirectParam = searchParams.get('redirect') ? `?redirect=${encodeURIComponent(searchParams.get('redirect'))}` : '';
 
@@ -33,10 +36,33 @@ function LoginContent() {
   });
 
   const handleSubmit = async (values, { setSubmitting }) => {
-    // Paso 1: solo tenemos el email → revelamos el campo de contraseña.
+    // Paso 1: con solo el email, comprobamos si tiene cuenta ANTES de pedir la
+    // contraseña. Si no existe, mostramos el modal para crear la cuenta; si
+    // existe sin contraseña, le llevamos a crearla.
     if (!showPassword) {
-      setShowPassword(true);
-      setSubmitting(false);
+      try {
+        const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/user/check-email`, {
+          email: values.username,
+        });
+        const { exists, hasPassword } = res.data || {};
+        if (!exists) {
+          setCheckedEmail(values.username);
+          setShowCreateModal(true);
+        } else if (!hasPassword) {
+          const qs = new URLSearchParams({ email: values.username });
+          const redirect = searchParams.get('redirect');
+          if (redirect) qs.set('redirect', redirect);
+          toast('Tu cuenta aún no tiene contraseña. Te llevamos a crearla 👇', { duration: 4000 });
+          router.push(`/forgot-password?${qs.toString()}`);
+        } else {
+          setShowPassword(true);
+        }
+      } catch (error) {
+        // Si el chequeo falla, no bloqueamos: dejamos que intente con contraseña.
+        setShowPassword(true);
+      } finally {
+        setSubmitting(false);
+      }
       return;
     }
     try {
@@ -148,6 +174,39 @@ function LoginContent() {
           </div>
         </div>
       </div>
+
+      {/* Modal: el email no tiene cuenta → invitar a crear una */}
+      {showCreateModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-5" onClick={() => setShowCreateModal(false)}>
+          <div className="w-full max-w-sm rounded-3xl bg-white p-7 text-center shadow-2xl" onClick={(e) => e.stopPropagation()}>
+            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-orange-100">
+              <span className="text-3xl">👋</span>
+            </div>
+            <h3 className="text-2xl font-bold text-secondary">No tenemos ese email</h3>
+            <p className="mt-2 text-gray-600">
+              No encontramos <span className="font-semibold text-secondary">{checkedEmail}</span> en nuestra base de datos.
+              Crea tu cuenta en Squad Fit en 1 minuto.
+            </p>
+            <button
+              onClick={() => {
+                const qs = new URLSearchParams({ email: checkedEmail });
+                const redirect = searchParams.get('redirect');
+                if (redirect) qs.set('redirect', redirect);
+                router.push(`/register?${qs.toString()}`);
+              }}
+              className="mt-6 w-full rounded-2xl bg-primary py-3.5 text-base font-bold text-white transition-colors hover:bg-orange-600"
+            >
+              Crear mi cuenta
+            </button>
+            <button
+              onClick={() => setShowCreateModal(false)}
+              className="mt-3 w-full text-sm font-semibold text-gray-500 hover:text-gray-700"
+            >
+              Usar otro email
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -1,54 +1,18 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { Euro, DollarSign } from 'lucide-react';
+import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useCartStore } from '@/stores/cart.store';
+import { useCurrency } from './useCurrency';
+import CurrencySelector from './CurrencySelector';
 
 export default function OrderSummary(props) {
     const { isFormValid, isFormDirty, triggerCheckoutFormSubmit } = props;
     const { cart } = useCartStore();
 
-    const [currency, setCurrency] = useState('EUR');
-    const [exchangeRate, setExchangeRate] = useState(null);
-    const [isLoading, setIsLoading] = useState(true);
+    const { currency, setCurrency, symbol, convertPrice, currencies } = useCurrency();
 
-    useEffect(() => {
-        const fetchExchangeRate = async () => {
-            try {
-                // Use a short timeout to fail fast if blocked by CORS/Network
-                const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 2000);
-
-                const response = await fetch('https://api.frankfurter.app/latest?from=EUR&to=USD', { 
-                    signal: controller.signal 
-                });
-                
-                clearTimeout(timeoutId);
-
-                if (!response.ok) throw new Error('Network response not ok');
-                const data = await response.json();
-                if (data?.rates?.USD) {
-                    setExchangeRate(data.rates.USD);
-                } else {
-                    setExchangeRate(1.08); // Fallback
-                }
-            } catch (error) {
-                // Silence common fetch errors to keep dev logs clean
-                setExchangeRate(1.08); // Fallback standard EUR/USD
-            } finally {
-                setIsLoading(false);
-            }
-        };
-
-        fetchExchangeRate();
-    }, []);
-
-    const toggleCurrency = () => {
-        setCurrency((prev) => (prev === 'EUR' ? 'USD' : 'EUR'));
-    };
-    
     const subtotal = cart.reduce((acc, item) => acc + item.price * item.quantity, 0);
     // Only apply shipping if the cart contains physical products (non-direct checkouts)
     const hasPhysicalItems = cart.some(item => !item.isDirectCheckout);
@@ -57,16 +21,6 @@ export default function OrderSummary(props) {
     
     const finalShipping = subtotal >= freeShippingThreshold ? 0 : shippingCost;
     const total = subtotal + finalShipping;
-
-    const convertPrice = (priceInEur) => {
-        if (isLoading || !exchangeRate) {
-            return '...';
-        }
-        if (currency === 'USD') {
-            return (priceInEur * exchangeRate).toFixed(2).replace('.', ',');
-        }
-        return priceInEur.toFixed(2).replace('.', ',');
-    };
 
     // Recurring Payment Logic
     const monthlyItems = cart.filter(item => item.period === '/mes');
@@ -80,20 +34,15 @@ export default function OrderSummary(props) {
     return (
     <div className="w-full h-full p-6 lg:p-14 xl:p-20 font-sans flex flex-col justify-start lg:justify-center">
 
-      {/* Logo & Header — se oculta en móvil para que el bottom sheet sea compacto */}
-      <div className="hidden lg:flex flex-col items-center mb-8">
-         <Link href="/" className="mb-4">
-            <div className="w-20 h-20 relative">
-                 <Image src="/LogotipoSquatfit.png" layout="fill" objectFit="contain" alt="Logo Squad Fit" />
-            </div>
-         </Link>
-         
-         <button onClick={toggleCurrency} className="flex items-center gap-2 text-indigo-400 text-sm border-b border-indigo-200 pb-0.5 hover:text-indigo-600 transition-colors">
-            Cambiar moneda
-            <div className="border-2 border-indigo-900 rounded-full w-7 h-7 flex items-center justify-center text-indigo-900 font-bold text-sm">
-                {currency === 'EUR' ? '€' : '$'}
-            </div>
-        </button>
+      {/* Logo (oculto en móvil para compactar) + selector de moneda (siempre
+          visible: en móvil se quedaba escondido dentro del bloque del logo). */}
+      <Link href="/" className="mb-4 hidden lg:block self-center">
+        <div className="w-20 h-20 relative">
+          <Image src="/LogotipoSquatfit.png" layout="fill" objectFit="contain" alt="Logo Squad Fit" />
+        </div>
+      </Link>
+      <div className="mb-6 flex justify-center">
+        <CurrencySelector currency={currency} setCurrency={setCurrency} currencies={currencies} />
       </div>
 
       {/* Product List Cards */}
@@ -125,7 +74,7 @@ export default function OrderSummary(props) {
                   {item.type === 'digital' ? item.period?.replace('/', '') || 'mes' : `${item.quantity || 1} unidad`}
                 </span>
                 <span className="text-indigo-900 font-bold text-sm">
-                  {convertPrice(item.price * (item.quantity || 1))} {currency === 'EUR' ? '€' : '$'}
+                  {convertPrice(item.price * (item.quantity || 1))} {symbol}
                   {item.period && <span className="text-xs font-normal text-gray-500"> {item.period}</span>}
                 </span>
               </div>
@@ -149,7 +98,7 @@ export default function OrderSummary(props) {
             <div className="flex justify-between items-center text-indigo-900/80 text-lg">
                 <span>Hoy pagarás</span>
                 <span className="font-bold text-indigo-900 text-xl">
-                    {convertPrice(total)} {currency === 'EUR' ? '€' : '$'}
+                    {convertPrice(total)} {symbol}
                 </span>
             </div>
             
@@ -157,17 +106,17 @@ export default function OrderSummary(props) {
                 <div className="flex justify-between items-center text-indigo-900 font-bold text-lg pt-2 border-t border-indigo-100/50">
                     <span>Los siguientes meses</span>
                     <span>
-                        {convertPrice(recurringTotal)} {currency === 'EUR' ? '€' : '$'}
+                        {convertPrice(recurringTotal)} {symbol}
                     </span>
                 </div>
             )}
         </div>
       </div>
 
-      <button 
-        onClick={triggerCheckoutFormSubmit} 
+      <button
+        onClick={triggerCheckoutFormSubmit}
         disabled={!isFormValid}
-        className="w-full bg-indigo-800 text-white cursor-pointer font-bold text-lg py-4 rounded-2xl hover:bg-indigo-900 transition-all shadow-xl shadow-indigo-200 disabled:opacity-50 disabled:cursor-not-allowed"
+        className="w-full bg-indigo-800 text-white cursor-pointer font-bold text-base py-3 lg:text-lg lg:py-4 rounded-2xl hover:bg-indigo-900 transition-all shadow-xl shadow-indigo-200 disabled:opacity-50 disabled:cursor-not-allowed"
       >
         Continuar
       </button>

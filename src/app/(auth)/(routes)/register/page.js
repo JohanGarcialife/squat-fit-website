@@ -6,7 +6,7 @@ import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
 import { useRouter, useSearchParams } from 'next/navigation';
 import toast from 'react-hot-toast';
-import { Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff, Check } from 'lucide-react';
 
 function RegisterContent() {
   const router = useRouter();
@@ -149,23 +149,44 @@ function RegisterContent() {
                   )}
                 </div>
                 <div>
-                  <div className="relative">
-                    <Field
-                      type={isConfirmPasswordVisible ? 'text' : 'password'}
-                      name="confirmPassword"
-                      placeholder='Confirmar contraseña'
-                      className='w-full bg-white text-gray-800 rounded-2xl px-5 py-3.5 pr-12 text-base focus:outline-none focus:ring-2 focus:ring-[#FF690B] placeholder-gray-400'
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setIsConfirmPasswordVisible(!isConfirmPasswordVisible)}
-                      className="absolute inset-y-0 right-0 flex items-center pr-4 text-gray-400 hover:text-gray-600"
-                      aria-label={isConfirmPasswordVisible ? 'Ocultar contraseña' : 'Mostrar contraseña'}
-                    >
-                      {isConfirmPasswordVisible ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-                    </button>
-                  </div>
-                  <ErrorMessage name="confirmPassword" component="div" className="text-white text-sm mt-1.5 font-medium" />
+                  {(() => {
+                    const passwordsMatch =
+                      values.confirmPassword.length > 0 && values.confirmPassword === values.password;
+                    return (
+                      <>
+                        <div className="relative">
+                          <Field
+                            type={isConfirmPasswordVisible ? 'text' : 'password'}
+                            name="confirmPassword"
+                            placeholder='Confirmar contraseña'
+                            className={`w-full bg-white text-gray-800 rounded-2xl px-5 py-3.5 pr-20 text-base focus:outline-none focus:ring-2 placeholder-gray-400 transition-shadow ${
+                              passwordsMatch ? 'ring-2 ring-green-500' : 'focus:ring-[#FF690B]'
+                            }`}
+                          />
+                          {passwordsMatch && (
+                            <span className="absolute inset-y-0 right-11 flex items-center text-green-500" aria-label="Las contraseñas coinciden">
+                              <Check className="h-5 w-5" strokeWidth={3} />
+                            </span>
+                          )}
+                          <button
+                            type="button"
+                            onClick={() => setIsConfirmPasswordVisible(!isConfirmPasswordVisible)}
+                            className="absolute inset-y-0 right-0 flex items-center pr-4 text-gray-400 hover:text-gray-600"
+                            aria-label={isConfirmPasswordVisible ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                          >
+                            {isConfirmPasswordVisible ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                          </button>
+                        </div>
+                        {passwordsMatch ? (
+                          <div className="text-green-200 text-sm mt-1.5 font-medium flex items-center gap-1">
+                            <span className="font-bold">✓</span> Las contraseñas coinciden
+                          </div>
+                        ) : (
+                          <ErrorMessage name="confirmPassword" component="div" className="text-white text-sm mt-1.5 font-medium" />
+                        )}
+                      </>
+                    );
+                  })()}
                 </div>
                 <button type="submit" disabled={isSubmitting} className='cursor-pointer bg-white text-primary rounded-2xl py-3.5 text-base font-bold hover:bg-[#FFEDE0] transition duration-300 disabled:opacity-50 mt-1'>
                   Registrarme

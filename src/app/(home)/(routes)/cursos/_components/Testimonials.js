@@ -6,6 +6,7 @@ import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
 import useWindowSize from '@/hooks/UseWindowSize';
 import useSlickWrapSpeed from '@/hooks/useSlickWrapSpeed';
+import usePreloadImages from '@/hooks/usePreloadImages';
 
 const Slider = dynamic(() => import('react-slick'), { ssr: false });
 
@@ -65,6 +66,7 @@ const Testimonials = () => {
     const [isMobile, setIsMobile] = useState(false);
      const { width } = useWindowSize();
      const { speed, onBeforeChange, next, prev } = useSlickWrapSpeed(testimonials.length, sliderRef);
+     usePreloadImages(testimonials.map((t) => t.image));
 
     useEffect(() => {
         const handleResize = () => {

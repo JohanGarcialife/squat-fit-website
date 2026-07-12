@@ -9,6 +9,7 @@ import { useRouter } from 'next/navigation';
 import { useAuthStore } from "@/stores/auth.store";
 import { useCartStore } from "@/stores/cart.store";
 import ConfirmationModal from "@/app/components/ConfirmationModal";
+import usePreloadImages from "@/hooks/usePreloadImages";
 
 const Slider = dynamic(() => import("react-slick"), { ssr: false });
 
@@ -102,6 +103,7 @@ export default function TopVentas({ courses = [], userCourses = [] }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const router = useRouter();
+  usePreloadImages(courses.map((c) => c.image).filter(Boolean));
 
   useEffect(() => {
     setMounted(true);

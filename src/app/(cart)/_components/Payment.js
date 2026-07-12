@@ -172,6 +172,7 @@ export default function Payment(props) {
        const f = useCheckoutStore.getState().formData || {};
        const shipping = f.address
          ? {
+             companyName: f.companyName || undefined,
              firstName: f.firstName || undefined,
              lastName: f.lastName || undefined,
              address: f.address,

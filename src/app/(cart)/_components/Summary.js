@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react'
 import { ChevronLeft, ChevronDown, X } from "lucide-react";
 import Image from "next/image";
 import Link from 'next/link';
+import { useCurrency } from './useCurrency';
+import CurrencySelector from './CurrencySelector';
 
 export default function Summary(props) {
     const {
@@ -18,44 +20,8 @@ export default function Summary(props) {
         updateQuantity,
         setStep    } = props;
 
-    // Currency State
-    const [currency, setCurrency] = useState('EUR');
-    const [exchangeRate, setExchangeRate] = useState(null);
-    const [isLoading, setIsLoading] = useState(true);
-
-    useEffect(() => {
-        const fetchExchangeRate = async () => {
-            try {
-                const response = await fetch('https://api.frankfurter.app/latest?from=EUR&to=USD');
-                if (!response.ok) throw new Error('Network response was not ok');
-                const data = await response.json();
-                if (data && data.rates && data.rates.USD) {
-                    setExchangeRate(data.rates.USD);
-                } else {
-                    throw new Error('Invalid data format');
-                }
-            } catch (error) {
-                console.warn("Using fallback exchange rate (CORS/Network):", error.message);
-                setExchangeRate(1.08); // Fallback
-            } finally {
-                setIsLoading(false);
-            }
-        };
-
-        fetchExchangeRate();
-    }, []);
-
-    const toggleCurrency = () => {
-        setCurrency((prev) => (prev === 'EUR' ? 'USD' : 'EUR'));
-    };
-
-    const convertPrice = (priceInEur) => {
-        if (isLoading || !exchangeRate) return '...';
-        if (currency === 'USD') {
-            return (priceInEur * exchangeRate).toFixed(2).replace('.', ',');
-        }
-        return priceInEur.toFixed(2).replace('.', ',');
-    };
+    // Moneda: hook compartido (Euro y Dólar primero + monedas de países principales)
+    const { currency, setCurrency, symbol, convertPrice, currencies } = useCurrency();
 
     // Digital Product Variations (Mirrors Shop.js data)
     const digitalVariants = [
@@ -204,7 +170,7 @@ export default function Summary(props) {
                             {/* Price */}
                             <div className="text-right">
                                 <span className="text-indigo-900 font-bold text-xl">
-                                    {convertPrice(item.price * (item.quantity || 1))} {currency === 'EUR' ? '€' : '$'}
+                                    {convertPrice(item.price * (item.quantity || 1))} {symbol}
                                 </span>
                                 {isDigital(item) && <span className="text-indigo-400 text-xs block">
                                     {digitalVariants.find(v => v.id === item.id)?.period || '/mes'}
@@ -243,20 +209,15 @@ export default function Summary(props) {
                      />
                 </div>
 
-                 {/* Currency Switcher */}
-                <button onClick={toggleCurrency} className="flex items-center gap-2 text-indigo-400 text-sm border-b border-indigo-200 pb-0.5 hover:text-indigo-600 transition-colors">
-                  Cambiar moneda
-                  <div className="border-2 border-indigo-900 rounded-full w-7 h-7 flex items-center justify-center text-indigo-900 font-bold text-sm">
-                    {currency === 'EUR' ? '€' : '$'}
-                  </div>
-                </button>
+                 {/* Selector de moneda */}
+                <CurrencySelector currency={currency} setCurrency={setCurrency} currencies={currencies} />
               </div>
 
               {/* Free Shipping Message */}
               <div className="text-center mb-12">
                 {remainingForFreeShipping > 0 ? (
                   <p className="text-indigo-900 text-lg">
-                    *Añade <span className="font-bold">{convertPrice(remainingForFreeShipping)} {currency === 'EUR' ? '€' : '$'}</span> para tener envío <span className="text-orange-500 font-bold">gratis</span>
+                    *Añade <span className="font-bold">{convertPrice(remainingForFreeShipping)} {symbol}</span> para tener envío <span className="text-orange-500 font-bold">gratis</span>
                   </p>
                 ) : (
                   <p className="text-green-600 text-lg font-bold">
@@ -269,14 +230,14 @@ export default function Summary(props) {
               <div className="space-y-6 mb-12 max-w-md mx-auto w-full">
                 <div className="flex justify-between items-center text-indigo-900/80 text-xl">
                   <span>Subtotal</span>
-                  <span>{convertPrice(subtotal)} {currency === 'EUR' ? '€' : '$'}</span>
+                  <span>{convertPrice(subtotal)} {symbol}</span>
                 </div>
                 <div className="flex justify-between items-center text-indigo-900/80 text-xl">
                   <span>Envío</span>
                   <span>
                     {subtotal >= freeShippingThreshold
                       ? "0,00"
-                      : convertPrice(shipping)} {currency === 'EUR' ? '€' : '$'}
+                      : convertPrice(shipping)} {symbol}
                   </span>
                 </div>
                 <div className="flex justify-between items-center text-indigo-900 font-bold text-2xl pt-6 border-t border-indigo-100">
@@ -285,16 +246,16 @@ export default function Summary(props) {
                     {convertPrice(
                       subtotal +
                       (subtotal >= freeShippingThreshold ? 0 : shipping)
-                    )} {currency === 'EUR' ? '€' : '$'}
+                    )} {symbol}
                   </span>
                 </div>
               </div>
 
-              {/* Action Button */}
-              <button 
-                onClick={() => setStep(2)} 
+              {/* Action Button — un poco más pequeño en móvil */}
+              <button
+                onClick={() => setStep(2)}
                 disabled={cart.length === 0}
-                className="w-full cursor-pointer max-w-md mx-auto bg-indigo-800 text-white font-bold text-lg py-5 rounded-2xl hover:bg-indigo-900 transition-all shadow-xl shadow-indigo-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full cursor-pointer max-w-md mx-auto bg-indigo-800 text-white font-bold text-base py-3 lg:text-lg lg:py-5 rounded-2xl hover:bg-indigo-900 transition-all shadow-xl shadow-indigo-200 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Continuar
               </button>
