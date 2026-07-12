@@ -34,6 +34,11 @@ const faqs = [
       "Sí. Tenemos envío internacional a todo el mundo, y la versión digital la tienes disponible estés donde estés.",
   },
   {
+    question: "¿Y si no me convence? Devoluciones y garantía",
+    answer:
+      "Compra tranquilo: con el libro impreso tienes 30 días naturales desde que lo recibes para devolverlo, siempre que esté en las mismas condiciones en las que llegó (solo los gastos del envío de vuelta van por tu cuenta). Escríbenos a hola@squatfit.es con tu nombre y los datos de la compra y te reembolsamos por el mismo método de pago en un máximo de 14 días. Condiciones completas en nuestra política de devoluciones.",
+  },
+  {
     question: "Estoy a dieta para perder grasa, ¿me sirve?",
     answer:
       "Es que NECESITAS este libro. Lo creamos en plena definición: casi todas las recetas rondan las 200-500 calorías, la mayoría son bajas en grasa y altas en proteína, así que encajan perfectamente en un protocolo de pérdida de grasa sin pasar hambre.",

@@ -9,10 +9,16 @@ import * as Yup from 'yup';
 import PhoneInput from 'react-phone-input-2';
 import 'react-phone-input-2/lib/style.css';
 import { getNames, getCode } from 'country-list';
+import { useCartStore } from '@/stores/cart.store';
 
 
-const validationSchema = Yup.object({
-  dni_cif: Yup.string(),
+// El DNI/CIF es obligatorio en pedidos de más de 400 € (requisito fiscal, Doc 0)
+const DNI_REQUIRED_FROM = 400;
+
+const buildValidationSchema = (dniRequired) => Yup.object({
+  dni_cif: dniRequired
+    ? Yup.string().required('El DNI/CIF es obligatorio en pedidos de más de 400 €')
+    : Yup.string(),
   firstName: Yup.string().required('El nombre es obligatorio'),
   lastName: Yup.string().required('Los apellidos son obligatorios'),
   address: Yup.string().required('La dirección es obligatoria'),
@@ -28,10 +34,18 @@ const validationSchema = Yup.object({
 export default function CheckoutForm({ setStep, onValidationChange, submitRef }) {
   const { formData, updateFormData } = useCheckoutStore();
   const { user } = useAuthStore();
+  const { cart } = useCartStore();
   const [customerType, setCustomerType] = useState('particular');
   const [sameAddress, setSameAddress] = useState(true);
 
   const countryNames = useMemo(() => getNames(), []);
+
+  const subtotal = useMemo(
+    () => cart.reduce((sum, item) => sum + item.price * (item.quantity || 1), 0),
+    [cart],
+  );
+  const dniRequired = subtotal >= DNI_REQUIRED_FROM;
+  const validationSchema = useMemo(() => buildValidationSchema(dniRequired), [dniRequired]);
 
   const initialValues = useMemo(() => {
     const userEmail = (user?.email && user.email.includes('@')) 
@@ -94,7 +108,11 @@ export default function CheckoutForm({ setStep, onValidationChange, submitRef })
 
             return (
               <Form className="space-y-5">
-                <InputField label="DNI/CIF (opcional)" name="dni_cif" placeholder="Número de Identificación" />
+                <InputField
+                  label={dniRequired ? 'DNI/CIF* (obligatorio en pedidos de +400 €)' : 'DNI/CIF (opcional)'}
+                  name="dni_cif"
+                  placeholder="Número de Identificación"
+                />
                 <InputField label="Nombre*" name="firstName" placeholder="Tu nombre" />
                 <InputField label="Apellidos*" name="lastName" placeholder="Tus apellidos" />
                 <div className="h-2"></div>

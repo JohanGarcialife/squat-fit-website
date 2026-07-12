@@ -61,7 +61,9 @@ export default function CartPage() {
     (acc, item) => acc + item.price * item.quantity,
     0
   );
-  const shipping = 4.99;
+  // El envío solo aplica a productos físicos (los digitales van con isDirectCheckout)
+  const hasPhysicalItems = cart.some((item) => !item.isDirectCheckout);
+  const shipping = hasPhysicalItems ? 4.99 : 0;
   const total = subtotal + shipping;
   const freeShippingThreshold = 90.0;
   const remainingForFreeShipping = Math.max(
