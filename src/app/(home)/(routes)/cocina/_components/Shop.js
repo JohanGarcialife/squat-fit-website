@@ -119,6 +119,9 @@ export default function Shop() {
   const [vol1, setVol1] = useState(null)
   const [pack, setPack] = useState(null)
   const [bundle, setBundle] = useState(null)
+  // Versión de PRUEBA del flujo de compra (solo existe mientras haya una
+  // versión cuyo título empiece por 🧪 en el catálogo; al borrarla desaparece)
+  const [testItem, setTestItem] = useState(null)
 
   React.useEffect(() => {
     async function fetchProducts() {
@@ -131,11 +134,30 @@ export default function Shop() {
         const booksData = await booksRes.json()
         const packsData = await packsRes.json()
 
-        // Primer volumen físico disponible
+        // Versión de prueba del flujo de compra (🧪), si existe
         if (Array.isArray(booksData)) {
-          const withVersion = booksData.find((b) => b.versions?.length > 0)
+          for (const b of booksData) {
+            const tv = (b.versions || []).find((v) => (v.version_title || '').startsWith('🧪'))
+            if (tv) {
+              setTestItem({
+                id: tv.version_id,
+                type: 'version',
+                name: tv.version_title,
+                price: tv.version_price,
+                image: '/LibrosFisicos.png',
+              })
+              break
+            }
+          }
+        }
+
+        // Primer volumen físico disponible (excluyendo la de prueba)
+        if (Array.isArray(booksData)) {
+          const withVersion = booksData.find((b) =>
+            (b.versions || []).some((v) => !(v.version_title || '').startsWith('🧪')),
+          )
           if (withVersion) {
-            const v = withVersion.versions[0]
+            const v = withVersion.versions.find((x) => !(x.version_title || '').startsWith('🧪'))
             setVol1({
               id: v.version_id,
               type: 'version',
@@ -275,6 +297,27 @@ export default function Shop() {
             disabled={!pack}
             disabledLabel="No disponible"
           />
+
+          {/* Tarjeta TEMPORAL de prueba del flujo de compra (0,05 €): solo se
+              muestra mientras exista la versión 🧪 en el catálogo */}
+          {testItem && (
+            <PricingCard
+              tag="Prueba"
+              tagColor={C.print}
+              edgeOff={C.grayEdge}
+              edgeOn={C.printSoft}
+              title={testItem.name}
+              titleColor={C.print}
+              price={formatPrice(testItem.price)}
+              per="pago de prueba"
+              desc="Tarjeta temporal para validar el flujo de compra completo."
+              ctaLabel="Comprar prueba"
+              ctaColor={C.print}
+              selected={selectedCard === 'test'}
+              onSelect={() => setSelectedCard('test')}
+              onCta={() => addPhysical(testItem)}
+            />
+          )}
 
           {/* 3. Digital de por vida (simple) */}
           <PricingCard
