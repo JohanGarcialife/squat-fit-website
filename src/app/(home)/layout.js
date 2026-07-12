@@ -6,6 +6,7 @@ import FloatingCartWidget from "../components/FloatingCartWidget"; // Importar F
 import CartDrawer from "../components/CartDrawer";
 import ToasterProvider from "@/components/ToasterProvider";
 import AutoShineObserver from "../components/AutoShineObserver";
+import UTMCapture from "../components/UTMCapture";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -27,6 +28,7 @@ export default function RootLayout({ children }) {
         <ToasterProvider />
         <AutoShineObserver />
         <Header />
+        <UTMCapture />
         {children}
         <Footer />
         <FloatingCartWidget /> {/* Renderizar el FloatingCartWidget aquí */}
