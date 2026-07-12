@@ -48,9 +48,11 @@ export default function Temario() {
         </h2>
 
         {/* Vol. 1 Section */}
-        <div className="flex flex-row gap-4 items-center mb-24">
+        {/* En móvil se apila (como Vol. 2): con flex-row + w-1/2 fijos, la foto
+            de cada categoría salía diminuta y montada encima de la lista */}
+        <div className="grid lg:grid-cols-2 gap-4 items-center mb-24">
           {/* Left Side - Timeline Vol 1 */}
-          <div className="pl-6 w-1/2">
+          <div className="pl-6">
             <div className="flex justify-center mb-8 lg:justify-start lg:ml-12">
                <span className="text-secondary text-5xl font-extrabold inline-block border-b-4 border-primary pb-2">
                 Vol. 1
@@ -95,7 +97,7 @@ export default function Temario() {
           </div>
 
           {/* Right Side - Content Vol 1 */}
-          <div className="flex w-1/2 flex-col items-center justify-center lg:items-start text-center lg:text-left">
+          <div className="flex flex-col items-center justify-center lg:items-start text-center lg:text-left">
             <h3 className="text-4xl md:text-6xl text-center font-bold text-orange-500 mb-4 leading-tight">
               Pensado para usarlo,<br />no para guardarlo
             </h3>

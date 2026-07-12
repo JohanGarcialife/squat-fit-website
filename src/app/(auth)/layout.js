@@ -3,6 +3,8 @@ import "../globals.css";
 import ToasterProvider from "@/components/ToasterProvider";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
+import FloatingCartWidget from "../components/FloatingCartWidget";
+import CartDrawer from "../components/CartDrawer";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -28,7 +30,11 @@ export default function RootLayout({ children }) {
         
         <Header />
         {children}
-        {/* <Footer /> */}
+        {/* Mismo pie y carrito que el layout de (home): antes el login se
+            quedaba sin footer y sin forma de abrir el carrito */}
+        <Footer />
+        <FloatingCartWidget />
+        <CartDrawer />
         </div>
       </body>
     </html>

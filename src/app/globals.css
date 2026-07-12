@@ -123,23 +123,43 @@ html, body {
   100% { transform: scale(1); opacity: 1; }
 }
 
-/* Badges antes/después del comparador de recetas: el borde que da al divisor
-   se difumina (máscara degradada) para que el texto parezca continuar bajo el
-   divisor en vez de cortarse en seco. -webkit- para que funcione en iOS. */
-.badge-fade-r {
-  -webkit-mask-image: linear-gradient(to right, #000 78%, transparent);
-  mask-image: linear-gradient(to right, #000 78%, transparent);
+/* Rebote de "fin de scroll" para el carrusel de comparaciones: al dar la
+   vuelta, la tira empuja brevemente contra el borde y vuelve, como el
+   overscroll de iOS. Se aplica junto a la sombra de límite del componente. */
+@keyframes carousel-bounce-end {
+  0% { transform: translateX(0); }
+  35% { transform: translateX(-14px); }
+  70% { transform: translateX(5px); }
+  100% { transform: translateX(0); }
 }
-.badge-fade-l {
-  -webkit-mask-image: linear-gradient(to left, #000 78%, transparent);
-  mask-image: linear-gradient(to left, #000 78%, transparent);
+@keyframes carousel-bounce-start {
+  0% { transform: translateX(0); }
+  35% { transform: translateX(14px); }
+  70% { transform: translateX(-5px); }
+  100% { transform: translateX(0); }
 }
+.carousel-bounce-end { animation: carousel-bounce-end 0.45s ease-out; }
+.carousel-bounce-start { animation: carousel-bounce-start 0.45s ease-out; }
 
 @media (prefers-reduced-motion: reduce) {
   /* !important para ganar a la regla .landing-autoshine.shine-go (más específica) */
   .landing-autoshine,
   .landing-autoshine.shine-go {
     animation: none !important;
+  }
+  .carousel-bounce-end,
+  .carousel-bounce-start {
+    animation: none !important;
+  }
+}
+
+/* Testimonios de Cursos en escritorio (2 tarjetas a la vez, sin centerMode):
+   el encogido/atenuado genérico de slick dejaba la segunda tarjeta pequeña y
+   torcida respecto a la primera. Aquí las dos van rectas y al mismo tamaño. */
+@media (min-width: 1280px) {
+  .cursos-testimonials .slick-slide > div {
+    transform: none;
+    opacity: 1;
   }
 }
 

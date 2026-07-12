@@ -83,7 +83,9 @@ const Testimonials = () => {
    // slick no aplicaba en móvil y salían varias tarjetas con avatares aplastados.
    const w = width || 0;
    const settings = {
-     className: 'center',
+     // 'cursos-testimonials': en escritorio anula el encogido genérico de
+     // slick que dejaba las tarjetas torcidas/desiguales (ver globals.css)
+     className: 'center cursos-testimonials',
      centerMode: w < 1280,
      infinite: true,
      centerPadding: w >= 1280 ? '0px' : w >= 640 ? '48px' : '38px',
@@ -147,7 +149,8 @@ const Testimonials = () => {
                                     className="cursor-pointer px-3 py-5 "
                                     onClick={() => sliderRef.current && sliderRef.current.slickGoTo(index)}
                                 >
-                                    <div className="bg-[#3932C01A] h-full w-full lg:w-[420px] p-8 rounded-3xl shadow-lg border border-[#3932C0]/15 hover:shadow-xl transition-shadow duration-300  flex flex-col items-center text-center">
+                                    {/* min-h para que las dos tarjetas visibles queden a la misma altura */}
+                                    <div className="bg-[#3932C01A] h-full w-full lg:w-[420px] min-h-[240px] p-8 rounded-3xl shadow-lg border border-[#3932C0]/15 hover:shadow-xl transition-shadow duration-300  flex flex-col items-center text-center">
                                       <div className='flex gap-5 flex-row items-center '>
 
                                         <div className="relative  mb-6">

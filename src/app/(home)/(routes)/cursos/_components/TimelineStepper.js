@@ -48,18 +48,22 @@ const steps = [
   },
 ];
 
-const TimelineStepper = () => {
-  // --- CAMBIO CLAVE ---
-  // Estado para rastrear el ID del paso abierto.
-  // Lo inicializamos en 1 para que "Conceptos básicos" esté abierto por defecto.
-  // Usa 'null' si quieres que todos estén cerrados al inicio.
-  const [openStep, setOpenStep] = useState(1);
+const TimelineStepper = ({ openStep: openStepProp, onToggle }) => {
+  // Estado del paso abierto. Puede venir controlado desde fuera (Content.js
+  // lo usa para cambiar la foto del temario al abrir cada bloque); si no,
+  // se gestiona aquí como siempre, con "Conceptos básicos" abierto de inicio.
+  const [openStepLocal, setOpenStepLocal] = useState(1);
+  const openStep = openStepProp !== undefined ? openStepProp : openStepLocal;
 
   // Función para manejar el clic
   const handleToggle = (stepNumber) => {
+    if (onToggle) {
+      onToggle(stepNumber);
+      return;
+    }
     // Si se hace clic en el que ya está abierto, se cierra (set a null).
     // Si se hace clic en uno cerrado, se abre (set al stepNumber).
-    setOpenStep(openStep === stepNumber ? null : stepNumber);
+    setOpenStepLocal(openStep === stepNumber ? null : stepNumber);
   };
 
   return (

@@ -9,6 +9,7 @@ import { useAuthStore } from "@/stores/auth.store";
 import toast from "react-hot-toast";
 
 import Summary from "../../_components/Summary";
+import CheckoutAccess from "../../_components/CheckoutAccess";
 import FormData from "../../_components/FormData";
 import Payment from "../../_components/Payment";
 import PaymentSuccess from "../../_components/PaymentSuccess";
@@ -40,21 +41,16 @@ export default function CartPage() {
     }
   }, []);
 
-  // Force Step 1 if the user is not authenticated
-  useEffect(() => {
-    if (isClient && step > 1 && !token) {
-      setStep(1);
-      toast.error("Debes iniciar sesión para realizar la compra.");
-      router.push("/login?redirect=/cart");
-    }
-  }, [step, token, isClient, router]);
+  // SIN muro de login: si no hay sesión, el paso intermedio pide solo el email
+  // (CheckoutAccess) y resuelve invitado/contraseña sin salir del carrito.
+  const [needsAccess, setNeedsAccess] = useState(false);
 
   const handleSetStep = (nextStep) => {
     if (nextStep > 1 && !token) {
-      toast.error("Debes iniciar sesión para realizar la compra.");
-      router.push("/login?redirect=/cart");
+      setNeedsAccess(true);
       return;
     }
+    setNeedsAccess(false);
     setStep(nextStep);
   };
 
@@ -93,6 +89,17 @@ export default function CartPage() {
           Ver productos
         </Link>
       </div>
+    );
+  }
+
+  if (needsAccess && !token) {
+    return (
+      <CheckoutAccess
+        onReady={() => {
+          setNeedsAccess(false);
+          setStep(2);
+        }}
+      />
     );
   }
 

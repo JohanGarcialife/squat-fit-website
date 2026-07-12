@@ -89,16 +89,13 @@ function PricingCard({
       <button
         onClick={(e) => { e.stopPropagation(); onCta() }}
         disabled={disabled}
-        className={`relative group overflow-hidden block w-full text-white text-[15px] font-semibold py-3.5 px-3.5 rounded-[14px] transition-all duration-300 ${
+        className={`block w-full text-white text-[15px] font-semibold py-3.5 px-3.5 rounded-[14px] transition-all duration-300 ${
           disabled
             ? 'opacity-50 cursor-not-allowed'
             : 'hover:scale-[1.02] active:scale-[0.98] hover:brightness-95 cursor-pointer'
         }`}
         style={{ background: ctaColor }}
       >
-        {!disabled && (
-          <span className="landing-autoshine absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/40 to-transparent -translate-x-full skew-x-12 group-hover:translate-x-full transition-transform duration-700 ease-out" aria-hidden="true" />
-        )}
         {disabled ? disabledLabel : ctaLabel}
       </button>
     </div>
@@ -151,19 +148,44 @@ export default function Shop() {
           }
         }
 
-        // Primer volumen físico disponible (excluyendo la de prueba)
+        // Volumen 1 físico: se busca ENTRE TODOS los libros la versión cuyo
+        // título case con "Vol(umen) 1" (admite "Vol. 1"); si ninguna versión
+        // casa, vale también que case el título del libro. Solo si no hay
+        // match se cae al comportamiento anterior (primera versión del primer
+        // libro), que hoy trae un producto equivocado. La 🧪 queda fuera.
         if (Array.isArray(booksData)) {
-          const withVersion = booksData.find((b) =>
-            (b.versions || []).some((v) => !(v.version_title || '').startsWith('🧪')),
-          )
-          if (withVersion) {
-            const v = withVersion.versions.find((x) => !(x.version_title || '').startsWith('🧪'))
+          const VOL1_RE = /vol(umen)?\.?\s*1/i
+          const noTest = (v) => !(v.version_title || '').startsWith('🧪')
+
+          let book = null
+          let version = null
+          for (const b of booksData) {
+            const versions = (b.versions || []).filter(noTest)
+            const v = versions.find((x) => VOL1_RE.test(x.version_title || ''))
+            if (v) { book = b; version = v; break }
+            if (!book && VOL1_RE.test(b.title || '') && versions.length > 0) {
+              book = b
+              version = versions[0]
+              // seguimos buscando por si otra versión casa directamente
+            }
+          }
+
+          // Fallback: primer libro con alguna versión que no sea la de prueba
+          if (!version) {
+            const withVersion = booksData.find((b) => (b.versions || []).some(noTest))
+            if (withVersion) {
+              book = withVersion
+              version = withVersion.versions.find(noTest)
+            }
+          }
+
+          if (version) {
             setVol1({
-              id: v.version_id,
+              id: version.version_id,
               type: 'version',
-              name: v.version_title || withVersion.title,
-              price: v.version_price,
-              image: v.version_image || withVersion.image || '/LibrosFisicos.png',
+              name: version.version_title || book.title,
+              price: version.version_price,
+              image: version.version_image || book.image || '/LibrosFisicos.png',
             })
           }
         }
@@ -172,7 +194,13 @@ export default function Shop() {
           // El bundle (físico + digital) se identifica por nombre; hasta que
           // exista en el backend, la tarjeta se muestra como "muy pronto".
           const bundlePack = packsData.find((p) => /todo|bundle|digital/i.test(p.name))
-          const printPack = packsData.find((p) => p !== bundlePack) || packsData[0]
+          // Pack impreso: el que se llame "Vol 1 y 2" (o "1 y 2" / "1 + 2");
+          // si no hay match, el fallback anterior (primer pack que no sea el
+          // bundle), que hoy trae un pack equivocado.
+          const printPack =
+            packsData.find((p) => /vol.*1.*(y|\+).*2|1\s*y\s*2/i.test(p.name || '')) ||
+            packsData.find((p) => p !== bundlePack) ||
+            packsData[0]
           if (printPack) {
             setPack({
               id: printPack.id,
@@ -247,7 +275,7 @@ export default function Shop() {
       <div className="max-w-[1120px] mx-auto">
         {/* Cabecera */}
         <div className="text-center mb-8">
-          <h2 className="text-3xl md:text-4xl font-bold text-[#1f1f1f] mb-2">
+          <h2 className="text-3xl md:text-4xl font-bold text-[#363C98] mb-2">
             Elige cómo quieres disfrutar de Cocina Squad Fit
           </h2>
           <p className="text-gray-500 text-base">

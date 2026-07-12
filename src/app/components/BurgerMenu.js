@@ -20,6 +20,10 @@ export default function BurgerMenu() {
 
   const totalItems = cart.reduce((acc, item) => acc + item.quantity, 0);
 
+  // En las propias páginas de acceso/registro no tiene sentido repetir
+  // los botones "Acceder"/"Registro" dentro del menú
+  const isAuthPage = pathname === '/login' || pathname === '/register';
+
   // Hydration fix for client-side state
   const [isClient, setIsClient] = useState(false);
   useEffect(() => {
@@ -139,7 +143,7 @@ export default function BurgerMenu() {
                 <p className='text-xl font-bold text-primary'>Cerrar sesión</p>
               </div>
             </>
-          ) : (
+          ) : !isAuthPage && (
             <>
               <Link href="/login" onClick={() => setShow(false)} className='w-full'>
                 <div className='flex justify-center py-3 px-4 border-2 border-primary rounded-[20px] cursor-pointer active:scale-95 transition-transform'>
