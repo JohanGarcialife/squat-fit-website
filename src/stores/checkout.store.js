@@ -7,6 +7,7 @@ import { persist } from 'zustand/middleware';
 const initialState = {
   email: '',
   country: 'ES', // Valor por defecto
+  companyName: '',
   firstName: '',
   lastName: '',
   address: '',

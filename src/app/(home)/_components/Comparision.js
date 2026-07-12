@@ -5,6 +5,7 @@ import BeforeAfterSlider from '../../components/BeforeAfterSlider'
 import useWindowSize from '@/hooks/UseWindowSize';
 import useResizeRemountKey from '@/hooks/useResizeRemountKey';
 import useSlickWrapSpeed from '@/hooks/useSlickWrapSpeed';
+import usePreloadImages from '@/hooks/usePreloadImages';
 import LandingButton from '../../components/LandingButton';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
@@ -18,6 +19,8 @@ export default function Comparision(props) {
   const [current, setCurrent] = useState(0);
   const resizeKey = useResizeRemountKey();
   const { speed, onBeforeChange, next, prev } = useSlickWrapSpeed(comparacion.length, sliderRef);
+  // Precarga todas las fotos (antes y después) para que no carguen a mitad de clic
+  usePreloadImages(comparacion.flatMap((c) => [c.beforeSrc, c.afterSrc]));
 
   if (comparacion.length === 0) {
     return null;
@@ -34,8 +37,12 @@ export default function Comparision(props) {
     centerPadding: w >= 1024 ? '20%' : w >= 640 ? '16%' : '15%',
     slidesToShow: 1,
     arrows: false,
-    swipe: false,
-    draggable: false,
+    // Swipe con el dedo para cambiar de foto; el arrastre del mango (revelado
+    // antes/después) frena la propagación para no chocar con el swipe.
+    swipe: true,
+    swipeToSlide: true,
+    touchMove: true,
+    draggable: true,
     speed,
     cssEase: 'cubic-bezier(0.25, 1, 0.5, 1)',
     beforeChange: (cur, idx) => { setCurrent(idx); onBeforeChange(cur, idx); },

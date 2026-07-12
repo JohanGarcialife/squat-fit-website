@@ -6,6 +6,7 @@ import { ChevronLeft, ChevronRight } from 'lucide-react'
 import useResizeRemountKey from '@/hooks/useResizeRemountKey'
 import useWindowSize from '@/hooks/UseWindowSize'
 import useSlickWrapSpeed from '@/hooks/useSlickWrapSpeed'
+import usePreloadImages from '@/hooks/usePreloadImages'
 import 'slick-carousel/slick/slick.css'
 import 'slick-carousel/slick/slick-theme.css'
 
@@ -32,6 +33,8 @@ export default function ComparisionCocina(props) {
   // brevemente el borde por el que se ha salido, para que se note el límite.
   const [edge, setEdge] = useState(null) // 'start' | 'end' | null
   const edgeTimer = useRef(null)
+  // Precarga todas las fotos (antes/después) para que no carguen a mitad de clic
+  usePreloadImages(comparacion.flatMap((c) => [c.beforeSrc, c.afterSrc]))
 
   if (comparacion.length === 0) {
     return null
@@ -62,8 +65,11 @@ export default function ComparisionCocina(props) {
     slidesToShow: 1,
     speed,
     arrows: false,
-    swipe: false,
-    draggable: false,
+    // Swipe con el dedo; el mango del comparador frena la propagación (stopPropagation)
+    swipe: true,
+    swipeToSlide: true,
+    touchMove: true,
+    draggable: true,
     initialSlide: current,
     beforeChange: (cur, next) => { setCurrent(next); onBeforeChange(cur, next) },
   }
