@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import OrderSummary from './OrderSummary';
 import { useCartStore } from '@/stores/cart.store';
 import { useAuthStore } from '@/stores/auth.store';
+import { useCheckoutStore } from '@/stores/checkout.store';
 import axios from 'axios';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
@@ -166,12 +167,30 @@ export default function Payment(props) {
        let origin;
        try { origin = localStorage.getItem('sf_origin') || undefined; } catch { origin = undefined; }
 
+       // Dirección de envío del paso 2 (formulario de checkout): el pedido la
+       // necesita en el back office para preparar el envío del producto físico
+       const f = useCheckoutStore.getState().formData || {};
+       const shipping = f.address
+         ? {
+             firstName: f.firstName || undefined,
+             lastName: f.lastName || undefined,
+             address: f.address,
+             apartment: f.apartment || undefined,
+             postalCode: f.postalCode || undefined,
+             city: f.city || undefined,
+             country: f.country || undefined,
+             phone: f.phone || undefined,
+             dni_cif: f.dni_cif || undefined,
+             notes: f.shippingNotes || undefined,
+           }
+         : undefined;
+
        if (item.type === 'pack') {
            endpoint = '/api/v1/book/create-payment-intent-pack';
-           payload = { pack_id: item.id, quantity: item.quantity || 1, origin };
+           payload = { pack_id: item.id, quantity: item.quantity || 1, origin, shipping };
        } else {
            endpoint = '/api/v1/book/create-payment-intent-version';
-           payload = { version_id: item.id, quantity: item.quantity || 1, origin };
+           payload = { version_id: item.id, quantity: item.quantity || 1, origin, shipping };
        }
     }
 

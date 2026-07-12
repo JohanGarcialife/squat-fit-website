@@ -18,9 +18,10 @@ export default function FormData(props) {
   }, []);
 
   const subtotal = cart.reduce((acc, item) => acc + item.price * (item.quantity || 1), 0);
-  const shippingCost = 4.99;
+  // El envío solo aplica a productos físicos (los digitales van con isDirectCheckout)
+  const shippingCost = cart.some((item) => !item.isDirectCheckout) ? 4.99 : 0;
   const freeShippingThreshold = 90.00;
-  
+
   const finalShipping = subtotal >= freeShippingThreshold ? 0 : shippingCost;
   const total = subtotal + finalShipping;
 
