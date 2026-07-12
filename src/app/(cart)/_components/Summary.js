@@ -226,14 +226,15 @@ export default function Summary(props) {
             </div>
           </div>
 
-        {/* Columna Derecha: Resumen */}
-        <div className="w-full lg:w-2/5 xl:w-1/2 min-h-screen bg-[#FFF5F3]">
-          <div className="sticky top-0 h-screen overflow-y-auto">
-            <div className="py-14 px-8 lg:px-20 xl:px-32 flex flex-col h-full justify-center">
+        {/* Columna Derecha: Resumen — sticky a la derecha en desktop, sticky
+            abajo (bottom sheet) en móvil para tener siempre a la vista el total. */}
+        <div className="w-full lg:w-2/5 xl:w-1/2 lg:min-h-screen bg-orange-50 sticky bottom-0 lg:static z-40 rounded-t-3xl lg:rounded-none shadow-[0_-10px_30px_rgba(0,0,0,0.10)] lg:shadow-none">
+          <div className="lg:sticky lg:top-0 lg:h-screen max-h-[70vh] lg:max-h-none overflow-y-auto">
+            <div className="py-8 lg:py-14 px-6 lg:px-20 xl:px-32 flex flex-col h-full justify-start lg:justify-center">
               
-              {/* Logo */}
-              <div className="flex flex-col items-center mb-10">
-                <div className="w-24 h-24 relative mb-4">
+              {/* Logo + moneda — el logo se oculta en móvil (bottom sheet compacto) */}
+              <div className="flex flex-col items-center mb-6 lg:mb-10">
+                <div className="hidden lg:block w-24 h-24 relative mb-4">
                      <Image
                         src="/LogotipoSquatfit.png" // Placeholder or existing logo
                         layout="fill"
@@ -241,7 +242,7 @@ export default function Summary(props) {
                         alt="Logo Squad Fit"
                      />
                 </div>
-                
+
                  {/* Currency Switcher */}
                 <button onClick={toggleCurrency} className="flex items-center gap-2 text-indigo-400 text-sm border-b border-indigo-200 pb-0.5 hover:text-indigo-600 transition-colors">
                   Cambiar moneda

@@ -14,20 +14,31 @@ function LoginContent() {
   const searchParams = useSearchParams();
   const { setToken } = useAuthStore();
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+  // Login en dos pasos: primero el email, luego se revela la contraseña.
+  const [showPassword, setShowPassword] = useState(false);
 
   const redirectParam = searchParams.get('redirect') ? `?redirect=${encodeURIComponent(searchParams.get('redirect'))}` : '';
 
   const initialValues = {
-    username: '',
+    username: searchParams.get('email') || '',
     password: '',
   };
 
+  // El esquema de la contraseña solo aplica una vez revelada (paso 2).
   const validationSchema = Yup.object({
     username: Yup.string().email('El formato del email no es válido').required('El email es obligatorio'),
-    password: Yup.string().min(6, 'La contraseña debe tener al menos 6 caracteres').required('La contraseña es obligatoria'),
+    password: showPassword
+      ? Yup.string().min(6, 'La contraseña debe tener al menos 6 caracteres').required('La contraseña es obligatoria')
+      : Yup.string(),
   });
 
   const handleSubmit = async (values, { setSubmitting }) => {
+    // Paso 1: solo tenemos el email → revelamos el campo de contraseña.
+    if (!showPassword) {
+      setShowPassword(true);
+      setSubmitting(false);
+      return;
+    }
     try {
       const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/user/login`, values);
       const { token } = response.data;
@@ -82,33 +93,47 @@ function LoginContent() {
             validationSchema={validationSchema}
             onSubmit={handleSubmit}
           >
-            {({ isSubmitting }) => (
+            {({ isSubmitting, values }) => (
               <Form className='flex flex-col gap-4'>
                 <div>
-                  <Field type="email" name="username" placeholder='E-mail' className='w-full bg-white text-gray-800 rounded-2xl px-5 py-3.5 text-base focus:outline-none focus:ring-2 focus:ring-[#FF690B] placeholder-gray-400' />
+                  <div className="relative">
+                    <Field type="email" name="username" placeholder='E-mail' disabled={showPassword} className='w-full bg-white text-gray-800 rounded-2xl px-5 py-3.5 text-base focus:outline-none focus:ring-2 focus:ring-[#FF690B] placeholder-gray-400 disabled:bg-white/70' />
+                    {showPassword && (
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(false)}
+                        className="absolute inset-y-0 right-0 flex items-center pr-4 text-xs text-primary font-semibold hover:underline"
+                      >
+                        Cambiar
+                      </button>
+                    )}
+                  </div>
                   <ErrorMessage name="username" component="div" className="text-white text-sm mt-1.5 font-medium" />
                 </div>
-                <div>
-                  <div className="relative">
-                    <Field
-                      type={isPasswordVisible ? 'text' : 'password'}
-                      name="password"
-                      placeholder='Contraseña'
-                      className='w-full bg-white text-gray-800 rounded-2xl px-5 py-3.5 pr-12 text-base focus:outline-none focus:ring-2 focus:ring-[#FF690B] placeholder-gray-400'
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setIsPasswordVisible(!isPasswordVisible)}
-                      className="absolute inset-y-0 right-0 flex items-center pr-4 text-gray-400 hover:text-gray-600"
-                      aria-label={isPasswordVisible ? 'Ocultar contraseña' : 'Mostrar contraseña'}
-                    >
-                      {isPasswordVisible ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-                    </button>
+                {showPassword && (
+                  <div>
+                    <div className="relative">
+                      <Field
+                        type={isPasswordVisible ? 'text' : 'password'}
+                        name="password"
+                        placeholder='Contraseña'
+                        autoFocus
+                        className='w-full bg-white text-gray-800 rounded-2xl px-5 py-3.5 pr-12 text-base focus:outline-none focus:ring-2 focus:ring-[#FF690B] placeholder-gray-400'
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setIsPasswordVisible(!isPasswordVisible)}
+                        className="absolute inset-y-0 right-0 flex items-center pr-4 text-gray-400 hover:text-gray-600"
+                        aria-label={isPasswordVisible ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                      >
+                        {isPasswordVisible ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                      </button>
+                    </div>
+                    <ErrorMessage name="password" component="div" className="text-white text-sm mt-1.5 font-medium" />
                   </div>
-                  <ErrorMessage name="password" component="div" className="text-white text-sm mt-1.5 font-medium" />
-                </div>
+                )}
                 <button type="submit" disabled={isSubmitting} className='cursor-pointer bg-white text-primary rounded-2xl py-3.5 text-base font-bold hover:bg-[#FFEDE0] transition duration-300 disabled:opacity-50 mt-1'>
-                  Iniciar Sesión
+                  {showPassword ? 'Iniciar Sesión' : 'Continuar'}
                 </button>
               </Form>
             )}

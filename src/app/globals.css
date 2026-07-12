@@ -35,6 +35,20 @@
   --color-blue-800: #363C98; /* Corporate Blue */
   --color-blue-900: #363C98; /* Corporate Blue */
   --color-blue-950: #363C98; /* Corporate Blue */
+
+  /* Naranja de marca (#FF690B) en toda la escala orange, igual que el azul:
+     así todas las clases orange-* del proyecto usan el mismo naranja y sus
+     tintes armónicos, en vez del naranja rojizo por defecto de Tailwind. */
+  --color-orange-50: #fff3ec;
+  --color-orange-100: #ffe3d1;
+  --color-orange-200: #ffc9a8;
+  --color-orange-300: #ffab77;
+  --color-orange-400: #ff8a40;
+  --color-orange-500: #FF690B; /* Brand Orange */
+  --color-orange-600: #ea5c00; /* Brand Orange (hover) */
+  --color-orange-700: #c24d00;
+  --color-orange-800: #9a3e00;
+  --color-orange-900: #7c3300;
 }
 
 /* La web es de tema claro siempre: sin esto, a los usuarios con el móvil en

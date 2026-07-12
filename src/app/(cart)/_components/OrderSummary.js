@@ -78,10 +78,10 @@ export default function OrderSummary(props) {
     const hasRecurring = recurringTotal > 0;
 
     return (
-    <div className="w-full h-full p-8 lg:p-14 xl:p-20 font-sans flex flex-col justify-center">
-      
-      {/* Logo & Header */}
-      <div className="flex flex-col items-center mb-8">
+    <div className="w-full h-full p-6 lg:p-14 xl:p-20 font-sans flex flex-col justify-start lg:justify-center">
+
+      {/* Logo & Header — se oculta en móvil para que el bottom sheet sea compacto */}
+      <div className="hidden lg:flex flex-col items-center mb-8">
          <Link href="/" className="mb-4">
             <div className="w-20 h-20 relative">
                  <Image src="/LogotipoSquatfit.png" layout="fill" objectFit="contain" alt="Logo Squad Fit" />
