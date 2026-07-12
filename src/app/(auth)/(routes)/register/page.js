@@ -16,9 +16,10 @@ function RegisterContent() {
   const redirectParam = searchParams.get('redirect') ? `?redirect=${encodeURIComponent(searchParams.get('redirect'))}` : '';
   const [isConfirmPasswordVisible, setIsConfirmPasswordVisible] = useState(false);
 
+  // Email precargado si venimos del login (email no registrado).
   const initialValues = {
     username: '',
-    email: '',
+    email: searchParams.get('email') || '',
     password: '',
     confirmPassword: '',
   };

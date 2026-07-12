@@ -38,18 +38,31 @@ function LoginContent() {
         router.push(redirect);
       }
     } catch (error) {
-      console.error('Error en el login', error.response ? error.response.data : error.message);
-      if (error.response && error.response.data) {
-        const { message } = error.response.data;
-        if (message === 'User is not active') {
-          toast.error('Tu cuenta aún no está activa. Por favor, contacta con soporte.');
-        } else if (message === 'Invalid email or password' || error.response.status === 401) {
-          toast.error('Email o contraseña inválidos.');
-        } else {
-          toast.error(typeof message === 'string' ? message : 'Error al iniciar sesión');
-        }
+      const status = error.response?.status;
+      const message = error.response?.data?.message;
+
+      // Login inteligente: el backend distingue por código HTTP.
+      //   404 → el email no está registrado  → a crear cuenta
+      //   401 → la contraseña es incorrecta   → a recuperar contraseña
+      // En ambos casos arrastramos el email (y el redirect) para no reescribirlo.
+      const qs = new URLSearchParams();
+      qs.set('email', values.username);
+      const redirect = searchParams.get('redirect');
+      if (redirect) qs.set('redirect', redirect);
+
+      if (status === 404) {
+        toast('No encontramos una cuenta con ese email. Vamos a crearla 👇', { duration: 4000 });
+        router.push(`/register?${qs.toString()}`);
+      } else if (message === 'User is not active') {
+        toast.error('Tu cuenta aún no está activa. Revisa tu correo para activarla.');
+      } else if (status === 403) {
+        toast.error(typeof message === 'string' ? message : 'Esta cuenta no puede iniciar sesión aquí.');
+      } else if (status === 401) {
+        toast.error('La contraseña no es correcta. Te llevamos a recuperarla 👇', { duration: 4000 });
+        router.push(`/forgot-password?${qs.toString()}`);
       } else {
-        toast.error('Ocurrió un error inesperado.');
+        console.error('Error en el login', error.response ? error.response.data : error.message);
+        toast.error(typeof message === 'string' ? message : 'Ocurrió un error inesperado.');
       }
     } finally {
       setSubmitting(false);

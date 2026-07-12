@@ -3,6 +3,7 @@ import "../globals.css";
 // import Header from "../components/Header";
 // import Footer from "../components/Footer";
 import ToasterProvider from "@/components/ToasterProvider";
+import UTMCapture from "@/app/components/UTMCapture";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -23,6 +24,7 @@ export default function RootLayout({ children }) {
         <div className="min-h-screen bg-background ">
         <ToasterProvider />
         {/* <Header /> */}
+        <UTMCapture />
         {children}
         {/* <Footer /> */}
         </div>

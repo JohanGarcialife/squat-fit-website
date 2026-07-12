@@ -4,52 +4,59 @@ import { useState } from 'react';
 import { PlusIcon, MinusIcon } from '@heroicons/react/24/solid';
 
 // 1. Datos de las preguntas
-// Puedes mover esto a un archivo JSON o pasarlo como prop
+// Traídas y actualizadas de la web antigua (squatfit.es/libro-de-cocina) y
+// ordenadas por impacto de compra: primero qué incluye y para quién es,
+// después formatos/envío y al final las dudas de dieta y el acceso digital.
 const faqs = [
   {
-    question: "¿Es presencial u online?",
+    question: "¿Qué incluye la Cocina Squad Fit?",
     answer:
-      "Todos mis cursos son 100% online por lo que cualquier persona con internet podrá acceder a ellos.",
+      "Los volúmenes 1 y 2 suman más de 155 recetas fit —desayunos, comidas, cenas, snacks y postres— todas con sus calorías y macros incluidos. Y de regalo, los extras: +30 salsas fit, +15 guarniciones y 6 recetas tropicales para que no repitas plato ni de casualidad.",
   },
   {
-    question: "¿Este curso es para mí?",
+    question: "¿Este recetario es para mí aunque no entrene?",
     answer:
-      "Este curso es para ti si buscas mejorar tu salud, aprender a entrenar de forma eficiente y quieres ver resultados duraderos.",
+      "¡Por supuesto! Da igual tu edad, sexo o condición física: comes todos los días, ¿no? Pues este libro te enseña a hacerlo rico y saludable. Y si además entrenas, mejor todavía: cada receta te ayuda a cuadrar tus objetivos sin aburrirte comiendo.",
   },
   {
-    question: "¿Es apto para mujeres? No quiero ponerme como un hombre...",
+    question: "¿En qué formatos puedo conseguirlo?",
     answer:
-      "¡Totalmente! Este entrenamiento está diseñado para tonificar y fortalecer, no para hipertrofiar de forma masculina. Lograrás una figura estilizada y fuerte.",
+      "Como prefieras: el Volumen 1 impreso, el pack con los dos volúmenes en papel, la biblioteca digital de por vida (con el Volumen 3 ya en camino) o el pack completo con todo. Elige el tuyo en la sección de precios de esta misma página.",
   },
   {
-    question: "¿Qué aprenderé en el curso?",
+    question: "¿Cuándo recibo el libro?",
     answer:
-      "Aprenderás las técnicas correctas de cada ejercicio, cómo estructurar tus rutinas, principios de nutrición y a crear hábitos sostenibles.",
+      "El digital, en 24-48 horas en tu cuenta. El impreso, en 2-4 días laborables si estás en Europa y en 5-7 para el resto del mundo. Hacemos envíos a todo el planeta.",
   },
   {
-    question: "¿Qué nivel tiene el curso?",
+    question: "¿Puedo comprarlo si vivo fuera de España?",
     answer:
-      "El curso es apto para todos los niveles, desde principiante hasta avanzado, con progresiones y regresiones para cada ejercicio.",
+      "Sí. Tenemos envío internacional a todo el mundo, y la versión digital la tienes disponible estés donde estés.",
   },
   {
-    question: "¿Hay material de apoyo?",
+    question: "Estoy a dieta para perder grasa, ¿me sirve?",
     answer:
-      "Sí, además de los videos, tendrás acceso a guías en PDF, plantillas de seguimiento y una comunidad de apoyo.",
+      "Es que NECESITAS este libro. Lo creamos en plena definición: casi todas las recetas rondan las 200-500 calorías, la mayoría son bajas en grasa y altas en proteína, así que encajan perfectamente en un protocolo de pérdida de grasa sin pasar hambre.",
   },
   {
-    question: "¿Dónde puedo ver los videos?",
+    question: "¿Los ingredientes son fáciles de conseguir en mi país?",
     answer:
-      "Todos los videos están alojados en nuestra plataforma privada. Podrás acceder desde tu computadora, tablet o móvil 24/7.",
+      "La mayoría los encuentras en cualquier supermercado. Y para los más especiales te dejamos sustituciones, así que no te quedas sin tu receta vivas donde vivas.",
   },
   {
-    question: "¿Qué pasa si tengo dudas?",
+    question: "Tengo intolerancia (gluten, lactosa, huevo...), ¿hay recetas para mí?",
     answer:
-      "Tendrás acceso a un grupo privado (Discord/Telegram) y sesiones de Q&A en vivo para resolver todas tus preguntas.",
+      "¡Claro! Hay muchas recetas sin gluten y sin lactosa claramente indicadas, y casi todas admiten sustituciones muy sencillas siguiendo nuestras indicaciones.",
   },
   {
-    question: "¿Puedo hacerlo si soy de fuera de España?",
+    question: "¿Hay opciones vegetarianas, veganas o keto?",
     answer:
-      "¡Por supuesto! Al ser 100% online, puedes acceder desde cualquier parte del mundo con una conexión a internet.",
+      "Sí. Hay recetas directamente vegetarianas o veganas y muchísimas más con sustituciones fáciles. Y aunque somos amantes de los hidratos, también hemos incluido recetas keto y bajas en carbohidratos.",
+  },
+  {
+    question: "¿Cómo accedo a la versión digital?",
+    answer:
+      "Nada más completar la compra la tienes en tu cuenta de Squad Fit, disponible 24/7 desde el móvil, la tablet o el ordenador. Es acceso de por vida: cada nueva receta y volumen que añadamos, también será tuyo.",
   },
 ];
 

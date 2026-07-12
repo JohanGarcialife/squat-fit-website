@@ -101,7 +101,7 @@ function ForgotPasswordContent() {
 
           {step === 1 ? (
             <Formik
-              initialValues={{ email: '' }}
+              initialValues={{ email: searchParams.get('email') || '' }}
               validationSchema={requestSchema}
               onSubmit={handleRequestCode}
             >

@@ -14,7 +14,8 @@ export default function HeroSection() {
             <span className='w-8 sm:w-20 h-[2px] bg-primary rounded-full'></span>
         </div>
 
-        <h2 className='font-bold text-secondary text-center md:text-start text-6xl md:text-8xl my-8'>Fuerte y definid@</h2>
+        {/* Antes text-6xl/8xl: en escritorio quedaba gigante y en iPhone algo pasado */}
+        <h2 className='font-bold text-secondary text-center md:text-start text-5xl my-8'>Fuerte y definid@</h2>
         <p className='text-black text-2xl md:text-start text-center md:text-3xl  max-w-[520px] md:mb-8'>Transforma tu cuerpo y no solo llega al objetivo físico que siempre has querido sino a cómo mantenerlo de por vida</p>
         </div> 
 

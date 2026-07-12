@@ -24,6 +24,10 @@ export default function MenuHeader() {
     else if (pathname?.startsWith('/planes')) active = 'planes';
     else if (pathname?.startsWith('/cursos')) active = 'cursos';
 
+    // En las propias páginas de acceso/registro no tiene sentido repetir
+    // los botones "Acceder"/"Registro" en el header
+    const isAuthPage = pathname === '/login' || pathname === '/register';
+
     // Hydration fix for client-side state
     const [isClient, setIsClient] = useState(false);
     useEffect(() => {
@@ -117,7 +121,7 @@ export default function MenuHeader() {
                             <span className="sr-only">Cerrar sesión</span>
                         </button>
                     </>
-                ) : (
+                ) : !isAuthPage && (
                     <>
                         <Link href="/login">
                             <button className='relative group overflow-hidden bg-background border-2 border-primary text-primary hover:bg-primary hover:text-white px-8 py-2 rounded-[20px] font-bold text-2xl hover:scale-105 active:scale-95 transition-all duration-300 cursor-pointer'>

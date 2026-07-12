@@ -6,8 +6,10 @@ import Image from 'next/image';
 // Comparador antes/después reutilizable (home y cocina comparten esto).
 //
 // Diferencias que se controlan por props (lo demás es idéntico):
-//   - showTitles: badges inferiores "versión clásica / versión Squad Fit"
-//       (solo cocina; la home NO los lleva).
+//   - showTitles: badges descriptivos "versión clásica / versión Squad Fit"
+//       (solo cocina; la home NO los lleva). Con ellos activos, la descripción
+//       va ARRIBA y las etiquetas ANTES/DESPUÉS bajan ABAJO; sin ellos (home)
+//       las etiquetas se quedan arriba como siempre.
 //   - beforeGrayscale: B/N del lado "antes" (cocina 0.5; home 0 = color).
 //   - El caption/subtítulo NO vive aquí: cada página lo coloca donde toca
 //       (cocina ENCIMA, home DEBAJO).
@@ -91,11 +93,11 @@ export default function BeforeAfterSlider({
         className="absolute inset-0 pointer-events-none z-20"
         style={{ clipPath: `inset(0 0 0 ${sliderPosition}%)` }}
       >
-        <span className="absolute top-5 right-6 text-white font-bold text-sm sm:text-base uppercase tracking-widest drop-shadow-[0_1px_4px_rgba(0,0,0,0.65)] select-none">
+        <span className={`absolute ${showTitles ? 'bottom-5' : 'top-5'} right-6 text-white font-bold text-sm sm:text-base uppercase tracking-widest drop-shadow-[0_1px_4px_rgba(0,0,0,0.65)] select-none`}>
           Después
         </span>
         {showTitles && (
-          <span className="absolute bottom-5 right-4 text-white font-semibold text-[11px] sm:text-sm bg-black/60 backdrop-blur-sm px-3 py-1 rounded-full drop-shadow select-none badge-fade-l">
+          <span className="absolute top-5 right-4 text-white font-semibold text-[11px] sm:text-sm bg-black/60 px-3 py-1 rounded-full drop-shadow select-none">
             {afterTitle}
           </span>
         )}
@@ -115,11 +117,11 @@ export default function BeforeAfterSlider({
           style={beforeGrayscale ? { filter: `grayscale(${beforeGrayscale})` } : undefined}
           priority={priority}
         />
-        <span className="absolute top-5 left-6 text-white font-bold text-sm sm:text-base uppercase tracking-widest drop-shadow-[0_1px_4px_rgba(0,0,0,0.65)] select-none">
+        <span className={`absolute ${showTitles ? 'bottom-5' : 'top-5'} left-6 text-white font-bold text-sm sm:text-base uppercase tracking-widest drop-shadow-[0_1px_4px_rgba(0,0,0,0.65)] select-none`}>
           Antes
         </span>
         {showTitles && (
-          <span className="absolute bottom-5 left-4 text-white font-semibold text-[11px] sm:text-sm bg-black/30 backdrop-blur-sm px-3 py-1 rounded-full drop-shadow select-none badge-fade-r">
+          <span className="absolute top-5 left-4 text-white font-semibold text-[11px] sm:text-sm bg-black/30 px-3 py-1 rounded-full drop-shadow select-none">
             {beforeTitle}
           </span>
         )}
