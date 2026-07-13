@@ -46,8 +46,11 @@ function RegisterContent() {
 
   const handleSubmit = async (values, { setSubmitting }) => {
     try {
-      const { username, email, password } = values;
-      
+      const { username, password } = values;
+      // Email normalizado (minúsculas + sin espacios) para que el login por
+      // email siempre coincida, escriba como escriba el teclado del móvil.
+      const email = (values.email || '').trim().toLowerCase();
+
       // Split "Nombre" into firstName and lastName
       const nameParts = username.trim().split(/\s+/);
       const firstName = nameParts[0] || 'Usuario';
@@ -113,7 +116,7 @@ function RegisterContent() {
                   <ErrorMessage name="username" component="div" className="text-white text-sm mt-1.5 font-medium" />
                 </div>
                 <div>
-                  <Field type="email" name="email" placeholder='E-mail' className='w-full bg-white text-gray-800 rounded-2xl px-5 py-3.5 text-base focus:outline-none focus:ring-2 focus:ring-[#FF690B] placeholder-gray-400' />
+                  <Field type="email" name="email" placeholder='E-mail' inputMode="email" autoCapitalize="none" autoCorrect="off" spellCheck={false} className='w-full bg-white text-gray-800 rounded-2xl px-5 py-3.5 text-base focus:outline-none focus:ring-2 focus:ring-[#FF690B] placeholder-gray-400' />
                   <ErrorMessage name="email" component="div" className="text-white text-sm mt-1.5 font-medium" />
                 </div>
                 <div>
