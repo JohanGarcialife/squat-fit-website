@@ -39,17 +39,23 @@ function LoginContent() {
     // Paso 1: con solo el email, comprobamos si tiene cuenta ANTES de pedir la
     // contraseña. Si no existe, mostramos el modal para crear la cuenta; si
     // existe sin contraseña, le llevamos a crearla.
+    // El email se normaliza (minúsculas + sin espacios) para que coincida con
+    // el paso 1 (check-email también normaliza). En iOS es clave: el teclado
+    // suele capitalizar la primera letra o dejar un espacio, y eso hacía que el
+    // login fallara aunque el email existiera.
+    const email = (values.username || '').trim().toLowerCase();
+
     if (!showPassword) {
       try {
         const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/user/check-email`, {
-          email: values.username,
+          email,
         });
         const { exists, hasPassword } = res.data || {};
         if (!exists) {
-          setCheckedEmail(values.username);
+          setCheckedEmail(email);
           setShowCreateModal(true);
         } else if (!hasPassword) {
-          const qs = new URLSearchParams({ email: values.username });
+          const qs = new URLSearchParams({ email });
           const redirect = searchParams.get('redirect');
           if (redirect) qs.set('redirect', redirect);
           toast('Tu cuenta aún no tiene contraseña. Te llevamos a crearla 👇', { duration: 4000 });
@@ -66,7 +72,10 @@ function LoginContent() {
       return;
     }
     try {
-      const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/user/login`, values);
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/user/login`, {
+        ...values,
+        username: email,
+      });
       const { token } = response.data;
       if (token) {
         setToken(token);
@@ -83,7 +92,7 @@ function LoginContent() {
       //   401 → la contraseña es incorrecta   → a recuperar contraseña
       // En ambos casos arrastramos el email (y el redirect) para no reescribirlo.
       const qs = new URLSearchParams();
-      qs.set('email', values.username);
+      qs.set('email', email);
       const redirect = searchParams.get('redirect');
       if (redirect) qs.set('redirect', redirect);
 
@@ -131,7 +140,7 @@ function LoginContent() {
               <Form className='flex flex-col gap-4'>
                 <div>
                   <div className="relative">
-                    <Field type="email" name="username" placeholder='E-mail' disabled={showPassword} className='w-full bg-white text-gray-800 rounded-2xl px-5 py-3.5 text-base focus:outline-none focus:ring-2 focus:ring-[#FF690B] placeholder-gray-400 disabled:bg-white/70' />
+                    <Field type="email" name="username" placeholder='E-mail' disabled={showPassword} inputMode="email" autoCapitalize="none" autoCorrect="off" spellCheck={false} className='w-full bg-white text-gray-800 rounded-2xl px-5 py-3.5 text-base focus:outline-none focus:ring-2 focus:ring-[#FF690B] placeholder-gray-400 disabled:bg-white/70' />
                     {showPassword && (
                       <button
                         type="button"

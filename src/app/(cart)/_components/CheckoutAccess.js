@@ -32,7 +32,7 @@ export default function CheckoutAccess({ onReady }) {
       const res = await fetch(`${API}/api/v1/user/begin-checkout`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: email.trim() }),
+        body: JSON.stringify({ email: email.trim().toLowerCase() }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data?.message || 'No se pudo continuar');
@@ -61,7 +61,7 @@ export default function CheckoutAccess({ onReady }) {
       const res = await fetch(`${API}/api/v1/user/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username: email.trim(), password }),
+        body: JSON.stringify({ username: email.trim().toLowerCase(), password }),
       });
       const data = await res.json();
       if (!res.ok || !data.token) throw new Error('Contraseña incorrecta');
@@ -97,6 +97,10 @@ export default function CheckoutAccess({ onReady }) {
                 type="email"
                 value={email}
                 disabled={needsPassword}
+                inputMode="email"
+                autoCapitalize="none"
+                autoCorrect="off"
+                spellCheck={false}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="tu@email.com"
                 className="w-full rounded-xl border border-gray-300 px-4 py-3 focus:border-orange-500 focus:outline-none disabled:bg-gray-100"
