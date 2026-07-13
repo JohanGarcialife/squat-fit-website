@@ -16,16 +16,15 @@ export const metadata = {
   description: "Squad Fit Website",
 };
 
-import { Toaster } from 'react-hot-toast';
-
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body
         className={`${inter.variable} antialiased`}
       >
+        {/* Un solo proveedor de toasts (antes había ToasterProvider + Toaster,
+            así cada aviso salía duplicado y descolocado en el iPhone). */}
         <ToasterProvider />
-        <Toaster />
         <div className="min-h-screen bg-background ">
         
         <Header />
