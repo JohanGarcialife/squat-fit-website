@@ -93,7 +93,15 @@ function LoginContent() {
       } else if (message === 'User is not active') {
         toast.error('Tu cuenta aún no está activa. Revisa tu correo para activarla.');
       } else if (status === 403) {
-        toast.error(typeof message === 'string' ? message : 'Esta cuenta no puede iniciar sesión aquí.');
+        // El backend rechaza aquí a administradores y staff (deben entrar por el
+        // back office). Mostramos un mensaje claro en español, no el técnico.
+        const isStaff = typeof message === 'string' && /admin-panel|administrator|staff/i.test(message);
+        toast.error(
+          isStaff
+            ? 'Esta cuenta es de administrador o del equipo. Accede desde el panel de gestión, no desde la tienda.'
+            : 'Esta cuenta no puede iniciar sesión aquí.',
+          { duration: 5000 },
+        );
       } else if (status === 401) {
         toast.error('La contraseña no es correcta. Te llevamos a recuperarla 👇', { duration: 4000 });
         router.push(`/forgot-password?${qs.toString()}`);
