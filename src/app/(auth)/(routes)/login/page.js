@@ -218,8 +218,13 @@ function LoginContent() {
                     <ErrorMessage name="password" component="div" className="text-white text-sm mt-1.5 font-medium" />
                   </div>
                 )}
-                <button type="submit" disabled={isSubmitting} className='cursor-pointer bg-white text-primary rounded-2xl py-3.5 text-base font-bold hover:bg-[#FFEDE0] transition duration-300 disabled:opacity-50 mt-1'>
-                  {showPassword ? 'Iniciar Sesión' : 'Continuar'}
+                <button type="submit" disabled={isSubmitting} className='cursor-pointer bg-white text-primary rounded-2xl py-3.5 text-base font-bold hover:bg-[#FFEDE0] transition duration-300 disabled:opacity-70 mt-1'>
+                  {isSubmitting ? (
+                    <span className="flex items-center justify-center gap-2">
+                      <span className="h-5 w-5 rounded-full border-2 border-primary/30 border-t-primary animate-spin"></span>
+                      Validando…
+                    </span>
+                  ) : (showPassword ? 'Iniciar Sesión' : 'Continuar')}
                 </button>
               </Form>
             )}
