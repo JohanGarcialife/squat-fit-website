@@ -19,6 +19,8 @@ function LoginContent() {
   // Modal cuando el email no tiene cuenta (invitación a crear una).
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [checkedEmail, setCheckedEmail] = useState('');
+  // Aviso fijo cuando la cuenta existe pero aún no tiene contraseña (invitado).
+  const [noPasswordSent, setNoPasswordSent] = useState(false);
 
   const redirectParam = searchParams.get('redirect') ? `?redirect=${encodeURIComponent(searchParams.get('redirect'))}` : '';
 
@@ -55,11 +57,17 @@ function LoginContent() {
           setCheckedEmail(email);
           setShowCreateModal(true);
         } else if (!hasPassword) {
-          const qs = new URLSearchParams({ email });
-          const redirect = searchParams.get('redirect');
-          if (redirect) qs.set('redirect', redirect);
-          toast('Tu cuenta aún no tiene contraseña. Te llevamos a crearla 👇', { duration: 4000 });
-          router.push(`/forgot-password?${qs.toString()}`);
+          // Cuenta creada al comprar como invitado: aún no tiene contraseña.
+          // Se le reenvía el email para crearla (activación) y se muestra un
+          // aviso FIJO en pantalla (antes se reenviaba a recuperar contraseña,
+          // que ni aplica a cuentas inactivas ni funcionaba).
+          setCheckedEmail(email);
+          setNoPasswordSent(true);
+          try {
+            await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/user/resend-activation`, { email });
+          } catch (e) {
+            // Si el reenvío falla no rompemos el aviso; el usuario puede reintentar.
+          }
         } else {
           setShowPassword(true);
         }
@@ -131,6 +139,41 @@ function LoginContent() {
           <p className='text-white/85 text-base md:text-lg mt-3'>Accede a tu cuenta con Squad Fit</p>
         </div>
         <div className='bg-white/15 backdrop-blur-sm rounded-3xl p-6 sm:p-8 shadow-xl flex flex-col gap-5'>
+          {noPasswordSent ? (
+            <div className="text-center">
+              <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-white/25">
+                <span className="text-3xl">📩</span>
+              </div>
+              <h3 className="text-2xl font-bold text-white">Revisa tu correo</h3>
+              <p className="mt-2 text-white/90">
+                Tu cuenta se creó al comprar y aún no tiene contraseña. Te hemos enviado un correo a{' '}
+                <span className="font-semibold">{checkedEmail}</span> para crearla. Revisa tu bandeja de entrada (y la
+                carpeta de spam).
+              </p>
+              <button
+                type="button"
+                onClick={async () => {
+                  try {
+                    await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/user/resend-activation`, { email: checkedEmail });
+                    toast.success('Correo reenviado');
+                  } catch {
+                    toast.error('No se pudo reenviar, inténtalo en un momento');
+                  }
+                }}
+                className="mt-6 w-full rounded-2xl bg-white py-3.5 text-base font-bold text-primary transition-colors hover:bg-[#FFEDE0]"
+              >
+                Reenviar correo
+              </button>
+              <button
+                type="button"
+                onClick={() => { setNoPasswordSent(false); setShowPassword(false); }}
+                className="mt-3 w-full text-sm font-semibold text-white/80 hover:text-white"
+              >
+                Usar otro email
+              </button>
+            </div>
+          ) : (
+          <>
           <Formik
             initialValues={initialValues}
             validationSchema={validationSchema}
@@ -189,6 +232,8 @@ function LoginContent() {
               <span className='text-white/85 underline hover:text-white cursor-pointer'>¿Olvidaste tu contraseña?</span>
             </Link>
           </div>
+          </>
+          )}
         </div>
       </div>
 

@@ -78,10 +78,10 @@ function ForgotPasswordContent() {
   };
 
   return (
-    <div className='min-h-screen text-2xl text-white bg-linear-to-b from-primary to-secondary flex flex-col md:flex-row px-3 gap-10 md:px-32 py-32'>
+    <div className='min-h-screen text-base md:text-2xl text-white bg-linear-to-b from-primary to-secondary flex flex-col md:flex-row px-5 gap-6 md:gap-10 md:px-32 py-16 md:py-32'>
       <div className='md:w-1/2'>
-        <h2 className='md:text-8xl text-6xl font-bold text-center md:text-start'>Recupera tu cuenta</h2>
-        <p className='text-white text-3xl mt-12 max-w-[430px] text-center md:text-start'>
+        <h2 className='text-4xl md:text-8xl font-bold text-center md:text-start'>Recupera tu cuenta</h2>
+        <p className='text-white text-lg md:text-3xl mt-4 md:mt-12 max-w-[430px] mx-auto md:mx-0 text-center md:text-start'>
           {step === 1 
             ? 'Ingresa tu correo para recibir un código de restablecimiento de contraseña.' 
             : 'Introduce el código enviado a tu correo y tu nueva contraseña.'}
@@ -183,7 +183,7 @@ function ForgotPasswordContent() {
             </Formik>
           )}
 
-          <div className="flex justify-between items-center mt-5 text-2xl font-bold">
+          <div className="flex justify-between items-center mt-5 text-base md:text-2xl font-bold">
             <Link href={`/login${redirectParam}`}>
               <p className='underline text-gris cursor-pointer'>Iniciar Sesión</p>
             </Link>
