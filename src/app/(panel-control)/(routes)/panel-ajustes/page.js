@@ -68,6 +68,43 @@ export default function AjustesPage() {
   const [portalLoading, setPortalLoading] = useState(false);
   const [logoutOpen, setLogoutOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
+  const [actionBusy, setActionBusy] = useState(null);
+  const [cancelTarget, setCancelTarget] = useState(null);
+
+  const runAction = async (sub, action) => {
+    setActionBusy(sub.id);
+    try {
+      await axios.post(
+        `${API}/api/v1/billing/subscriptions/${sub.id}/${action}`,
+        { kind: sub.kind },
+        { headers: { Authorization: `Bearer ${token}` } },
+      );
+      // Optimista: refleja el nuevo estado sin esperar al webhook.
+      setSubscriptions((subs) =>
+        subs.map((s) =>
+          s.id === sub.id && s.kind === sub.kind
+            ? {
+                ...s,
+                status: action === 'pause' ? 'en pausa' : action === 'resume' ? 'activa' : s.status,
+                _cancelScheduled: action === 'cancel' ? true : s._cancelScheduled,
+              }
+            : s,
+        ),
+      );
+      toast.success(
+        action === 'cancel'
+          ? 'Cancelada al final del periodo'
+          : action === 'pause'
+          ? 'Suscripción pausada'
+          : 'Suscripción reanudada',
+      );
+    } catch (e) {
+      toast.error('No se pudo completar la acción');
+    } finally {
+      setActionBusy(null);
+      setCancelTarget(null);
+    }
+  };
 
   const setField = (patch) => {
     setProfile((p) => ({ ...p, ...patch }));
@@ -289,27 +326,46 @@ export default function AjustesPage() {
             <p className="text-slate-400 text-center py-6">Aún no tienes suscripciones activas.</p>
           ) : (
             <div className="space-y-3">
-              {subscriptions.map((s) => (
-                <div key={`${s.kind}-${s.id}`} className="flex items-center justify-between gap-4 p-4 rounded-2xl border border-slate-100">
-                  <div className="min-w-0">
-                    <p className="text-[#363C98] font-bold truncate">{s.title}</p>
-                    <p className="text-slate-400 text-sm">
-                      {s.periodicity || '—'}
-                      {s.next_renewal && ` · Renueva el ${new Date(s.next_renewal).toLocaleDateString('es-ES')}`}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-3 shrink-0">
-                    {s.amount != null && (
-                      <span className="text-[#FF690B] font-bold text-sm">
-                        {Number(s.amount).toFixed(2)} {s.currency ? s.currency.toUpperCase() : '€'}
-                      </span>
+              {subscriptions.map((s) => {
+                const busy = actionBusy === s.id;
+                return (
+                  <div key={`${s.kind}-${s.id}`} className="p-4 rounded-2xl border border-slate-100 space-y-3">
+                    <div className="flex items-center justify-between gap-4">
+                      <div className="min-w-0">
+                        <p className="text-[#363C98] font-bold truncate">{s.title}</p>
+                        <p className="text-slate-400 text-sm">
+                          {s.periodicity || '—'}
+                          {s.next_renewal && ` · Renueva el ${new Date(s.next_renewal).toLocaleDateString('es-ES')}`}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-3 shrink-0">
+                        {s.amount != null && (
+                          <span className="text-[#FF690B] font-bold text-sm">
+                            {Number(s.amount).toFixed(2)} {s.currency ? s.currency.toUpperCase() : '€'}
+                          </span>
+                        )}
+                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase ${STATUS_STYLE[s.status] || 'bg-slate-100 text-slate-500'}`}>
+                          {s.status}
+                        </span>
+                      </div>
+                    </div>
+                    {(s.status === 'activa' || s.status === 'en pausa') && (
+                      <div className="flex items-center gap-2 flex-wrap">
+                        {s._cancelScheduled ? (
+                          <span className="text-xs text-slate-400 font-semibold">Se cancelará al final del periodo</span>
+                        ) : s.status === 'en pausa' ? (
+                          <ActionBtn onClick={() => runAction(s, 'resume')} disabled={busy}>Reanudar</ActionBtn>
+                        ) : (
+                          <>
+                            <ActionBtn onClick={() => runAction(s, 'pause')} disabled={busy}>Pausar</ActionBtn>
+                            <ActionBtn danger onClick={() => setCancelTarget(s)} disabled={busy}>Cancelar</ActionBtn>
+                          </>
+                        )}
+                      </div>
                     )}
-                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase ${STATUS_STYLE[s.status] || 'bg-slate-100 text-slate-500'}`}>
-                      {s.status}
-                    </span>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
           <p className="text-slate-400 text-xs">Las tarjetas guardadas, las facturas en PDF y la cancelación se gestionan de forma segura en el portal de pagos (Stripe).</p>
@@ -358,7 +414,30 @@ export default function AjustesPage() {
 
       <ConfirmationModal isOpen={logoutOpen} onClose={() => setLogoutOpen(false)} onConfirm={handleLogout} message="¿Estás seguro de que quieres cerrar sesión?" />
       <ConfirmationModal isOpen={deleteOpen} onClose={() => setDeleteOpen(false)} onConfirm={handleDelete} message="Vas a eliminar tu cuenta y todos tus datos. Esta acción no se puede deshacer. ¿Continuar?" />
+      <ConfirmationModal
+        isOpen={!!cancelTarget}
+        onClose={() => setCancelTarget(null)}
+        onConfirm={() => cancelTarget && runAction(cancelTarget, 'cancel')}
+        message={`¿Cancelar "${cancelTarget?.title || 'esta suscripción'}"? Seguirá activa hasta el final del periodo que ya has pagado.`}
+      />
     </div>
+  );
+}
+
+function ActionBtn({ children, onClick, disabled, danger }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      className={`text-xs font-bold px-3 py-1.5 rounded-full border transition-all active:scale-95 cursor-pointer disabled:opacity-50 ${
+        danger
+          ? 'border-red-200 text-red-500 hover:bg-red-50'
+          : 'border-slate-200 text-[#363C98] hover:border-[#FF690B]/40 hover:text-[#FF690B]'
+      }`}
+    >
+      {children}
+    </button>
   );
 }
 
