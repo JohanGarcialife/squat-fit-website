@@ -19,34 +19,44 @@ const Slider = dynamic(() => import("react-slick"), { ssr: false });
 // 'Continua donde estabas' section will be added once course purchase
 // and progress tracking are implemented (GET /api/v1/course/by-user)
 
+// Flechas de marca visibles (antes las flechas de slick quedaban escondidas).
+const ArrowBtn = ({ onClick, dir }) => (
+  <button
+    type="button"
+    onClick={onClick}
+    aria-label={dir === 'next' ? 'Siguiente' : 'Anterior'}
+    className={`absolute top-1/2 z-20 -translate-y-1/2 ${dir === 'next' ? 'right-0' : 'left-0'} flex h-11 w-11 items-center justify-center rounded-full bg-white text-[#FF690B] shadow-md ring-1 ring-black/5 transition-transform hover:scale-110 active:scale-95`}
+  >
+    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+      {dir === 'next' ? <path d="m9 18 6-6-6-6" /> : <path d="m15 18-6-6 6-6" />}
+    </svg>
+  </button>
+);
+
 const CarouselSection = ({ title, items, variant = 'default', onItemClick }) => {
+  // slidesToShow adaptativo: si hay menos items que columnas, no dejar hueco
+  // a un lado (era lo que hacía que se viera "ladeado").
+  const perView = Math.min(3, Math.max(1, items.length));
   const settings = {
     dots: true,
-    infinite: items.length > 3,
+    infinite: items.length > perView,
     speed: 500,
-    slidesToShow: 3,
+    slidesToShow: perView,
     slidesToScroll: 1,
-    focusOnSelect: true, // Navigate to slide on click
+    focusOnSelect: true,
+    arrows: items.length > 1,
+    nextArrow: <ArrowBtn dir="next" />,
+    prevArrow: <ArrowBtn dir="prev" />,
     responsive: [
-      {
-        breakpoint: 1024,
-        settings: {
-          slidesToShow: 2,
-        },
-      },
-      {
-        breakpoint: 640,
-        settings: {
-          slidesToShow: 1,
-        },
-      },
+      { breakpoint: 1024, settings: { slidesToShow: Math.min(2, items.length) } },
+      { breakpoint: 640, settings: { slidesToShow: 1, arrows: false } },
     ],
   };
 
   return (
     <div className="mb-16">
       <h2 className="text-[#3932C0] font-bold text-3xl mb-8">{title}</h2>
-      <div className="slider-container overflow-hidden max-w-full mx-auto px-2">
+      <div className="slider-container relative max-w-full mx-auto px-2">
         <Slider {...settings}>
           {items.map((item) => (
             <div 
@@ -141,7 +151,7 @@ export default function TopVentas({ courses = [], userCourses = [] }) {
         */}
         <div className="flex-grow"></div> {/* Spacer */}
         <div className="flex items-center space-x-6">
-             <div className="cursor-pointer" onClick={() => setIsModalOpen(true)} className="cursor-pointer text-[#3932C0] hover:text-[#FF690B] transition-colors">
+             <div onClick={() => setIsModalOpen(true)} title="Cerrar sesión" className="cursor-pointer text-[#3932C0] hover:text-[#FF690B] transition-colors">
                 <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
                     <path d="M14 8v-2a2 2 0 0 0 -2 -2h-7a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h7a2 2 0 0 0 2 -2v-2" />
@@ -206,9 +216,10 @@ export default function TopVentas({ courses = [], userCourses = [] }) {
         onItemClick={handleCourseClick}
       />
       
-      {/* 'Continua donde estabas' slider */}
-      <CarouselSection 
-        title="Continua donde estabas" 
+      {/* 'Continua donde estabas' — solo si hay algún curso ya iniciado */}
+      {userCourses.length > 0 && (
+      <CarouselSection
+        title="Continua donde estabas"
         items={userCourses.map(course => {
           let safeImageUrl = "/Group32.png";
           if (course.image) {
@@ -238,9 +249,10 @@ export default function TopVentas({ courses = [], userCourses = [] }) {
             progress: course.progress || 0
           };
         })} 
-        variant="progress" 
+        variant="progress"
         onItemClick={handleCourseClick}
       />
+      )}
 
       <ConfirmationModal
         isOpen={isModalOpen}

@@ -309,6 +309,7 @@ function CursosPageContent() {
         </div>
         
         <RichProductCards
+          show={['fuerte-definido']}
           verifyLoading={loading}
           onVerifyAccess={async () => {
             setLoading(true);
