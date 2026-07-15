@@ -133,7 +133,7 @@ export default function BurgerMenu() {
         <div className='mt-auto pt-8 flex flex-col gap-3'>
           {isClient && isAuth ? (
             <>
-              <p className='text-[#3932C0]/80 text-lg font-medium text-center'>Hola, {user?.username}</p>
+              <p className='text-[#3932C0]/80 text-lg font-medium text-center'>Hola, {user?.firstName || user?.username}</p>
               <Link href="/panel-control" onClick={() => setShow(false)} className='w-full'>
                 <div className='flex justify-center bg-secondary py-3 px-4 rounded-[20px] shadow-md cursor-pointer active:scale-95 transition-transform'>
                   <p className='text-xl font-bold text-white'>Mi panel</p>
