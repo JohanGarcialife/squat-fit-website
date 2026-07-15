@@ -8,6 +8,7 @@ import { useRouter } from 'next/navigation';
 
 import { useAuthStore } from "@/stores/auth.store";
 import { useCartStore } from "@/stores/cart.store";
+import { useUiStore } from "@/stores/ui.store";
 import ConfirmationModal from "@/app/components/ConfirmationModal";
 import usePreloadImages from "@/hooks/usePreloadImages";
 
@@ -110,6 +111,7 @@ const CarouselSection = ({ title, items, variant = 'default', onItemClick }) => 
 export default function TopVentas({ courses = [], userCourses = [] }) {
   const { logout } = useAuthStore();
   const { cart } = useCartStore();
+  const { openCart } = useUiStore();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const router = useRouter();
@@ -161,8 +163,8 @@ export default function TopVentas({ courses = [], userCourses = [] }) {
              </div>
              
               {/* Cart Icon */}
-             <div 
-               onClick={() => router.push('/cart')}
+             <div
+               onClick={openCart}
                className="relative cursor-pointer text-[#3932C0] hover:text-[#FF690B] transition-colors"
              >
                 <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="icon icon-tabler icons-tabler-outline icon-tabler-shopping-cart">
