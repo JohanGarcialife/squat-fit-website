@@ -7,6 +7,11 @@ export const useCartStore = create(
     (set, get) => ({
       cart: [],
 
+      // Último producto eliminado, para poder deshacer mientras el carrito
+      // esté abierto. No se persiste (ver partialize), así no reaparece el
+      // aviso al recargar.
+      lastRemoved: null,
+
       // Añade un producto al carrito (Comportamiento clásico para Carrito global)
       // Si el producto ya existe, incrementa su cantidad.
       addToCart: (product) => {
@@ -38,12 +43,34 @@ export const useCartStore = create(
         set({ cart: [{ ...product, quantity: 1, isDirectCheckout: true }] })
       },
 
-      // Elimina un producto del carrito por su ID
+      // Elimina un producto del carrito por su ID.
+      // Guarda el item y su posición para poder deshacer.
       removeFromCart: (productId) => {
+        const cart = get().cart
+        const index = cart.findIndex((item) => item.id === productId)
+        if (index === -1) return
         set({
-          cart: get().cart.filter((item) => item.id !== productId),
+          cart: cart.filter((item) => item.id !== productId),
+          lastRemoved: { item: cart[index], index },
         })
       },
+
+      // Devuelve al carrito el último producto eliminado, en su posición.
+      undoRemove: () => {
+        const { lastRemoved, cart } = get()
+        if (!lastRemoved) return
+        // Si mientras tanto se volvió a añadir, solo limpiamos el aviso.
+        if (cart.some((item) => item.id === lastRemoved.item.id)) {
+          set({ lastRemoved: null })
+          return
+        }
+        const restored = [...cart]
+        restored.splice(Math.min(lastRemoved.index, restored.length), 0, lastRemoved.item)
+        set({ cart: restored, lastRemoved: null })
+      },
+
+      // Descarta el aviso de deshacer (al cerrar el carrito, por ejemplo).
+      clearLastRemoved: () => set({ lastRemoved: null }),
 
       // Decrementa la cantidad de un producto.
       // Si la cantidad es 1, elimina el producto del carrito.
@@ -81,6 +108,8 @@ export const useCartStore = create(
     }),
     {
       name: 'cart-storage', // Nombre para el almacenamiento en localStorage
+      // Solo persistimos el carrito; lastRemoved es efímero (sesión/pestaña).
+      partialize: (state) => ({ cart: state.cart }),
     }
   )
 )
