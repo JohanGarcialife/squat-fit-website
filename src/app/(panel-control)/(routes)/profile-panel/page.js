@@ -537,6 +537,15 @@ export default function ProfilePage() {
                 : 'Completa tus datos para que tu coach pueda ajustar tu plan.'}
             </p>
           </div>
+          {completion < 100 && (
+            <button
+              type="button"
+              onClick={() => router.push('/onboarding')}
+              className="shrink-0 bg-[#FF690B] text-white font-bold text-sm px-5 py-2.5 rounded-full hover:scale-105 active:scale-95 transition-all shadow-sm cursor-pointer"
+            >
+              Completar
+            </button>
+          )}
         </div>
 
         {/* --- GRID PRINCIPAL --- */}
