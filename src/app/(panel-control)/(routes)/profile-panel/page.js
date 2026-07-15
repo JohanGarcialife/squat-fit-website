@@ -873,7 +873,7 @@ export default function ProfilePage() {
 
         {/* --- BARRA DE GUARDAR (solo si hay cambios) --- */}
         {formik.dirty && (
-          <div className="fixed bottom-0 left-0 md:left-64 right-0 bg-white border-t border-slate-100 p-4 sm:px-8 flex items-center justify-end gap-4 shadow-2xl z-40 animate-fade-in">
+          <div className="fixed bottom-0 left-0 lg:left-64 right-0 bg-white border-t border-slate-100 p-4 sm:px-8 flex items-center justify-end gap-4 shadow-2xl z-40 animate-fade-in">
             <span className="mr-auto hidden sm:block text-slate-400 text-sm font-semibold">Tienes cambios sin guardar</span>
             <button
               type="button"

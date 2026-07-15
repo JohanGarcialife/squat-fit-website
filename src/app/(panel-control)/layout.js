@@ -24,7 +24,9 @@ export default function RootLayout({ children }) {
         <div className="min-h-screen bg-background flex">
         <ToasterProvider />
         <Sidebar />
-        {children}
+        {/* En móvil el Sidebar colapsa a una barra superior fija (h-16); este
+            padding evita que el contenido quede debajo. En lg+ no hace falta. */}
+        <div className="flex-1 min-w-0 pt-16 lg:pt-0">{children}</div>
         <CartDrawer />
         </div>
       </body>

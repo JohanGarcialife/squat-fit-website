@@ -154,57 +154,111 @@ const MENU_ITEMS = [
 export default function Sidebar() {
   const pathname = usePathname()
   const [activeId, setActiveId] = useState(0)
+  const [mobileOpen, setMobileOpen] = useState(false)
 
   useEffect(() => {
     const activeItem = MENU_ITEMS.find(item => item.href && pathname.startsWith(item.href))
     if (activeItem) setActiveId(activeItem.id)
   }, [pathname])
 
+  // Cierra el menú móvil al cambiar de ruta.
+  useEffect(() => { setMobileOpen(false) }, [pathname])
+
+  // Bloquea el scroll de fondo mientras el drawer está abierto.
+  useEffect(() => {
+    if (!mobileOpen) return
+    const prev = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => { document.body.style.overflow = prev }
+  }, [mobileOpen])
+
   const handleItemClick = (id) => setActiveId(id)
 
-  return (
-    <div className="bg-[#FFF6F0] rounded-[40px] flex flex-col items-center py-8 px-6 h-[calc(100vh-40px)] sticky top-[20px] ml-[20px] overflow-y-auto">
-      <div className="flex flex-col w-full max-w-[200px] h-full">
-        {/* Logo */}
-        <Link href="/" className="mx-auto mb-8">
-          <Image src="/LogotipoSquatfit.png" width={80} height={80} alt="Logo" className="hover:scale-105 transition-transform" />
-        </Link>
+  // Contenido del menú, reutilizado en escritorio y en el drawer móvil.
+  const renderNav = (onNavigate) => (
+    <div className="flex flex-col w-full max-w-[200px] h-full mx-auto">
+      {/* Logo */}
+      <Link href="/" className="mx-auto mb-8" onClick={onNavigate}>
+        <Image src="/LogotipoSquatfit.png" width={80} height={80} alt="Logo" className="hover:scale-105 transition-transform" />
+      </Link>
 
-        {/* Telegram Link — oculto de momento (no se necesita el chat todavía) */}
-        {/* <div className="flex items-center space-x-2 border border-[#3932C0] rounded-full py-2 px-4 text-[#3932C0] cursor-pointer hover:bg-[#3932C0]/10 transition duration-200 ease-in-out mb-8">
-          <TelegramIcon />
-          <span className="font-bold text-sm whitespace-nowrap">Ir al Chat</span>
-        </div> */}
+      {/* Menu Items */}
+      <div className="flex flex-col space-y-4 flex-grow">
+        {MENU_ITEMS.map((item) => {
+          if (item.label === 'Ajustes') return null;
+          const isActive = activeId === item.id
+          const Content = (
+            <div className="flex items-center space-x-3 cursor-pointer group" onClick={() => handleItemClick(item.id)}>
+              <div className="transition-transform group-hover:scale-110"><item.Icon filled={isActive} /></div>
+              <span className={`text-lg transition-colors ${isActive ? 'font-bold text-[#FF690B]' : 'text-[#3932C0] group-hover:text-[#FF690B]'}`}>{item.label}</span>
+            </div>
+          )
+          return item.href ? (<Link key={item.id} href={item.href} className="no-underline" onClick={onNavigate}>{Content}</Link>) : (<div key={item.id}>{Content}</div>)
+        })}
+      </div>
 
-        {/* Menu Items */}
-        <div className="flex flex-col space-y-4 flex-grow">
-          {MENU_ITEMS.map((item) => {
-            if (item.label === 'Ajustes') return null;
-            const isActive = activeId === item.id
-            const Content = (
-              <div className="flex items-center space-x-3 cursor-pointer group" onClick={() => handleItemClick(item.id)}>
-                <div className="transition-transform group-hover:scale-110"><item.Icon filled={isActive} /></div>
-                <span className={`text-lg transition-colors ${isActive ? 'font-bold text-[#FF690B]' : 'text-[#3932C0] group-hover:text-[#FF690B]'}`}>{item.label}</span>
-              </div>
-            )
-            return item.href ? (<Link key={item.id} href={item.href} className="no-underline">{Content}</Link>) : (<div key={item.id}>{Content}</div>)
-          })}
-        </div>
-
-        {/* Bottom Items (Ajustes) */}
-        <div className="mt-auto pt-8">
-          {MENU_ITEMS.filter(item => item.label === 'Ajustes').map((item) => {
-            const isActive = activeId === item.id
-            return (
-              <div key={item.id} className="flex items-center space-x-3 cursor-pointer group" onClick={() => handleItemClick(item.id)}>
-                <div className="transition-transform group-hover:scale-110"><item.Icon filled={isActive} /></div>
-                <span className={`text-lg transition-colors ${isActive ? 'font-bold text-[#FF690B]' : 'text-[#3932C0] group-hover:text-[#FF690B]'}`}>{item.label}</span>
-              </div>
-            )
-          })}
-        </div>
+      {/* Bottom Items (Ajustes) */}
+      <div className="mt-auto pt-8">
+        {MENU_ITEMS.filter(item => item.label === 'Ajustes').map((item) => {
+          const isActive = activeId === item.id
+          return (
+            <div key={item.id} className="flex items-center space-x-3 cursor-pointer group" onClick={() => handleItemClick(item.id)}>
+              <div className="transition-transform group-hover:scale-110"><item.Icon filled={isActive} /></div>
+              <span className={`text-lg transition-colors ${isActive ? 'font-bold text-[#FF690B]' : 'text-[#3932C0] group-hover:text-[#FF690B]'}`}>{item.label}</span>
+            </div>
+          )
+        })}
       </div>
     </div>
+  )
+
+  return (
+    <>
+      {/* Barra superior (solo móvil/tablet, < lg): logo + hamburguesa */}
+      <div className="lg:hidden fixed top-0 inset-x-0 z-40 h-16 bg-[#FFF6F0] border-b border-orange-100 flex items-center justify-between px-4">
+        <Link href="/">
+          <Image src="/LogotipoSquatfit.png" width={44} height={44} alt="Logo" />
+        </Link>
+        <button
+          type="button"
+          onClick={() => setMobileOpen(true)}
+          aria-label="Abrir menú"
+          className="p-2 text-[#3932C0] hover:text-[#FF690B] transition-colors cursor-pointer"
+        >
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </button>
+      </div>
+
+      {/* Sidebar de escritorio (lg+) */}
+      <div className="hidden lg:flex bg-[#FFF6F0] rounded-[40px] flex-col items-center py-8 px-6 h-[calc(100vh-40px)] sticky top-[20px] ml-[20px] overflow-y-auto shrink-0">
+        {renderNav()}
+      </div>
+
+      {/* Drawer móvil */}
+      <div className={`lg:hidden fixed inset-0 z-50 ${mobileOpen ? '' : 'pointer-events-none'}`} aria-hidden={!mobileOpen}>
+        <div
+          onClick={() => setMobileOpen(false)}
+          className={`absolute inset-0 bg-black/30 transition-opacity duration-300 ${mobileOpen ? 'opacity-100' : 'opacity-0'}`}
+        />
+        <aside
+          className={`absolute left-0 top-0 h-full w-[80%] max-w-[300px] bg-[#FFF6F0] shadow-2xl flex flex-col py-8 px-6 overflow-y-auto transition-transform duration-300 ease-out ${mobileOpen ? 'translate-x-0' : '-translate-x-full'}`}
+        >
+          <button
+            type="button"
+            onClick={() => setMobileOpen(false)}
+            aria-label="Cerrar menú"
+            className="self-end p-1 text-[#FF690B] hover:opacity-80 transition-opacity mb-2 cursor-pointer"
+          >
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M18 6 6 18M6 6l12 12" />
+            </svg>
+          </button>
+          {renderNav(() => setMobileOpen(false))}
+        </aside>
+      </div>
+    </>
   )
 }
 
