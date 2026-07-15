@@ -70,17 +70,13 @@ const StarIcon = ({ filled }) => (
   </svg>
 )
 
+// Cursos: birrete. El estado activo usa la MISMA forma de contorno pero en
+// naranja (antes el "filled" era un glyph distinto y no correspondía).
 const SchoolIcon = ({ filled }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill={filled ? "#FF690B" : "none"} stroke={filled ? "none" : "#3932C0"} strokeWidth={filled ? "0" : "2"} strokeLinecap="round" strokeLinejoin="round">
+  <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke={filled ? "#FF690B" : "#3932C0"} strokeWidth={filled ? "2.5" : "2"} strokeLinecap="round" strokeLinejoin="round">
     <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-    {filled ? (
-        <path d="M12 2.133l10.59 4.354a1 1 0 0 1 0 1.854l-5.467 2.248v5.411a1 1 0 0 1 -1.455 .89l-3.328 -1.664a.5 .5 0 0 0 -.44 0l-3.328 1.664a1 1 0 0 1 -1.455 -.89v-5.411l-5.708 -2.347a1 1 0 0 1 0 -1.854l10.59 -4.354z" />
-    ) : (
-        <>
-            <path d="M22 9l-10 -4l-10 4l10 4l10 -4v6" />
-            <path d="M6 10.6v5.4a6 3 0 0 0 12 0v-5.4" />
-        </>
-    )}
+    <path d="M22 9l-10 -4l-10 4l10 4l10 -4v6" />
+    <path d="M6 10.6v5.4a6 3 0 0 0 12 0v-5.4" />
   </svg>
 )
 
