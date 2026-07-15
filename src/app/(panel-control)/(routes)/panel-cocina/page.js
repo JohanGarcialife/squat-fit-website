@@ -132,6 +132,7 @@ export default function CocinaPage() {
           </div>
           
           <RichProductCards
+            show={['cocina']}
             verifyLoading={loading}
             onVerifyAccess={async () => {
               setLoading(true);

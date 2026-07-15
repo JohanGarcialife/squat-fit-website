@@ -4,8 +4,8 @@ import React from 'react';
 import Link from 'next/link';
 import { Star, BookOpen, Utensils, Users, Video, RefreshCw, Compass, Award, ClipboardList } from 'lucide-react';
 
-export default function RichProductCards({ onVerifyAccess, verifyLoading }) {
-  const cards = [
+export default function RichProductCards({ onVerifyAccess, verifyLoading, show }) {
+  const allCards = [
     {
       id: 'cocina',
       title: (
@@ -89,30 +89,15 @@ export default function RichProductCards({ onVerifyAccess, verifyLoading }) {
     }
   ];
 
+  // Cada pestaña muestra solo su(s) producto(s): antes salían las 3 juntas
+  // aunque no correspondiera. `show` es un array de ids; sin él, se ven todas.
+  const cards = show ? allCards.filter((c) => show.includes(c.id)) : allCards;
+  const gridCols = cards.length === 1 ? 'md:grid-cols-1 max-w-md' : cards.length === 2 ? 'md:grid-cols-2 max-w-4xl' : 'md:grid-cols-2 lg:grid-cols-3 max-w-7xl';
+
   return (
     <div className="w-full flex flex-col items-center">
-      {/* Botón de verificación superior */}
-      <div className="w-full flex justify-center mb-12">
-        <button
-          onClick={onVerifyAccess}
-          disabled={verifyLoading}
-          className="flex items-center justify-center gap-3 bg-white text-[#FF690B] border-2 border-[#FF690B] font-bold py-4 px-10 rounded-2xl text-lg hover:bg-orange-50/50 transition-all cursor-pointer shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {verifyLoading ? (
-            <>
-              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-[#FF690B]"></div>
-              Verificando...
-            </>
-          ) : (
-            <>
-              🔄 Verificar mi pago / acceso
-            </>
-          )}
-        </button>
-      </div>
-
       {/* Grid de Tarjetas */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 w-full max-w-7xl px-4 md:px-0">
+      <div className={`grid grid-cols-1 ${gridCols} gap-10 w-full px-4 md:px-0`}>
         {cards.map((card) => {
           return (
             <div
@@ -204,6 +189,28 @@ export default function RichProductCards({ onVerifyAccess, verifyLoading }) {
       
       {/* Texto de suscripción inferior */}
       <p className="text-gray-400 text-sm mt-12 text-center">Desde 9,99€/mes • Cancela cuando quieras</p>
+
+      {/* Enlace discreto para refrescar el acceso tras comprar (reemplaza al
+          botón grande; en Fase 3 esta acción vivirá también en Ajustes). */}
+      {onVerifyAccess && (
+        <button
+          onClick={onVerifyAccess}
+          disabled={verifyLoading}
+          className="mt-4 flex items-center gap-2 text-sm text-gray-400 hover:text-[#FF690B] transition-colors disabled:opacity-50"
+        >
+          {verifyLoading ? (
+            <>
+              <span className="inline-block h-3.5 w-3.5 animate-spin rounded-full border-b-2 border-current"></span>
+              Actualizando…
+            </>
+          ) : (
+            <>
+              <RefreshCw size={14} />
+              ¿Acabas de comprar y no ves tu acceso? Actualizar
+            </>
+          )}
+        </button>
+      )}
     </div>
   );
 }
