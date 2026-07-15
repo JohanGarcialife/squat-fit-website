@@ -147,7 +147,7 @@ const MENU_ITEMS = [
   { id: 5, label: 'Perfil', href: '/profile-panel', Icon: UserIcon },
   { id: 6, label: 'Contacto', href: '/panel-contacto', Icon: MessageIcon },
   { id: 8, label: 'Info', href: '/panel-info', Icon: InfoIcon },
-  { id: 7, label: 'Ajustes', href: null, Icon: SettingsIcon },
+  { id: 7, label: 'Ajustes', href: '/panel-ajustes', Icon: SettingsIcon },
 ]
 
 // ─── Default (navigation) Sidebar ───────────────────────────────────────────
@@ -201,12 +201,15 @@ export default function Sidebar() {
       <div className="mt-auto pt-8">
         {MENU_ITEMS.filter(item => item.label === 'Ajustes').map((item) => {
           const isActive = activeId === item.id
-          return (
-            <div key={item.id} className="flex items-center space-x-3 cursor-pointer group" onClick={() => handleItemClick(item.id)}>
+          const Content = (
+            <div className="flex items-center space-x-3 cursor-pointer group" onClick={() => handleItemClick(item.id)}>
               <div className="transition-transform group-hover:scale-110"><item.Icon filled={isActive} /></div>
               <span className={`text-lg transition-colors ${isActive ? 'font-bold text-[#FF690B]' : 'text-[#3932C0] group-hover:text-[#FF690B]'}`}>{item.label}</span>
             </div>
           )
+          return item.href
+            ? (<Link key={item.id} href={item.href} className="no-underline" onClick={onNavigate}>{Content}</Link>)
+            : (<div key={item.id}>{Content}</div>)
         })}
       </div>
     </div>
