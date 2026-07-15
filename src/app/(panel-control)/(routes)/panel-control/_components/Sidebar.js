@@ -174,11 +174,11 @@ export default function Sidebar() {
           <Image src="/LogotipoSquatfit.png" width={80} height={80} alt="Logo" className="hover:scale-105 transition-transform" />
         </Link>
 
-        {/* Telegram Link */}
-        <div className="flex items-center space-x-2 border border-[#3932C0] rounded-full py-2 px-4 text-[#3932C0] cursor-pointer hover:bg-[#3932C0]/10 transition duration-200 ease-in-out mb-8">
+        {/* Telegram Link — oculto de momento (no se necesita el chat todavía) */}
+        {/* <div className="flex items-center space-x-2 border border-[#3932C0] rounded-full py-2 px-4 text-[#3932C0] cursor-pointer hover:bg-[#3932C0]/10 transition duration-200 ease-in-out mb-8">
           <TelegramIcon />
           <span className="font-bold text-sm whitespace-nowrap">Ir al Chat</span>
-        </div>
+        </div> */}
 
         {/* Menu Items */}
         <div className="flex flex-col space-y-4 flex-grow">

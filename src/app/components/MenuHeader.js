@@ -108,7 +108,7 @@ export default function MenuHeader() {
                             Mi panel
                         </button>
                     </Link>
-                    <p className='text-secondary text-xl ml-2'>Hola, {user?.username}</p>
+                    <p className='text-secondary text-xl ml-2'>Hola, {user?.firstName || user?.username}</p>
                         <button 
                             onClick={() => setIsModalOpen(true)} 
                             className='text-secondary font-bold hover:opacity-80 text-2xl transition cursor-pointer flex items-center gap-2'>
