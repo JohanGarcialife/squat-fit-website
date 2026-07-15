@@ -140,7 +140,7 @@ const InfoIcon = ({ filled }) => (
 // --- Configuration ---
 const MENU_ITEMS = [
   { id: 0, label: 'Inicio', href: '/panel-control', Icon: HomeIcon },
-  { id: 1, label: 'Alertas', href: null, Icon: BellIcon },
+  { id: 1, label: 'Alertas', href: '/panel-alertas', Icon: BellIcon },
   { id: 2, label: 'Cocina', href: '/panel-cocina', Icon: AppleIcon },
   { id: 3, label: 'Planes', href: '/panel-planes', Icon: StarIcon },
   { id: 4, label: 'Cursos', href: '/panel-cursos', Icon: SchoolIcon },
