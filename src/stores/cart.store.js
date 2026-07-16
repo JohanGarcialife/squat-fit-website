@@ -73,12 +73,15 @@ export const useCartStore = create(
       clearLastRemoved: () => set({ lastRemoved: null }),
 
       // Decrementa la cantidad de un producto.
-      // Si la cantidad es 1, elimina el producto del carrito.
+      // Si la cantidad es 1, elimina el producto del carrito (y guarda el
+      // borrado para poder deshacerlo, igual que con el botón de la papelera).
       decrementQuantity: (productId) => {
         const cart = get().cart
-        const productInCart = cart.find((item) => item.id === productId)
+        const index = cart.findIndex((item) => item.id === productId)
+        if (index === -1) return
+        const productInCart = cart[index]
 
-        if (productInCart && productInCart.quantity > 1) {
+        if (productInCart.quantity > 1) {
           const updatedCart = cart.map((item) =>
             item.id === productId
               ? { ...item, quantity: item.quantity - 1 }
@@ -86,8 +89,11 @@ export const useCartStore = create(
           )
           set({ cart: updatedCart })
         } else {
-          // Si la cantidad es 1 o el producto no se encuentra, lo elimina
-          set({ cart: get().cart.filter((item) => item.id !== productId) })
+          // Última unidad: es un borrado → deshacible.
+          set({
+            cart: cart.filter((item) => item.id !== productId),
+            lastRemoved: { item: productInCart, index },
+          })
         }
       },
 

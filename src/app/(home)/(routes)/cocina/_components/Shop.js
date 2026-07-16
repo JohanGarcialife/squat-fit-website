@@ -2,6 +2,7 @@
 import React, { useState } from 'react'
 import { useCartStore } from '@/stores/cart.store'
 import { useAuthStore } from '@/stores/auth.store'
+import { useUiStore } from '@/stores/ui.store'
 import { toast } from 'react-hot-toast'
 
 // Sección de precios de Cocina Squad Fit: 4 tarjetas
@@ -105,6 +106,7 @@ function PricingCard({
 export default function Shop() {
   const { addToCart, setDirectCheckoutItem, cart } = useCartStore()
   const { subscriptionType } = useAuthStore()
+  const { peekCart } = useUiStore()
 
   const TIER_RANK = { monthly: 1, annual: 2, permanent: 3 }
   const currentTierRank = TIER_RANK[subscriptionType] || 0
@@ -240,7 +242,10 @@ export default function Shop() {
       price: product.price,
       image: product.image || '/LibrosFisicos.png',
     })
-    toast.success('Añadido al carrito')
+    // En vez de un toast, el carrito se asoma por la derecha como sugerencia:
+    // un clic lo abre entero, un clic fuera lo retira. Menos invasivo que
+    // abrirlo del todo en cada producto añadido.
+    peekCart()
   }
 
   const buyDigitalPermanent = () => {
