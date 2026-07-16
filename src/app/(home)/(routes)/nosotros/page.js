@@ -5,6 +5,7 @@ import Achievements from '../../_components/Achievements';
 import Education from '../../_components/Education';
 import SobreHamlet from '../../_components/SobreHamlet';
 import Empleo from '../../_components/Empleo';
+import BrandTabs from '@/app/components/BrandTabs';
 
 // Componente principal de la página "Nosotros" con Tabs
 export default function NosotrosPage() {
@@ -27,28 +28,8 @@ export default function NosotrosPage() {
     <> {/* Fragmento para permitir múltiples elementos hermanos */}
         <main className="w-full px-4 sm:px-6 lg:px-16 py-10 font-sans">
         
-        {/* Navegación de TABS: reparten el ancho a partes iguales para que
-            quepan sin scroll horizontal (antes desbordaban en móvil) */}
-        <nav className="flex items-end w-full mb-10">
-          {tabs.map((tab) => {
-            const isActive = activeTab === tab.id;
-            return (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`
-                  flex-1 min-w-0 text-center whitespace-nowrap px-1.5 sm:px-6 py-2.5 sm:py-3 text-xs sm:text-lg font-medium transition-all duration-200 rounded-t-2xl
-                  ${isActive
-                    ? 'text-orange-500 bg-white border-t-2 border-l-2 border-r-2 border-orange-500 -mb-[2px] z-10 font-bold'
-                    : 'text-[#3B3B98] hover:text-blue-800 mb-0 border-b-2 border-primary'
-                  }
-                `}
-              >
-                {tab.label}
-              </button>
-            );
-          })}
-        </nav>
+        {/* Submenú de marca (mismo formato en toda la web y el panel) */}
+        <BrandTabs tabs={tabs} active={activeTab} onChange={setActiveTab} className="mb-10" />
 
         {/* Contenido dinámico según la tab activa */}
         <section className="text-gray-800 leading-relaxed min-h-[500px] bg-white">

@@ -218,3 +218,41 @@ img, a, button {
 .react-tel-input .flag-dropdown.open .selected-flag {
   background-color: transparent !important;
 }
+/* ── Submenú de marca ────────────────────────────────────────────────────────
+   Formato único de submenú (pestañas ligeras con indicador inferior naranja).
+   En React se usa vía <BrandTabs>; estas clases permiten replicar exactamente
+   el mismo submenú fuera de ese componente (p. ej. en el back office).        */
+.sf-tabs {
+  display: flex;
+  gap: 0;
+  overflow-x: auto;
+  margin-bottom: -1px; /* la barra de la activa se come la línea inferior */
+  border-bottom: 1px solid #e2e8f0;
+}
+@media (min-width: 640px) {
+  .sf-tabs { gap: 1.5rem; }
+}
+.sf-tab {
+  white-space: nowrap;
+  padding: 0.625rem 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #3932c0; /* azul de marca: pestaña inactiva */
+  border-bottom: 3px solid transparent;
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+@media (min-width: 640px) {
+  .sf-tab { padding: 0.75rem 1rem; font-size: 1rem; }
+}
+.sf-tab:hover { color: #ff690b; }
+.sf-tab-active {
+  color: #ff690b; /* naranja de marca: pestaña activa */
+  border-bottom-color: #ff690b;
+  font-weight: 700;
+}
+
+/* Oculta la barra de scroll (submenús y carruseles horizontales).
+   Se usaba en el código pero nunca llegó a definirse. */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
