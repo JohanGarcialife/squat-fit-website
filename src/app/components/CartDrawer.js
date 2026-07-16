@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
@@ -14,10 +14,29 @@ import { useUiStore } from '@/stores/ui.store'
 export default function CartDrawer() {
   const router = useRouter()
   const [isClient, setIsClient] = useState(false)
-  const { isCartOpen, closeCart } = useUiStore()
+  const { isCartOpen, closeCart, isCartPeeking, openCart, closePeek } = useUiStore()
   const { cart, addToCart, decrementQuantity, removeFromCart, lastRemoved, undoRemove, clearLastRemoved } = useCartStore()
+  const asideRef = useRef(null)
 
   useEffect(() => { setIsClient(true) }, [])
+
+  // Con el carrito "asomado": un clic fuera lo retira. El listener se registra
+  // en el siguiente tick para no comerse el mismo clic de "Añadir al carrito".
+  useEffect(() => {
+    if (!isCartPeeking) return
+    let onDocClick
+    const t = setTimeout(() => {
+      onDocClick = (e) => {
+        if (asideRef.current?.contains(e.target)) return // el clic en el panel lo abre
+        closePeek()
+      }
+      document.addEventListener('click', onDocClick)
+    }, 0)
+    return () => {
+      clearTimeout(t)
+      if (onDocClick) document.removeEventListener('click', onDocClick)
+    }
+  }, [isCartPeeking, closePeek])
 
   // El aviso de "deshacer" solo vive mientras el carrito está abierto.
   useEffect(() => {
@@ -65,22 +84,31 @@ export default function CartDrawer() {
   const overlay = (
     <div
       className={`fixed inset-0 z-[100] ${isCartOpen ? '' : 'pointer-events-none'}`}
-      aria-hidden={!isCartOpen}
+      aria-hidden={!isCartOpen && !isCartPeeking}
     >
-      {/* Fondo */}
+      {/* Fondo: solo al abrir del todo. Asomado no oscurece ni bloquea la web. */}
       <div
         onClick={requestClose}
-        className={`absolute inset-0 bg-black/25 transition-opacity duration-300 ${isCartOpen ? 'opacity-100' : 'opacity-0'}`}
+        className={`absolute inset-0 bg-black/25 transition-opacity duration-300 ${isCartOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
       />
 
       {/* Panel. En móvil deja asomar la página por la izquierda (como el menú),
           en vez de taparla entera. En escritorio el 86% supera el tope de
           420px, así que ahí no cambia nada. */}
       <aside
+        ref={asideRef}
         role="dialog"
-        aria-modal="true"
+        aria-modal={isCartOpen}
         aria-label="Carrito"
-        className={`absolute right-0 top-0 h-full w-[86%] max-w-[420px] bg-white shadow-2xl flex flex-col transition-transform duration-300 ease-out ${isCartOpen ? 'translate-x-0' : 'translate-x-full'}`}
+        onClick={isCartPeeking ? openCart : undefined}
+        title={isCartPeeking ? 'Ver tu carrito' : undefined}
+        className={`absolute right-0 top-0 h-full w-[86%] max-w-[420px] bg-white shadow-2xl flex flex-col transition-transform duration-300 ease-out ${
+          isCartOpen
+            ? 'translate-x-0'
+            : isCartPeeking
+              ? 'translate-x-[calc(100%-84px)] pointer-events-auto cursor-pointer'
+              : 'translate-x-full'
+        }`}
       >
         <header className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
           <h2 className="text-secondary text-xl font-extrabold">
