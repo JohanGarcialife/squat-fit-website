@@ -4,6 +4,7 @@ import React, { useState } from 'react'
 import Image from 'next/image'
 import Achievements from '../../../(home)/_components/Achievements'
 import { LEGAL_SECTIONS } from '@/app/components/LegalContent'
+import BrandTabs from '@/app/components/BrandTabs'
 
 // Pestañas "sobre" (contenido propio) + secciones legales (módulo compartido
 // con la web pública /politicas, para que ambos muestren lo mismo).
@@ -23,25 +24,8 @@ export default function InfoPage() {
       <div className="max-w-5xl mx-auto">
         <h1 className="text-3xl font-extrabold text-[#363C98] mb-6">Información</h1>
 
-        {/* Tabs tipo píldora: azul inactivo, naranja activo */}
-        <nav className="flex gap-2 w-full overflow-x-auto no-scrollbar mb-8 pb-1">
-          {ALL_TABS.map((tab) => {
-            const isActive = activeTab === tab.id
-            return (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`whitespace-nowrap px-4 py-2 text-sm font-bold rounded-full transition-colors cursor-pointer ${
-                  isActive
-                    ? 'bg-[#FF690B] text-white shadow-sm'
-                    : 'bg-white text-[#3932C0] border border-slate-200 hover:border-[#FF690B]/40 hover:text-[#FF690B]'
-                }`}
-              >
-                {tab.label}
-              </button>
-            )
-          })}
-        </nav>
+        {/* Submenú de marca (mismo formato que la web pública) */}
+        <BrandTabs tabs={ALL_TABS} active={activeTab} onChange={setActiveTab} className="mb-8" />
 
         {/* Contenido en tarjeta */}
         <section className="bg-white rounded-3xl border border-slate-100 shadow-sm p-6 sm:p-10 text-gray-800 leading-relaxed min-h-[500px]">
