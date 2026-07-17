@@ -20,7 +20,7 @@ export default function HeroSection() {
 <div className='flex flex-row w-full items-center lg:items-start lg:justify-center'>
 <div className='flex flex-row items-center justify-center lg:justify-start w-full'>
 
-<LandingButton variant="blue" size="lg" autoShine className='mt-8'>Reserva tu plaza</LandingButton>
+<LandingButton variant="blue" size="lg" autoShine href="/planes" className='mt-8'>Reserva tu plaza</LandingButton>
 </div>
 </div>
 

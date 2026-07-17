@@ -112,7 +112,7 @@ export default function HowItWorks() {
 
       </div>
 
-      <LandingButton variant="orange" size="lg" autoShine className='mt-12 w-full max-w-[300px] md:max-w-none md:w-auto'>
+      <LandingButton variant="orange" size="lg" autoShine href="/planes" className='mt-12 w-full max-w-[300px] md:max-w-none md:w-auto'>
         Aplicar al programa
       </LandingButton>
     </div>
