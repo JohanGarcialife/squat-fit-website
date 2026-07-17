@@ -105,13 +105,16 @@ export default function BurgerMenu() {
         {/* Navegación */}
         <nav className='flex flex-col gap-1'>
           {[
+            { href: '/', label: 'Inicio' },
+            { href: '/programa', label: 'Programa' },
             { href: '/cocina', label: 'Cocina' },
-            { href: '/planes', label: 'Planes' },
             { href: '/cursos', label: 'Cursos' },
+            { href: '/nosotros', label: 'Conócenos' },
             { href: '/politicas', label: 'Políticas' },
-            { href: '/nosotros', label: 'Nosotros' },
           ].map((item) => {
-            const isActive = pathname?.startsWith(item.href);
+            // '/' (Inicio) solo activo en la home exacta; el resto por prefijo
+            // (si no, startsWith('/') marcaría Inicio en todas las páginas).
+            const isActive = item.href === '/' ? pathname === '/' : pathname?.startsWith(item.href);
             return (
               <Link
                 key={item.href}

@@ -58,7 +58,7 @@ export default function RichProductCards({ onVerifyAccess, verifyLoading, show }
       ],
       btnText: 'Empezar mi cambio',
       btnBg: 'bg-[#FF690B] hover:bg-[#e05b08]',
-      btnLink: '/planes'
+      btnLink: '/programa'
     },
     {
       id: 'fuerte-definido',

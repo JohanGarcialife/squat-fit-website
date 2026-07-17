@@ -49,7 +49,7 @@ export default function RelatableSection() {
         {/* --- Botón CTA --- */}
         <div className="pt-4">
           <LandingButton variant="orange" size="lg" autoShine onClick={handleScrollToPlans}>
-            Reserva tu plaza
+            Unirme al programa
           </LandingButton>
         </div>
 

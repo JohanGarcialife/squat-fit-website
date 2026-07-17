@@ -19,10 +19,12 @@ export default function MenuHeader() {
     const [isModalOpen, setIsModalOpen] = useState(false);
 
     // Determine active menu item based on current URL path
-    let active = 'home';
-    if (pathname?.startsWith('/cocina')) active = 'cocina';
-    else if (pathname?.startsWith('/planes')) active = 'planes';
+    let active = '';
+    if (pathname === '/') active = 'home';
+    else if (pathname?.startsWith('/programa')) active = 'programa';
+    else if (pathname?.startsWith('/cocina')) active = 'cocina';
     else if (pathname?.startsWith('/cursos')) active = 'cursos';
+    else if (pathname?.startsWith('/nosotros')) active = 'nosotros';
 
     // En las propias páginas de acceso/registro no tiene sentido repetir
     // los botones "Acceder"/"Registro" en el header
@@ -56,22 +58,23 @@ export default function MenuHeader() {
                     />
                 </Link>
 
-                <div className='flex gap-5 text-secondary text-2xl justify-start'> {/* Enlaces ahora justificados a la izquierda dentro de su grupo */}
-                    <Link href="/cocina">
-                        <p className={`px-4 py-1.5 rounded-2xl transition-colors ${active === 'cocina' ? 'text-primary font-bold bg-[#FFEDE0]' : 'text-secondary hover:text-primary hover:bg-[#FF690B]/10'}`}>
-                            Cocina
-                        </p>
-                    </Link>
-                    <Link href="/planes">
-                        <p className={`px-4 py-1.5 rounded-2xl transition-colors ${active === 'planes' ? 'text-primary font-bold bg-[#FFEDE0]' : 'text-secondary hover:text-primary hover:bg-[#FF690B]/10'}`}>
-                            Planes
-                        </p>
-                    </Link>
-                    <Link href="/cursos">
-                        <p className={`px-4 py-1.5 rounded-2xl transition-colors ${active === 'cursos' ? 'text-primary font-bold bg-[#FFEDE0]' : 'text-secondary hover:text-primary hover:bg-[#FF690B]/10'}`}>
-                            Cursos
-                        </p>
-                    </Link>
+                {/* Nav de marca: Inicio · Programa · Cocina · Cursos · Conócenos.
+                    text-xl + gap-4 para que los 5 items quepan junto al logo y los
+                    botones de cuenta desde 1024px (antes eran 3 items a text-2xl). */}
+                <div className='flex gap-4 text-secondary text-xl justify-start'>
+                    {[
+                        { href: '/', key: 'home', label: 'Inicio' },
+                        { href: '/programa', key: 'programa', label: 'Programa' },
+                        { href: '/cocina', key: 'cocina', label: 'Cocina' },
+                        { href: '/cursos', key: 'cursos', label: 'Cursos' },
+                        { href: '/nosotros', key: 'nosotros', label: 'Conócenos' },
+                    ].map((item) => (
+                        <Link key={item.key} href={item.href}>
+                            <p className={`px-4 py-1.5 rounded-2xl transition-colors ${active === item.key ? 'text-primary font-bold bg-[#FFEDE0]' : 'text-secondary hover:text-primary hover:bg-[#FF690B]/10'}`}>
+                                {item.label}
+                            </p>
+                        </Link>
+                    ))}
                 </div>
             </div>
 

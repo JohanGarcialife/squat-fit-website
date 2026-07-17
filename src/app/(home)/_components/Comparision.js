@@ -113,8 +113,8 @@ export default function Comparision(props) {
           </div>
           {/* Botón debajo, con separación del comparador */}
           <div className="w-full flex justify-center mt-16">
-            <LandingButton variant="orange" size="lg" autoShine href="/planes" className="w-[70%] max-w-[340px]">
-              Reserva tu plaza
+            <LandingButton variant="orange" size="lg" autoShine href="/programa" className="w-[70%] max-w-[340px]">
+              Unirme al programa
             </LandingButton>
           </div>
         </>
@@ -127,8 +127,8 @@ export default function Comparision(props) {
             <p className="text-primary font-bold text-6xl">Un cambio físico que se mantiene</p>
             <p className="text-black text-2xl mt-10">Aprende a mantenerte en forma, evitar el efecto rebote y progresar igual que cientos de miembros de nuestra comunidad 👇🏼</p>
             <div className="w-full flex items-center justify-start gap-10">
-              <LandingButton variant="orange" size="lg" autoShine href="/planes" className="mt-10 text-xl lg:text-2xl">
-                Reserva tu plaza
+              <LandingButton variant="orange" size="lg" autoShine href="/programa" className="mt-10 text-xl lg:text-2xl">
+                Unirme al programa
               </LandingButton>
             </div>
           </div>

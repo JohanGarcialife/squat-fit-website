@@ -36,6 +36,13 @@ const nextConfig = {
       },
     ],
   },
+  // La antigua ruta /planes pasó a llamarse /programa (reestructura de marca).
+  // Redirección permanente para no romper enlaces guardados ni SEO.
+  async redirects() {
+    return [
+      { source: '/planes', destination: '/programa', permanent: true },
+    ];
+  },
   async headers() {
     return [
       {

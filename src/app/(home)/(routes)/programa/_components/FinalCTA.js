@@ -27,7 +27,7 @@ export default function FinalCTA() {
         {/* --- Botón Blanco CTA --- */}
         <div>
           <LandingButton variant="orange-light" size="xl" autoShine onClick={handleScrollToPlans}>
-            Reserva tu plaza
+            Unirme al programa
           </LandingButton>
         </div>
 
