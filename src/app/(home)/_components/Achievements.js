@@ -1,4 +1,5 @@
 import React from 'react';
+import { ABOUT } from './aboutStyles';
 
 const Achievements = () => {
   const logros = [
@@ -13,34 +14,31 @@ const Achievements = () => {
   const meritos = [
     "Experta en nutrición, entrenamiento y formación",
     "Promotora del entrenamiento de fuerza y el fitness en la mujer",
-    "Ayudado a cientos de personas a mejorar su relación con la comida/ recuperar la menstruación/ o perder el miedo a comer",
+    "Ayudado a cientos de personas a mejorar su relación con la comida / recuperar la menstruación / o perder el miedo a comer",
     "Formadora en plataformas nacionales: ICNS y FitGeneration"
   ];
 
   return (
-    <section className="max-w-6xl mx-auto p-8 font-sans">
-      <div className="grid md:grid-cols-2 gap-12">
-        {/* Columna Logros */}
+    <section className="mt-12">
+      <div className="grid sm:grid-cols-2 gap-8 sm:gap-12">
         <div>
-          <h2 className="text-4xl font-bold text-primary mb-6">Logros</h2>
-          <ul className="space-y-4">
+          <h2 className={ABOUT.h2}>Logros</h2>
+          <ul className="mt-4 space-y-2.5">
             {logros.map((item, index) => (
-              <li key={index} className="flex items-start">
-                <span className="text-primary mr-2 text-xl">•</span>
-                <p className="text-gray-800 text-2xl leading-relaxed">{item}</p>
+              <li key={index} className="flex items-start gap-2.5">
+                <span className="text-[#FF690B] leading-7">•</span>
+                <p className={ABOUT.p}>{item}</p>
               </li>
             ))}
           </ul>
         </div>
-
-        {/* Columna Méritos */}
         <div>
-          <h2 className="text-4xl font-bold text-primary mb-6">Méritos</h2>
-          <ul className="space-y-4">
+          <h2 className={ABOUT.h2}>Méritos</h2>
+          <ul className="mt-4 space-y-2.5">
             {meritos.map((item, index) => (
-              <li key={index} className="flex items-start">
-                <span className="text-primary mr-2 text-xl">•</span>
-                <p className="text-gray-800 text-2xl leading-relaxed">{item}</p>
+              <li key={index} className="flex items-start gap-2.5">
+                <span className="text-[#FF690B] leading-7">•</span>
+                <p className={ABOUT.p}>{item}</p>
               </li>
             ))}
           </ul>
