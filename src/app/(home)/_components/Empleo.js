@@ -3,6 +3,7 @@ import React, { useState } from 'react'
 import Image from 'next/image'
 import { Formik, Form, Field, ErrorMessage } from 'formik'
 import * as Yup from 'yup'
+import { ABOUT } from './aboutStyles'
 
 // Schema de validación
 const validationSchema = Yup.object({
@@ -69,92 +70,78 @@ export default function Empleo() {
   }
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-16 font-sans">
+    <div className="animate-fadeIn font-sans">
       {/* SECCIÓN 1: HEADER + IMAGEN */}
-      <div className="flex flex-col lg:flex-row items-center justify-between gap-12 mb-20 animate-fadeIn">
-        <div className="lg:w-1/2">
-          <h1 className="text-8xl font-bold text-[#3B3B98] mb-8">Empleo</h1>
-          <div className="space-y-6 text-gray-700 text-3xl leading-relaxed">
-            <p>
-              En Squad Fit estamos construyendo un proyecto a largo plazo, con
-              impacto real en la vida de las personas.
+      <div className="flex flex-col md:flex-row items-start justify-between gap-8 md:gap-10 mb-14">
+        <div className="flex-1 order-2 md:order-1">
+          <p className={ABOUT.eyebrow}>Trabaja con nosotros</p>
+          <h1 className={`${ABOUT.h1} mt-2 mb-4`}>Empleo</h1>
+          <div className="space-y-4">
+            <p className={ABOUT.p}>
+              En Squad Fit estamos construyendo un proyecto a largo plazo, con impacto real en la
+              vida de las personas.
             </p>
-            <p>
-              No publicamos ofertas tradicionales de empleo con horario y sueldo
-              cerrado, pero <span className="font-bold">sí estamos abiertos a
-              conocer perfiles que encajen con nuestra forma de trabajar.</span>
+            <p className={ABOUT.p}>
+              No publicamos ofertas tradicionales con horario y sueldo cerrado, pero{' '}
+              <span className="font-semibold text-gray-700">sí estamos abiertos a conocer perfiles
+              que encajen con nuestra forma de trabajar.</span>
             </p>
-            <p>
-              Buscamos personas con iniciativa, responsabilidad y ganas de
-              crecer dentro del proyecto.
+            <p className={ABOUT.p}>
+              Buscamos personas con iniciativa, responsabilidad y ganas de crecer dentro del proyecto.
             </p>
           </div>
         </div>
-        <div className="lg:w-1/2 flex justify-center lg:justify-end">
-             {/* Imagen circular */}
-            
-                 <Image
-                  src="/empleo.png" // Reutilizamos la imagen existente o la que el usuario prefiera
-                  alt="Equipo Squad Fit"
-                  width={528}
-                  height={528}
-                  className="object-contain"
-                />
-           
+        <div className="order-1 md:order-2 w-full md:w-auto flex justify-center">
+          <div className="relative w-[240px] sm:w-[280px] aspect-square">
+            <Image src="/empleo.png" alt="Equipo Squad Fit" fill sizes="300px" className="object-contain" />
+          </div>
         </div>
       </div>
 
       {/* SECCIÓN 2: LO QUE SOLEMOS BUSCAR */}
-      <div className="mb-16 animate-fadeIn">
-        <h2 className="text-4xl font-bold text-[#FF6B00] mb-6">
-          Lo que solemos buscar
-        </h2>
-        <p className="text-gray-700 mb-6 text-3xl">
+      <div className="mt-12">
+        <h2 className={ABOUT.h2}>Lo que solemos buscar</h2>
+        <p className={`${ABOUT.p} mt-3`}>
           Estos son los perfiles que más sentido tienen dentro de Squad Fit:
         </p>
-        <ul className="list-disc list-inside space-y-2 text-gray-800 font-medium text-3xl ml-4">
-          <li>Setter (ventas por mensaje)</li>
-          <li>Closer (ventas telefónicas / videollamada)</li>
-          <li>Marketing de contenidos (copy, email, funnels)</li>
-          <li>Paid Media / Ads (Meta, Google, etc.)</li>
-          <li>Editor/a de vídeo (Reels, YouTube, Shorts)</li>
-          <li>Dietista-nutricionista</li>
-          <li>Entrenador/a de fuerza</li>
-          <li>Psicólogo/a especializado/a en TCA</li>
+        <ul className="mt-4 grid sm:grid-cols-2 gap-x-8 gap-y-2">
+          {['Setter (ventas por mensaje)', 'Closer (ventas telefónicas / videollamada)', 'Marketing de contenidos (copy, email, funnels)', 'Paid Media / Ads (Meta, Google, etc.)', 'Editor/a de vídeo (Reels, YouTube, Shorts)', 'Dietista-nutricionista', 'Entrenador/a de fuerza', 'Psicólogo/a especializado/a en TCA'].map((t, i) => (
+            <li key={i} className="flex items-start gap-2.5">
+              <span className="text-[#FF690B] leading-7">•</span>
+              <p className={ABOUT.p}>{t}</p>
+            </li>
+          ))}
         </ul>
-        <p className="text-gray-600 mt-6 text-base leading-relaxed max-w-4xl">
-          En algunos roles (especialmente Setter y Closer), la colaboración
-          suele empezar por comisión, con posibilidad de evolucionar a una
-          posición más estable según el rendimiento, la implicación y el encaje
-          con el equipo.
+        <p className="text-sm text-gray-500 mt-5 leading-relaxed">
+          En algunos roles (especialmente Setter y Closer), la colaboración suele empezar por comisión,
+          con posibilidad de evolucionar a una posición más estable según el rendimiento, la implicación
+          y el encaje con el equipo.
         </p>
       </div>
 
       {/* SECCIÓN 3: LO QUE NO BUSCAMOS */}
-      <div className="mb-24 animate-fadeIn">
-        <h2 className="text-4xl font-bold text-[#FF6B00] mb-6">
-          Lo que NO buscamos
-        </h2>
-        <p className="text-gray-700 mb-6 text-3xl">
-          Para evitar malentendidos, actualmente <span className="font-bold">no estamos buscando:</span>
+      <div className="mt-12">
+        <h2 className={ABOUT.h2}>Lo que NO buscamos</h2>
+        <p className={`${ABOUT.p} mt-3`}>
+          Para evitar malentendidos, actualmente <span className="font-semibold text-gray-700">no estamos buscando:</span>
         </p>
-        <ul className="list-disc list-inside space-y-2 text-gray-800 font-medium text-3xl ml-4">
-          <li>Desarrollo web</li>
-          <li>Diseño web</li>
-          <li>Colaboraciones con marcas de suplementación</li>
+        <ul className="mt-4 space-y-2">
+          {['Desarrollo web', 'Diseño web', 'Colaboraciones con marcas de suplementación'].map((t, i) => (
+            <li key={i} className="flex items-start gap-2.5">
+              <span className="text-[#FF690B] leading-7">•</span>
+              <p className={ABOUT.p}>{t}</p>
+            </li>
+          ))}
         </ul>
-        <p className="text-gray-600 mt-6 text-3xl">
-          Los mensajes relacionados con estos perfiles no serán tenidos en
-          cuenta.
+        <p className={`${ABOUT.p} mt-4`}>
+          Los mensajes relacionados con estos perfiles no serán tenidos en cuenta.
         </p>
       </div>
 
       {/* SECCIÓN 4: FORMULARIO */}
-      <div className="max-w-xl animate-fadeIn">
-        <h2 className="text-4xl font-bold text-[#FF6B00] mb-10">
-          Cómo contactarnos
-        </h2>
-        
+      <div className="max-w-xl mt-12">
+        <h2 className={`${ABOUT.h2} mb-6`}>Cómo contactarnos</h2>
+
         <Formik
           initialValues={initialValues}
           validationSchema={validationSchema}
@@ -166,7 +153,7 @@ export default function Empleo() {
               <FormInput label="Apellidos" name="apellidos" example="Ej: García López" />
               <FormInput label="Edad" name="edad" type="number" min="16" max="99" example="Ej: 28 (entre 16 y 99)" />
               <FormInput label="País de residencia" name="pais" example="Ej: España" />
-              
+
               <div className="flex flex-col">
                 <label htmlFor="ocupacion" className="text-[#FF6B00] text-sm mb-1 font-medium">
                   Ocupación*
