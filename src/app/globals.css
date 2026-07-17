@@ -167,14 +167,18 @@ html, body {
   }
 }
 
-/* Testimonios de Cursos en escritorio (2 tarjetas a la vez, sin centerMode):
-   el encogido/atenuado genérico de slick dejaba la segunda tarjeta pequeña y
-   torcida respecto a la primera. Aquí las dos van rectas y al mismo tamaño. */
-@media (min-width: 1280px) {
-  .cursos-testimonials .slick-slide > div {
-    transform: none;
-    opacity: 1;
-  }
+/* Testimonios de Cursos: una reseña principal centrada y grande, las laterales
+   encogidas y atenuadas (mismo lenguaje que el comparador antes/después).
+   Antes se mostraban 2 tarjetas iguales sin principal, porque se anulaba el
+   escalado para que no salieran torcidas. */
+.cursos-testimonials .slick-slide > div {
+  transform: scale(0.85);
+  opacity: 0.5;
+  transition: transform 0.4s ease, opacity 0.4s ease;
+}
+.cursos-testimonials .slick-slide.slick-current > div {
+  transform: scale(1);
+  opacity: 1;
 }
 
 /* Carrusel de comparaciones antes/después: las laterales van más pegadas
