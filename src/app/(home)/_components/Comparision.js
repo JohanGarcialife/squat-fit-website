@@ -37,6 +37,9 @@ export default function Comparision(props) {
     centerPadding: w >= 1024 ? '20%' : w >= 640 ? '16%' : '15%',
     slidesToShow: 1,
     arrows: false,
+    // Al pulsar una de las fotos laterales (las que asoman), se centra. Antes
+    // solo se podía cambiar con las flechas o arrastrando.
+    focusOnSelect: true,
     // Swipe con el dedo para cambiar de foto; el arrastre del mango (revelado
     // antes/después) frena la propagación para no chocar con el swipe.
     swipe: true,
@@ -110,7 +113,7 @@ export default function Comparision(props) {
           </div>
           {/* Botón debajo, con separación del comparador */}
           <div className="w-full flex justify-center mt-16">
-            <LandingButton variant="orange" size="lg" autoShine className="w-[70%] max-w-[340px]">
+            <LandingButton variant="orange" size="lg" autoShine href="/planes" className="w-[70%] max-w-[340px]">
               Reserva tu plaza
             </LandingButton>
           </div>
@@ -124,7 +127,7 @@ export default function Comparision(props) {
             <p className="text-primary font-bold text-6xl">Un cambio físico que se mantiene</p>
             <p className="text-black text-2xl mt-10">Aprende a mantenerte en forma, evitar el efecto rebote y progresar igual que cientos de miembros de nuestra comunidad 👇🏼</p>
             <div className="w-full flex items-center justify-start gap-10">
-              <LandingButton variant="orange" size="lg" autoShine className="mt-10 text-xl lg:text-2xl">
+              <LandingButton variant="orange" size="lg" autoShine href="/planes" className="mt-10 text-xl lg:text-2xl">
                 Reserva tu plaza
               </LandingButton>
             </div>
