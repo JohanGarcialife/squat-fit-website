@@ -85,13 +85,14 @@ const Testimonials = () => {
    // slick no aplicaba en móvil y salían varias tarjetas con avatares aplastados.
    const w = width || 0;
    const settings = {
-     // 'cursos-testimonials': en escritorio anula el encogido genérico de
-     // slick que dejaba las tarjetas torcidas/desiguales (ver globals.css)
+     // Una reseña principal centrada y las laterales asomando encogidas, igual
+     // que el comparador antes/después. Antes, en escritorio se apagaba el
+     // centerMode y salían 2 tarjetas iguales, sin principal (ver globals.css).
      className: 'center cursos-testimonials',
-     centerMode: w < 1280,
+     centerMode: true,
      infinite: true,
-     centerPadding: w >= 1280 ? '0px' : w >= 640 ? '48px' : '38px',
-     slidesToShow: w >= 1280 ? 2 : 1,
+     centerPadding: w >= 1280 ? '18%' : w >= 640 ? '12%' : '38px',
+     slidesToShow: 1,
      speed,
      beforeChange: onBeforeChange,
      arrows: false,
@@ -108,7 +109,7 @@ const Testimonials = () => {
                             <p className='text-primary font-bold tracking-[0.2em] text-base sm:text-3xl uppercase whitespace-nowrap'>Testimonios</p>
                             <span className='w-8 sm:w-20 h-[2px] bg-primary rounded-full'></span>
                         </div>
-                        <p className='font-bold text-secondary text-6xl'>Que te lo digan ellos</p>
+                        <p className='font-bold text-secondary text-3xl sm:text-5xl text-center'>Que te lo digan ellos</p>
                     </div>
                     <div className="relative">
                         {width < 480 ? <Slider {...settings} ref={sliderRef}>
@@ -134,7 +135,7 @@ const Testimonials = () => {
                                         <div className="text-yellow-400 mb-4 text-lg">
                                             {'★'.repeat(testimonial.rating)}
                                         </div>
-                                        <p className="text-gray-600 leading-relaxed flex-grow">
+                                        <p className="text-gray-600 leading-relaxed flex-grow text-lg sm:text-xl">
                                             {testimonial.text}
                                         </p>
                                     </div>
@@ -176,7 +177,7 @@ const Testimonials = () => {
                                         </div>
                                       </div>
 
-                                        <p className="text-gray-600 leading-relaxed flex-grow">
+                                        <p className="text-gray-600 leading-relaxed flex-grow text-lg sm:text-xl">
                                             {testimonial.text}
                                         </p>
                                     </div>
