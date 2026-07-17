@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import Image from 'next/image';
 import LandingButton from '../../../../components/LandingButton';
 
 export default function HeroPlanes() {
@@ -22,7 +23,7 @@ export default function HeroPlanes() {
       <div className="flex items-center justify-center gap-4 mb-8 animate-fade-in opacity-0 [animation-fill-mode:forwards] [animation-delay:100ms] duration-700">
         <span className="w-8 sm:w-20 h-[2px] bg-primary rounded-full"></span>
         <span className="text-primary font-bold tracking-[0.2em] text-base sm:text-3xl uppercase whitespace-nowrap">
-          NUESTROS PLANES
+          NUESTRO PROGRAMA
         </span>
         <span className="w-8 sm:w-20 h-[2px] bg-primary rounded-full"></span>
       </div>
@@ -41,13 +42,26 @@ export default function HeroPlanes() {
            familia de botones de la web) --- */}
       <div className="flex flex-col items-center justify-center animate-fade-in opacity-0 [animation-fill-mode:forwards] [animation-delay:700ms] duration-700">
         <LandingButton variant="orange" size="xl" autoShine onClick={handleScrollToPlans} className="text-xl sm:text-2xl">
-          Reserva tu plaza
+          Unirme al programa
         </LandingButton>
 
         {/* --- Subtexto --- */}
         <span className="mt-4 text-slate-400 text-sm sm:text-base font-medium tracking-wide">
           Plazas limitadas
         </span>
+      </div>
+
+      {/* Imagen del hero: antes vivía en la sección "El método para no volver a
+          abandonar" (eliminada); ahora acompaña al hero del programa. */}
+      <div className="relative w-full max-w-[360px] sm:max-w-[440px] aspect-[4/5] mt-14 animate-fade-in opacity-0 [animation-fill-mode:forwards] [animation-delay:900ms] duration-700">
+        <Image
+          src="/PlanesHeroImage.png"
+          alt="El programa Squad Fit"
+          fill
+          priority
+          sizes="(max-width: 768px) 100vw, 440px"
+          className="object-contain"
+        />
       </div>
 
       {/* Simple animations injection */}

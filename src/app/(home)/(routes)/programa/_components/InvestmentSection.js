@@ -34,7 +34,7 @@ export default function InvestmentSection() {
 
           <div className="pt-4">
             <LandingButton variant="orange" size="lg" autoShine onClick={handleScrollToPlans} className="flex items-center gap-2">
-              <span>👉</span> Reserva tu plaza
+              <span>👉</span> Unirme al programa
             </LandingButton>
           </div>
 

@@ -14,8 +14,8 @@ export default function StartPlan() {
         <p className='text-white text-xl text-center mb-10'>
             Plazas limitadas para un seguimiento personalizado
         </p>
-        <LandingButton variant="orange-light" size="lg" autoShine>
-            Reserva tu plaza
+        <LandingButton variant="orange-light" size="lg" autoShine href="/programa">
+            Unirme al programa
         </LandingButton>
 
         {/* <div className='lg:flex lg:flex-row lg:gap-16 px-7 lg:px-10  mt-40 lg:mt-44 mb-20 flex flex-row flex-wrap gap-10 items-center justify-center'>

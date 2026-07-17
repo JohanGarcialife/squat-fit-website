@@ -178,7 +178,7 @@ export default function StepsSection() {
 
         {/* --- Botón CTA --- */}
         <LandingButton variant="orange" size="lg" autoShine onClick={handleScrollToPlans}>
-          Reserva tu plaza
+          Unirme al programa
         </LandingButton>
 
         {/* --- Subtexto --- */}

@@ -82,7 +82,7 @@ export default function PlanesTestimonials() {
 
   const renderStars = (rating) => {
     return (
-      <div className="flex gap-0.5 text-[#FF690B] text-lg sm:text-xl">
+      <div className="flex gap-0.5 text-[#FF690B] text-lg sm:text-xl lg:text-2xl">
         {[...Array(5)].map((_, idx) => {
           const starValue = idx + 1;
           if (rating >= starValue) {
@@ -138,7 +138,7 @@ export default function PlanesTestimonials() {
                       />
                     </div>
                     <div className="flex flex-col items-start min-w-0">
-                      <h3 className="text-lg sm:text-xl font-extrabold text-[#363C98] truncate w-full">
+                      <h3 className="text-lg sm:text-xl lg:text-2xl font-extrabold text-[#363C98] truncate w-full">
                         {testimonial.name}
                       </h3>
                       <div className="mt-0.5">
@@ -148,7 +148,7 @@ export default function PlanesTestimonials() {
                   </div>
 
                   {/* Testimonial Text */}
-                  <p className="text-inherit leading-relaxed font-medium text-sm sm:text-base flex-grow">
+                  <p className="text-inherit leading-relaxed font-medium text-base sm:text-lg lg:text-xl flex-grow">
                     {testimonial.text}
                   </p>
                 </div>
