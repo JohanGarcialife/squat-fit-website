@@ -34,17 +34,13 @@ const SobreHamlet = () => {
 
   return (
     <div className="animate-fadeIn">
-      <div className="flex flex-col md:flex-row gap-8 md:gap-10 items-start">
-        <div className="flex-1 order-2 md:order-1">
-          <p className={ABOUT.eyebrow}>El equipo</p>
-          <h1 className={`${ABOUT.h1} mt-2`}>Sobre Hamlet</h1>
-          <div className="mt-4 space-y-4">
-            {parrafos.map((t, i) => <p key={i} className={ABOUT.p}>{t}</p>)}
-          </div>
-        </div>
-        <div className="order-1 md:order-2 w-full md:w-auto">
-          <Portrait src="/hamlet.png" alt="Hamlet de Squad Fit" />
-        </div>
+      <p className={ABOUT.eyebrow}>El equipo</p>
+      <h1 className={`${ABOUT.h1} mt-2`}>Sobre Hamlet</h1>
+      <div className="mt-6">
+        <Portrait src="/hamlet.png" alt="Hamlet de Squad Fit" />
+      </div>
+      <div className="mt-6 space-y-4">
+        {parrafos.map((t, i) => <p key={i} className={ABOUT.p}>{t}</p>)}
       </div>
 
       {/* Logros y méritos */}

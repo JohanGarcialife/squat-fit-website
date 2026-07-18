@@ -1,147 +1,149 @@
 'use client';
 
 import React from 'react';
+import { LEGAL_DATA } from './legalData';
 
 // Contenido legal compartido entre la web pública (/politicas) y el panel del
-// cliente (panel-info), para que ambos muestren exactamente el mismo texto.
-// Datos de empresa reales: Squat Fit SLU · CIF B19463066.
+// cliente (panel-info). Los textos reales del cliente están en legalData.js
+// (migrados de squatfit.es); aquí van el renderer, el índice y el callout.
+// Titular: Squat Fit, S.L.U. · NIF B19463066.
+
+const COMPANY = [
+  ['Razón social', 'Squat Fit, S.L.U.'],
+  ['NIF', 'B19463066'],
+  ['Domicilio', 'Av. Maisonnave 41, 3 B'],
+  ['C. Postal', '03003'],
+  ['Ciudad', 'Alicante, España'],
+  ['Teléfono', '+34 623 020 494'],
+  ['Correo', 'hola@squatfit.es'],
+];
+
+// Callout destacado con los datos de empresa (imita el bloque resaltado de squatfit.es).
+export function CompanyCallout({ title = 'Datos de la empresa' }) {
+  return (
+    <div className="my-6 rounded-2xl border border-[#363C98]/15 bg-[#F1F2FC] p-5 sm:p-6">
+      <p className="text-[#363C98] font-bold text-xs uppercase tracking-[0.12em] mb-4">{title}</p>
+      <dl className="grid sm:grid-cols-2 gap-x-10 gap-y-2">
+        {COMPANY.map(([k, v]) => (
+          <div key={k} className="flex gap-3 text-sm sm:text-[15px]">
+            <dt className="text-gray-500 w-24 flex-shrink-0">{k}</dt>
+            <dd className="text-gray-800 font-medium">{v}</dd>
+          </div>
+        ))}
+      </dl>
+    </div>
+  );
+}
 
 const H1 = ({ children }) => (
-  <h1 className="text-3xl sm:text-4xl font-bold text-[#3B3B98] mb-6">{children}</h1>
-);
-const H2 = ({ children }) => (
-  <h2 className="text-xl font-bold text-black mb-3">{children}</h2>
+  <h1 className="text-2xl sm:text-3xl font-bold text-[#363C98] tracking-tight mb-2">{children}</h1>
 );
 
-// --- Aviso Legal ---
-export const ContenidoAvisoLegal = () => (
-  <div className="animate-fadeIn">
-    <H1>Aviso legal</H1>
-    <p className="mb-6">
-      En cumplimiento de la Ley 34/2002, de 11 de julio, de Servicios de la Sociedad de la Información y de Comercio
-      Electrónico (LSSI-CE), la empresa le informa que es titular del portal web/app móvil. De acuerdo con la exigencia
-      del artículo 10 de la citada Ley, informa de los siguientes datos:
-    </p>
-    <p className="mb-4">El titular de este portal web/app móvil es:</p>
-    <div className="mb-8">
-      <p>Empresa: Squat Fit SLU</p>
-      <p>CIF: B19463066</p>
-      <p>Dirección: Av Maisonnave 41, 3 B</p>
-      <p>03003, Alicante, España</p>
-      <p>Contacto: hola@squatfit.es</p>
-    </div>
+// Formato en línea: negrita (**texto**) y enlaces markdown ([texto](url)).
+function inline(s, key) {
+  return String(s).split(/(\*\*[^*]+\*\*|\[[^\]]+\]\([^)]+\))/g).map((p, i) => {
+    if (p.startsWith('**') && p.endsWith('**')) {
+      return <strong key={`${key}-${i}`} className="text-gray-800 font-semibold">{p.slice(2, -2)}</strong>;
+    }
+    const link = p.match(/^\[([^\]]+)\]\(([^)]+)\)$/);
+    if (link) {
+      return (
+        <a key={`${key}-${i}`} href={link[2]} target="_blank" rel="noopener noreferrer"
+           className="text-[#FF690B] font-medium underline underline-offset-2 hover:text-[#363C98] transition-colors break-words">
+          {link[1]}
+        </a>
+      );
+    }
+    return <React.Fragment key={`${key}-${i}`}>{p}</React.Fragment>;
+  });
+}
 
-    <H2>Usuarios</H2>
-    <p className="mb-8">
-      El acceso y/o uso de este portal le atribuye la condición de USUARIO, que acepta, desde dicho acceso y/o uso, las
-      Condiciones Generales de Uso aquí reflejadas. Las citadas Condiciones serán de aplicación independientemente de las
-      Condiciones Generales de Contratación que en su caso resulten de obligado cumplimiento.
-    </p>
+// Si un título viene TODO EN MAYÚSCULAS, lo pasamos a mayúscula inicial (menos
+// gritón). Los que ya traen minúsculas (p. ej. "1. Aceptación") se dejan igual.
+function tidyHeading(s) {
+  const t = s.trim();
+  if (/[a-záéíóúñü]/.test(t)) return t;
+  return t.toLowerCase().replace(/[a-záéíóúñü]/, (c) => c.toUpperCase());
+}
 
-    <H2>Uso del portal</H2>
-    <p className="mb-4">
-      El portal web/app móvil proporciona el acceso a multitud de informaciones, servicios, programas o datos (en
-      adelante, &quot;los contenidos&quot;) en Internet pertenecientes a María Casas Gómez o a sus licenciantes a los que
-      el USUARIO pueda tener acceso. El USUARIO asume la responsabilidad del uso del portal. Dicha responsabilidad se
-      extiende al registro que fuese necesario para acceder a determinados servicios o contenidos.
-    </p>
-    <p className="mb-4">
-      En dicho registro el USUARIO será responsable de aportar información veraz y lícita. Como consecuencia de este
-      registro, al USUARIO se le puede proporcionar una contraseña de la que será responsable, comprometiéndose a hacer
-      un uso diligente y confidencial de la misma. El USUARIO se compromete a hacer un uso adecuado de los contenidos y
-      servicios que María Casas Gómez ofrece a través de su portal y con carácter enunciativo, pero no limitativo, a no
-      emplearlos para:
-    </p>
-    <ul className="list-disc pl-6 mb-8 space-y-2">
-      <li>Incurrir en actividades ilícitas, ilegales o contrarias a la buena fe y al orden público.</li>
-      <li>
-        Difundir contenidos o propaganda de carácter racista, xenófobo, pornográfico-ilegal, de apología del terrorismo
-        o atentatorio contra los derechos humanos.
-      </li>
-      <li>
-        Provocar daños en los sistemas físicos y lógicos de María Casas Gómez, de sus proveedores o de terceras
-        personas, introducir o difundir en la red virus informáticos o cualesquiera otros sistemas físicos o lógicos que
-        sean susceptibles de provocar los daños anteriormente mencionados.
-      </li>
-      <li>
-        Intentar acceder y, en su caso, utilizar las cuentas de correo electrónico de otros usuarios y modificar o
-        manipular sus mensajes. María Casas Gómez se reserva el derecho de retirar todos aquellos comentarios y
-        aportaciones que vulneren el respeto a la dignidad de la persona, que sean discriminatorios, xenófobos, racistas,
-        pornográficos, que atenten contra la juventud o la infancia, el orden o la seguridad pública o que, a su juicio,
-        no resultaran adecuados para su publicación. En cualquier caso, María Casas Gómez no será responsable de las
-        opiniones vertidas por los usuarios a través de los foros, chats, u otras herramientas de participación.
-      </li>
-    </ul>
+// Ancla legible a partir del título.
+function slugify(s) {
+  return s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
+    .replace(/[^a-z0-9\s-]/g, '').trim().replace(/\s+/g, '-').slice(0, 40);
+}
 
-    <H2>Propiedad intelectual e industrial</H2>
-    <p className="mb-4">
-      Squad Fit será titular de todos los derechos de propiedad intelectual e industrial del portal web/app, así como de
-      los elementos contenidos en la misma (a título enunciativo, imágenes, sonido, audio, vídeo, software o textos;
-      marcas o logotipos, combinaciones de colores, estructura y diseño, selección de materiales usados, programas de
-      ordenador necesarios para su funcionamiento, acceso y uso, etc.).
-    </p>
-    <p className="mb-8">
-      Todos los derechos reservados. En virtud de lo dispuesto en los artículos 8 y 32.1, párrafo segundo, de la Ley de
-      Propiedad Intelectual, quedan expresamente prohibidas la reproducción, la distribución y la comunicación pública,
-      incluida su modalidad de puesta a disposición, de la totalidad o parte de los contenidos de esta web/app, con
-      fines comerciales, en cualquier soporte y por cualquier medio técnico, sin la autorización de Squad Fit. El USUARIO
-      se compromete a respetar los derechos de Propiedad Intelectual e Industrial titularidad de Squad Fit.
-    </p>
+// Renderer markdown-ligero: "## " → h2 (con ancla), "- "/"* " → lista, resto →
+// párrafo. Devuelve { toc, body } para poder construir el índice de la pestaña.
+function renderPolicy(text, prefix) {
+  const toc = [];
+  let hn = 0; // contador de apartados: numeramos todas las políticas por igual
+  const body = text.trim().split(/\n{2,}/).map((block, i) => {
+    const lines = block.split('\n');
+    if (lines[0].startsWith('## ')) {
+      hn += 1;
+      // Quitamos cualquier número que ya trajera el original y ponemos el nuestro,
+      // así Aviso/Privacidad/Cookies quedan numerados igual que Términos/Devoluciones.
+      const raw = tidyHeading(lines[0].slice(3)).replace(/^\d+\.\s*/, '');
+      const label = `${hn}. ${raw}`;
+      const id = `${prefix}-${slugify(raw)}-${i}`;
+      toc.push({ id, label });
+      return (
+        <h2 key={i} id={id} className="scroll-mt-28 text-lg sm:text-xl font-bold text-[#363C98] mt-8 mb-3">
+          {inline(label, i)}
+        </h2>
+      );
+    }
+    const items = lines.map((l) => l.trim()).filter(Boolean);
+    if (items.length && items.every((l) => /^[-*]\s/.test(l))) {
+      return (
+        <ul key={i} className="list-disc pl-5 space-y-1.5 my-3 text-gray-600 leading-relaxed">
+          {items.map((l, j) => <li key={j}>{inline(l.replace(/^[-*]\s/, ''), `${i}-${j}`)}</li>)}
+        </ul>
+      );
+    }
+    return (
+      <p key={i} className="text-gray-600 leading-relaxed my-3">
+        {inline(block.replace(/\n/g, ' '), i)}
+      </p>
+    );
+  });
+  return { toc, body, count: hn };
+}
 
-    <H2>Exclusión de garantías y responsabilidad</H2>
-    <p className="mb-8">
-      Squad Fit no se hace responsable, en ningún caso, de los daños y perjuicios de cualquier naturaleza que pudieran
-      ocasionar, a título enunciativo: errores u omisiones en los contenidos, falta de disponibilidad del portal o la
-      transmisión de virus o programas maliciosos o lesivos en los contenidos, a pesar de haber adoptado todas las
-      medidas tecnológicas necesarias para evitarlo.
-    </p>
+// Índice "En esta página": salta a cada apartado de la pestaña activa.
+function Toc({ items }) {
+  if (items.length < 2) return null;
+  return (
+    <nav aria-label="Índice de la página" className="my-6 rounded-2xl border border-slate-100 bg-[#F8F9FC] p-4 sm:p-5">
+      <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-gray-400 mb-3">En esta página</p>
+      <ol className="space-y-1.5">
+        {items.map((it, i) => (
+          <li key={it.id} className="flex gap-2 text-sm sm:text-[15px]">
+            <span className="text-gray-300 tabular-nums">{i + 1}.</span>
+            <a href={`#${it.id}`} className="text-[#363C98] hover:text-[#FF690B] transition-colors">
+              {/* Si la cabecera ya trae su número (p. ej. "1. Derecho…"), lo
+                  quitamos aquí para no duplicarlo con el del índice. */}
+              {it.label.replace(/^\d+\.\s*/, '')}
+            </a>
+          </li>
+        ))}
+      </ol>
+    </nav>
+  );
+}
 
-    <H2>Modificaciones</H2>
-    <p className="mb-8">
-      María Casas Gómez se reserva el derecho de efectuar sin previo aviso las modificaciones que considere oportunas en
-      su portal, pudiendo cambiar, suprimir o añadir tanto los contenidos y servicios que se presten a través de la
-      misma como la forma en la que éstos aparezcan presentados o localizados en su portal.
-    </p>
-
-    <H2>Enlaces</H2>
-    <p className="mb-8">
-      En el caso de que en el portal web/app móvil se dispusiese enlaces o hipervínculos hacia otros sitios de Internet,
-      Squad Fit no ejercerá ningún tipo de control sobre dichos sitios y contenidos. En ningún caso María Casas Gómez
-      asumirá responsabilidad alguna por los contenidos de algún enlace perteneciente a un sitio web ajeno.
-    </p>
-
-    <H2>Legislación aplicable y jurisdicción</H2>
-    <p>
-      La relación entre Squad Fit y el USUARIO se regirá por la normativa española vigente y cualquier controversia se
-      someterá a los Juzgados y tribunales de la ciudad anteriormente indicada.
-    </p>
-  </div>
-);
-
-// --- Política de Cookies (auditada: sin analítica ni publicidad) ---
-export const ContenidoCookies = () => (
-  <div className="animate-fadeIn">
-    <H1>Política de Cookies</H1>
-    <p className="mb-6">
-      En cumplimiento del artículo 22.2 de la Ley 34/2002 (LSSI-CE), te informamos sobre el uso de cookies y tecnologías
-      de almacenamiento en este sitio.
-    </p>
-
-    <H2>¿Qué son las cookies?</H2>
-    <p className="mb-6">
-      Las cookies (y tecnologías similares como el almacenamiento local del navegador) son pequeños archivos que un sitio
-      web guarda en tu dispositivo. Sirven para que la web funcione correctamente y recuerde información entre páginas.
-    </p>
-
-    <H2>¿Qué utilizamos en esta web?</H2>
-    <p className="mb-4">
-      Somos especialmente respetuosos con tu privacidad: <strong>no utilizamos cookies de analítica, de publicidad ni de
-      seguimiento de terceros.</strong> Solo empleamos lo imprescindible para que la web funcione:
-    </p>
-    <div className="overflow-x-auto rounded-2xl border border-slate-200 mb-6">
-      <table className="w-full text-left text-sm border-collapse">
+// Tabla real de cookies del sitio nuevo (auditada: solo localStorage + Stripe).
+function CookiesTable() {
+  const rows = [
+    ['cart-storage · auth-storage · sf_origin', 'Propia (local)', 'Recordar tu carrito, tu sesión iniciada y el origen de tu visita.', 'Hasta que borres los datos del navegador'],
+    ['__stripe_mid', 'De terceros (Stripe)', 'Procesar el pago de forma segura y prevenir el fraude (solo al pagar).', '1 año'],
+    ['__stripe_sid', 'De terceros (Stripe)', 'Procesar el pago de forma segura y prevenir el fraude (solo al pagar).', '30 minutos'],
+  ];
+  return (
+    <div className="overflow-x-auto rounded-2xl border border-slate-200 my-5">
+      <table className="w-full text-left text-sm border-collapse min-w-[540px]">
         <thead>
-          <tr className="bg-slate-50 text-[#3B3B98]">
+          <tr className="bg-slate-50 text-[#363C98]">
             <th className="p-3 font-bold">Nombre</th>
             <th className="p-3 font-bold">Tipo</th>
             <th className="p-3 font-bold">Finalidad</th>
@@ -149,156 +151,77 @@ export const ContenidoCookies = () => (
           </tr>
         </thead>
         <tbody>
-          <tr className="border-t border-slate-100">
-            <td className="p-3 font-mono text-xs">cart-storage · auth-storage · sf_origin</td>
-            <td className="p-3">Técnica propia (almacenamiento local)</td>
-            <td className="p-3">Recordar tu carrito, tu sesión iniciada y el origen de tu visita.</td>
-            <td className="p-3">Persistente hasta que borres los datos del navegador</td>
-          </tr>
-          <tr className="border-t border-slate-100">
-            <td className="p-3 font-mono text-xs">__stripe_mid</td>
-            <td className="p-3">Técnica de terceros (Stripe)</td>
-            <td className="p-3">Procesar el pago de forma segura y prevenir el fraude. Solo al pagar.</td>
-            <td className="p-3">1 año</td>
-          </tr>
-          <tr className="border-t border-slate-100">
-            <td className="p-3 font-mono text-xs">__stripe_sid</td>
-            <td className="p-3">Técnica de terceros (Stripe)</td>
-            <td className="p-3">Procesar el pago de forma segura y prevenir el fraude. Solo al pagar.</td>
-            <td className="p-3">30 minutos</td>
-          </tr>
+          {rows.map((r, i) => (
+            <tr key={i} className="border-t border-slate-100 text-gray-600">
+              <td className="p-3 font-mono text-xs">{r[0]}</td>
+              <td className="p-3">{r[1]}</td>
+              <td className="p-3">{r[2]}</td>
+              <td className="p-3">{r[3]}</td>
+            </tr>
+          ))}
         </tbody>
       </table>
     </div>
+  );
+}
 
-    <H2>Gestión de cookies</H2>
-    <p className="mb-6">
-      Puedes permitir, bloquear o eliminar el almacenamiento instalado en tu equipo mediante la configuración de tu
-      navegador. Ten en cuenta que desactivar el almacenamiento técnico puede afectar al funcionamiento del carrito, del
-      inicio de sesión o del proceso de pago.
-    </p>
+// Sección extra de cookies (nuestra tabla auditada). Recibe el número de
+// apartado que le toca para continuar la numeración del resto de la política.
+const COOKIES_EXTRA_ID = 'cookies-que-usamos-en-esta-web';
+const cookiesExtra = (num) => ({
+  toc: [{ id: COOKIES_EXTRA_ID, label: `${num}. ¿Qué usamos en esta web?` }],
+  body: (
+    <React.Fragment key="cookies-extra">
+      <h2 id={COOKIES_EXTRA_ID} className="scroll-mt-28 text-lg sm:text-xl font-bold text-[#363C98] mt-8 mb-3">
+        {num}. ¿Qué usamos en esta web?
+      </h2>
+      <p className="text-gray-600 leading-relaxed my-3">
+        Somos especialmente respetuosos con tu privacidad:{' '}
+        <strong className="text-gray-800 font-semibold">no usamos cookies de analítica, de publicidad ni de seguimiento de terceros.</strong>{' '}
+        Solo empleamos el almacenamiento imprescindible para que la web funcione:
+      </p>
+      <CookiesTable />
+    </React.Fragment>
+  ),
+});
 
-    <H2>Cambios en esta política</H2>
-    <p>
-      No usamos cookies de terceros con fines publicitarios o estadísticos. Si en el futuro incorporásemos herramientas
-      de analítica, actualizaríamos esta política y te solicitaríamos tu consentimiento previo.
-    </p>
-  </div>
-);
-
-// --- Política de Devoluciones ---
-export const ContenidoDevoluciones = () => (
-  <div className="animate-fadeIn">
-    <H1>Política de Devoluciones</H1>
-    <p className="mb-6">En Squad Fit queremos que estés completamente satisfecho con tu compra.</p>
-    <H2>Productos digitales y suscripciones</H2>
-    <p className="mb-6">
-      Debido a la naturaleza digital de nuestros productos, una vez que se ha proporcionado acceso al contenido, no se
-      realizarán reembolsos salvo en los casos indicados a continuación.
-    </p>
-    <H2>Derecho de desistimiento</H2>
-    <p className="mb-6">
-      De acuerdo con la normativa española y europea, dispone de 14 días naturales desde la contratación para ejercer su
-      derecho de desistimiento, siempre que no haya comenzado a disfrutar del servicio o descargado el contenido digital.
-    </p>
-    <H2>Proceso de solicitud de devolución</H2>
-    <ul className="list-disc pl-6 mb-6 space-y-2">
-      <li>Envíe un correo a hola@squatfit.es con su nombre, número de pedido y motivo.</li>
-      <li>Nuestro equipo analizará su solicitud en un plazo máximo de 5 días hábiles.</li>
-      <li>Si procede, el reembolso se realizará en el mismo medio de pago en un plazo de 10–14 días hábiles.</li>
-    </ul>
-    <H2>Excepciones</H2>
-    <p>
-      No se aceptarán devoluciones cuando el contenido haya sido descargado o consumido, o cuando hayan transcurrido más
-      de 14 días naturales desde la compra.
-    </p>
-  </div>
-);
-
-// --- Política de Privacidad ---
-export const ContenidoPrivacidad = () => (
-  <div className="animate-fadeIn">
-    <H1>Política de Privacidad</H1>
-    <p className="mb-6">
-      En cumplimiento del Reglamento (UE) 2016/679 (RGPD) y la Ley Orgánica 3/2018 (LOPDGDD), le informamos sobre el
-      tratamiento de sus datos personales.
-    </p>
-    <H2>Responsable del tratamiento</H2>
-    <div className="mb-6">
-      <p>Empresa: Squat Fit SLU | CIF: B19463066</p>
-      <p>Dirección: Av Maisonnave 41, 3 B, 03003, Alicante, España</p>
-      <p>Contacto: hola@squatfit.es</p>
+// Estructura común de una política: H1 + callout de empresa + índice + cuerpo.
+function Policy({ h1, calloutTitle, mdKey, prefix, extra }) {
+  const { toc, body, count } = renderPolicy(LEGAL_DATA[mdKey], prefix);
+  const extraData = extra ? extra(count + 1) : null;
+  const fullToc = extraData ? [...toc, ...extraData.toc] : toc;
+  return (
+    <div className="animate-fadeIn">
+      <H1>{h1}</H1>
+      <CompanyCallout title={calloutTitle} />
+      <Toc items={fullToc} />
+      {body}
+      {extraData?.body}
     </div>
-    <H2>Datos que recabamos</H2>
-    <ul className="list-disc pl-6 mb-6 space-y-2">
-      <li>Datos de identificación: nombre, apellidos, correo electrónico.</li>
-      <li>Datos de salud relacionados con los servicios de nutrición y entrenamiento (aportados voluntariamente).</li>
-      <li>Datos de facturación y datos de navegación (almacenamiento técnico y pasarela de pago).</li>
-    </ul>
-    <H2>Finalidad del tratamiento</H2>
-    <ul className="list-disc pl-6 mb-6 space-y-2">
-      <li>Prestación del servicio contratado (planes, cursos, asesoramiento).</li>
-      <li>Gestión de pagos, facturación y comunicaciones del servicio.</li>
-      <li>Con consentimiento expreso: envío de comunicaciones comerciales.</li>
-    </ul>
-    <H2>Sus derechos</H2>
-    <p>
-      Puede ejercer sus derechos de acceso, rectificación, supresión, oposición, limitación y portabilidad escribiendo a
-      hola@squatfit.es. También puede reclamar ante la AEPD (www.aepd.es).
-    </p>
-  </div>
-);
+  );
+}
 
-// --- Términos y Condiciones ---
+export const ContenidoAvisoLegal = () => (
+  <Policy h1="Aviso legal" calloutTitle="Datos identificativos" mdKey="avisoLegal" prefix="aviso" />
+);
 export const ContenidoTerminos = () => (
-  <div className="animate-fadeIn">
-    <H1>Términos y Condiciones</H1>
-    <p className="mb-6">
-      Los presentes Términos y Condiciones regulan el acceso y uso de los servicios ofrecidos por Squat Fit SLU. Al
-      contratar cualquier servicio, el usuario acepta estos términos.
-    </p>
-    <H2>1. Objeto</H2>
-    <p className="mb-6">
-      Squad Fit ofrece servicios de asesoramiento en nutrición, planes de entrenamiento y formación en línea. El acceso
-      requiere registro y, en su caso, el pago del precio correspondiente.
-    </p>
-    <H2>2. Condiciones de acceso</H2>
-    <p className="mb-6">
-      El usuario debe ser mayor de 18 años o contar con autorización de sus tutores legales. Es responsable de mantener
-      sus credenciales en seguridad y no compartirlas con terceros.
-    </p>
-    <H2>3. Precios y pago</H2>
-    <p className="mb-6">
-      Los precios incluyen los impuestos aplicables. Squad Fit puede modificar sus tarifas, notificando al usuario con
-      antelación razonable.
-    </p>
-    <H2>4. Uso adecuado</H2>
-    <p className="mb-6">
-      Queda prohibida la reproducción o distribución de los contenidos sin autorización expresa de Squad Fit.
-    </p>
-    <H2>5. Responsabilidad</H2>
-    <p className="mb-6">
-      Los planes de nutrición y entrenamiento son orientativos y no sustituyen el consejo médico. Squad Fit no se
-      responsabiliza de los resultados individuales de cada usuario.
-    </p>
-    <H2>6. Cancelación</H2>
-    <p className="mb-6">
-      El usuario podrá cancelar su suscripción desde su perfil o mediante hola@squatfit.es. La cancelación surtirá efecto
-      al final del período de facturación en curso.
-    </p>
-    <H2>7. Legislación aplicable</H2>
-    <p>
-      Los presentes Términos se rigen por la legislación española. Cualquier controversia se someterá a los Juzgados y
-      Tribunales de la ciudad de Alicante.
-    </p>
-  </div>
+  <Policy h1="Términos y Condiciones" calloutTitle="Identificación del titular" mdKey="terminos" prefix="terminos" />
+);
+export const ContenidoPrivacidad = () => (
+  <Policy h1="Política de Privacidad" calloutTitle="Responsable del tratamiento" mdKey="privacidad" prefix="privacidad" />
+);
+export const ContenidoCookies = () => (
+  <Policy h1="Política de Cookies" calloutTitle="Titular" mdKey="cookies" prefix="cookies" extra={cookiesExtra} />
+);
+export const ContenidoDevoluciones = () => (
+  <Policy h1="Política de Devoluciones y Reembolsos" calloutTitle="Identificación del titular" mdKey="devoluciones" prefix="devoluciones" />
 );
 
 // Orden y etiquetas de las secciones legales, para construir menús/tabs.
 export const LEGAL_SECTIONS = [
   { id: 'aviso-legal', label: 'Aviso Legal', Component: ContenidoAvisoLegal },
+  { id: 'terminos', label: 'Términos y Condiciones', Component: ContenidoTerminos },
   { id: 'privacidad', label: 'Política de Privacidad', Component: ContenidoPrivacidad },
   { id: 'cookies', label: 'Política de Cookies', Component: ContenidoCookies },
   { id: 'devoluciones', label: 'Política de Devoluciones', Component: ContenidoDevoluciones },
-  { id: 'terminos', label: 'Términos y Condiciones', Component: ContenidoTerminos },
 ];

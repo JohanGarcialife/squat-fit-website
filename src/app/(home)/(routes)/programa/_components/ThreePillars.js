@@ -23,7 +23,7 @@ const PILLARS = [
   {
     icon: Heart,
     title: 'Entorno',
-    text: 'Una comunidad activa que sostiene el cambio.',
+    text: 'Una comunidad que te ayuda a mantener el cambio.',
     cardClass: 'bg-[#DBDCF8] shadow-[0_15px_40px_rgba(0,0,0,0.02)] hover:shadow-[0_20px_50px_rgba(54,60,152,0.1)]',
     textClass: 'text-slate-700',
   },
@@ -92,7 +92,7 @@ export default function ThreePillars() {
   };
 
   return (
-    <section className="relative bg-white py-20 sm:py-28 px-6 sm:px-12 md:px-24 overflow-hidden">
+    <section className="relative bg-[#F8F9FC] py-20 sm:py-28 px-6 sm:px-12 md:px-24 overflow-hidden">
       <div className="max-w-7xl mx-auto flex flex-col items-center">
 
         {/* --- Título Principal --- */}

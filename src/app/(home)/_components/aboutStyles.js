@@ -27,12 +27,24 @@ export const ABOUT = {
   divider: 'mt-12 pt-2 border-t border-gray-100',
 };
 
-// Retrato con tamaño y estilo iguales en todas las pestañas (antes 500-550 px y
-// object-cover que estiraba la foto). Relación 4:5, esquinas redondeadas.
+// Retrato in-line: bloque centrado en el flujo (igual que la imagen de la
+// pestaña "Squad Fit"), no flotado al lado. Relación 4:5, esquinas redondeadas.
 export function Portrait({ src, alt, className = '' }) {
   return (
-    <div className={`relative w-[240px] sm:w-[280px] aspect-[4/5] mx-auto flex-shrink-0 ${className}`}>
+    <div className={`relative w-full max-w-[300px] aspect-[4/5] mx-auto ${className}`}>
       <Image src={src} alt={alt} fill sizes="300px" className="object-cover rounded-2xl shadow-sm" />
     </div>
+  );
+}
+
+// "Hoja": página legal/conócenos con formato de folio blanco sobre fondo suave
+// #F8F9FC, para que se vea recogido y no "suelto". Incluye márgenes consistentes.
+export function Sheet({ children }) {
+  return (
+    <main className="w-full bg-[#F8F9FC] min-h-screen py-8 sm:py-14 px-4 sm:px-6 font-sans">
+      <div className="max-w-4xl mx-auto bg-white rounded-[28px] border border-slate-100 shadow-[0_12px_45px_rgba(54,60,152,0.06)] px-5 sm:px-10 lg:px-14 py-8 sm:py-12">
+        {children}
+      </div>
+    </main>
   );
 }

@@ -92,35 +92,17 @@ export default function StepsSection() {
     }
   };
 
+  // Diferenciado de la home ("¿Cómo funciona el programa?"): aquí el flujo va
+  // alineado con el funnel de llamada (reserva → plan → seguimiento semanal).
   const steps = [
     {
       number: 'Paso 1',
-      title: 'Rellenas el formulario',
-      subtitle: 'y nos cuentas tu situación',
+      title: 'Reservas tu llamada',
+      subtitle: 'y nos cuentas tu caso',
       icon: (
         <div className="relative w-20 h-20 flex items-center justify-center">
-          {/* Background Decorative Accent */}
           <div className="absolute top-1 left-1 w-6 h-6 rounded-full bg-[#FF690B]/30" />
-          {/* Main Document Icon */}
-          <ClipboardList className="w-14 h-14 text-slate-600" strokeWidth={1.2} />
-          {/* Pencil overlay */}
-          <div className="absolute bottom-1 right-1 bg-white p-1 rounded-full shadow-sm">
-            <Pencil className="w-6 h-6 text-[#FF690B]" strokeWidth={2} />
-          </div>
-        </div>
-      )
-    },
-    {
-      number: 'Paso 2',
-      title: 'Revisamos tu caso',
-      subtitle: 'y agendamos una llamada',
-      icon: (
-        <div className="relative w-20 h-20 flex items-center justify-center">
-          {/* Background Decorative Accent */}
-          <div className="absolute top-1 left-1 w-6 h-6 rounded-full bg-[#FF690B]/30" />
-          {/* Calendar Icon */}
           <Calendar className="w-14 h-14 text-slate-600" strokeWidth={1.2} />
-          {/* Phone overlay */}
           <div className="absolute bottom-1 right-0 bg-white p-1 rounded-full shadow-md border border-slate-100">
             <div className="bg-[#363C98] text-white p-1.5 rounded-full">
               <Phone className="w-4 h-4" />
@@ -130,16 +112,27 @@ export default function StepsSection() {
       )
     },
     {
-      number: 'Paso 3',
-      title: 'Entras al programa',
-      subtitle: 'y arrancamos',
+      number: 'Paso 2',
+      title: 'Diseñamos tu plan',
+      subtitle: 'a tu medida',
       icon: (
         <div className="relative w-20 h-20 flex items-center justify-center">
-          {/* Background Decorative Accent */}
           <div className="absolute top-1 left-1 w-6 h-6 rounded-full bg-[#FF690B]/30" />
-          {/* Check List Icon */}
+          <ClipboardList className="w-14 h-14 text-slate-600" strokeWidth={1.2} />
+          <div className="absolute bottom-1 right-1 bg-white p-1 rounded-full shadow-sm">
+            <Pencil className="w-6 h-6 text-[#FF690B]" strokeWidth={2} />
+          </div>
+        </div>
+      )
+    },
+    {
+      number: 'Paso 3',
+      title: 'Empezamos juntos',
+      subtitle: 'con seguimiento cada semana',
+      icon: (
+        <div className="relative w-20 h-20 flex items-center justify-center">
+          <div className="absolute top-1 left-1 w-6 h-6 rounded-full bg-[#FF690B]/30" />
           <CheckCircle2 className="w-14 h-14 text-slate-600" strokeWidth={1.2} />
-          {/* Dumbbell overlay */}
           <div className="absolute bottom-1 right-1 bg-[#363C98] p-1.5 rounded-full shadow-md text-white border border-white">
             <Dumbbell className="w-4 h-4" />
           </div>
