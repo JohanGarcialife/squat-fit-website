@@ -110,9 +110,17 @@ function renderPolicy(text, prefix) {
   return { toc, body, count: hn };
 }
 
-// Índice "En esta página": salta a cada apartado de la pestaña activa.
+// Índice "En esta página": desplaza suavemente a cada apartado de la pestaña
+// activa. Usamos el id del apartado + scrollIntoView en lugar de dejar que el
+// enlace navegue: así no se cambia la URL (no añade #ancla) ni hay recarga,
+// solo un deslizamiento in-page. El scroll-margin-top (scroll-mt-28) de cada
+// h2 hace que caiga por debajo de la cabecera fija.
 function Toc({ items }) {
   if (items.length < 2) return null;
+  const scrollTo = (e, id) => {
+    e.preventDefault();
+    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
   return (
     <nav aria-label="Índice de la página" className="my-6 rounded-2xl border border-slate-100 bg-[#F8F9FC] p-4 sm:p-5">
       <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-gray-400 mb-3">En esta página</p>
@@ -120,7 +128,8 @@ function Toc({ items }) {
         {items.map((it, i) => (
           <li key={it.id} className="flex gap-2 text-sm sm:text-[15px]">
             <span className="text-gray-300 tabular-nums">{i + 1}.</span>
-            <a href={`#${it.id}`} className="text-[#363C98] hover:text-[#FF690B] transition-colors">
+            <a href={`#${it.id}`} onClick={(e) => scrollTo(e, it.id)}
+               className="text-[#363C98] hover:text-[#FF690B] transition-colors cursor-pointer">
               {/* Si la cabecera ya trae su número (p. ej. "1. Derecho…"), lo
                   quitamos aquí para no duplicarlo con el del índice. */}
               {it.label.replace(/^\d+\.\s*/, '')}
