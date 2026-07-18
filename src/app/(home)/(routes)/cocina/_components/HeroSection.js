@@ -11,11 +11,11 @@ export default function HeroSection() {
         <div className='md:pl-14 md:w-1/2 flex flex-col items-center md:items-start'>
         <div className='flex items-center gap-4'>
             <span className='w-8 sm:w-20 h-[2px] bg-primary rounded-full'></span>
-            <p className='text-primary font-bold tracking-[0.2em] text-base sm:text-3xl uppercase whitespace-nowrap text-center'>Colección completa</p>
+            <p className='text-primary font-bold tracking-[0.2em] text-base sm:text-3xl uppercase whitespace-nowrap text-center'>Biblioteca de recetas</p>
             <span className='w-8 sm:w-20 h-[2px] bg-primary rounded-full'></span>
         </div>
 
-        <h2 className='font-bold text-secondary text-center md:text-start text-4xl sm:text-6xl md:text-6xl lg:text-7xl my-6 md:my-8 leading-tight'>La Cocina Squad Fit 1 y 2</h2>
+        <h2 className='font-bold text-secondary text-center md:text-start text-4xl sm:text-6xl md:text-6xl lg:text-7xl my-6 md:my-8 leading-tight'>La Cocina Squad Fit</h2>
         <p className='text-primary text-2xl sm:text-3xl md:text-4xl max-w-[580px] font-bold mb-4 md:mb-8 text-center md:text-start'>Recetas fit con sabor real</p>
         <p className='text-black text-base sm:text-xl md:text-3xl md:text-start text-center max-w-[520px] mb-4 leading-relaxed'>Una biblioteca <span className='text-primary font-bold'>en constante crecimiento</span> con más de 155 recetas fáciles, saciantes y deliciosas para comer sano sin restricciones.</p>
         <p className='text-black text-base sm:text-xl md:text-3xl md:text-start text-center max-w-[520px] mb-8 leading-relaxed'>Incluye los volúmenes 1 y 2, con el volumen 3 ya en camino y mucho más contenido por venir.</p>
