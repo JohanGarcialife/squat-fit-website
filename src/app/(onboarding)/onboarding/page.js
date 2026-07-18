@@ -27,6 +27,16 @@ const COUNTRY_OPTIONS = (() => {
 // Fases mostradas en el panel derecho.
 const PHASES = ['Datos básicos', 'Tu cuerpo', 'Estilo de vida', 'Último paso'];
 
+// Actividad diaria en femenino + aclaración corta (el backend devuelve los
+// nombres en masculino; los presentamos como "la actividad… sedentaria").
+const ACTIVIDAD_LABELS = {
+  'sedentario': ['Sedentaria', 'trabajo sentado y poco movimiento en el día'],
+  'ligero': ['Ligera', 'caminas algo o estás de pie parte del día'],
+  'moderado': ['Moderada', 'te mueves buena parte del día'],
+  'activo': ['Activa', 'trabajo físico o mucho movimiento diario'],
+  'muy activo': ['Muy activa', 'trabajo muy físico durante casi todo el día'],
+};
+
 // Definición de pantallas. Cada una mapea a datos reales del perfil.
 const STEPS = [
   {
@@ -168,9 +178,18 @@ export default function OnboardingPage() {
   };
 
   const handleFinish = async () => {
-    if (!userId) { router.push('/panel-control'); return; }
     setSaving(true);
     try {
+      // Si el id no llegó al cargar, lo reintentamos aquí: antes esto se
+      // saltaba el guardado EN SILENCIO y redirigía (parecía que todo fue
+      // bien sin guardar nada).
+      let uid = userId;
+      if (!uid) {
+        const info = (await axios.get(`${API}/api/v1/user/info`, { headers: { Authorization: `Bearer ${token}` } })).data;
+        uid = info?.id;
+        if (uid) setUserId(uid);
+      }
+      if (!uid) throw new Error('No pudimos identificar tu usuario. Recarga e inténtalo de nuevo.');
       const apiGender = answers.sexo === 'Hombre' ? 'male' : answers.sexo === 'Mujer' ? 'female' : '';
       const birth = answers.edad ? `${new Date().getFullYear() - parseInt(answers.edad, 10)}-01-01` : '';
       const fd = new FormData();
@@ -189,14 +208,19 @@ export default function OnboardingPage() {
       ['steps_peer_day_id', 'strength_training_id', 'weekly_cardio_frequency_id', 'daily_activity_id'].forEach((k) => {
         if (answers[k]) fd.append(k, answers[k]);
       });
-      await axios.put(`${API}/api/v1/user/update?user_id=${userId}`, fd, { headers: { Authorization: `Bearer ${token}` } });
+      await axios.put(`${API}/api/v1/user/update?user_id=${uid}`, fd, { headers: { Authorization: `Bearer ${token}` } });
       toast.success('¡Perfil completado!');
+      router.push('/panel-control');
     } catch (e) {
       console.error('guardar onboarding', e);
-      toast.error('No pudimos guardar. Puedes completarlo desde tu Perfil.');
+      const detail = e?.response?.data?.message;
+      // NOS QUEDAMOS en la página (antes redirigía igualmente y el error se
+      // perdía): el usuario ve el fallo y puede reintentar con el mismo botón.
+      toast.error(typeof detail === 'string' && detail
+        ? `No pudimos guardar: ${detail}`
+        : 'No pudimos guardar tus respuestas. Revisa tu conexión y pulsa de nuevo.');
     } finally {
       setSaving(false);
-      router.push('/panel-control');
     }
   };
 
@@ -228,10 +252,12 @@ export default function OnboardingPage() {
 
         {/* Contenido (con animación de entrada) */}
         <div key={index} className="flex-1 flex flex-col max-w-xl w-full mx-auto" style={{ animation: `sfIn 0.35s ease` }}>
-          <h1 className="font-extrabold leading-tight mb-3" style={{ color: BLUE, fontSize: 'clamp(2rem, 4vw, 3.25rem)' }}>
+          {/* Título contenido: antes crecía hasta 3.25rem y a dos líneas se
+              comía media pantalla en desktop (captura del 18 jul). */}
+          <h1 className="font-extrabold leading-tight mb-3" style={{ color: BLUE, fontSize: 'clamp(1.75rem, 2.8vw, 2.5rem)' }}>
             {step.title}
           </h1>
-          {step.subtitle && <p className="text-[#6B6BA8] text-lg sm:text-xl mb-8">{step.subtitle}</p>}
+          {step.subtitle && <p className="text-[#6B6BA8] text-base sm:text-lg mb-7">{step.subtitle}</p>}
 
           <div className="flex-1">
             {step.type === 'intro' && (
@@ -271,9 +297,10 @@ export default function OnboardingPage() {
 
             {step.type === 'sexo' && (
               <div className="flex flex-col gap-4 max-w-md">
+                {/* Iconos PNG del diseño de Figma (carpeta Formularios/PNGs) */}
                 {[
-                  { v: 'Hombre', emoji: '👨' },
-                  { v: 'Mujer', emoji: '👩' },
+                  { v: 'Hombre', img: '/onboarding/hombre.png' },
+                  { v: 'Mujer', img: '/onboarding/mujer.png' },
                 ].map((o) => {
                   const active = answers.sexo === o.v;
                   return (
@@ -281,12 +308,12 @@ export default function OnboardingPage() {
                       key={o.v}
                       type="button"
                       onClick={() => set({ sexo: o.v })}
-                      className="flex items-center gap-4 rounded-2xl border-2 px-5 py-4 font-bold text-lg transition-all cursor-pointer text-left"
+                      className="flex items-center gap-4 rounded-2xl border-2 px-5 py-3.5 font-bold text-base sm:text-lg transition-all cursor-pointer text-left"
                       style={active
                         ? { borderColor: ORANGE, backgroundColor: '#FFF6F0', color: ORANGE, boxShadow: '0 2px 10px rgba(255,105,11,0.15)' }
                         : { borderColor: '#FBD5B8', backgroundColor: '#FFF9F5', color: ORANGE }}
                     >
-                      <span className="text-2xl">{o.emoji}</span>
+                      <Image src={o.img} width={44} height={44} alt="" className="rounded-full" />
                       {o.v}
                     </button>
                   );
@@ -318,17 +345,24 @@ export default function OnboardingPage() {
               <div className="flex flex-col gap-3 max-w-md">
                 {(lists[step.list] || []).map((opt) => {
                   const active = answers[step.key] === opt.id;
+                  // La actividad diaria va en FEMENINO (es "la actividad") y
+                  // con una aclaración pequeña de a qué se refiere cada nivel.
+                  const extra = step.key === 'daily_activity_id' ? ACTIVIDAD_LABELS[String(opt.name || '').trim().toLowerCase()] : null;
+                  const label = extra ? extra[0] : opt.name;
                   return (
                     <button
                       key={opt.id}
                       type="button"
                       onClick={() => set({ [step.key]: opt.id })}
-                      className="rounded-2xl border-2 px-5 py-4 font-bold text-lg transition-all cursor-pointer text-left"
+                      className="rounded-2xl border-2 px-5 py-3.5 font-bold text-base sm:text-[17px] transition-all cursor-pointer text-left"
                       style={active
                         ? { borderColor: ORANGE, backgroundColor: '#FFF6F0', color: ORANGE, boxShadow: '0 2px 10px rgba(255,105,11,0.15)' }
                         : { borderColor: '#E7E6F5', backgroundColor: '#fff', color: BLUE }}
                     >
-                      {opt.name}
+                      {label}
+                      {extra && (
+                        <span className="block text-xs font-medium opacity-70 mt-0.5">({extra[1]})</span>
+                      )}
                     </button>
                   );
                 })}

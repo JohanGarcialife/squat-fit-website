@@ -98,12 +98,16 @@ function ActivateContent() {
               Ya tienes acceso completo a la plataforma Squad Fit.
             </p>
           </div>
-          <div className="w-full mt-4 flex flex-col gap-4">
-            <div className="text-sm text-gray-500 font-semibold bg-gray-50 py-3 px-6 rounded-2xl border border-gray-100">
-              Redirigiéndote al inicio de sesión en <span className="text-[#FF690B] font-bold text-base">{countdown}</span> segundos...
+          <div className="w-full mt-4 flex flex-col items-center gap-4">
+            {/* Cuenta atrás protagonista: 3, 2, 1… */}
+            <div className="flex flex-col items-center gap-1 bg-[#F8F9FC] w-full py-4 px-6 rounded-2xl border border-slate-100">
+              <span key={countdown} className="text-5xl font-extrabold text-[#FF690B] tabular-nums animate-in zoom-in-50 duration-300">
+                {countdown > 0 ? countdown : '¡Vamos!'}
+              </span>
+              <span className="text-sm text-gray-500 font-semibold">Te llevamos al inicio de sesión…</span>
             </div>
             <Link href="/login" className="w-full cursor-pointer bg-[#3932C0] text-white rounded-3xl p-5 text-lg font-bold hover:bg-[#3932C0]/90 transition duration-300">
-              Ir a Iniciar Sesión ahora
+              Ir a iniciar sesión ahora
             </Link>
           </div>
         </>

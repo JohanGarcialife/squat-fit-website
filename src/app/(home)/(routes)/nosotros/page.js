@@ -172,14 +172,33 @@ const ContenidoContacto = () => (
       ¿Tienes una duda o quieres empezar? Escríbenos y te respondemos lo antes posible.
     </p>
 
+    {/* Vías de contacto: tarjetas-botón con icono y flecha (que se vea que son
+        NUESTROS datos para escribirnos, no campos a rellenar). El número no
+        recibe llamadas: se ofrece como WhatsApp, no como teléfono. */}
     <div className="mt-8 grid sm:grid-cols-2 gap-4">
-      <a href="mailto:hola@squatfit.es" className="rounded-2xl border border-slate-100 bg-[#F8F9FC] p-5 hover:shadow-sm transition-shadow">
-        <p className="text-xs uppercase tracking-[0.12em] text-[#FF690B] font-bold">Email</p>
-        <p className="text-gray-800 font-medium mt-1">hola@squatfit.es</p>
+      <a href="mailto:hola@squatfit.es" className="group flex items-center gap-4 rounded-2xl border-2 border-[#363C98]/15 p-5 hover:border-[#363C98] hover:shadow-md transition-all">
+        <span className="flex-shrink-0 w-12 h-12 rounded-2xl bg-[#363C98] flex items-center justify-center">
+          <svg className="w-6 h-6 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <rect x="3" y="5" width="18" height="14" rx="3" /><path d="m3 7 9 6 9-6" />
+          </svg>
+        </span>
+        <span className="flex-1">
+          <span className="block text-gray-800 font-bold">Escríbenos un email</span>
+          <span className="block text-[#363C98] text-sm font-medium mt-0.5">hola@squatfit.es</span>
+        </span>
+        <span className="text-slate-300 group-hover:text-[#363C98] group-hover:translate-x-0.5 transition-all" aria-hidden="true">→</span>
       </a>
-      <a href="tel:+34623020494" className="rounded-2xl border border-slate-100 bg-[#F8F9FC] p-5 hover:shadow-sm transition-shadow">
-        <p className="text-xs uppercase tracking-[0.12em] text-[#FF690B] font-bold">Teléfono</p>
-        <p className="text-gray-800 font-medium mt-1">+34 623 020 494</p>
+      <a href="https://wa.me/34623020494" target="_blank" rel="noopener noreferrer" className="group flex items-center gap-4 rounded-2xl border-2 border-[#25D366]/30 p-5 hover:border-[#25D366] hover:shadow-md transition-all">
+        <span className="flex-shrink-0 w-12 h-12 rounded-2xl bg-[#25D366] flex items-center justify-center">
+          <svg className="w-6 h-6 text-white" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm0 18.2a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2Zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.5.1-.2.2-.6.8-.8 1-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-2-1.2 7.5 7.5 0 0 1-1.4-1.7c-.1-.2 0-.4.1-.5l.4-.5c.1-.2.2-.3.3-.5v-.4c0-.1-.5-1.3-.7-1.8-.2-.5-.4-.4-.5-.4h-.5c-.2 0-.4.1-.7.3-.2.3-.9.9-.9 2.1s.9 2.4 1 2.6a11.2 11.2 0 0 0 4.3 3.8c.6.3 1.1.4 1.4.5.6.2 1.2.2 1.6.1.5-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.2-1.2l-.4-.2Z" />
+          </svg>
+        </span>
+        <span className="flex-1">
+          <span className="block text-gray-800 font-bold">Escríbenos por WhatsApp</span>
+          <span className="block text-[#25D366] text-sm font-medium mt-0.5">+34 623 020 494</span>
+        </span>
+        <span className="text-slate-300 group-hover:text-[#25D366] group-hover:translate-x-0.5 transition-all" aria-hidden="true">→</span>
       </a>
     </div>
 

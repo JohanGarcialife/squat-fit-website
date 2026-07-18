@@ -174,18 +174,34 @@ export default function BurgerMenu() {
 
   return (
     <div className='flex flex-row items-center justify-between px-5 py-2.5'>
-      <Link href="/">
-        <Image
-          src="/LogoSquadFit-horizontal.png"
-          width={192}
-          height={46}
-          alt="Logo"
-          className='object-contain'
-        />
-      </Link>
+      {/* Menú a la IZQUIERDA del logo: azul en reposo, naranja al abrirse */}
+      <div className='flex items-center gap-3'>
+        <button
+          className={`p-1 active:scale-90 transition-all cursor-pointer ${show ? 'invisible' : ''}`}
+          style={{ color: show ? '#FF690B' : '#3932C0' }}
+          onClick={() => setShow(true)}
+          aria-label='Abrir menú'
+          aria-expanded={show}
+        >
+          <svg width="27" height="20" viewBox="0 0 27 20" fill="none" aria-hidden="true">
+            <line x1="2.8" y1="3" x2="24.2" y2="3" stroke="currentColor" strokeWidth="4" strokeLinecap="round" />
+            <line x1="2.8" y1="10" x2="24.2" y2="10" stroke="currentColor" strokeWidth="4" strokeLinecap="round" />
+            <line x1="2.8" y1="17" x2="24.2" y2="17" stroke="currentColor" strokeWidth="4" strokeLinecap="round" />
+          </svg>
+        </button>
+        <Link href="/">
+          <Image
+            src="/LogoSquadFit-horizontal.png"
+            width={192}
+            height={46}
+            alt="Logo"
+            className='object-contain'
+          />
+        </Link>
+      </div>
 
-      {/* Carrito + menú. Ambos se ocultan con el drawer abierto: quedan debajo
-          del overlay y se verían atenuados en vez de desaparecer. */}
+      {/* Carrito a la derecha. Se oculta con el drawer abierto: queda debajo
+          del overlay y se vería atenuado en vez de desaparecer. */}
       <div className={`${show ? 'invisible' : 'flex'} items-center gap-4`}>
         {/* Carrito: abre el pop-up. Siempre visible, aunque esté vacío; el badge
             solo sale si hay unidades. El pop-up ya tiene su estado vacío. */}
@@ -210,18 +226,6 @@ export default function BurgerMenu() {
           </button>
         )}
 
-        {/* Botón menú: icono de líneas, sin fondo */}
-        <button
-          className='text-[#FF690B] p-1 active:scale-90 transition-transform cursor-pointer'
-          onClick={() => setShow(true)}
-          aria-label='Abrir menú'
-        >
-          <svg width="27" height="20" viewBox="0 0 27 20" fill="none" aria-hidden="true">
-            <line x1="2.8" y1="3" x2="24.2" y2="3" stroke="currentColor" strokeWidth="4" strokeLinecap="round" />
-            <line x1="2.8" y1="10" x2="24.2" y2="10" stroke="currentColor" strokeWidth="4" strokeLinecap="round" />
-            <line x1="2.8" y1="17" x2="24.2" y2="17" stroke="currentColor" strokeWidth="4" strokeLinecap="round" />
-          </svg>
-        </button>
       </div>
 
       {isClient && createPortal(overlay, document.body)}
