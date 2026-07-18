@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react'
 import axios from 'axios'
 import TopVentas from '../_components/TopVentas'
 import { useAuthStore } from '@/stores/auth.store'
+import AccessNotice from '@/app/components/AccessNotice'
 
 export default function Page() {
   const [courses, setCourses] = useState([])
@@ -53,6 +54,9 @@ export default function Page() {
     fetchCourses()
     fetchUserCourses()
   }, [token])
+
+  // Sin sesión, aviso de acceso en vez de un dashboard a medias.
+  if (!token) return <AccessNotice redirect="/panel-control" />
 
   return (
     <div className='py-16 pl-20 w-full'>

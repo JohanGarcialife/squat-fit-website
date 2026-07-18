@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import { useAuthStore } from '@/stores/auth.store';
+import AccessNotice from '@/app/components/AccessNotice';
 import {
   Bell,
   TrendingUp,
@@ -44,10 +45,8 @@ export default function AlertasPage() {
   const [showPrefs, setShowPrefs] = useState(false);
 
   useEffect(() => {
-    if (!token) {
-      router.push('/login?redirect=/panel-alertas');
-      return;
-    }
+    // Sin sesión no cargamos nada: el render muestra el aviso de acceso.
+    if (!token) return;
     const headers = { Authorization: `Bearer ${token}` };
     (async () => {
       try {
@@ -92,7 +91,7 @@ export default function AlertasPage() {
     }
   };
 
-  if (!token) return null;
+  if (!token) return <AccessNotice redirect="/panel-alertas" />;
   if (loading) {
     return (
       <div className="flex-1 bg-[#F8F9FC] flex flex-col justify-center items-center min-h-screen">
