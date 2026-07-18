@@ -6,7 +6,6 @@ import LandingButton from '../../../../components/LandingButton';
 
 export default function HeroPlanes() {
   const handleScrollToPlans = () => {
-    // For now, it will scroll to a plans section if/when we add it, or can navigate to a shop section.
     const element = document.getElementById('shop-plans');
     if (element) {
       element.scrollIntoView({ behavior: 'smooth' });
@@ -14,54 +13,58 @@ export default function HeroPlanes() {
   };
 
   return (
-    <section className="relative overflow-hidden bg-white py-20 sm:py-28 md:py-36 px-6 sm:px-12 md:px-24 flex flex-col items-center justify-center text-center">
-      
+    <section className="relative overflow-hidden bg-white py-16 sm:py-24 md:py-28 px-6 sm:px-12 md:px-16 lg:px-24">
+
       {/* Decorative Top Background Element */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-gradient-to-b from-[#363c98]/5 to-transparent rounded-full blur-3xl pointer-events-none -z-10" />
 
-      {/* --- Indicador: NUESTROS PLANES --- */}
-      <div className="flex items-center justify-center gap-4 mb-8 animate-fade-in opacity-0 [animation-fill-mode:forwards] [animation-delay:100ms] duration-700">
-        <span className="w-8 sm:w-20 h-[2px] bg-primary rounded-full"></span>
-        <span className="text-primary font-bold tracking-[0.2em] text-base sm:text-3xl uppercase whitespace-nowrap">
-          NUESTRO PROGRAMA
-        </span>
-        <span className="w-8 sm:w-20 h-[2px] bg-primary rounded-full"></span>
-      </div>
+      {/* Desktop (lg+): texto a la izquierda, foto a la derecha. Móvil/tablet: apilado y centrado. */}
+      <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-10 lg:gap-16">
 
-      {/* --- Título Principal --- */}
-      <h1 className="text-[#363C98] font-extrabold text-4xl sm:text-6xl md:text-7xl lg:text-8xl leading-[1.1] tracking-tight max-w-5xl mx-auto mb-8 animate-fade-in opacity-0 [animation-fill-mode:forwards] [animation-delay:300ms] duration-700">
-        Tu cambio, esta vez <br /> <span className="text-[#363C98]">de verdad</span>
-      </h1>
+        {/* --- Columna de texto --- */}
+        <div className="flex-1 flex flex-col items-center lg:items-start text-center lg:text-left">
 
-      {/* --- Subtítulo --- */}
-      <p className="text-primary font-bold text-lg sm:text-2xl md:text-3xl max-w-4xl mx-auto mb-12 leading-relaxed animate-fade-in opacity-0 [animation-fill-mode:forwards] [animation-delay:500ms] duration-700">
-        Un programa de nutrición y entreno para lograr tu objetivo y mantener resultados.
-      </p>
+          {/* --- Indicador: NUESTRO PROGRAMA --- */}
+          <div className="flex items-center gap-4 mb-6 animate-fade-in opacity-0 [animation-fill-mode:forwards] [animation-delay:100ms] duration-700">
+            <span className="w-8 sm:w-14 h-[2px] bg-primary rounded-full"></span>
+            <span className="text-primary font-bold tracking-[0.2em] text-base sm:text-2xl uppercase whitespace-nowrap">
+              NUESTRO PROGRAMA
+            </span>
+            <span className="w-8 sm:w-14 h-[2px] bg-primary rounded-full"></span>
+          </div>
 
-      {/* --- Botón CTA (naranja de sistema; el degradado quedaba fuera de la
-           familia de botones de la web) --- */}
-      <div className="flex flex-col items-center justify-center animate-fade-in opacity-0 [animation-fill-mode:forwards] [animation-delay:700ms] duration-700">
-        <LandingButton variant="orange" size="xl" autoShine onClick={handleScrollToPlans} className="text-xl sm:text-2xl">
-          Unirme al programa
-        </LandingButton>
+          {/* --- Título Principal --- */}
+          <h1 className="text-[#363C98] font-extrabold text-4xl sm:text-5xl md:text-6xl xl:text-7xl leading-[1.1] tracking-tight mb-6 animate-fade-in opacity-0 [animation-fill-mode:forwards] [animation-delay:300ms] duration-700">
+            Tu cambio, esta vez <span className="whitespace-nowrap">de verdad</span>
+          </h1>
 
-        {/* --- Subtexto --- */}
-        <span className="mt-4 text-slate-400 text-sm sm:text-base font-medium tracking-wide">
-          Plazas limitadas
-        </span>
-      </div>
+          {/* --- Subtítulo --- */}
+          <p className="text-primary font-bold text-lg sm:text-2xl md:text-3xl max-w-xl mb-10 leading-relaxed animate-fade-in opacity-0 [animation-fill-mode:forwards] [animation-delay:500ms] duration-700">
+            Un programa de nutrición y entreno para lograr tu objetivo y mantener resultados.
+          </p>
 
-      {/* Imagen del hero: antes vivía en la sección "El método para no volver a
-          abandonar" (eliminada); ahora acompaña al hero del programa. */}
-      <div className="relative w-full max-w-[360px] sm:max-w-[440px] aspect-[4/5] mt-14 animate-fade-in opacity-0 [animation-fill-mode:forwards] [animation-delay:900ms] duration-700">
-        <Image
-          src="/PlanesHeroImage.png"
-          alt="El programa Squad Fit"
-          fill
-          priority
-          sizes="(max-width: 768px) 100vw, 440px"
-          className="object-contain"
-        />
+          {/* --- Botón CTA --- */}
+          <div className="flex flex-col items-center lg:items-start animate-fade-in opacity-0 [animation-fill-mode:forwards] [animation-delay:700ms] duration-700">
+            <LandingButton variant="orange" size="xl" autoShine onClick={handleScrollToPlans} className="text-xl sm:text-2xl">
+              Unirme al programa
+            </LandingButton>
+            <span className="mt-4 text-slate-400 text-sm sm:text-base font-medium tracking-wide">
+              Plazas limitadas
+            </span>
+          </div>
+        </div>
+
+        {/* --- Columna de imagen (derecha en desktop) --- */}
+        <div className="relative w-full max-w-[320px] sm:max-w-[420px] lg:max-w-[460px] aspect-[4/5] flex-shrink-0 animate-fade-in opacity-0 [animation-fill-mode:forwards] [animation-delay:900ms] duration-700">
+          <Image
+            src="/PlanesHeroImage.png"
+            alt="El programa Squad Fit"
+            fill
+            priority
+            sizes="(max-width: 1024px) 100vw, 460px"
+            className="object-contain"
+          />
+        </div>
       </div>
 
       {/* Simple animations injection */}

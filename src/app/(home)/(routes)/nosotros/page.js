@@ -1,48 +1,50 @@
 'use client'
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import Achievements from '../../_components/Achievements';
 import Education from '../../_components/Education';
 import SobreHamlet from '../../_components/SobreHamlet';
 import Empleo from '../../_components/Empleo';
 import BrandTabs from '@/app/components/BrandTabs';
-import { ABOUT, Portrait } from '../../_components/aboutStyles';
+import { ABOUT, Portrait, Sheet } from '../../_components/aboutStyles';
 
-// Página "Nosotros" con pestañas. Estilo unificado (sobrio/legal) en aboutStyles.
+// Página "Conócenos" con pestañas, formato hoja (aboutStyles). Estilo sobrio/legal.
 export default function NosotrosPage() {
   const [activeTab, setActiveTab] = useState('la-empresa');
 
-  // Al entrar a Nosotros, empezar arriba (antes podía quedarse abajo)
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
 
   const tabs = [
-    { id: 'la-empresa', label: 'La empresa' },
-    { id: 'sobre-maria', label: 'Sobre María' },
-    { id: 'sobre-hamlet', label: 'Sobre Hamlet' },
-    { id: 'empleo', label: 'Empleo' },
+    { id: 'la-empresa', label: 'Squad Fit' },
+    { id: 'sobre-maria', label: 'María' },
+    { id: 'sobre-hamlet', label: 'Hamlet' },
+    { id: 'empleo', label: 'Únete al equipo' },
+    { id: 'contacto', label: 'Contacto' },
   ];
 
-  return (
-    <main className="w-full px-5 sm:px-6 py-10 sm:py-14 font-sans">
-      {/* Todo comparte la misma columna estrecha: tabs y contenido alineados */}
-      <div className={ABOUT.page}>
-        <BrandTabs tabs={tabs} active={activeTab} onChange={setActiveTab} className="mb-12" />
+  const goEmpleo = () => { setActiveTab('empleo'); window.scrollTo(0, 0); };
 
-        <section className="min-h-[400px] text-gray-800">
-          {activeTab === 'la-empresa' && <ContenidoEmpresa />}
-          {activeTab === 'sobre-maria' && <ContenidoSobreMaria />}
-          {activeTab === 'sobre-hamlet' && <SobreHamlet />}
-          {activeTab === 'empleo' && <Empleo />}
-        </section>
-      </div>
-    </main>
+  return (
+    <Sheet>
+      {/* Barra de navegación arriba del todo */}
+      <BrandTabs tabs={tabs} active={activeTab} onChange={setActiveTab} className="mb-10" />
+
+      <section className="min-h-[400px] text-gray-800">
+        {activeTab === 'la-empresa' && <ContenidoEmpresa onGoToEmpleo={goEmpleo} />}
+        {activeTab === 'sobre-maria' && <ContenidoSobreMaria />}
+        {activeTab === 'sobre-hamlet' && <SobreHamlet />}
+        {activeTab === 'empleo' && <Empleo />}
+        {activeTab === 'contacto' && <ContenidoContacto />}
+      </section>
+    </Sheet>
   );
 }
 
-// ── Pestaña "La empresa" ─────────────────────────────────────────────────────
-const ContenidoEmpresa = () => {
+// ── Pestaña "Squad Fit" ──────────────────────────────────────────────────────
+const ContenidoEmpresa = ({ onGoToEmpleo }) => {
   return (
     <div className="animate-fadeIn">
       <p className={ABOUT.eyebrow}>Squad Fit</p>
@@ -52,7 +54,7 @@ const ContenidoEmpresa = () => {
         a alcanzar tus metas de una manera divertida y sostenible.
       </p>
 
-      {/* Imagen de marca, contenida (antes 500 px sueltos) */}
+      {/* Imagen de marca, contenida en el flujo */}
       <div className="mt-8 relative w-full aspect-[16/9] max-w-2xl mx-auto">
         <Image src="/nosotros.png" alt="Equipo de Squad Fit" fill sizes="(max-width:768px) 100vw, 672px" className="object-contain" />
       </div>
@@ -85,8 +87,8 @@ const ContenidoEmpresa = () => {
         <h2 className={ABOUT.h2}>Nuestra visión</h2>
         <div className="mt-3 space-y-4">
           <p className={ABOUT.p}>
-            Tenemos dos convicciones: 1.º, si todos entendiéramos las calorías tomaríamos mejores
-            decisiones; y 2.º, si erradicamos el sedentarismo todos seremos más saludables.
+            Tenemos dos convicciones: 1: si todos entendiéramos las calorías tomaríamos mejores
+            decisiones; y 2: si erradicamos el sedentarismo todos seremos más saludables.
           </p>
           <p className={ABOUT.p}>
             Por eso, ya sea que busques mejorar tu físico, tu rendimiento, tu mentalidad, tu salud
@@ -96,20 +98,29 @@ const ContenidoEmpresa = () => {
       </section>
 
       <section className={ABOUT.section}>
-        <h2 className={ABOUT.h2}>Únete al equipo</h2>
+        <h2 className={ABOUT.h2}>Trabaja con nosotros</h2>
         <div className="mt-3 space-y-4">
           <p className={ABOUT.p}>
-            Si estás listo para transformar tu vida y divertirte mientras lo haces, ¡estás en la
-            comunidad perfecta! Únete y descubre cómo alcanzar tus objetivos de fitness y salud.
+            En Squad Fit buscamos personas responsables, resolutivas y comprometidas con ayudar
+            a los demás a mejorar su salud y sus hábitos.
           </p>
           <p className={ABOUT.p}>
-            Gracias por confiar en nosotros y por permitirnos ser parte de tu viaje hacia una vida
-            más saludable y activa. Juntos, haremos que cada Squat cuente. ¡Nos vemos en Squad Fit!
+            Valoramos la iniciativa, el trabajo en equipo y las ganas de seguir aprendiendo. Si
+            crees que puedes aportar al proyecto, nos encantará conocerte.
+          </p>
+          <p className={ABOUT.p}>
+            <button
+              type="button"
+              onClick={onGoToEmpleo}
+              className="text-[#FF690B] font-semibold underline underline-offset-2 hover:text-[#363C98] transition-colors cursor-pointer"
+            >
+              Consulta nuestras vacantes o envíanos tu candidatura
+            </button>.
           </p>
         </div>
       </section>
 
-      {/* Foto del equipo, contenida y redondeada (antes a sangre 1920×600) */}
+      {/* Foto del equipo, contenida y redondeada */}
       <div className="mt-12 relative w-full aspect-[16/7] rounded-2xl overflow-hidden shadow-sm">
         <Image src="/equipo.png" alt="El equipo de Squad Fit" fill sizes="768px" className="object-cover" />
       </div>
@@ -117,7 +128,7 @@ const ContenidoEmpresa = () => {
   );
 };
 
-// ── Pestaña "Sobre María" ────────────────────────────────────────────────────
+// ── Pestaña "María" ──────────────────────────────────────────────────────────
 const ContenidoSobreMaria = () => {
   const data = [
     { icon: 'Pills', title: 'Licenciatura en Farmacia', subtitle: 'Universidad', detail: 'Complutense de Madrid (UCM)' },
@@ -137,17 +148,13 @@ const ContenidoSobreMaria = () => {
 
   return (
     <div className="animate-fadeIn">
-      <div className="flex flex-col md:flex-row gap-8 md:gap-10 items-start">
-        <div className="flex-1 order-2 md:order-1">
-          <p className={ABOUT.eyebrow}>El equipo</p>
-          <h1 className={`${ABOUT.h1} mt-2`}>Sobre María</h1>
-          <div className="mt-4 space-y-4">
-            {parrafos.map((t, i) => <p key={i} className={ABOUT.p}>{t}</p>)}
-          </div>
-        </div>
-        <div className="order-1 md:order-2 w-full md:w-auto">
-          <Portrait src="/Maria.png" alt="María de Squad Fit" />
-        </div>
+      <p className={ABOUT.eyebrow}>El equipo</p>
+      <h1 className={`${ABOUT.h1} mt-2`}>Sobre María</h1>
+      <div className="mt-6">
+        <Portrait src="/Maria.png" alt="María de Squad Fit" />
+      </div>
+      <div className="mt-6 space-y-4">
+        {parrafos.map((t, i) => <p key={i} className={ABOUT.p}>{t}</p>)}
       </div>
 
       <Achievements />
@@ -155,3 +162,31 @@ const ContenidoSobreMaria = () => {
     </div>
   );
 };
+
+// ── Pestaña "Contacto" ───────────────────────────────────────────────────────
+const ContenidoContacto = () => (
+  <div className="animate-fadeIn">
+    <p className={ABOUT.eyebrow}>Hablemos</p>
+    <h1 className={`${ABOUT.h1} mt-2`}>Contacto</h1>
+    <p className={ABOUT.lead}>
+      ¿Tienes una duda o quieres empezar? Escríbenos y te respondemos lo antes posible.
+    </p>
+
+    <div className="mt-8 grid sm:grid-cols-2 gap-4">
+      <a href="mailto:hola@squatfit.es" className="rounded-2xl border border-slate-100 bg-[#F8F9FC] p-5 hover:shadow-sm transition-shadow">
+        <p className="text-xs uppercase tracking-[0.12em] text-[#FF690B] font-bold">Email</p>
+        <p className="text-gray-800 font-medium mt-1">hola@squatfit.es</p>
+      </a>
+      <a href="tel:+34623020494" className="rounded-2xl border border-slate-100 bg-[#F8F9FC] p-5 hover:shadow-sm transition-shadow">
+        <p className="text-xs uppercase tracking-[0.12em] text-[#FF690B] font-bold">Teléfono</p>
+        <p className="text-gray-800 font-medium mt-1">+34 623 020 494</p>
+      </a>
+    </div>
+
+    <div className="mt-6">
+      <Link href="/contacto" className="inline-block bg-primary hover:bg-[#e05b08] text-white font-bold px-7 py-3 rounded-2xl transition-colors">
+        Ir al formulario de contacto
+      </Link>
+    </div>
+  </div>
+);

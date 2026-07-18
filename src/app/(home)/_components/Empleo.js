@@ -72,29 +72,25 @@ export default function Empleo() {
   return (
     <div className="animate-fadeIn font-sans">
       {/* SECCIÓN 1: HEADER + IMAGEN */}
-      <div className="flex flex-col md:flex-row items-start justify-between gap-8 md:gap-10 mb-14">
-        <div className="flex-1 order-2 md:order-1">
-          <p className={ABOUT.eyebrow}>Trabaja con nosotros</p>
-          <h1 className={`${ABOUT.h1} mt-2 mb-4`}>Empleo</h1>
-          <div className="space-y-4">
-            <p className={ABOUT.p}>
-              En Squad Fit estamos construyendo un proyecto a largo plazo, con impacto real en la
-              vida de las personas.
-            </p>
-            <p className={ABOUT.p}>
-              No publicamos ofertas tradicionales con horario y sueldo cerrado, pero{' '}
-              <span className="font-semibold text-gray-700">sí estamos abiertos a conocer perfiles
-              que encajen con nuestra forma de trabajar.</span>
-            </p>
-            <p className={ABOUT.p}>
-              Buscamos personas con iniciativa, responsabilidad y ganas de crecer dentro del proyecto.
-            </p>
-          </div>
+      <div className="mb-14">
+        <p className={ABOUT.eyebrow}>Trabaja con nosotros</p>
+        <h1 className={`${ABOUT.h1} mt-2 mb-4`}>Únete al equipo</h1>
+        <div className="relative w-full max-w-[300px] aspect-square mx-auto my-6">
+          <Image src="/empleo.png" alt="Equipo Squad Fit" fill sizes="300px" className="object-contain" />
         </div>
-        <div className="order-1 md:order-2 w-full md:w-auto flex justify-center">
-          <div className="relative w-[240px] sm:w-[280px] aspect-square">
-            <Image src="/empleo.png" alt="Equipo Squad Fit" fill sizes="300px" className="object-contain" />
-          </div>
+        <div className="space-y-4">
+          <p className={ABOUT.p}>
+            En Squad Fit estamos construyendo un proyecto a largo plazo, con impacto real en la
+            vida de las personas.
+          </p>
+          <p className={ABOUT.p}>
+            No publicamos ofertas tradicionales con horario y sueldo cerrado, pero{' '}
+            <span className="font-semibold text-gray-700">sí estamos abiertos a conocer perfiles
+            que encajen con nuestra forma de trabajar.</span>
+          </p>
+          <p className={ABOUT.p}>
+            Buscamos personas con iniciativa, responsabilidad y ganas de crecer dentro del proyecto.
+          </p>
         </div>
       </div>
 
@@ -104,8 +100,8 @@ export default function Empleo() {
         <p className={`${ABOUT.p} mt-3`}>
           Estos son los perfiles que más sentido tienen dentro de Squad Fit:
         </p>
-        <ul className="mt-4 grid sm:grid-cols-2 gap-x-8 gap-y-2">
-          {['Setter (ventas por mensaje)', 'Closer (ventas telefónicas / videollamada)', 'Marketing de contenidos (copy, email, funnels)', 'Paid Media / Ads (Meta, Google, etc.)', 'Editor/a de vídeo (Reels, YouTube, Shorts)', 'Dietista-nutricionista', 'Entrenador/a de fuerza', 'Psicólogo/a especializado/a en TCA'].map((t, i) => (
+        <ul className="mt-4 space-y-1">
+          {['Personal de ventas: Setters o Closers', 'Marketing de contenidos: copy, email, funnels', 'Paid Media o Ads: Meta, Google, etc.', 'Editor de vídeos cortos o largos', 'Dietistas o nutricionistas', 'Entrenadores de fuerza', 'Psicólogos con manejo en TCA'].map((t, i) => (
             <li key={i} className="flex items-start gap-2.5">
               <span className="text-[#FF690B] leading-7">•</span>
               <p className={ABOUT.p}>{t}</p>
@@ -125,7 +121,7 @@ export default function Empleo() {
         <p className={`${ABOUT.p} mt-3`}>
           Para evitar malentendidos, actualmente <span className="font-semibold text-gray-700">no estamos buscando:</span>
         </p>
-        <ul className="mt-4 space-y-2">
+        <ul className="mt-4 space-y-1">
           {['Desarrollo web', 'Diseño web', 'Colaboraciones con marcas de suplementación'].map((t, i) => (
             <li key={i} className="flex items-start gap-2.5">
               <span className="text-[#FF690B] leading-7">•</span>
