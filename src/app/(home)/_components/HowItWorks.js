@@ -31,16 +31,17 @@ const BENEFITS = [
   },
 ]
 
-// Cada fila anima al entrar ELLA en pantalla, con un pequeño escalonado.
+// Cada fila anima al ASOMAR por abajo (ratio alto = disparo temprano en este
+// hook), rápido y con un escalonado mínimo para que no se sienta lento.
 function BenefitRow({ benefit, index }) {
-  const [ref, visible] = useInView(0.35)
+  const [ref, visible] = useInView(0.95)
   const { icon: Icon, title, text, tint, medallion } = benefit
   return (
     <div
       ref={ref}
-      style={{ transitionDelay: `${visible ? index * 120 : 0}ms` }}
-      className={`flex items-center gap-4 sm:gap-5 rounded-[18px] border p-4 sm:p-5 transition-all duration-500 ease-out hover:-translate-y-0.5 hover:shadow-[0_12px_30px_rgba(54,60,152,0.06)] ${tint} ${
-        visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
+      style={{ transitionDelay: `${visible ? index * 70 : 0}ms` }}
+      className={`flex items-center gap-4 sm:gap-5 rounded-[18px] border p-4 sm:p-5 transition-all duration-[400ms] ease-out hover:-translate-y-0.5 hover:shadow-[0_12px_30px_rgba(54,60,152,0.06)] ${tint} ${
+        visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
       }`}
     >
       <div className={`flex-shrink-0 w-14 h-14 rounded-2xl flex items-center justify-center ${medallion}`}>
