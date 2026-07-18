@@ -29,6 +29,7 @@ import {
   Zap,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import AccessNotice from '@/app/components/AccessNotice';
 
 const API = 'https://squatfit-api-cyrc2g3zra-no.a.run.app';
 
@@ -382,10 +383,8 @@ export default function ProfilePage() {
   });
 
   useEffect(() => {
-    if (!token) {
-      router.push('/login');
-      return;
-    }
+    // Sin sesión no cargamos nada: el render muestra el aviso de acceso.
+    if (!token) return;
 
     const fetchUserData = async () => {
       setIsLoading(true);
@@ -511,6 +510,8 @@ export default function ProfilePage() {
   }, [formik.values]);
 
   const firstName = formik.values.nombre || 'crack';
+
+  if (!token) return <AccessNotice redirect="/profile-panel" />;
 
   if (isLoading) {
     return (

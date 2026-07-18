@@ -6,6 +6,7 @@ import axios from 'axios';
 import toast from 'react-hot-toast';
 import { useAuthStore } from '@/stores/auth.store';
 import ConfirmationModal from '@/app/components/ConfirmationModal';
+import AccessNotice from '@/app/components/AccessNotice';
 import {
   CreditCard,
   FileText,
@@ -112,10 +113,8 @@ export default function AjustesPage() {
   };
 
   useEffect(() => {
-    if (!token) {
-      router.push('/login?redirect=/panel-ajustes');
-      return;
-    }
+    // Sin sesión no cargamos nada: el render muestra el aviso de acceso.
+    if (!token) return;
     const headers = { Authorization: `Bearer ${token}` };
     (async () => {
       // Info de cuenta (email, notificaciones). No debe tumbar la página.
@@ -207,7 +206,7 @@ export default function AjustesPage() {
     }
   };
 
-  if (!token) return null;
+  if (!token) return <AccessNotice redirect="/panel-ajustes" />;
   if (loading) {
     return (
       <div className="flex-1 bg-[#F8F9FC] flex flex-col justify-center items-center min-h-screen">

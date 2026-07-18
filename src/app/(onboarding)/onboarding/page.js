@@ -10,6 +10,7 @@ import 'react-phone-input-2/lib/style.css';
 import esPhone from 'react-phone-input-2/lang/es.json';
 import { getData as getCountryData } from 'country-list';
 import { useAuthStore } from '@/stores/auth.store';
+import AccessNotice from '@/app/components/AccessNotice';
 
 const API = 'https://squatfit-api-cyrc2g3zra-no.a.run.app';
 const BLUE = '#3932C0';
@@ -72,10 +73,8 @@ export default function OnboardingPage() {
 
   // Carga: exige sesión, precarga datos del perfil y las listas de estilo de vida.
   useEffect(() => {
-    if (!token) {
-      router.push('/login?redirect=/onboarding');
-      return;
-    }
+    // Sin sesión no cargamos nada: el render muestra el aviso de acceso.
+    if (!token) return;
     (async () => {
       try {
         const headers = { Authorization: `Bearer ${token}` };
@@ -201,7 +200,7 @@ export default function OnboardingPage() {
     }
   };
 
-  if (!token) return null;
+  if (!token) return <AccessNotice redirect="/onboarding" />;
   if (loading) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-white">

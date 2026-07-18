@@ -9,6 +9,7 @@ import axios from 'axios';
 import toast from 'react-hot-toast';
 import Image from 'next/image';
 import { Check } from 'lucide-react';
+import AccessNotice from '@/app/components/AccessNotice';
 
 const API = 'https://squatfit-api-cyrc2g3zra-no.a.run.app';
 
@@ -70,11 +71,7 @@ export default function ContactPage() {
   const { token, user } = useAuthStore();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  useEffect(() => {
-    if (!token) {
-      router.push('/login?redirect=/panel-contacto');
-    }
-  }, [token, router]);
+  // Sin sesión, el render muestra el aviso de acceso (no redirigimos en seco).
 
   const formik = useFormik({
     initialValues: {
@@ -175,7 +172,7 @@ ${values.mensaje}
     'w-full border border-orange-300 rounded-2xl px-5 py-3 placeholder-orange-200 text-gray-700 outline-none focus:border-[#FF690B] focus:ring-1 focus:ring-[#FF690B] transition-all';
   const labelClass = 'text-[#FF690B] text-sm font-bold uppercase tracking-wider';
 
-  if (!token) return null;
+  if (!token) return <AccessNotice redirect="/panel-contacto" />;
 
   return (
     <div className="flex-1 bg-[#F8F9FC] p-6 md:p-10 min-h-screen overflow-y-auto">
