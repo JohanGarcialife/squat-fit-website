@@ -18,7 +18,7 @@ export default function HeroSection() {
         <h2 className='font-bold text-secondary text-center md:text-start text-4xl sm:text-6xl md:text-6xl lg:text-7xl my-6 md:my-8 leading-tight'>La Cocina Squad Fit</h2>
         <p className='text-primary text-2xl sm:text-3xl md:text-4xl max-w-[580px] font-bold mb-4 md:mb-8 text-center md:text-start'>Recetas fit con sabor real</p>
         <p className='text-black text-base sm:text-xl md:text-3xl md:text-start text-center max-w-[520px] mb-4 leading-relaxed'>Una biblioteca <span className='text-primary font-bold'>en constante crecimiento</span> con más de 155 recetas fáciles, saciantes y deliciosas para comer sano sin restricciones.</p>
-        <p className='text-black text-base sm:text-xl md:text-3xl md:text-start text-center max-w-[520px] mb-8 leading-relaxed'>Incluye los volúmenes 1 y 2, con el volumen 3 ya en camino y mucho más contenido por venir.</p>
+        <p className='text-black text-base sm:text-xl md:text-3xl md:text-start text-center max-w-[520px] mb-8 leading-relaxed'>Incluye los volúmenes 1 y 2, con el volumen 3 ya en camino y <span className='text-primary font-bold'>5 recetas nuevas cada semana</span> en la versión Premium.</p>
 
         {/* Cifras: siempre en fila de 3, como en el hero de la home */}
         <div className='flex flex-row items-start justify-center md:justify-start gap-6 sm:gap-10 w-full'>

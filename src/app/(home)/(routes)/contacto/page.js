@@ -9,6 +9,7 @@ import axios from 'axios';
 import toast from 'react-hot-toast';
 import Image from 'next/image';
 import Link from 'next/link';
+import GdprCheckbox from '@/app/components/GdprCheckbox';
 
 // --- Esquema de Validación con Yup ---
 const ContactSchema = Yup.object().shape({
@@ -44,6 +45,7 @@ export default function PublicContactPage() {
   const router = useRouter();
   const { token, user } = useAuthStore();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [gdprAccepted, setGdprAccepted] = useState(false);
 
   // Hydration fix for client-side state
   const [isClient, setIsClient] = useState(false);
@@ -311,10 +313,13 @@ ${values.mensaje}
                 )}
               </div>
 
+              {/* RGPD */}
+              <GdprCheckbox checked={gdprAccepted} onChange={setGdprAccepted} id="gdpr-contacto" />
+
               {/* Botón de envío */}
               <button
                 type="submit"
-                disabled={isSubmitting}
+                disabled={isSubmitting || !gdprAccepted}
                 className="w-full bg-[#3932C0] hover:bg-[#2e28a0] text-white font-bold py-4 rounded-2xl transition-all cursor-pointer shadow-lg shadow-indigo-100 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-lg"
               >
                 {isSubmitting ? (

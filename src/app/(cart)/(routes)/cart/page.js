@@ -13,6 +13,7 @@ import CheckoutAccess from "../../_components/CheckoutAccess";
 import FormData from "../../_components/FormData";
 import Payment from "../../_components/Payment";
 import PaymentSuccess from "../../_components/PaymentSuccess";
+import { markLeavingCart } from "@/app/components/CartScrollRestore";
 
 export default function CartPage() {
   const router = useRouter();
@@ -20,6 +21,18 @@ export default function CartPage() {
   const [isClient, setIsClient] = useState(false);
   const [step, setStep] = useState(1);
   const [success, setSuccess] = useState(false);
+
+  // Carrito 3.3: al salir de /cart (atrás o enlaces de volver) se marca la
+  // salida para que la página anterior restaure su posición de scroll.
+  // `pagehide` porque salir de /cart cambia de grupo de layout (navegación
+  // completa, sin cleanup de React).
+  useEffect(() => {
+    window.addEventListener('pagehide', markLeavingCart);
+    return () => {
+      markLeavingCart();
+      window.removeEventListener('pagehide', markLeavingCart);
+    };
+  }, []);
 
   useEffect(() => {
     setIsClient(true);
@@ -54,7 +67,7 @@ export default function CartPage() {
     setStep(nextStep);
   };
 
-  const { cart, addToCart, decrementQuantity, removeFromCart, updateQuantity } = useCartStore();
+  const { cart, addToCart, decrementQuantity, removeFromCart, updateQuantity, lastRemoved, undoRemove } = useCartStore();
 
   const totalItems = cart.reduce((acc, item) => acc + item.quantity, 0);
   const subtotal = cart.reduce(
@@ -85,6 +98,17 @@ export default function CartPage() {
         <h1 className="text-3xl font-bold text-indigo-900 mb-4">
           Tu carrito está vacío
         </h1>
+        {/* Si el último producto se eliminó (p. ej. con el botón −), se puede
+            recuperar sin salir de la página. */}
+        {lastRemoved && (
+          <button
+            type="button"
+            onClick={undoRemove}
+            className="mb-2 text-indigo-900 font-bold hover:underline cursor-pointer"
+          >
+            ↩ Deshacer: recuperar «{lastRemoved.item.name}»
+          </button>
+        )}
         <Link
           href="/cocina"
           className="mt-4 inline-block bg-indigo-800 text-white font-bold py-4 px-8 rounded-xl hover:bg-indigo-900 transition-colors">

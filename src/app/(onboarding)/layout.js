@@ -1,5 +1,6 @@
 import { Inter } from "next/font/google";
 import "../globals.css";
+import "../form-motion.css";
 import ToasterProvider from "@/components/ToasterProvider";
 
 const inter = Inter({

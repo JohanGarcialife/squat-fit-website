@@ -362,7 +362,7 @@ export default function Shop() {
             titleColor={C.digital}
             price={formatPrice(PERMANENT_PRICE)}
             per="pago único"
-            desc="Toda la biblioteca, ahora y siempre: Vol. 1, 2, el 3 (próximamente) y futuros. Recetas siempre actualizadas."
+            desc="Toda la biblioteca, ahora y siempre: Vol. 1, 2, el 3 (próximamente) y futuros. Con 5 recetas nuevas cada semana."
             ctaLabel={currentTierRank > 0 && !hasPermanent ? 'Mejorar a de por vida' : 'Acceso de por vida'}
             ctaColor={C.digital}
             selected={selectedCard === 'digital'}

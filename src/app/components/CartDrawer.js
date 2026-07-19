@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation'
 import { Minus, Plus, Trash2, X, RotateCcw } from 'lucide-react'
 import { useCartStore } from '@/stores/cart.store'
 import { useUiStore } from '@/stores/ui.store'
+import { rememberCartReturnPoint } from '@/app/components/CartScrollRestore'
 
 // Carrito como pop-up: aquí SOLO se ve y se edita (cantidades, borrar).
 // Pagar sigue siendo la página /cart, porque Stripe redirige de vuelta con
@@ -75,6 +76,7 @@ export default function CartDrawer() {
   const subtotal = cart.reduce((acc, i) => acc + i.price * i.quantity, 0)
 
   const irAPagar = () => {
+    rememberCartReturnPoint()
     closeCart()
     router.push('/cart?step=2')
   }

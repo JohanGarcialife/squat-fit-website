@@ -7,11 +7,13 @@ import * as Yup from 'yup';
 import { useRouter, useSearchParams } from 'next/navigation';
 import toast from 'react-hot-toast';
 import { Eye, EyeOff, Check } from 'lucide-react';
+import GdprCheckbox from '@/app/components/GdprCheckbox';
 
 function RegisterContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+  const [gdprAccepted, setGdprAccepted] = useState(false);
 
   const redirectParam = searchParams.get('redirect') ? `?redirect=${encodeURIComponent(searchParams.get('redirect'))}` : '';
   const [isConfirmPasswordVisible, setIsConfirmPasswordVisible] = useState(false);
@@ -191,7 +193,8 @@ function RegisterContent() {
                     );
                   })()}
                 </div>
-                <button type="submit" disabled={isSubmitting} className='cursor-pointer bg-white text-primary rounded-2xl py-3.5 text-base font-bold hover:bg-[#FFEDE0] transition duration-300 disabled:opacity-50 mt-1'>
+                <GdprCheckbox checked={gdprAccepted} onChange={setGdprAccepted} id="gdpr-register" light />
+                <button type="submit" disabled={isSubmitting || !gdprAccepted} className='cursor-pointer bg-white text-primary rounded-2xl py-3.5 text-base font-bold hover:bg-[#FFEDE0] transition duration-300 disabled:opacity-50 disabled:cursor-not-allowed mt-1'>
                   Registrarme
                 </button>
               </Form>

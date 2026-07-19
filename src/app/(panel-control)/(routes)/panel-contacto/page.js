@@ -10,6 +10,7 @@ import toast from 'react-hot-toast';
 import Image from 'next/image';
 import { Check } from 'lucide-react';
 import AccessNotice from '@/app/components/AccessNotice';
+import GdprCheckbox from '@/app/components/GdprCheckbox';
 
 const API = 'https://squatfit-api-cyrc2g3zra-no.a.run.app';
 
@@ -70,6 +71,7 @@ export default function ContactPage() {
   const router = useRouter();
   const { token, user } = useAuthStore();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [gdprAccepted, setGdprAccepted] = useState(false);
 
   // Sin sesión, el render muestra el aviso de acceso (no redirigimos en seco).
 
@@ -338,9 +340,11 @@ ${values.mensaje}
                 )}
               </div>
 
+              <GdprCheckbox checked={gdprAccepted} onChange={setGdprAccepted} id="gdpr-panel-contacto" />
+
               <button
                 type="submit"
-                disabled={isSubmitting}
+                disabled={isSubmitting || !gdprAccepted}
                 className="w-full bg-[#3932C0] hover:bg-[#2e28a0] text-white font-bold py-4 rounded-2xl transition-all cursor-pointer shadow-lg shadow-indigo-100 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-lg"
               >
                 {isSubmitting ? (

@@ -11,6 +11,7 @@ import esPhone from 'react-phone-input-2/lang/es.json';
 import { getData as getCountryData } from 'country-list';
 import { useAuthStore } from '@/stores/auth.store';
 import AccessNotice from '@/app/components/AccessNotice';
+import GdprCheckbox from '@/app/components/GdprCheckbox';
 
 const API = 'https://squatfit-api-cyrc2g3zra-no.a.run.app';
 const BLUE = '#3932C0';
@@ -74,6 +75,7 @@ export default function OnboardingPage() {
   const [saving, setSaving] = useState(false);
   const [exitOpen, setExitOpen] = useState(false);
   const [canAdvance, setCanAdvance] = useState(true); // para el retardo de lectura
+  const [gdprAccepted, setGdprAccepted] = useState(false); // RGPD en el último paso
   const [dir, setDir] = useState(1); // dirección de la transición
 
   const step = STEPS[index];
@@ -145,8 +147,9 @@ export default function OnboardingPage() {
     if (step.readDelay && !canAdvance) return false;
     switch (step.type) {
       case 'intro':
-      case 'done':
         return true;
+      case 'done':
+        return gdprAccepted;
       case 'basicos':
         return answers.nombre.trim().length > 0 && answers.paisIdioma;
       case 'sexo':
@@ -160,7 +163,7 @@ export default function OnboardingPage() {
       default:
         return true;
     }
-  }, [step, answers, canAdvance]);
+  }, [step, answers, canAdvance, gdprAccepted]);
 
   const goNext = async () => {
     if (!isValid) return;
@@ -243,7 +246,7 @@ export default function OnboardingPage() {
         {/* Barra de progreso + cerrar */}
         <div className="flex items-center gap-4 mb-12 sm:mb-16">
           <div className="flex-1 h-2.5 rounded-full bg-[#DEDCF5] overflow-hidden">
-            <div className="h-full rounded-full transition-all duration-500" style={{ width: `${progress}%`, backgroundColor: BLUE }} />
+            <div className="h-full rounded-full sf-progress-fill" style={{ width: `${progress}%`, backgroundColor: BLUE }} />
           </div>
           <button onClick={() => setExitOpen(true)} aria-label="Salir" className="text-[#8B87C9] hover:text-[#3932C0] transition-colors cursor-pointer text-xl font-bold px-1">
             ✕
@@ -251,7 +254,7 @@ export default function OnboardingPage() {
         </div>
 
         {/* Contenido (con animación de entrada) */}
-        <div key={index} className="flex-1 flex flex-col max-w-xl w-full mx-auto" style={{ animation: `sfIn 0.35s ease` }}>
+        <div key={index} className="flex-1 flex flex-col max-w-xl w-full mx-auto sf-screen-in">
           {/* Título contenido: antes crecía hasta 3.25rem y a dos líneas se
               comía media pantalla en desktop (captura del 18 jul). */}
           <h1 className="font-extrabold leading-tight mb-3" style={{ color: BLUE, fontSize: 'clamp(1.75rem, 2.8vw, 2.5rem)' }}>
@@ -301,17 +304,17 @@ export default function OnboardingPage() {
                 {[
                   { v: 'Hombre', img: '/onboarding/hombre.png' },
                   { v: 'Mujer', img: '/onboarding/mujer.png' },
-                ].map((o) => {
+                ].map((o, i) => {
                   const active = answers.sexo === o.v;
                   return (
                     <button
                       key={o.v}
                       type="button"
                       onClick={() => set({ sexo: o.v })}
-                      className="flex items-center gap-4 rounded-2xl border-2 px-5 py-3.5 font-bold text-base sm:text-lg transition-all cursor-pointer text-left"
+                      className={`flex items-center gap-4 rounded-2xl border-2 px-5 py-3.5 font-bold text-base sm:text-lg cursor-pointer text-left sf-choice sf-stagger ${active ? 'is-selected' : ''}`}
                       style={active
-                        ? { borderColor: ORANGE, backgroundColor: '#FFF6F0', color: ORANGE, boxShadow: '0 2px 10px rgba(255,105,11,0.15)' }
-                        : { borderColor: '#FBD5B8', backgroundColor: '#FFF9F5', color: ORANGE }}
+                        ? { '--i': i, borderColor: ORANGE, backgroundColor: '#FFF6F0', color: ORANGE, boxShadow: '0 2px 10px rgba(255,105,11,0.15)' }
+                        : { '--i': i, borderColor: '#FBD5B8', backgroundColor: '#FFF9F5', color: ORANGE }}
                     >
                       <Image src={o.img} width={44} height={44} alt="" className="rounded-full" />
                       {o.v}
@@ -343,7 +346,7 @@ export default function OnboardingPage() {
 
             {step.type === 'select' && (
               <div className="flex flex-col gap-3 max-w-md">
-                {(lists[step.list] || []).map((opt) => {
+                {(lists[step.list] || []).map((opt, i) => {
                   const active = answers[step.key] === opt.id;
                   // La actividad diaria va en FEMENINO (es "la actividad") y
                   // con una aclaración pequeña de a qué se refiere cada nivel.
@@ -354,10 +357,10 @@ export default function OnboardingPage() {
                       key={opt.id}
                       type="button"
                       onClick={() => set({ [step.key]: opt.id })}
-                      className="rounded-2xl border-2 px-5 py-3.5 font-bold text-base sm:text-[17px] transition-all cursor-pointer text-left"
+                      className={`rounded-2xl border-2 px-5 py-3.5 font-bold text-base sm:text-[17px] cursor-pointer text-left sf-choice sf-stagger ${active ? 'is-selected' : ''}`}
                       style={active
-                        ? { borderColor: ORANGE, backgroundColor: '#FFF6F0', color: ORANGE, boxShadow: '0 2px 10px rgba(255,105,11,0.15)' }
-                        : { borderColor: '#E7E6F5', backgroundColor: '#fff', color: BLUE }}
+                        ? { '--i': i, borderColor: ORANGE, backgroundColor: '#FFF6F0', color: ORANGE, boxShadow: '0 2px 10px rgba(255,105,11,0.15)' }
+                        : { '--i': i, borderColor: '#E7E6F5', backgroundColor: '#fff', color: BLUE }}
                     >
                       {label}
                       {extra && (
@@ -376,6 +379,7 @@ export default function OnboardingPage() {
               <div className="mt-2">
                 <div className="text-6xl mb-4">🎉</div>
                 <p className="text-[#3932C0] text-lg sm:text-2xl leading-relaxed whitespace-pre-line">{step.body}</p>
+                <GdprCheckbox checked={gdprAccepted} onChange={setGdprAccepted} id="gdpr-onboarding" className="mt-8" />
               </div>
             )}
           </div>
@@ -386,7 +390,7 @@ export default function OnboardingPage() {
           <button
             onClick={step.type === 'done' ? handleFinish : goNext}
             disabled={!isValid || saving}
-            className="w-full rounded-2xl py-4 font-bold text-white text-lg transition-all cursor-pointer disabled:cursor-not-allowed active:scale-[0.99]"
+            className={`w-full rounded-2xl py-4 font-bold text-white text-lg cursor-pointer disabled:cursor-not-allowed sf-cta ${isValid && !saving ? 'is-enabled' : ''}`}
             style={{ backgroundColor: isValid && !saving ? BLUE : '#C6C3E8' }}
           >
             {saving ? 'Guardando…' : step.type === 'done' ? 'Ir a mi panel' : 'Continuar'}
@@ -435,10 +439,6 @@ export default function OnboardingPage() {
       )}
 
       <style jsx global>{`
-        @keyframes sfIn {
-          from { opacity: 0; transform: translateY(10px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
         .onb-phone .react-tel-input .form-control { height: auto; }
       `}</style>
     </div>

@@ -1,14 +1,26 @@
 "use client";
 
 import React from "react";
-import { 
-  Dumbbell, 
-  Heart, 
-  Apple, 
-  ChevronRight, 
-  ChevronDown, 
-  Footprints 
+import Link from "next/link";
+import {
+  Dumbbell,
+  Heart,
+  Apple,
+  ChevronRight,
+  ChevronDown,
+  Footprints,
+  ClipboardList,
+  CalendarCheck,
+  CalendarRange
 } from "lucide-react";
+
+// Formularios del programa (14.1–14.3): se rellenan con el motor tipo
+// onboarding en /formulario/<slug>.
+const PROGRAM_FORMS = [
+  { slug: 'evaluacion-inicial', label: 'Evaluación inicial', desc: 'Para adaptar el proceso a ti', Icon: ClipboardList },
+  { slug: 'seguimiento-semanal', label: 'Seguimiento semanal', desc: 'Ajustamos tu semana', Icon: CalendarCheck },
+  { slug: 'revision-mensual', label: 'Revisión mensual', desc: 'Evaluamos tu progreso', Icon: CalendarRange },
+];
 
 export default function Page() {
   // Datos simulados para el gráfico
@@ -109,6 +121,31 @@ export default function Page() {
                 </button>
               </div>
 
+            </div>
+          </section>
+
+          {/* Sección: Mis formularios (14.1–14.3) */}
+          <section>
+            <h2 className="text-2xl md:text-3xl font-bold text-secondary mb-6">Mis formularios</h2>
+            <div className="space-y-4">
+              {PROGRAM_FORMS.map(({ slug, label, desc, Icon }) => (
+                <Link
+                  key={slug}
+                  href={`/formulario/${slug}`}
+                  className="flex-1 bg-white border border-slate-200 rounded-xl p-4 flex items-center justify-between hover:shadow-md hover:border-blue-300 transition-all group text-left"
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="p-2 bg-orange-50 rounded-lg">
+                      <Icon className="text-[#FF690B] w-6 h-6" strokeWidth={2} />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-slate-800">{label}</h3>
+                      <p className="text-slate-500 text-sm">{desc}</p>
+                    </div>
+                  </div>
+                  <ChevronRight className="text-slate-400 w-5 h-5 group-hover:text-primary transition-colors" />
+                </Link>
+              ))}
             </div>
           </section>
 

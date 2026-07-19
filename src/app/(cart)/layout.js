@@ -4,6 +4,7 @@ import "../globals.css";
 // import Footer from "../components/Footer";
 import ToasterProvider from "@/components/ToasterProvider";
 import UTMCapture from "@/app/components/UTMCapture";
+import CookieBanner from "@/app/components/CookieBanner";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -28,6 +29,7 @@ export default function RootLayout({ children }) {
         {children}
         {/* <Footer /> */}
         </div>
+      <CookieBanner />
       </body>
     </html>
   );
