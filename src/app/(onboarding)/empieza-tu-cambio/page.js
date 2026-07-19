@@ -20,7 +20,7 @@ const ORANGE = '#FF690B';
 
 // Enlace de reserva de la llamada. Hoy apunta a /contacto; cuando exista un
 // calendario (Calendly o similar) basta con cambiar esta constante.
-const BOOKING_URL = '/contacto';
+const BOOKING_URL = 'https://agenda.squatfit.es/sesion-diagnostica';
 
 // Endpoint de guardado. El módulo de forms del backend (/api/v1/advice/…)
 // exige sesión, y este formulario es público, así que de momento queda
