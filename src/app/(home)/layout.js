@@ -7,6 +7,8 @@ import CartDrawer from "../components/CartDrawer";
 import ToasterProvider from "@/components/ToasterProvider";
 import AutoShineObserver from "../components/AutoShineObserver";
 import UTMCapture from "../components/UTMCapture";
+import CookieBanner from "@/app/components/CookieBanner";
+import CartScrollRestore from "@/app/components/CartScrollRestore";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -29,11 +31,13 @@ export default function RootLayout({ children }) {
         <AutoShineObserver />
         <Header />
         <UTMCapture />
+        <CartScrollRestore />
         {children}
         <Footer />
         <FloatingCartWidget /> {/* Renderizar el FloatingCartWidget aquí */}
         <CartDrawer />
         </div>
+      <CookieBanner />
       </body>
     </html>
   );

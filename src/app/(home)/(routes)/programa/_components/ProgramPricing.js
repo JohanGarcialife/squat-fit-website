@@ -6,10 +6,11 @@ import Link from 'next/link';
 // ── Enlace de reserva de llamada ─────────────────────────────────────────────
 // Cuando tengáis Calendly, pega aquí el enlace del evento
 // (p. ej. https://calendly.com/squatfit/valoracion). Sirve igual un enlace de
-// TidyCal mientras tanto. Si se deja vacío, el botón lleva a /contacto.
+// TidyCal mientras tanto. Si se deja vacío, el botón lleva al formulario de
+// prellamada «Aquí empieza tu cambio» (13.11).
 const BOOKING_URL = ''; // ← pega aquí tu link de Calendly (o TidyCal)
 
-const bookHref = BOOKING_URL || '/contacto';
+const bookHref = BOOKING_URL || '/empieza-tu-cambio';
 const bookExternal = Boolean(BOOKING_URL);
 
 // Programa Tu Mejor Versión: 2 formatos completos + 2 módulos sueltos.
@@ -44,7 +45,7 @@ const FORMATS = [
 ];
 
 // Botón de reserva: enlace externo (Calendly/TidyCal) en pestaña nueva, o Link
-// interno a /contacto mientras no haya URL configurada.
+// interno al formulario de prellamada mientras no haya URL configurada.
 function BookButton({ className, children }) {
   if (bookExternal) {
     return <a href={bookHref} target="_blank" rel="noopener noreferrer" className={className}>{children}</a>;

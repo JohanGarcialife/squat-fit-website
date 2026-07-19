@@ -4,6 +4,7 @@ import ToasterProvider from "@/components/ToasterProvider";
 import CartDrawer from "../components/CartDrawer";
 
 import Sidebar from "./(routes)/panel-control/_components/Sidebar";
+import CookieBanner from "@/app/components/CookieBanner";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -29,6 +30,7 @@ export default function RootLayout({ children }) {
         <div className="flex-1 min-w-0 pt-16 lg:pt-0">{children}</div>
         <CartDrawer />
         </div>
+      <CookieBanner />
       </body>
     </html>
   );

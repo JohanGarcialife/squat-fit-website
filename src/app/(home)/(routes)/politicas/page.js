@@ -1,12 +1,20 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { LEGAL_SECTIONS } from '@/app/components/LegalContent'
 import BrandTabs from '@/app/components/BrandTabs'
 import { Sheet } from '../../_components/aboutStyles'
 
 export default function Page() {
   const [activeTab, setActiveTab] = useState(LEGAL_SECTIONS[0].id)
+
+  // Enlace directo a un apartado: /politicas?tab=cookies (también #cookies)
+  useEffect(() => {
+    const wanted =
+      new URLSearchParams(window.location.search).get('tab') ||
+      window.location.hash.replace('#', '')
+    if (wanted && LEGAL_SECTIONS.some((s) => s.id === wanted)) setActiveTab(wanted)
+  }, [])
   const Active = LEGAL_SECTIONS.find((s) => s.id === activeTab)?.Component
 
   return (

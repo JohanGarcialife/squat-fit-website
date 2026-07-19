@@ -61,7 +61,7 @@ const faqs = [
   {
     question: "¿Cómo accedo a la versión digital?",
     answer:
-      "Nada más completar la compra la tienes en tu cuenta de Squad Fit, disponible 24/7 desde el móvil, la tablet o el ordenador. Es acceso de por vida: cada nueva receta y volumen que añadamos, también será tuyo.",
+      "Nada más completar la compra la tienes en tu cuenta de Squad Fit, disponible 24/7 desde el móvil, la tablet o el ordenador. Es acceso de por vida: añadimos 5 recetas nuevas cada semana, y cada receta y volumen nuevo también será tuyo.",
   },
 ];
 

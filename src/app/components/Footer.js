@@ -2,6 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
+import { rememberCartReturnPoint } from '@/app/components/CartScrollRestore';
 
 const LINK_CLASS = 'text-[#FF690B] font-medium text-xs sm:text-base leading-snug sm:leading-relaxed hover:text-[#363C98] transition-colors';
 const HEADING_CLASS = 'text-[#363C98] font-bold text-[15px] sm:text-lg leading-snug mb-4 sm:mb-6';
@@ -50,7 +51,7 @@ export default function Footer() {
               <li><Link href="/profile-panel" className={LINK_CLASS}>Mi Cuenta</Link></li>
               <li><Link href="/login" className={LINK_CLASS}>Iniciar Sesión</Link></li>
               <li><Link href="/register" className={LINK_CLASS}>Registrarme</Link></li>
-              <li><Link href="/cart" className={LINK_CLASS}>Carrito</Link></li>
+              <li><Link href="/cart" onClick={rememberCartReturnPoint} className={LINK_CLASS}>Carrito</Link></li>
             </ul>
           </div>
         </div>

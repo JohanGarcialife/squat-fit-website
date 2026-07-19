@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react'
-import { ChevronLeft, ChevronDown, X } from "lucide-react";
+import { ChevronLeft, ChevronDown, X, RotateCcw } from "lucide-react";
 import Image from "next/image";
 import Link from 'next/link';
 import { useCurrency } from './useCurrency';
 import CurrencySelector from './CurrencySelector';
+import { useCartStore } from '@/stores/cart.store';
 
 export default function Summary(props) {
     const {
@@ -22,6 +23,10 @@ export default function Summary(props) {
 
     // Moneda: hook compartido (Euro y Dólar primero + monedas de países principales)
     const { currency, setCurrency, symbol, convertPrice, currencies } = useCurrency();
+
+    // Deshacer: igual que en el pop-up del carrito, también cuando el producto
+    // se elimina llegando a 0 con el botón −.
+    const { lastRemoved, undoRemove } = useCartStore();
 
     // Digital Product Variations (Mirrors Shop.js data)
     const digitalVariants = [
@@ -70,6 +75,24 @@ export default function Summary(props) {
                 <h1 className="text-3xl md:text-4xl font-bold">Carrito ({totalItems})</h1>
                 </Link>
             </div>
+
+            {/* Aviso de deshacer: al eliminar un producto (papelera, "x" o el
+                botón − llegando a 0) se puede recuperar aquí mismo. */}
+            {lastRemoved && (
+                <div className="flex items-center justify-between gap-3 mb-6 px-5 py-3 rounded-2xl bg-indigo-50 border border-indigo-100">
+                    <span className="text-sm text-indigo-900 min-w-0 truncate">
+                        «{lastRemoved.item.name}» eliminado
+                    </span>
+                    <button
+                        type="button"
+                        onClick={undoRemove}
+                        className="shrink-0 inline-flex items-center gap-1.5 text-indigo-900 font-bold text-sm hover:underline active:scale-95 transition cursor-pointer"
+                    >
+                        <RotateCcw className="w-3.5 h-3.5" />
+                        Deshacer
+                    </button>
+                </div>
+            )}
 
             <div className="space-y-8">
                 {cart.map((item) => (
@@ -146,9 +169,8 @@ export default function Summary(props) {
                                     <div className="flex items-center gap-2">
                                         <button
                                             type="button"
-                                            onClick={() => updateQuantity(item.id, Math.max(1, item.quantity - 1))}
-                                            disabled={item.quantity <= 1}
-                                            className="w-9 h-9 rounded-lg bg-indigo-900 text-white text-2xl leading-none font-bold flex items-center justify-center hover:bg-indigo-800 transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+                                            onClick={() => decrementQuantity(item.id)}
+                                            className="w-9 h-9 rounded-lg bg-indigo-900 text-white text-2xl leading-none font-bold flex items-center justify-center hover:bg-indigo-800 transition-colors cursor-pointer"
                                             aria-label="Quitar una unidad"
                                         >
                                             −

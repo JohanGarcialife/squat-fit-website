@@ -4,6 +4,7 @@ import Image from 'next/image'
 import { Formik, Form, Field, ErrorMessage } from 'formik'
 import * as Yup from 'yup'
 import { ABOUT } from './aboutStyles'
+import GdprCheckbox from '@/app/components/GdprCheckbox'
 
 // Schema de validación
 const validationSchema = Yup.object({
@@ -50,6 +51,7 @@ const FormInput = ({ label, name, type = 'text', as = 'input', example, ...props
 export default function Empleo() {
   // Modal "rellena todos los campos" al intentar enviar incompleto (item 17)
   const [showIncomplete, setShowIncomplete] = useState(false)
+  const [gdprAccepted, setGdprAccepted] = useState(false)
 
   const initialValues = {
     nombre: '',
@@ -191,10 +193,14 @@ export default function Empleo() {
                 example="Ej: 1.200 €/mes o por comisión"
               />
 
+              {/* RGPD */}
+              <GdprCheckbox checked={gdprAccepted} onChange={setGdprAccepted} id="gdpr-empleo" className="mt-2" />
+
               {/* Botón gris hasta que el formulario esté completo y válido; si
                   se intenta enviar incompleto, se marca todo y sale el modal. */}
               <button
                 type="submit"
+                disabled={!gdprAccepted}
                 onClick={async (e) => {
                   const errors = await validateForm()
                   if (Object.keys(errors).length > 0) {
@@ -203,8 +209,8 @@ export default function Empleo() {
                     setShowIncomplete(true)
                   }
                 }}
-                className={`w-full font-bold py-4 rounded-lg transition-colors mt-8 shadow-lg cursor-pointer ${
-                  isValid && dirty
+                className={`w-full font-bold py-4 rounded-lg transition-colors mt-8 shadow-lg cursor-pointer disabled:cursor-not-allowed ${
+                  isValid && dirty && gdprAccepted
                     ? 'bg-[#3B3B98] text-white hover:bg-[#2E2E80]'
                     : 'bg-gray-300 text-gray-500'
                 }`}

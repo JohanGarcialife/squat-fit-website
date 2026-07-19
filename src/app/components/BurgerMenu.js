@@ -178,7 +178,7 @@ export default function BurgerMenu() {
       <div className='flex items-center gap-3'>
         <button
           className={`p-1 active:scale-90 transition-all cursor-pointer ${show ? 'invisible' : ''}`}
-          style={{ color: show ? '#FF690B' : '#3932C0' }}
+          style={{ color: show ? '#FF690B' : '#363C98' }}
           onClick={() => setShow(true)}
           aria-label='Abrir menú'
           aria-expanded={show}

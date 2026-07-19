@@ -6,6 +6,7 @@ import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { useAuthStore } from '@/stores/auth.store';
 import ConfirmationModal from '@/app/components/ConfirmationModal';
+import GdprCheckbox from '@/app/components/GdprCheckbox';
 import axios from 'axios';
 import PhoneInput from 'react-phone-input-2';
 import 'react-phone-input-2/lib/style.css';
@@ -306,6 +307,7 @@ export default function ProfilePage() {
   const router = useRouter();
   const { logout, token } = useAuthStore();
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
+  const [gdprAccepted, setGdprAccepted] = useState(false);
   const [isPurchasesModalOpen, setIsPurchasesModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [advice, setAdvice] = useState(null);
@@ -883,8 +885,9 @@ export default function ProfilePage() {
 
         {/* --- BARRA DE GUARDAR (solo si hay cambios) --- */}
         {formik.dirty && (
-          <div className="fixed bottom-0 left-0 lg:left-64 right-0 bg-white border-t border-slate-100 p-4 sm:px-8 flex items-center justify-end gap-4 shadow-2xl z-40 animate-fade-in">
+          <div className="fixed bottom-0 left-0 lg:left-64 right-0 bg-white border-t border-slate-100 p-4 sm:px-8 flex flex-wrap items-center justify-end gap-4 shadow-2xl z-40 animate-fade-in">
             <span className="mr-auto hidden sm:block text-slate-400 text-sm font-semibold">Tienes cambios sin guardar</span>
+            <GdprCheckbox checked={gdprAccepted} onChange={setGdprAccepted} id="gdpr-profile" />
             <button
               type="button"
               onClick={() => formik.resetForm()}
@@ -895,7 +898,7 @@ export default function ProfilePage() {
             <button
               type="button"
               onClick={formik.handleSubmit}
-              disabled={formik.isSubmitting}
+              disabled={formik.isSubmitting || !gdprAccepted}
               className="bg-[#FF690B] text-white font-bold px-6 py-2.5 rounded-full hover:scale-105 active:scale-95 transition-all text-sm sm:text-base shadow-md hover:shadow-[#FF690B]/20 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:scale-100"
             >
               {formik.isSubmitting ? 'Guardando…' : 'Guardar cambios'}

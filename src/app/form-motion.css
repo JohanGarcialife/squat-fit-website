@@ -1,0 +1,123 @@
+/* ============================================================
+   Movimiento de formularios (briefing "Movimiento CSS")
+   Microinteracciones tipo Duolingo, reutilizables en cualquier
+   formulario (onboarding, prellamada, forms del dashboard…).
+   ============================================================ */
+
+:root {
+  --ease-ui: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ms-press: 90ms;
+  --ms-fast: 180ms;
+  --ms-med: 220ms;
+  --ms-screen-in: 260ms;
+  --ms-screen-out: 180ms;
+  --ms-progress: 420ms;
+}
+
+/* 1) Entrada de pantalla: fade + slide corto */
+@keyframes sfScreenIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.sf-screen-in {
+  animation: sfScreenIn var(--ms-screen-in) var(--ease-ui) both;
+  will-change: transform, opacity;
+}
+
+/* Salida (para quien orqueste la salida antes de desmontar) */
+@keyframes sfScreenOut {
+  from { opacity: 1; transform: translateY(0); }
+  to   { opacity: 0; transform: translateY(-6px); }
+}
+.sf-screen-out {
+  animation: sfScreenOut var(--ms-screen-out) var(--ease-ui) both;
+}
+
+/* 2) Barra de progreso: solo el ancho, sin rebote */
+.sf-progress-fill {
+  transition: width var(--ms-progress) var(--ease-ui);
+  will-change: width;
+}
+
+/* 3) Opciones: entrada con stagger opcional (usar style="--i: N") */
+.sf-stagger {
+  animation: sfScreenIn var(--ms-med) var(--ease-ui) both;
+  animation-delay: calc(var(--i, 0) * 50ms);
+}
+
+/* 4-5) Botones de opción: press físico + estado seleccionado estable */
+.sf-choice {
+  will-change: transform, box-shadow, opacity;
+  transition:
+    opacity 160ms ease,
+    transform var(--ms-press) ease,
+    box-shadow var(--ms-press) ease,
+    border-color 160ms ease,
+    color 160ms ease,
+    background-color 160ms ease;
+}
+.sf-choice:active {
+  transform: translateY(2px);
+  box-shadow: 0 4px 0 rgba(0, 0, 0, 0.12);
+}
+.sf-choice.is-selected {
+  transform: translateY(1px);
+  transition:
+    transform 140ms var(--ease-ui),
+    box-shadow 140ms var(--ease-ui),
+    border-color 160ms ease,
+    color 160ms ease,
+    background-color 160ms ease,
+    opacity 160ms ease;
+}
+
+/* 6-7) CTA inferior: atenuado hasta habilitarse + press físico */
+.sf-cta {
+  opacity: 0.35;
+  transform: translateY(6px);
+  transition:
+    opacity var(--ms-med) var(--ease-ui),
+    transform var(--ms-med) var(--ease-ui),
+    background-color 160ms ease,
+    box-shadow 120ms ease;
+}
+.sf-cta.is-enabled {
+  opacity: 1;
+  transform: translateY(0);
+}
+.sf-cta.is-enabled:active {
+  transform: translateY(2px);
+  box-shadow: 0 6px 0 rgba(0, 0, 0, 0.14);
+}
+
+/* 9) Bloques informativos con entrada suave */
+.sf-info {
+  opacity: 0;
+  transform: translateY(8px);
+}
+.sf-info.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+  transition:
+    opacity 240ms var(--ease-ui),
+    transform 240ms var(--ease-ui);
+}
+
+/* Accesibilidad: sin transforms ni animaciones si el usuario lo pide */
+@media (prefers-reduced-motion: reduce) {
+  .sf-screen-in,
+  .sf-screen-out,
+  .sf-stagger {
+    animation: none !important;
+  }
+  .sf-choice,
+  .sf-cta,
+  .sf-progress-fill,
+  .sf-info {
+    transition: none !important;
+    transform: none !important;
+  }
+  .sf-cta { opacity: 0.5; }
+  .sf-cta.is-enabled { opacity: 1; }
+  .sf-info { opacity: 1; }
+}

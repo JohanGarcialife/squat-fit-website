@@ -14,6 +14,37 @@ import usePreloadImages from "@/hooks/usePreloadImages";
 
 const Slider = dynamic(() => import("react-slick"), { ssr: false });
 
+// Portadas nuevas (mapeo 6.4): si el título del curso coincide con un
+// producto conocido, se usa la portada local; si no, la imagen del backend.
+const LOCAL_COVERS = [
+  { match: /cocina/i, src: '/mockup_cocina.png' },
+  { match: /fuerte|definid/i, src: '/mockup_fuerte_definido.png' },
+  { match: /mejor versi|versión|transform/i, src: '/mockup_mejor_version.png' },
+  { match: /libro\s*2/i, src: '/Libro2.png' },
+  { match: /libro/i, src: '/Libro1.png' },
+];
+
+const ALLOWED_HOSTS = ['storage.googleapis.com', 'images.unsplash.com', 'www.google.com', 'images.pexels.com', 'iframe.mediadelivery.net', 'b-cdn.net'];
+
+function coverFor(course) {
+  const title = course.name || course.title || '';
+  const local = LOCAL_COVERS.find((c) => c.match.test(title));
+  if (local) return local.src;
+  if (course.image) {
+    try {
+      const parsedUrl = new URL(course.image);
+      const isAllowed = ALLOWED_HOSTS.some((host) =>
+        parsedUrl.hostname === host || parsedUrl.hostname.endsWith('.' + host)
+      );
+      if (isAllowed) return course.image;
+    } catch (error) {
+      // URL relativa: Next exige que empiece por '/'
+      return course.image.startsWith('/') ? course.image : '/' + course.image;
+    }
+  }
+  return '/Libro1.png';
+}
+
 // The Top Sales data is now passed as `courses` prop from the parent
 
 
@@ -68,8 +99,8 @@ const CarouselSection = ({ title, items, variant = 'default', onItemClick }) => 
               {variant === 'progress' ? (
                  // --- Progress Card Variant ---
                  <div className="flex flex-col space-y-3">
-                    <div className="bg-[#FFF6F0] rounded-[20px] shadow-md hover:shadow-lg transition-shadow duration-300 h-full min-h-[300px] overflow-hidden flex flex-col justify-between">
-                        <div className="w-full h-48 relative">
+                    <div className="bg-[#FFF6F0] rounded-[20px] shadow-md hover:shadow-lg transition-shadow duration-300 h-full overflow-hidden flex flex-col justify-between">
+                        <div className="w-full aspect-square relative">
                             <Image src={item.image} fill alt={item.title} className="object-cover rounded-t-[20px]" />
                         </div>
                         <div className="text-center p-6 flex-grow flex flex-col justify-center">
@@ -90,8 +121,8 @@ const CarouselSection = ({ title, items, variant = 'default', onItemClick }) => 
                  </div>
               ) : (
                 // --- Default Card Variant ---
-                <div className="bg-white rounded-[20px] shadow-md hover:shadow-lg transition-shadow duration-300 h-full min-h-[300px] overflow-hidden flex flex-col justify-between">
-                    <div className="w-full h-48 relative">
+                <div className="bg-white rounded-[20px] shadow-md hover:shadow-lg transition-shadow duration-300 h-full overflow-hidden flex flex-col justify-between">
+                    <div className="w-full aspect-square relative">
                         <Image src={item.image} fill alt={item.title} className="object-cover rounded-t-[20px]" />
                     </div>
                     <div className="text-center p-6 flex-grow flex flex-col justify-center">
@@ -185,36 +216,12 @@ export default function TopVentas({ courses = [], userCourses = [] }) {
 
       <CarouselSection 
         title="Nuestros top ventas" 
-        items={courses.map(course => {
-          // Sanitization logic for Next.js <Image> component
-          let safeImageUrl = "/Group32.png";
-          if (course.image) {
-            try {
-              const parsedUrl = new URL(course.image);
-              const allowedHosts = ['storage.googleapis.com', 'images.unsplash.com', 'www.google.com', 'images.pexels.com', 'iframe.mediadelivery.net', 'b-cdn.net'];
-              const isAllowed = allowedHosts.some(host => 
-                parsedUrl.hostname === host || parsedUrl.hostname.endsWith('.' + host)
-              );
-              if (isAllowed) {
-                safeImageUrl = course.image;
-              }
-            } catch (error) {
-              // Not a valid absolute URL. Next.js requires relative URLs to start with '/'
-              if (course.image.startsWith('/')) {
-                safeImageUrl = course.image;
-              } else {
-                safeImageUrl = '/' + course.image;
-              }
-            }
-          }
-
-          return {
-            id: course.id,
-            title: course.name || course.title,
-            subtitle: course.category || "Curso",
-            image: safeImageUrl
-          };
-        })} 
+        items={courses.map(course => ({
+          id: course.id,
+          title: course.name || course.title,
+          subtitle: course.category || "Curso",
+          image: coverFor(course)
+        }))}
         onItemClick={handleCourseClick}
       />
       
@@ -222,35 +229,13 @@ export default function TopVentas({ courses = [], userCourses = [] }) {
       {userCourses.length > 0 && (
       <CarouselSection
         title="Continua donde estabas"
-        items={userCourses.map(course => {
-          let safeImageUrl = "/Group32.png";
-          if (course.image) {
-            try {
-              const parsedUrl = new URL(course.image);
-              const allowedHosts = ['storage.googleapis.com', 'images.unsplash.com', 'www.google.com', 'images.pexels.com', 'iframe.mediadelivery.net', 'b-cdn.net'];
-              const isAllowed = allowedHosts.some(host => 
-                parsedUrl.hostname === host || parsedUrl.hostname.endsWith('.' + host)
-              );
-              if (isAllowed) {
-                safeImageUrl = course.image;
-              }
-            } catch (error) {
-              if (course.image.startsWith('/')) {
-                safeImageUrl = course.image;
-              } else {
-                safeImageUrl = '/' + course.image;
-              }
-            }
-          }
-
-          return {
-            id: course.id,
-            title: course.title || course.name,
-            subtitle: course.subtitle || course.category || "Curso",
-            image: safeImageUrl,
-            progress: course.progress || 0
-          };
-        })} 
+        items={userCourses.map(course => ({
+          id: course.id,
+          title: course.title || course.name,
+          subtitle: course.subtitle || course.category || "Curso",
+          image: coverFor(course),
+          progress: course.progress || 0
+        }))}
         variant="progress"
         onItemClick={handleCourseClick}
       />
