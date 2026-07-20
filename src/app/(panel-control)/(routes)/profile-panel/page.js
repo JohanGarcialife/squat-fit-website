@@ -7,6 +7,7 @@ import * as Yup from 'yup';
 import { useAuthStore } from '@/stores/auth.store';
 import ConfirmationModal from '@/app/components/ConfirmationModal';
 import GdprCheckbox from '@/app/components/GdprCheckbox';
+import { normalizeName } from '@/app/components/nameUtils';
 import axios from 'axios';
 import PhoneInput from 'react-phone-input-2';
 import 'react-phone-input-2/lib/style.css';
@@ -356,8 +357,8 @@ export default function ProfilePage() {
         const cleanedTargetWeight = values.pesoObjetivo ? String(values.pesoObjetivo).replace(/[^0-9.]/g, '') : '';
 
         const formData = new FormData();
-        formData.append('firstName', values.nombre || '');
-        formData.append('lastName', values.apellidos || '');
+        formData.append('firstName', normalizeName(values.nombre) || '');
+        formData.append('lastName', normalizeName(values.apellidos) || '');
         if (values.fechaNacimiento) formData.append('birth', values.fechaNacimiento);
         formData.append('phone_number', values.telefono || '');
         if (apiGender) formData.append('gender', apiGender);

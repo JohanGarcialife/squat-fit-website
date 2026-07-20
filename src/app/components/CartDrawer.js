@@ -161,6 +161,11 @@ export default function CartDrawer() {
                     <p className="font-bold text-slate-900 truncate">{item.name}</p>
                     <p className="text-primary font-bold text-sm">€{item.price.toFixed(2).replace('.', ',')}</p>
 
+                    {item.tier ? (
+                      // Curso con tramo (15.1): sin cantidades — es un acceso o
+                      // una suscripción. La nota aclara qué tipo de pago es.
+                      <p className="mt-1.5 text-xs text-slate-400 font-semibold">{item.description}</p>
+                    ) : (
                     <div className="mt-2 flex items-center gap-2">
                       <button
                         onClick={() => decrementQuantity(item.id)}
@@ -179,6 +184,7 @@ export default function CartDrawer() {
                         <Plus className="w-3.5 h-3.5" />
                       </button>
                     </div>
+                    )}
                   </div>
 
                   <button

@@ -69,6 +69,10 @@ export default function AjustesPage() {
   const [portalLoading, setPortalLoading] = useState(false);
   const [logoutOpen, setLogoutOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
+  const [deleteWord, setDeleteWord] = useState('');
+  const [deleteEmail, setDeleteEmail] = useState('');
+  const [deleting, setDeleting] = useState(false);
+  const [deleted, setDeleted] = useState(false);
   const [actionBusy, setActionBusy] = useState(null);
   const [cancelTarget, setCancelTarget] = useState(null);
 
@@ -192,19 +196,64 @@ export default function AjustesPage() {
     router.push('/');
   };
 
+  // Doble confirmación superada → borrado RGPD definitivo (13.10). El email
+  // tecleado nunca puede estar vacío (si user/info fallara, un campo vacío
+  // «coincidiría» con un email desconocido).
+  const deleteConfirmed =
+    deleteWord.trim().toUpperCase() === 'ELIMINAR' &&
+    deleteEmail.trim().length > 0 &&
+    deleteEmail.trim().toLowerCase() === (email || '').trim().toLowerCase();
+
+  const closeDeleteModal = () => {
+    setDeleteOpen(false);
+    setDeleteWord('');
+    setDeleteEmail('');
+  };
+
   const handleDelete = async () => {
+    if (!deleteConfirmed || deleting) return;
+    setDeleting(true);
     try {
-      await axios.delete(`${API}/api/v1/user/account`, {
+      await axios.delete(`${API}/api/v1/user/account/gdpr`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      toast.success('Cuenta eliminada');
+      // Pantalla de despedida primero (el logout borra el token y, sin el
+      // estado `deleted` por delante, se vería el aviso de acceso).
+      setDeleted(true);
       logout();
-      router.push('/');
     } catch (e) {
       toast.error('No se pudo eliminar la cuenta. Escríbenos a hola@squatfit.es');
-      setDeleteOpen(false);
+      closeDeleteModal();
+    } finally {
+      setDeleting(false);
     }
   };
+
+  if (deleted) {
+    return (
+      <div className="flex-1 bg-[#F8F9FC] flex flex-col justify-center items-center min-h-screen px-6 text-center">
+        <div className="max-w-md flex flex-col items-center">
+          <div className="text-6xl mb-5">👋</div>
+          <h1 className="text-3xl font-extrabold text-[#363C98] mb-3">Tu cuenta se ha eliminado</h1>
+          <p className="text-slate-500 leading-relaxed mb-2">
+            Hemos borrado tus datos personales y cancelado tus suscripciones, tal y
+            como marca el RGPD. Sentimos verte marchar.
+          </p>
+          <p className="text-slate-400 text-sm leading-relaxed mb-8">
+            Si algún día quieres volver, estaremos aquí: puedes crear una cuenta
+            nueva cuando quieras.
+          </p>
+          <button
+            type="button"
+            onClick={() => router.push('/')}
+            className="bg-[#FF690B] text-white font-bold px-8 py-3.5 rounded-2xl hover:bg-[#e05b08] active:scale-95 transition-all cursor-pointer"
+          >
+            Volver al inicio
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   if (!token) return <AccessNotice redirect="/panel-ajustes" />;
   if (loading) {
@@ -405,14 +454,93 @@ export default function AjustesPage() {
           <button type="button" onClick={() => setLogoutOpen(true)} className="w-full flex items-center justify-between p-3.5 hover:bg-slate-50 rounded-2xl transition text-[#363C98] font-bold text-sm cursor-pointer">
             <span className="flex items-center gap-2.5"><LogOut className="w-4 h-4 text-slate-400" /> Cerrar sesión</span>
           </button>
-          <button type="button" onClick={() => setDeleteOpen(true)} className="w-full flex items-center justify-between p-3.5 hover:bg-red-50 rounded-2xl border border-transparent hover:border-red-100 transition text-red-500 font-bold text-sm cursor-pointer">
-            <span className="flex items-center gap-2.5"><Trash2 className="w-4 h-4" /> Eliminar mi cuenta</span>
+        </div>
+
+        {/* ===== ZONA DE PELIGRO (13.10) ===== */}
+        <div className="bg-white rounded-3xl p-6 sm:p-8 border-2 border-red-100 shadow-sm space-y-4">
+          <div className="flex items-center gap-3">
+            <div className="bg-red-50 p-2.5 rounded-2xl text-red-500"><Trash2 className="w-6 h-6" /></div>
+            <h3 className="text-red-600 font-extrabold text-lg">Zona de peligro</h3>
+          </div>
+          <p className="text-slate-500 text-sm leading-relaxed">
+            Eliminar tu cuenta es <strong className="text-slate-700">irreversible</strong>: borra
+            todos tus datos (perfil, progreso, formularios, historial de compras) y{' '}
+            <strong className="text-slate-700">cancela tus suscripciones activas</strong>. No
+            podremos recuperar nada después.
+          </p>
+          <button
+            type="button"
+            onClick={() => setDeleteOpen(true)}
+            className="border-2 border-red-200 text-red-500 font-bold text-sm px-5 py-2.5 rounded-full hover:bg-red-50 hover:border-red-300 active:scale-95 transition-all cursor-pointer"
+          >
+            Eliminar mi cuenta definitivamente
           </button>
         </div>
       </div>
 
       <ConfirmationModal isOpen={logoutOpen} onClose={() => setLogoutOpen(false)} onConfirm={handleLogout} message="¿Estás seguro de que quieres cerrar sesión?" />
-      <ConfirmationModal isOpen={deleteOpen} onClose={() => setDeleteOpen(false)} onConfirm={handleDelete} message="Vas a eliminar tu cuenta y todos tus datos. Esta acción no se puede deshacer. ¿Continuar?" />
+
+      {/* Modal de doble confirmación del borrado RGPD */}
+      {deleteOpen && (
+        <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/40" onClick={deleting ? undefined : closeDeleteModal} />
+          <div className="relative bg-white rounded-3xl shadow-2xl max-w-md w-full p-6 sm:p-8 space-y-5">
+            <div className="flex items-center gap-3">
+              <div className="bg-red-50 p-2.5 rounded-2xl text-red-500"><Trash2 className="w-6 h-6" /></div>
+              <h3 className="text-[#363C98] font-extrabold text-xl">¿Eliminar tu cuenta?</h3>
+            </div>
+            <p className="text-slate-500 text-sm leading-relaxed">
+              Esta acción es <strong className="text-slate-700">irreversible</strong>. Se
+              borrarán todos tus datos y se cancelarán tus suscripciones. Para
+              confirmar, escribe <strong className="text-red-500">ELIMINAR</strong> y tu
+              email de acceso.
+            </p>
+            <div className="space-y-4">
+              <div className="flex flex-col space-y-1.5">
+                <span className={LABEL}>Escribe ELIMINAR</span>
+                <input
+                  value={deleteWord}
+                  onChange={(e) => setDeleteWord(e.target.value)}
+                  placeholder="ELIMINAR"
+                  className={INPUT}
+                  autoComplete="off"
+                />
+              </div>
+              <div className="flex flex-col space-y-1.5">
+                <span className={LABEL}>Tu email ({email || 'el de tu cuenta'})</span>
+                <input
+                  value={deleteEmail}
+                  onChange={(e) => setDeleteEmail(e.target.value)}
+                  placeholder="tu@email.com"
+                  type="email"
+                  inputMode="email"
+                  autoCapitalize="none"
+                  className={INPUT}
+                  autoComplete="off"
+                />
+              </div>
+            </div>
+            <div className="flex gap-3 justify-end pt-1">
+              <button
+                type="button"
+                onClick={closeDeleteModal}
+                disabled={deleting}
+                className="px-5 py-2.5 rounded-full font-bold text-sm text-[#363C98] hover:bg-slate-50 transition cursor-pointer disabled:opacity-50"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                onClick={handleDelete}
+                disabled={!deleteConfirmed || deleting}
+                className="px-5 py-2.5 rounded-full font-bold text-sm text-white bg-red-500 hover:bg-red-600 active:scale-95 transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                {deleting ? 'Eliminando…' : 'Eliminar para siempre'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       <ConfirmationModal
         isOpen={!!cancelTarget}
         onClose={() => setCancelTarget(null)}

@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useCurrency } from './useCurrency';
 import CurrencySelector from './CurrencySelector';
 import { useCartStore } from '@/stores/cart.store';
+import { TIER_META, TIER_ORDER, buildTierCartItem, formatEuros } from '@/app/components/courseCatalog';
 
 export default function Summary(props) {
     const {
@@ -26,7 +27,15 @@ export default function Summary(props) {
 
     // Deshacer: igual que en el pop-up del carrito, también cuando el producto
     // se elimina llegando a 0 con el botón −.
-    const { lastRemoved, undoRemove } = useCartStore();
+    const { lastRemoved, undoRemove, setDirectCheckoutItem } = useCartStore();
+
+    // Cursos con tramos (15.1): el item lleva su grupo completo, así que aquí
+    // también se puede cambiar entre Mensual / Anual / De por vida.
+    const isCourseTier = (item) => !!(item.tierGroup && item.tier);
+    const handleTierChange = (item, newTierKey) => {
+        if (item.tier === newTierKey) return;
+        setDirectCheckoutItem(buildTierCartItem(item.tierGroup, newTierKey));
+    };
 
     // Digital Product Variations (Mirrors Shop.js data)
     const digitalVariants = [
@@ -126,7 +135,7 @@ export default function Summary(props) {
                                 Reference image shows "Curso de la mujer" as title and "Suscripción online" as subtitle
                                 But our items are named "Mensual", "Anual".
                                 Let's standardise the display title for digital items if possible or use item.name */}
-                            {isDigital(item) ? 'Cocina Squad Fit Digital' : item.name}
+                            {isDigital(item) ? 'Cocina Squad Fit Digital' : isCourseTier(item) ? item.tierGroup.baseName : item.name}
                         </h3>
                         {/* Subtitle / Description based on reference */}
                         <p className="text-indigo-400 text-sm mb-6">
@@ -137,10 +146,34 @@ export default function Summary(props) {
                             {/* Quantity or Period Selector */}
                             <div className="flex flex-col items-center sm:items-start gap-1">
                                 <span className="text-indigo-900 text-xs font-bold uppercase tracking-wider">
-                                    {isDigital(item) ? 'Período' : 'Cantidad'}
+                                    {isDigital(item) || isCourseTier(item) ? 'Período' : 'Cantidad'}
                                 </span>
-                                
-                                {isDigital(item) ? (
+
+                                {isCourseTier(item) ? (
+                                    /* Curso con tramos: selector Mensual / Anual / De por vida */
+                                    <div className="relative group">
+                                        <div className="bg-indigo-900 text-white pl-4 pr-10 py-2 rounded-lg font-medium text-sm flex items-center min-w-[140px] cursor-pointer">
+                                            {TIER_META[item.tier]?.label || item.tier}
+                                        </div>
+                                        <div className="absolute top-full left-0 w-full bg-white border border-indigo-100 rounded-lg shadow-lg hidden group-hover:block z-10 overflow-hidden min-w-[190px]">
+                                            {TIER_ORDER.map((key) => (
+                                                <button
+                                                    key={key}
+                                                    onClick={() => handleTierChange(item, key)}
+                                                    className={`w-full text-left px-4 py-3 text-sm hover:bg-indigo-50 transition-colors cursor-pointer
+                                                        ${item.tier === key ? 'bg-indigo-50 text-indigo-900 font-bold' : 'text-gray-600'}
+                                                    `}
+                                                >
+                                                    {TIER_META[key].label}
+                                                    <span className="block text-xs text-indigo-400 font-normal">
+                                                        {formatEuros(item.tierGroup.tiers[key].price)} {TIER_META[key].priceSuffix}
+                                                    </span>
+                                                </button>
+                                            ))}
+                                        </div>
+                                        <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-white pointer-events-none" />
+                                    </div>
+                                ) : isDigital(item) ? (
                                     /* Digital Item: Period Display & Selector */
                                     <div className="relative group">
                                          {/* Current Selection Display */}
@@ -196,6 +229,9 @@ export default function Summary(props) {
                                 </span>
                                 {isDigital(item) && <span className="text-indigo-400 text-xs block">
                                     {digitalVariants.find(v => v.id === item.id)?.period || '/mes'}
+                                </span>}
+                                {isCourseTier(item) && <span className="text-indigo-400 text-xs block">
+                                    {item.tier === 'mensual' ? '/mes' : 'pago único'}
                                 </span>}
                             </div>
                         </div>

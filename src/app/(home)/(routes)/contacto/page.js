@@ -10,6 +10,7 @@ import toast from 'react-hot-toast';
 import Image from 'next/image';
 import Link from 'next/link';
 import GdprCheckbox from '@/app/components/GdprCheckbox';
+import { normalizeName } from '@/app/components/nameUtils';
 
 // --- Esquema de Validación con Yup ---
 const ContactSchema = Yup.object().shape({
@@ -90,7 +91,7 @@ Motivo (${motivoIndex}): ${values.motivo}
 Ruta de Correo: ${category === 'technical' ? 'Devs' : 'Ventas'}
 
 DATOS DEL CLIENTE:
-- Nombre: ${values.nombre}
+- Nombre: ${normalizeName(values.nombre)}
 - WhatsApp: ${values.whatsapp}
 - Instagram: ${values.instagram || 'No proporcionado'}
 - Email: ${values.email}

@@ -5,6 +5,7 @@ import { Formik, Form, Field, ErrorMessage } from 'formik'
 import * as Yup from 'yup'
 import { ABOUT } from './aboutStyles'
 import GdprCheckbox from '@/app/components/GdprCheckbox'
+import { normalizeName } from '@/app/components/nameUtils'
 
 // Schema de validación
 const validationSchema = Yup.object({
@@ -65,7 +66,13 @@ export default function Empleo() {
   }
 
   const handleSubmit = (values, { setSubmitting, resetForm }) => {
-    console.log('Form Data:', values)
+    // 15.16: nombre y apellidos normalizados al enviar (no mientras teclea).
+    const data = {
+      ...values,
+      nombre: normalizeName(values.nombre),
+      apellidos: normalizeName(values.apellidos),
+    }
+    console.log('Form Data:', data)
     alert('Solicitud enviada (Revisa la consola)')
     setSubmitting(false)
     resetForm()

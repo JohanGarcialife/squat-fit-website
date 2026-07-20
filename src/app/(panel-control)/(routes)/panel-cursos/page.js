@@ -4,7 +4,8 @@ import React, { useState, useEffect, useRef, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import axios from "axios";
 import { useAuthStore } from "@/stores/auth.store";
-import RichProductCards from "@/app/components/RichProductCards";
+import CourseTierShop from "@/app/components/CourseTierShop";
+import { RefreshCw } from "lucide-react";
 
 // ─── TEST VIDEO (Bunny.net iframe) ───────────────────────────────────────────
 // Remove this constant once the backend is returning real video_url fields
@@ -304,19 +305,29 @@ function CursosPageContent() {
         <div className="text-center mb-12">
           <h2 className="text-[#3932C0] text-3xl font-bold mb-4">Aún no tienes acceso a los cursos</h2>
           <p className="text-gray-500 text-lg max-w-xl mx-auto leading-relaxed">
-            Suscríbete a <strong>Squad Fit</strong> para desbloquear todos los cursos en video y transformar tu cuerpo con nuestras metodologías.
+            Elige tu curso y cómo quieres acceder: <strong>mensual</strong> (suscripción),{' '}
+            <strong>anual</strong> (pago único, 12 meses de acceso) o <strong>de por vida</strong>.
           </p>
         </div>
-        
-        <RichProductCards
-          show={['fuerte-definido']}
-          verifyLoading={loading}
-          onVerifyAccess={async () => {
-            setLoading(true);
-            await useAuthStore.getState().refreshSubscriptionStatus();
-            setLoading(false);
-          }}
-        />
+
+        {/* Tienda 15.1: una tarjeta por curso con selector de tramo */}
+        <CourseTierShop highlight="Fuerte y Definid@" />
+
+        {/* Enlace discreto para refrescar el acceso tras comprar */}
+        <div className="w-full flex justify-center">
+          <button
+            onClick={async () => {
+              setLoading(true);
+              await useAuthStore.getState().refreshSubscriptionStatus();
+              setLoading(false);
+            }}
+            disabled={loading}
+            className="mt-10 flex items-center gap-2 text-sm text-gray-400 hover:text-[#FF690B] transition-colors disabled:opacity-50 cursor-pointer"
+          >
+            <RefreshCw size={14} />
+            ¿Acabas de comprar y no ves tu acceso? Actualizar
+          </button>
+        </div>
       </div>
     );
   }

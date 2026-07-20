@@ -14,6 +14,7 @@ import PhoneInput from 'react-phone-input-2';
 import 'react-phone-input-2/lib/style.css';
 import esPhone from 'react-phone-input-2/lang/es.json';
 import GdprCheckbox from '@/app/components/GdprCheckbox';
+import { normalizeName } from '@/app/components/nameUtils';
 
 const BLUE = '#3932C0';
 const ORANGE = '#FF690B';
@@ -187,6 +188,9 @@ export default function EmpiezaTuCambioPage() {
     setSaving(true);
     const submission = {
       ...answers,
+      // 15.16: nombre y apellidos normalizados solo al enviar, no al teclear.
+      first_name: normalizeName(answers.first_name),
+      last_name: normalizeName(answers.last_name),
       timestamp: new Date().toISOString(),
       origen: typeof window !== 'undefined' ? `web ${window.location.pathname}` : 'web',
     };

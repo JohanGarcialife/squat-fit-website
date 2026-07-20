@@ -141,13 +141,17 @@ function Toc({ items }) {
   );
 }
 
-// Tabla real de cookies del sitio nuevo (auditada: solo localStorage + Stripe).
+// Tabla real de cookies del sitio (auditada): localStorage propio + Stripe, y
+// las de Google Analytics SOLO si el usuario activa la analítica en el banner.
 function CookiesTable() {
   const rows = [
-    ['cart-storage · auth-storage · sf_origin', 'Propia (local)', 'Recordar tu carrito, tu sesión iniciada y el origen de tu visita.', 'Hasta que borres los datos del navegador'],
+    ['cart-storage · auth-storage · sf_origin · sqf-cookie-consent', 'Propia (local)', 'Recordar tu carrito, tu sesión iniciada, el origen de tu visita y tu elección de cookies.', 'Hasta que borres los datos del navegador'],
     ['__stripe_mid', 'De terceros (Stripe)', 'Procesar el pago de forma segura y prevenir el fraude (solo al pagar).', '1 año'],
     ['__stripe_sid', 'De terceros (Stripe)', 'Procesar el pago de forma segura y prevenir el fraude (solo al pagar).', '30 minutos'],
+    ['_ga', 'De terceros (Google Analytics)', 'Estadísticas anónimas de uso de la web. Solo si activas la analítica en las preferencias del banner (desactivada por defecto).', '2 años'],
+    ['_ga_<id>', 'De terceros (Google Analytics)', 'Mantener el estado de la sesión de medición. Solo si activas la analítica en las preferencias del banner (desactivada por defecto).', '2 años'],
   ];
+  const isConditional = (name) => name.startsWith('_ga');
   return (
     <div className="overflow-x-auto rounded-2xl border border-slate-200 my-5">
       <table className="w-full text-left text-sm border-collapse min-w-[540px]">
@@ -162,7 +166,14 @@ function CookiesTable() {
         <tbody>
           {rows.map((r, i) => (
             <tr key={i} className="border-t border-slate-100 text-gray-600">
-              <td className="p-3 font-mono text-xs">{r[0]}</td>
+              <td className="p-3 font-mono text-xs">
+                {r[0]}
+                {isConditional(r[0]) && (
+                  <span className="ml-2 inline-block align-middle rounded-full bg-[#FFF6F0] text-[#FF690B] text-[10px] font-bold px-2 py-0.5 whitespace-nowrap">
+                    solo si activas analítica
+                  </span>
+                )}
+              </td>
               <td className="p-3">{r[1]}</td>
               <td className="p-3">{r[2]}</td>
               <td className="p-3">{r[3]}</td>
@@ -186,8 +197,9 @@ const cookiesExtra = (num) => ({
       </h2>
       <p className="text-gray-600 leading-relaxed my-3">
         Somos especialmente respetuosos con tu privacidad:{' '}
-        <strong className="text-gray-800 font-semibold">no usamos cookies de analítica, de publicidad ni de seguimiento de terceros.</strong>{' '}
-        Solo empleamos el almacenamiento imprescindible para que la web funcione:
+        <strong className="text-gray-800 font-semibold">no usamos cookies de publicidad ni de seguimiento de terceros, y la analítica (Google) está desactivada por defecto</strong>
+        {' '}— solo se activa si tú lo eliges en las preferencias del banner de cookies. El resto es
+        el almacenamiento imprescindible para que la web funcione:
       </p>
       <CookiesTable />
     </React.Fragment>

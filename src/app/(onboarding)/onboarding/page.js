@@ -10,6 +10,7 @@ import 'react-phone-input-2/lib/style.css';
 import esPhone from 'react-phone-input-2/lang/es.json';
 import { getData as getCountryData } from 'country-list';
 import { useAuthStore } from '@/stores/auth.store';
+import { normalizeName } from '@/app/components/nameUtils';
 import AccessNotice from '@/app/components/AccessNotice';
 import GdprCheckbox from '@/app/components/GdprCheckbox';
 
@@ -196,8 +197,8 @@ export default function OnboardingPage() {
       const apiGender = answers.sexo === 'Hombre' ? 'male' : answers.sexo === 'Mujer' ? 'female' : '';
       const birth = answers.edad ? `${new Date().getFullYear() - parseInt(answers.edad, 10)}-01-01` : '';
       const fd = new FormData();
-      fd.append('firstName', answers.nombre || '');
-      fd.append('lastName', answers.apellidos || '');
+      fd.append('firstName', normalizeName(answers.nombre) || '');
+      fd.append('lastName', normalizeName(answers.apellidos) || '');
       if (birth) fd.append('birth', birth);
       fd.append('phone_number', answers.telefono || '');
       if (apiGender) fd.append('gender', apiGender);
