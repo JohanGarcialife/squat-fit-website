@@ -16,16 +16,15 @@ import { FORM_DEFINITIONS, computeWeeklyScores, isoWeekId } from '@/app/componen
 
 const API = 'https://squatfit-api-cyrc2g3zra-no.a.run.app';
 
-// Guardado en el backend: el módulo de forms existente
-// (POST /api/v1/advice/create-answer-form, body {form_id, answers[]}) necesita
-// el form_id del formulario creado en el back office. Cuando lo tengáis,
-// mapead aquí slug → form_id y el POST ya está preparado; mientras tanto las
-// respuestas quedan en localStorage (clave sqf-form-<slug>).
+// Guardado en el backend (conectado 20-jul-2026, lote 4): las respuestas van a
+// POST /api/v1/forms/public-answer con los form_ids estables sembrados por la
+// migración del backend. El endpoint enlaza la respuesta al usuario por email.
 // El SEGUIMIENTO SEMANAL es distinto: va al motor de hábitos
 // (POST /api/v1/habits/weekly-form) y no necesita form_id.
 const BACKEND_FORM_IDS = {
-  // 'evaluacion-inicial': '<form_id>',
-  // 'revision-mensual': '<form_id>',
+  'evaluacion-inicial': 'f0a11e00-0000-4000-a000-000000000002',
+  'seguimiento-semanal': 'f0a11e00-0000-4000-a000-000000000003',
+  'revision-mensual': 'f0a11e00-0000-4000-a000-000000000004',
 };
 
 // Las 10 claves del DTO del motor (habit_engine_config.json). Las escalas del
@@ -213,18 +212,28 @@ export default function FormularioPage() {
       return { engine };
     }
 
-    // ── Evaluación inicial / Revisión mensual (igual que antes) ───────────
+    // ── Evaluación inicial / Revisión mensual → forms públicos (lote 4) ───
+    // El endpoint enlaza al usuario por email, así que lo pedimos al perfil.
     const submission = { answers, submitted_at: new Date().toISOString() };
     const formId = BACKEND_FORM_IDS[slug];
     if (formId) {
-      await axios.post(
-        `${API}/api/v1/advice/create-answer-form`,
-        {
+      let profile = null;
+      try {
+        const r = await axios.get(`${API}/api/v1/user/info`, { headers: { Authorization: `Bearer ${token}` } });
+        profile = r.data || null;
+      } catch { /* sin perfil seguimos: la respuesta queda sin enlazar */ }
+      try {
+        await axios.post(`${API}/api/v1/forms/public-answer`, {
           form_id: formId,
-          answers: Object.entries(answers).map(([question_id, answer]) => ({ question_id, answer })),
-        },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+          email: profile?.email || undefined,
+          name: [profile?.firstName, profile?.lastName].filter(Boolean).join(' ') || undefined,
+          answers: Object.entries(answers).map(([question, answer]) => ({ question, answer })),
+          source: `/formulario/${slug}`,
+          website: '',
+        });
+      } catch (e) {
+        console.error('public-answer submit', e?.response?.data || e.message);
+      }
     }
     saveLocalCopy(submission);
   };

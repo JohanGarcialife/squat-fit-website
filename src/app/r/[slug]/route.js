@@ -4,7 +4,7 @@
 // que exista, REDIRECTS_API_READY queda en false y servimos un 404 amable sin
 // tocar la red. Para encenderlo: poner true y listo.
 
-const REDIRECTS_API_READY = false;
+const REDIRECTS_API_READY = true; // encendido 20-jul-2026: /api/v1/redirects/:slug vivo en prod (lote 4)
 
 const API = process.env.NEXT_PUBLIC_API_URL || 'https://squatfit-api-cyrc2g3zra-no.a.run.app';
 

@@ -23,11 +23,11 @@ const ORANGE = '#FF690B';
 // calendario (Calendly o similar) basta con cambiar esta constante.
 const BOOKING_URL = 'https://agenda.squatfit.es/sesion-diagnostica';
 
-// Endpoint de guardado. El módulo de forms del backend (/api/v1/advice/…)
-// exige sesión, y este formulario es público, así que de momento queda
-// desactivado y la solicitud se guarda en localStorage (clave abajo).
-// Cuando haya endpoint público: ponerlo aquí y el POST ya está preparado.
-const SUBMIT_ENDPOINT = null; // p. ej. 'https://…/api/v1/advice/create-answer-form'
+// Endpoint público de forms (lote 4, 20-jul-2026): guarda la solicitud en el
+// backend sin sesión, con rate-limit y honeypot. form_id estable sembrado por
+// la migración del backend (Prellamada — Aquí empieza tu cambio).
+const SUBMIT_ENDPOINT = 'https://squatfit-api-cyrc2g3zra-no.a.run.app/api/v1/forms/public-answer';
+const PRELLAMADA_FORM_ID = 'f0a11e00-0000-4000-a000-000000000001';
 const STORAGE_KEY = 'sqf-prellamada-solicitudes';
 
 // Pantallas del formulario: claves estables = atributos `name` del JSON.
@@ -196,10 +196,23 @@ export default function EmpiezaTuCambioPage() {
     };
     try {
       if (SUBMIT_ENDPOINT) {
+        // Contrato de POST /forms/public-answer: metadatos arriba, el resto de
+        // respuestas como pares {question, answer}. website = honeypot vacío.
+        const META_KEYS = ['first_name', 'last_name', 'phone', 'timestamp', 'origen'];
+        const body = {
+          form_id: PRELLAMADA_FORM_ID,
+          name: [submission.first_name, submission.last_name].filter(Boolean).join(' '),
+          phone: String(submission.phone || ''),
+          answers: Object.entries(submission)
+            .filter(([k]) => !META_KEYS.includes(k))
+            .map(([question, answer]) => ({ question, answer })),
+          source: submission.origen,
+          website: '',
+        };
         const res = await fetch(SUBMIT_ENDPOINT, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(submission),
+          body: JSON.stringify(body),
         });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
       } else {
