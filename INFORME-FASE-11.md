@@ -76,6 +76,18 @@ Verificado en navegador con dos recorridos completos (sesión forjada en localSt
 
 **Única atención manual posible**: si la Fase 9 publica el checkout en una ruta que no esté entre las 4 candidatas, añadirla a `TIER_CHECKOUT_ENDPOINTS` en `courseCatalog.js`. Y cuando el catálogo real responda, conviene un vistazo de 1 minuto a `/cursos` para confirmar que los UUID llegan a `product_id`.
 
+## Anexo — Re-verificación (20 jul 2026, tarde, tras mergear la Fase 9 en el backend)
+
+Se relanzó el prompt de la Fase 11 con la Fase 9 ya **mergeada a main del backend (PR #17) pero SIN desplegar**. Resultado: **cero cambios de código necesarios en la web**. Comprobado:
+
+- Rama al día con `origin/main` (nada nuevo que traer), árbol limpio, 3dc19ea pusheado.
+- La ruta real del checkout de la Fase 9 es `POST /api/v1/catalog/checkout` — **exactamente la primera candidata** de `TIER_CHECKOUT_ENDPOINTS`. Se encenderá sola con el deploy, sin tocar la constante.
+- El desajuste de payload (la web manda `items[]/product_id` sin email; el backend de la Fase 9 esperaba `stripe_price_id|lookup_key + email`) **lo reconcilia la FASE 12 en el backend** por decisión del plan (`~/Development/PLAN-PENDIENTES-SQUADFIT.md`, tercera pasada): la web NO debe tocarse. El backend aceptará también el shape de la web y añadirá `success=true` al success_url, que la pantalla de gracias de `/cart` ya entiende.
+- Prod re-sondeado: `GET /api/v1/catalog` → 404 y `POST /api/v1/catalog/checkout` → 404 (deploy pendiente) → la tienda sigue en espejo local y el paso 3 en «muy pronto», como debe.
+- `POST /forms/public-answer` → **201** con el shape real del formulario y el honeypot `website` relleno (no guarda nada).
+- Build de revisión reconstruido y sirviendo en :3002: `/cursos` pinta la tarjeta F&D con el selector de 3 tramos (Anual 187,99 € por defecto; al cambiar a Mensual → 27,50 €).
+- `~/Desktop`: sin capturas nuevas (solo las dos del 18 jul ya resueltas).
+
 ## Cómo verificar (build de revisión, ya arrancado en :3002)
 
 ```bash
