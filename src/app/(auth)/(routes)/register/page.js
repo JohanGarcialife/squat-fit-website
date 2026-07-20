@@ -8,6 +8,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import toast from 'react-hot-toast';
 import { Eye, EyeOff, Check } from 'lucide-react';
 import GdprCheckbox from '@/app/components/GdprCheckbox';
+import { normalizeName } from '@/app/components/nameUtils';
 
 function RegisterContent() {
   const router = useRouter();
@@ -53,8 +54,9 @@ function RegisterContent() {
       // email siempre coincida, escriba como escriba el teclado del móvil.
       const email = (values.email || '').trim().toLowerCase();
 
-      // Split "Nombre" into firstName and lastName
-      const nameParts = username.trim().split(/\s+/);
+      // Split "Nombre" into firstName and lastName, normalizado (15.16):
+      // Primera Mayúscula con partículas (de/del/la/…) en minúscula.
+      const nameParts = normalizeName(username).split(' ');
       const firstName = nameParts[0] || 'Usuario';
       const lastName = nameParts.length > 1 ? nameParts.slice(1).join(' ') : 'SquadFit';
 

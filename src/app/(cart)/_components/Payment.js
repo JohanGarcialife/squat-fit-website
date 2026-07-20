@@ -122,6 +122,9 @@ export default function Payment(props) {
   const { token } = useAuthStore();
   const [clientSecret, setClientSecret] = useState('');
   const [loading, setLoading] = useState(true);
+  // Cursos con tramos (15.1) sin endpoint de cobro todavía (TIER_CHECKOUT_ENDPOINT
+  // en null): aviso honesto en lugar de un error críptico de Stripe.
+  const [pendingBackend, setPendingBackend] = useState(false);
 
   const appearance = useMemo(() => ({
     theme: 'stripe',
@@ -148,7 +151,15 @@ export default function Payment(props) {
 
     // Detectar si es un checkout de suscripción directo o un carrito mixto
     const directItem = cart.find(item => item.isDirectCheckout);
-    
+
+    // Item directo SIN endpoint (curso con tramo, a la espera del checkout de
+    // productos del catálogo en el backend): no hay nada que cobrar aún.
+    if (directItem && !directItem.endpoint) {
+       setPendingBackend(true);
+       setLoading(false);
+       return;
+    }
+
     if (directItem && directItem.endpoint) {
        endpoint = directItem.endpoint;
        payload = directItem.payload;
@@ -242,6 +253,21 @@ export default function Payment(props) {
     return (
         <div className="min-h-screen bg-white flex items-center justify-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-900"></div>
+        </div>
+    );
+  }
+
+  if (pendingBackend) {
+    return (
+        <div className="min-h-screen bg-white flex flex-col items-center justify-center px-6 text-center">
+            <div className="text-5xl mb-4">🛠️</div>
+            <h2 className="text-indigo-900 text-2xl font-bold mb-3">La compra online de este curso se activa muy pronto</h2>
+            <p className="text-gray-500 max-w-md leading-relaxed mb-8">
+                Estamos terminando de conectar el pago de los cursos. Mientras tanto,
+                escríbenos y te lo activamos al momento:{' '}
+                <a href="mailto:hola@squatfit.es" className="text-orange-500 font-bold underline">hola@squatfit.es</a>
+            </p>
+            <button onClick={() => props.setStep(1)} className="text-secondary font-bold underline cursor-pointer">Volver al carrito</button>
         </div>
     );
   }

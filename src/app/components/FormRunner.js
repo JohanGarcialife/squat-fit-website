@@ -28,13 +28,17 @@ const ORANGE = '#FF690B';
 
 const OTHER_PREFIX = 'Otro: ';
 
-export default function FormRunner({ definition, context = {}, onSubmit, exitHref = '/panel-control' }) {
+// `renderResult` (opcional): recibe lo que devuelva onSubmit y sustituye a la
+// pantalla final genérica — lo usa el Seguimiento semanal para pintar el
+// semáforo y las sugerencias del motor de hábitos.
+export default function FormRunner({ definition, context = {}, onSubmit, exitHref = '/panel-control', renderResult }) {
   const { title: formTitle, phases = [], steps: allSteps } = definition;
 
   const [answers, setAnswers] = useState({});
   const [index, setIndex] = useState(0);
   const [saving, setSaving] = useState(false);
   const [sent, setSent] = useState(false);
+  const [result, setResult] = useState(null);
   const [otherDraft, setOtherDraft] = useState('');
 
   // Pasos visibles según condicionales (se recalcula con cada respuesta).
@@ -90,7 +94,8 @@ export default function FormRunner({ definition, context = {}, onSubmit, exitHre
     if (!isValid || saving) return;
     setSaving(true);
     try {
-      await onSubmit(answers);
+      const res = await onSubmit(answers);
+      setResult(res ?? null);
       setSent(true);
     } catch (e) {
       console.error('form submit', e);
@@ -101,6 +106,10 @@ export default function FormRunner({ definition, context = {}, onSubmit, exitHre
 
   const progress = total > 1 ? Math.round((index / (total - 1)) * 100) : 0;
   const isLast = index === total - 1;
+
+  if (sent && renderResult) {
+    return renderResult(result);
+  }
 
   if (sent) {
     return (

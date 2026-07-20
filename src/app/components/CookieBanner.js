@@ -5,12 +5,30 @@ import Link from 'next/link';
 
 const STORAGE_KEY = 'sqf-cookie-consent';
 
-// Banner de cookies discreto, abajo. Sin analítica: solo almacenamiento propio
-// (localStorage) y cookies de Stripe para el pago seguro. Las tres acciones
-// guardan la elección en localStorage y no se vuelve a mostrar.
+// Lee el consentimiento guardado. Devuelve null si aún no se ha elegido.
+export function getCookieConsent() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
+// ¿Puede cargarse Google Analytics? (consent mode: denegado por defecto).
+// Cuando se instale Site Kit/GA4, condicionar la carga del script a esto.
+export function analyticsAllowed() {
+  return getCookieConsent()?.analytics === true;
+}
+
+// Banner de cookies v2 (13.6): tres acciones — Aceptar (todo), Rechazar (solo
+// esenciales) y Saber más (política). El panel de preferencias añade la
+// categoría «Analítica (Google)», desactivada por defecto y persistida en
+// sqf-cookie-consent, lista para el consent mode cuando se instale GA4.
 export default function CookieBanner() {
   const [visible, setVisible] = useState(false);
   const [showPrefs, setShowPrefs] = useState(false);
+  const [analytics, setAnalytics] = useState(false);
 
   useEffect(() => {
     try {
@@ -20,9 +38,12 @@ export default function CookieBanner() {
     }
   }, []);
 
-  const save = (choice) => {
+  const save = (choice, analyticsOn) => {
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify({ choice, date: new Date().toISOString() }));
+      localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify({ choice, analytics: !!analyticsOn, date: new Date().toISOString() })
+      );
     } catch {}
     setVisible(false);
   };
@@ -35,12 +56,18 @@ export default function CookieBanner() {
         <div className="flex flex-col gap-3">
           <p className="text-sm text-[#363C98] leading-relaxed">
             <span className="font-bold">🍪 Cookies en Squad Fit.</span>{' '}
-            No usamos cookies de analítica ni publicidad. Solo guardamos datos en tu
-            dispositivo para que la web funcione (sesión, carrito y tus preferencias) y
-            Stripe usa sus cookies para procesar pagos de forma segura.{' '}
-            <Link href="/politicas?tab=cookies" className="underline font-semibold text-[#FF690B] hover:text-[#e05b08]">
-              Política de cookies
-            </Link>
+            Usamos almacenamiento propio para que la web funcione (sesión, carrito y tus
+            preferencias) y cookies de Stripe para pagar de forma segura. La analítica
+            (Google) está <strong>desactivada por defecto</strong>: solo se usa si tú la
+            activas en las{' '}
+            <button
+              type="button"
+              onClick={() => setShowPrefs((v) => !v)}
+              className="underline font-semibold text-[#363C98] hover:text-[#FF690B] cursor-pointer"
+            >
+              preferencias
+            </button>
+            .
           </p>
 
           {showPrefs && (
@@ -63,30 +90,52 @@ export default function CookieBanner() {
                   <span className="h-4 w-4 translate-x-5 rounded-full bg-white transition" />
                 </span>
               </div>
-              <p className="text-[#363C98]/60 text-xs">
-                No hay cookies opcionales que desactivar: no usamos analítica ni marketing.
-              </p>
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <p className="font-bold text-[#363C98]">Analítica (Google)</p>
+                  <p className="text-[#363C98]/70">
+                    Estadísticas anónimas de uso para mejorar la web. Desactivada por
+                    defecto; hoy no cargamos ningún script de Google hasta que tú lo actives.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={analytics}
+                  aria-label="Activar analítica de Google"
+                  onClick={() => setAnalytics((v) => !v)}
+                  className={`shrink-0 mt-1 inline-flex h-6 w-11 items-center rounded-full px-1 transition-colors cursor-pointer ${analytics ? 'bg-[#FF690B]' : 'bg-[#C6C3E8]'}`}
+                >
+                  <span className={`h-4 w-4 rounded-full bg-white transition-transform ${analytics ? 'translate-x-5' : ''}`} />
+                </button>
+              </div>
+              <button
+                type="button"
+                onClick={() => save(analytics ? 'custom-analytics' : 'custom-essential', analytics)}
+                className="self-end px-4 py-2 rounded-full text-sm font-bold text-white bg-[#363C98] hover:bg-[#2c317c] transition-colors cursor-pointer"
+              >
+                Guardar preferencias
+              </button>
             </div>
           )}
 
           <div className="flex flex-wrap gap-2 justify-end">
-            <button
-              type="button"
-              onClick={() => setShowPrefs((v) => !v)}
+            <Link
+              href="/politicas?tab=cookies"
               className="px-4 py-2 rounded-full text-sm font-bold text-[#363C98] hover:bg-[#363C98]/5 transition-colors cursor-pointer"
             >
-              Preferencias
-            </button>
+              Saber más
+            </Link>
             <button
               type="button"
-              onClick={() => save('essential')}
+              onClick={() => save('rejected', false)}
               className="px-4 py-2 rounded-full text-sm font-bold text-[#363C98] border-2 border-[#363C98] hover:bg-[#363C98]/5 transition-colors cursor-pointer"
             >
-              Solo esenciales
+              Rechazar
             </button>
             <button
               type="button"
-              onClick={() => save('accepted')}
+              onClick={() => save('accepted', true)}
               className="px-5 py-2 rounded-full text-sm font-bold text-white bg-[#FF690B] hover:bg-[#e05b08] shadow-md transition-colors cursor-pointer"
             >
               Aceptar

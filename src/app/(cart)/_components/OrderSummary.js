@@ -71,7 +71,11 @@ export default function OrderSummary(props) {
               
               <div className="flex justify-between items-end">
                 <span className="text-indigo-900 text-xs font-semibold bg-indigo-50 px-2 py-0.5 rounded-lg">
-                  {item.type === 'digital' ? item.period?.replace('/', '') || 'mes' : `${item.quantity || 1} unidad`}
+                  {item.type === 'digital'
+                    ? item.period?.replace('/', '') || 'mes'
+                    : item.tier
+                      ? { mensual: 'mensual', anual: 'anual', permanente: 'de por vida' }[item.tier] || item.tier
+                      : `${item.quantity || 1} unidad`}
                 </span>
                 <span className="text-indigo-900 font-bold text-sm">
                   {convertPrice(item.price * (item.quantity || 1))} {symbol}

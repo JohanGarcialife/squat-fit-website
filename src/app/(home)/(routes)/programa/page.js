@@ -8,6 +8,7 @@ import RelatableSection from './_components/RelatableSection';
 import StepsSection from './_components/StepsSection';
 import PlanesTestimonials from './_components/PlanesTestimonials';
 import ProgramPricing from './_components/ProgramPricing';
+import AgendaSection from './_components/AgendaSection';
 import GuaranteeSection from './_components/GuaranteeSection';
 import FinalCTA from './_components/FinalCTA';
 
@@ -22,6 +23,7 @@ export default function page() {
       <Reveal><StepsSection /></Reveal>
       <Reveal><PlanesTestimonials /></Reveal>
       <Reveal><ProgramPricing /></Reveal>
+      <Reveal><AgendaSection /></Reveal>
       <Reveal><GuaranteeSection /></Reveal>
       <Reveal><FinalCTA /></Reveal>
     </div>
