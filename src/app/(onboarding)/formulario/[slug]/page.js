@@ -61,7 +61,7 @@ function WeeklyResultScreen({ result }) {
             más tarde o avisa a tu coach.
           </p>
           <Link
-            href="/panel-planes"
+            href="/mi-programa"
             className="sf-cta is-enabled w-full max-w-xs rounded-2xl py-4 font-bold text-white text-lg text-center cursor-pointer"
             style={{ backgroundColor: '#FF690B' }}
           >
@@ -140,7 +140,7 @@ function WeeklyResultScreen({ result }) {
         >
           Ver mis alertas y hábitos
         </Link>
-        <Link href="/panel-planes" className="mt-4 text-[#8B87C9] hover:text-[#3932C0] font-semibold transition-colors">
+        <Link href="/mi-programa" className="mt-4 text-[#8B87C9] hover:text-[#3932C0] font-semibold transition-colors">
           Volver a mi panel
         </Link>
       </div>
@@ -167,7 +167,7 @@ export default function FormularioPage() {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center gap-4 bg-white px-6 text-center">
         <h1 className="text-2xl font-extrabold text-[#363C98]">Formulario no encontrado</h1>
-        <Link href="/panel-planes" className="text-[#FF690B] font-bold hover:underline">Volver a mi programa</Link>
+        <Link href="/mi-programa" className="text-[#FF690B] font-bold hover:underline">Volver a mi programa</Link>
       </div>
     );
   }
@@ -243,7 +243,7 @@ export default function FormularioPage() {
       definition={definition}
       context={{ gender }}
       onSubmit={handleSubmit}
-      exitHref="/panel-planes"
+      exitHref="/mi-programa"
       renderResult={slug === 'seguimiento-semanal' ? (result) => <WeeklyResultScreen result={result} /> : undefined}
     />
   );

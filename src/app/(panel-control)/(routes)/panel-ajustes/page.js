@@ -19,6 +19,9 @@ import {
   User,
   Trash2,
   ExternalLink,
+  LifeBuoy,
+  Users,
+  Scale,
 } from 'lucide-react';
 
 const API = 'https://squatfit-api-cyrc2g3zra-no.a.run.app';
@@ -420,7 +423,7 @@ export default function AjustesPage() {
         </div>
 
         {/* ===== NOTIFICACIONES ===== */}
-        <div className={CARD}>
+        <div className={CARD + ' space-y-2'}>
           <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-3">
               <div className="bg-[#FFF6F0] p-2.5 rounded-2xl text-[#FF690B]"><Bell className="w-6 h-6" /></div>
@@ -439,16 +442,34 @@ export default function AjustesPage() {
               <span className={`absolute top-0.5 left-0.5 w-6 h-6 bg-white rounded-full shadow transition-transform ${notifications ? 'translate-x-5' : ''}`} />
             </button>
           </div>
+          <button type="button" onClick={() => router.push('/panel-alertas')} className="w-full flex items-center justify-between p-3.5 hover:bg-slate-50 rounded-2xl transition text-[#363C98] font-bold text-sm cursor-pointer">
+            <span>Historial de avisos y preferencias</span>
+            <ChevronRight className="w-4 h-4 text-slate-300" />
+          </button>
         </div>
 
-        {/* ===== PRIVACIDAD / CUENTA ===== */}
+        {/* ===== PRIVACIDAD · AYUDA · CONÓCENOS · LEGAL · SESIÓN =====
+            El orden y los ítems siguen la spec TMV: Conócenos y Legal viven
+            aquí (antes estaban mezclados en «Info» con lo principal). */}
         <div className={CARD + ' space-y-2'}>
           <div className="flex items-center gap-3 border-b border-slate-100 pb-3 mb-2">
             <div className="bg-[#FFF6F0] p-2.5 rounded-2xl text-[#FF690B]"><Shield className="w-6 h-6" /></div>
-            <h3 className="text-[#363C98] font-extrabold text-lg">Privacidad y cuenta</h3>
+            <h3 className="text-[#363C98] font-extrabold text-lg">Privacidad y más</h3>
           </div>
-          <button type="button" onClick={() => router.push('/panel-info')} className="w-full flex items-center justify-between p-3.5 hover:bg-slate-50 rounded-2xl transition text-[#363C98] font-bold text-sm cursor-pointer">
-            <span>Aviso legal, privacidad y cookies</span>
+          <button type="button" onClick={() => router.push('/panel-ajustes/legal?seccion=privacidad')} className="w-full flex items-center justify-between p-3.5 hover:bg-slate-50 rounded-2xl transition text-[#363C98] font-bold text-sm cursor-pointer">
+            <span className="flex items-center gap-2.5"><Shield className="w-4 h-4 text-slate-400" /> Privacidad y cookies</span>
+            <ChevronRight className="w-4 h-4 text-slate-300" />
+          </button>
+          <button type="button" onClick={() => router.push('/panel-contacto')} className="w-full flex items-center justify-between p-3.5 hover:bg-slate-50 rounded-2xl transition text-[#363C98] font-bold text-sm cursor-pointer">
+            <span className="flex items-center gap-2.5"><LifeBuoy className="w-4 h-4 text-slate-400" /> Ayuda y soporte</span>
+            <ChevronRight className="w-4 h-4 text-slate-300" />
+          </button>
+          <button type="button" onClick={() => router.push('/panel-ajustes/conocenos')} className="w-full flex items-center justify-between p-3.5 hover:bg-slate-50 rounded-2xl transition text-[#363C98] font-bold text-sm cursor-pointer">
+            <span className="flex items-center gap-2.5"><Users className="w-4 h-4 text-slate-400" /> Conócenos</span>
+            <ChevronRight className="w-4 h-4 text-slate-300" />
+          </button>
+          <button type="button" onClick={() => router.push('/panel-ajustes/legal')} className="w-full flex items-center justify-between p-3.5 hover:bg-slate-50 rounded-2xl transition text-[#363C98] font-bold text-sm cursor-pointer">
+            <span className="flex items-center gap-2.5"><Scale className="w-4 h-4 text-slate-400" /> Legal</span>
             <ChevronRight className="w-4 h-4 text-slate-300" />
           </button>
           <button type="button" onClick={() => setLogoutOpen(true)} className="w-full flex items-center justify-between p-3.5 hover:bg-slate-50 rounded-2xl transition text-[#363C98] font-bold text-sm cursor-pointer">

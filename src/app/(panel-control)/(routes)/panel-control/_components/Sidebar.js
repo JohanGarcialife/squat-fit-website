@@ -138,15 +138,15 @@ const InfoIcon = ({ filled }) => (
 )
 
 // --- Configuration ---
+// Menú definitivo (spec programas TMV): Inicio · Mi programa · Mis cursos ·
+// Mi cocina · Perfil, con Ajustes abajo (Contacto, Conócenos, Legal y las
+// notificaciones viven dentro de Ajustes).
 const MENU_ITEMS = [
   { id: 0, label: 'Inicio', href: '/panel-control', Icon: HomeIcon },
-  { id: 1, label: 'Alertas', href: '/panel-alertas', Icon: BellIcon },
-  { id: 2, label: 'Cocina', href: '/panel-cocina', Icon: AppleIcon },
-  { id: 3, label: 'Planes', href: '/panel-planes', Icon: StarIcon },
-  { id: 4, label: 'Cursos', href: '/panel-cursos', Icon: SchoolIcon },
+  { id: 3, label: 'Mi programa', href: '/mi-programa', Icon: StarIcon },
+  { id: 4, label: 'Mis cursos', href: '/panel-cursos', Icon: SchoolIcon },
+  { id: 2, label: 'Mi cocina', href: '/panel-cocina', Icon: AppleIcon },
   { id: 5, label: 'Perfil', href: '/profile-panel', Icon: UserIcon },
-  { id: 6, label: 'Contacto', href: '/panel-contacto', Icon: MessageIcon },
-  { id: 8, label: 'Info', href: '/panel-info', Icon: InfoIcon },
   { id: 7, label: 'Ajustes', href: '/panel-ajustes', Icon: SettingsIcon },
 ]
 

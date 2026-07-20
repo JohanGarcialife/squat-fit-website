@@ -2,10 +2,12 @@
 
 import React, { useState, useEffect, useRef, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
 import axios from "axios";
 import { useAuthStore } from "@/stores/auth.store";
 import CourseTierShop from "@/app/components/CourseTierShop";
-import { RefreshCw } from "lucide-react";
+import BrandTabs from "@/app/components/BrandTabs";
+import { RefreshCw, ArrowRight } from "lucide-react";
 
 // ─── TEST VIDEO (Bunny.net iframe) ───────────────────────────────────────────
 // Remove this constant once the backend is returning real video_url fields
@@ -103,6 +105,12 @@ function CursosPageContent() {
   const [view, setView] = useState('catalog');
   const [courseList, setCourseList] = useState([]);
 
+  // ── Progreso por curso (spec TMV): pestañas En progreso / Pendientes /
+  //    Completados. El % sale de los vídeos vistos del detalle de cada curso;
+  //    si el detalle no responde, el curso queda en "En progreso" sin barra.
+  const [progressMap, setProgressMap] = useState({});
+  const [statusTab, setStatusTab] = useState('progress');
+
   // ── Player state ─────────────────────────────────────────────────────────────
   const [activeCourse, setActiveCourse] = useState(null);
   const [modules, setModules] = useState([]);
@@ -198,6 +206,29 @@ function CursosPageContent() {
     }
   };
 
+  const fetchProgressFor = async (list, headers, API) => {
+    const entries = await Promise.all(
+      list.map(async (course) => {
+        try {
+          const res = await axios.get(`${API}/api/v1/course/detail/${course.id}`, { headers });
+          const videos = res.data?.videos || res.data?.curriculum || res.data?.lessons || [];
+          if (!Array.isArray(videos) || videos.length === 0) return [course.id, 0];
+          const viewed = videos.filter((v) => v.views?.is_viewed).length;
+          return [course.id, Math.round((viewed / videos.length) * 100)];
+        } catch {
+          return [course.id, null]; // detalle no disponible → sin % (no se inventa)
+        }
+      })
+    );
+    const map = Object.fromEntries(entries);
+    setProgressMap(map);
+    // Arranca en la primera pestaña que tenga cursos.
+    const status = (p) => (p === 100 ? 'done' : p === 0 ? 'pending' : 'progress');
+    const counts = { progress: 0, pending: 0, done: 0 };
+    list.forEach((c) => { counts[status(map[c.id] ?? null)]++; });
+    setStatusTab(counts.progress > 0 ? 'progress' : counts.pending > 0 ? 'pending' : counts.done > 0 ? 'done' : 'progress');
+  };
+
   const fetchCourseList = async () => {
     try {
       const headers = { Authorization: `Bearer ${token}` };
@@ -216,6 +247,9 @@ function CursosPageContent() {
           const target = list.find((c) => c.id === courseIdParam) || list[0];
           openCourse(target);
         }
+
+        // Progreso real de cada curso (vídeos vistos en su detalle).
+        fetchProgressFor(list, headers, API);
       } else {
         setCourseList([]);
         setNoAccess(true);
@@ -301,7 +335,7 @@ function CursosPageContent() {
   if (!isSubscribed || noAccess) {
     return (
       <div className="flex-1 w-full max-w-7xl mx-auto p-6 md:p-12 min-h-screen">
-        <h1 className="text-[#3932C0] text-5xl font-bold mb-16">Cursos</h1>
+        <h1 className="text-[#3932C0] text-5xl font-bold mb-16">Mis cursos</h1>
         <div className="text-center mb-12">
           <h2 className="text-[#3932C0] text-3xl font-bold mb-4">Aún no tienes acceso a los cursos</h2>
           <p className="text-gray-500 text-lg max-w-xl mx-auto leading-relaxed">
@@ -334,13 +368,39 @@ function CursosPageContent() {
 
   // ── Vista: Catálogo de cursos ─────────────────────────────────────────────────
   if (view === 'catalog') {
+    const statusOf = (course) => {
+      const p = progressMap[course.id] ?? null;
+      return p === 100 ? 'done' : p === 0 ? 'pending' : 'progress';
+    };
+    const counts = { progress: 0, pending: 0, done: 0 };
+    courseList.forEach((c) => { counts[statusOf(c)]++; });
+    const STATUS_TABS = [
+      { id: 'progress', label: `En progreso (${counts.progress})` },
+      { id: 'pending', label: `Pendientes (${counts.pending})` },
+      { id: 'done', label: `Completados (${counts.done})` },
+    ];
+    const visibleCourses = courseList.filter((c) => statusOf(c) === statusTab);
+    const EMPTY_TAB_TEXT = {
+      progress: 'No tienes ningún curso en progreso ahora mismo.',
+      pending: 'No tienes cursos pendientes de empezar.',
+      done: 'Todavía no has completado ningún curso. ¡Ánimo, cada clase suma!',
+    };
+
     return (
       <div className="w-full max-w-6xl mx-auto p-6 md:p-12 min-h-screen">
-        <h1 className="text-[#3932C0] text-5xl font-bold mb-4">Cursos</h1>
-        <p className="text-gray-400 text-lg mb-12">{courseList.length} curso{courseList.length !== 1 ? 's' : ''} disponible{courseList.length !== 1 ? 's' : ''}</p>
+        <h1 className="text-[#3932C0] text-5xl font-bold mb-4">Mis cursos</h1>
+        <p className="text-gray-400 text-lg mb-8">{courseList.length} curso{courseList.length !== 1 ? 's' : ''} en tu cuenta</p>
+
+        <BrandTabs tabs={STATUS_TABS} active={statusTab} onChange={setStatusTab} className="mb-10" />
+
+        {visibleCourses.length === 0 && (
+          <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50/60 px-6 py-10 text-center mb-10">
+            <p className="text-slate-500">{EMPTY_TAB_TEXT[statusTab]}</p>
+          </div>
+        )}
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {courseList.map((course) => (
+          {visibleCourses.map((course) => (
             <button
               key={course.id}
               onClick={() => openCourse(course)}
@@ -379,6 +439,21 @@ function CursosPageContent() {
                   <p className="text-gray-400 text-sm mb-4 line-clamp-2">{course.subtitle}</p>
                 )}
 
+                {/* Progreso del curso (si el detalle lo ha devuelto) */}
+                {progressMap[course.id] != null && (
+                  <div className="flex items-center gap-3 mt-3">
+                    <div className="flex-1 bg-[#FFF6F0] rounded-full h-2.5">
+                      <div
+                        className="bg-[#FF690B] h-2.5 rounded-full transition-all duration-500"
+                        style={{ width: `${progressMap[course.id]}%` }}
+                      />
+                    </div>
+                    <span className="text-[#FF690B] font-bold text-xs whitespace-nowrap">
+                      {progressMap[course.id]}%
+                    </span>
+                  </div>
+                )}
+
                 {/* Tutor */}
                 {course.tutor && (
                   <div className="flex items-center gap-2 mt-3 pt-3 border-t border-gray-100">
@@ -398,6 +473,16 @@ function CursosPageContent() {
               </div>
             </button>
           ))}
+        </div>
+
+        {/* Al catálogo completo (web pública) para ampliar formación */}
+        <div className="w-full flex justify-center mt-14">
+          <Link
+            href="/cursos"
+            className="inline-flex items-center gap-2 text-[#FF690B] font-bold hover:underline"
+          >
+            Ver todos los cursos <ArrowRight className="w-4 h-4" />
+          </Link>
         </div>
       </div>
     );
