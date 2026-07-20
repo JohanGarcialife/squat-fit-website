@@ -8,6 +8,7 @@ import { useCartStore } from '@/stores/cart.store';
 import { useAuthStore } from '@/stores/auth.store';
 import { useCheckoutStore } from '@/stores/checkout.store';
 import axios from 'axios';
+import { createTierCheckout } from '@/app/components/courseCatalog';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import { toast } from 'react-hot-toast';
@@ -152,8 +153,34 @@ export default function Payment(props) {
     // Detectar si es un checkout de suscripción directo o un carrito mixto
     const directItem = cart.find(item => item.isDirectCheckout);
 
-    // Item directo SIN endpoint (curso con tramo, a la espera del checkout de
-    // productos del catálogo en el backend): no hay nada que cobrar aún.
+    // Curso con tramo (15.1): cobro contra el checkout de tramos de la Fase 9,
+    // con detección en vivo. Si el backend devuelve una Stripe Checkout
+    // Session se redirige (vuelta a /cart?success=true); si devuelve un
+    // clientSecret se monta el Payment Element; si el endpoint aún no está
+    // desplegado (404), se mantiene el aviso honesto de «muy pronto».
+    if (directItem && (directItem.tierGroup || directItem.tier)) {
+       createTierCheckout(directItem, { token })
+         .then((result) => {
+           if (result.status === 'redirect') {
+             // El spinner se queda mientras el navegador salta a Stripe.
+             window.location.assign(result.url);
+             return;
+           }
+           if (result.status === 'client_secret') {
+             setClientSecret(result.clientSecret);
+           } else {
+             setPendingBackend(true);
+           }
+           setLoading(false);
+         })
+         .catch((err) => {
+           toast.error(err.message || 'No se pudo iniciar el pago');
+           setLoading(false);
+         });
+       return;
+    }
+
+    // Item directo SIN endpoint (legado): no hay nada que cobrar aún.
     if (directItem && !directItem.endpoint) {
        setPendingBackend(true);
        setLoading(false);
