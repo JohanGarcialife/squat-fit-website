@@ -1,33 +1,33 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 
-// Agenda embebida de la sesión diagnóstica (15.10): iframe responsive de
-// agenda.squatfit.es con los UTM de la URL actual reenviados como query params
-// (así la reserva conserva la atribución de la campaña). Si el navegador no
-// puede pintar el iframe, queda siempre el enlace de debajo como respaldo.
-const AGENDA_BASE = 'https://agenda.squatfit.es/sesion-diagnostica';
-const UTM_KEYS = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content'];
+// Agenda de la sesión diagnóstica (15.10) embebida con el WIDGET INLINE oficial
+// de TidyCal. La página de reserva (agenda.squatfit.es / tidycal.com) manda
+// X-Frame-Options y NO se puede meter en un <iframe> normal (salía "contenido
+// bloqueado"); el widget de TidyCal sí está pensado para incrustarse.
+// data-path = ruta de la cita de EQUIPO en tidycal.com (team/agendas/<slug>).
+const TIDYCAL_PATH = 'team/agendas/sesion-diagnostica';
+const TIDYCAL_EMBED_JS = 'https://asset-tidycal.b-cdn.net/js/embed.js';
+// Respaldo (abrir en pestaña) por si el navegador bloquea scripts de terceros.
+const AGENDA_FALLBACK_URL = 'https://agenda.squatfit.es/sesion-diagnostica';
 
 export default function AgendaSection() {
-  // La URL se calcula en cliente (necesita window.location); hasta entonces se
-  // usa la base sin UTM para que el server render no difiera del primer paint.
-  const [agendaUrl, setAgendaUrl] = useState(AGENDA_BASE);
-  const [failed, setFailed] = useState(false);
-
+  // Inyecta el script del widget en cada montaje: al cargar, embed.js escanea
+  // los `.tidycal-embed` presentes y pinta el calendario. Re-inyectar en cada
+  // montaje hace que funcione también con la navegación cliente de Next.
   useEffect(() => {
-    try {
-      const current = new URLSearchParams(window.location.search);
-      const forward = new URLSearchParams();
-      UTM_KEYS.forEach((k) => {
-        const v = current.get(k);
-        if (v) forward.set(k, v);
-      });
-      const qs = forward.toString();
-      if (qs) setAgendaUrl(`${AGENDA_BASE}?${qs}`);
-    } catch {
-      // Sin UTM: la base ya sirve
-    }
+    const script = document.createElement('script');
+    script.src = TIDYCAL_EMBED_JS;
+    script.async = true;
+    document.body.appendChild(script);
+    return () => {
+      try {
+        document.body.removeChild(script);
+      } catch {
+        /* ya retirado */
+      }
+    };
   }, []);
 
   return (
@@ -48,32 +48,20 @@ export default function AgendaSection() {
           </p>
         </div>
 
-        {!failed && (
-          <div className="w-full rounded-[28px] overflow-hidden border border-slate-100 shadow-lg bg-[#F8F9FC]">
-            <iframe
-              src={agendaUrl}
-              title="Agenda de la sesión diagnóstica de Squad Fit"
-              className="w-full block"
-              style={{ height: 'min(720px, 85vh)', border: 'none' }}
-              loading="lazy"
-              onError={() => setFailed(true)}
-              allow="payment"
-            />
-          </div>
-        )}
+        {/* Widget inline de TidyCal (se pinta solo al cargar embed.js). El
+            min-height evita el salto de layout mientras carga. */}
+        <div className="w-full rounded-[28px] overflow-hidden border border-slate-100 shadow-lg bg-[#F8F9FC] p-2 sm:p-4">
+          <div className="tidycal-embed" data-path={TIDYCAL_PATH} style={{ minHeight: 'min(720px, 80vh)' }} />
+        </div>
 
-        {/* Respaldo: siempre visible por si el iframe no carga en algún navegador */}
+        {/* Respaldo discreto por si el widget no carga (bloqueadores, etc.) */}
         <a
-          href={agendaUrl}
+          href={AGENDA_FALLBACK_URL}
           target="_blank"
           rel="noopener noreferrer"
-          className={
-            failed
-              ? 'mt-2 inline-block bg-primary hover:bg-[#e05b08] text-white font-bold text-lg px-9 py-4 rounded-2xl active:scale-95 transition-all duration-200 cursor-pointer'
-              : 'mt-5 text-slate-400 hover:text-primary text-sm font-semibold underline underline-offset-2 transition-colors'
-          }
+          className="mt-5 text-slate-400 hover:text-primary text-sm font-semibold underline underline-offset-2 transition-colors"
         >
-          {failed ? 'Abrir la agenda para reservar' : '¿No ves la agenda? Ábrela en una pestaña nueva'}
+          ¿No ves la agenda? Ábrela en una pestaña nueva
         </a>
       </div>
     </section>
