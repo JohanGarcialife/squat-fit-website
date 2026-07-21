@@ -26,21 +26,18 @@ const testimonials = [
   },
   {
     name: 'Ana Béjar',
-    text: '“Es increíble lo que aprendo con el curso y los conocimientos que me da para enfocarme en mis objetivos y poder diseñar mi dieta y mi entrenamiento adaptandolos a mi ritmo de vida.”',
+    text: '“Es increíble lo mucho que aprendo y las herramientas que me ha dado Squad Fit para adaptar mi dieta y entreno a mis objetivos y a mi ritmo de vida.”',
     image: '/resenasAvatar/3 Ana Bejar 1.png',
-    rating: 4.5,
   },
   {
     name: 'Diego Villaroel',
     text: '“He logrado mis objetivos físicos por primera vez y, sobre todo, he adquirido el conocimiento para seguir mejorando por mi cuenta.”',
     image: '/resenasAvatar/4 Diego Villaroel 1.png',
-    rating: 5,
   },
   {
     name: 'Ane Ayerbe',
-    text: '“No solo me ayudó a mejorar físicamente, también ha sido clave para mi bienestar físico y mental.”',
+    text: '“No solo me ayudan a mejorar físicamente, también son clave para mi bienestar físico y mental.”',
     image: '/resenasAvatar/5 Ane Ayerbe 1.png',
-    rating: 5,
   },
 ];
 
@@ -78,23 +75,6 @@ export default function PlanesTestimonials() {
     beforeChange: onBeforeChange,
     arrows: false,
     cssEase: 'cubic-bezier(0.25, 1, 0.5, 1)',
-  };
-
-  const renderStars = (rating) => {
-    return (
-      <div className="flex gap-0.5 text-[#FF690B] text-lg sm:text-xl lg:text-2xl">
-        {[...Array(5)].map((_, idx) => {
-          const starValue = idx + 1;
-          if (rating >= starValue) {
-            return <span key={idx}>★</span>;
-          } else if (rating > idx && rating < starValue) {
-            return <span key={idx} className="relative inline-block overflow-hidden w-[0.5em] select-none">★<span className="absolute left-[0.5em] overflow-hidden text-slate-300">☆</span></span>;
-          } else {
-            return <span key={idx} className="text-[#FF690B]/30">☆</span>;
-          }
-        })}
-      </div>
-    );
   };
 
   return (
@@ -138,12 +118,9 @@ export default function PlanesTestimonials() {
                       />
                     </div>
                     <div className="flex flex-col items-start min-w-0">
-                      <h3 className="text-lg sm:text-xl lg:text-2xl font-extrabold text-[#363C98] truncate w-full">
+                      <h3 className="text-lg sm:text-xl lg:text-2xl font-extrabold text-[#363C98] leading-tight">
                         {testimonial.name}
                       </h3>
-                      <div className="mt-0.5">
-                        {renderStars(testimonial.rating)}
-                      </div>
                     </div>
                   </div>
 
