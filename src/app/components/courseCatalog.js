@@ -27,11 +27,16 @@ export const TIER_CHECKOUT_ENDPOINTS = [
 export const TIER_CHECKOUT_ENDPOINT = TIER_CHECKOUT_ENDPOINTS[0];
 
 // Metadatos de cada tramo, con la copy validada (anual y permanente son pago
-// único, no suscripción).
+// único, no suscripción). El trimestral solo existe en la Biblioteca digital.
 export const TIER_META = {
   mensual: {
     label: 'Mensual',
     priceSuffix: '€/mes',
+    note: 'Suscripción · cancela cuando quieras',
+  },
+  trimestral: {
+    label: 'Trimestral',
+    priceSuffix: '€/trimestre',
     note: 'Suscripción · cancela cuando quieras',
   },
   anual: {
@@ -46,7 +51,15 @@ export const TIER_META = {
   },
 };
 
+// Núcleo obligatorio de un grupo (los cursos tienen exactamente estos 3);
+// el trimestral es opcional y solo lo trae la Biblioteca digital.
 export const TIER_ORDER = ['mensual', 'anual', 'permanente'];
+const TIER_ORDER_FULL = ['mensual', 'trimestral', 'anual', 'permanente'];
+
+// Tramos presentes en un grupo, en orden canónico de duración.
+export function groupTierOrder(group) {
+  return TIER_ORDER_FULL.filter((t) => group.tiers[t]);
+}
 
 // Espejo del catálogo real 15.1 (área cursos) tal y como está en la tabla
 // products de producción: mismos nombres (con sufijo) y mismos precios.
@@ -61,20 +74,62 @@ const CURSOS_15_1 = [
   ['La Mujer - Parte 1 + 2', 37.5, 374.99, 635],
 ];
 
-export const LOCAL_CATALOG = CURSOS_15_1.flatMap(([name, mensual, anual, permanente]) => [
-  { id: null, name: `${name} (mensual)`, price: mensual, currency: 'eur', type: 'subscription', billing_period: 'monthly', access_months: null, area: 'cursos', active: true },
-  { id: null, name: `${name} (anual)`, price: anual, currency: 'eur', type: 'product', billing_period: 'one_time', access_months: 12, area: 'cursos', active: true },
-  { id: null, name: `${name} (permanente)`, price: permanente, currency: 'eur', type: 'product', billing_period: 'one_time', access_months: null, area: 'cursos', active: true },
-]);
+// Espejo de la Biblioteca digital (área cocina), con los 4 tramos y precios
+// reales confirmados en el /api/v1/catalog de producción (21-jul-2026).
+const BIBLIOTECA_LOCAL = [
+  ['mensual', 9.99, 'monthly'],
+  ['trimestral', 34.99, 'quarterly'],
+  ['anual', 89.99, 'one_time'],
+  ['permanente', 159, 'one_time'],
+].map(([tier, price, billing]) => ({
+  id: null, name: `Biblioteca digital (${tier})`, price, currency: 'eur',
+  type: billing === 'one_time' ? 'product' : 'subscription', billing_period: billing,
+  access_months: tier === 'anual' ? 12 : null, area: 'cocina', active: true,
+}));
 
-const SUFFIX_RE = /\s*\((mensual|anual|permanente)\)\s*$/i;
+export const LOCAL_CATALOG = [
+  ...CURSOS_15_1.flatMap(([name, mensual, anual, permanente]) => [
+    { id: null, name: `${name} (mensual)`, price: mensual, currency: 'eur', type: 'subscription', billing_period: 'monthly', access_months: null, area: 'cursos', active: true },
+    { id: null, name: `${name} (anual)`, price: anual, currency: 'eur', type: 'product', billing_period: 'one_time', access_months: 12, area: 'cursos', active: true },
+    { id: null, name: `${name} (permanente)`, price: permanente, currency: 'eur', type: 'product', billing_period: 'one_time', access_months: null, area: 'cursos', active: true },
+  ]),
+  ...BIBLIOTECA_LOCAL,
+];
 
-// Agrupa filas de `products` por nombre base + sufijo de tramo. Las filas sin
-// sufijo (libros, consultas…) se ignoran: no son productos con tramos.
+const SUFFIX_RE = /\s*\((mensual|trimestral|anual|permanente)\)\s*$/i;
+
+// Agrupa el catálogo por producto base. Acepta DOS shapes:
+//  · el REAL del backend desplegado (verificado 21-jul-2026): filas ya
+//    agrupadas {base, area, tiers: [{id, name, tier, price, billing_period,
+//    access_months, stripe_price_id, grant_type}]} — el tramo viene explícito
+//    en `tier` (el nombre puede no llevar sufijo, p. ej. «Biblioteca de
+//    recetas (de por vida)» es el tramo `permanente` de «Biblioteca digital»);
+//  · filas planas con sufijo «Nombre (mensual)» (espejo local y shapes
+//    legados). Las filas sin sufijo (libros, consultas…) se ignoran.
 export function groupTieredProducts(rows) {
   const groups = new Map();
   (rows || []).forEach((row) => {
-    const match = SUFFIX_RE.exec(row.name || '');
+    if (row && Array.isArray(row.tiers)) {
+      const baseName = String(row.base || row.baseName || '').trim();
+      if (!baseName) return;
+      const group = groups.get(baseName) || { baseName, area: row.area, tiers: {} };
+      row.tiers.forEach((t) => {
+        const tier = String(t.tier || '').toLowerCase();
+        if (!TIER_META[tier]) return; // 'unico' (libros, videoconsultas) no es un tramo
+        group.tiers[tier] = {
+          id: t.id ?? null,
+          name: t.name || `${baseName} (${tier})`,
+          price: typeof t.price === 'string' ? parseFloat(t.price) : t.price,
+          billing_period: t.billing_period || (tier === 'mensual' ? 'monthly' : 'one_time'),
+          access_months: t.access_months ?? (tier === 'anual' ? 12 : null),
+          stripe_price_id: t.stripe_price_id ?? null,
+        };
+      });
+      groups.set(baseName, group);
+      return;
+    }
+
+    const match = SUFFIX_RE.exec(row?.name || '');
     if (!match || row.active === false) return;
     const tier = match[1].toLowerCase();
     const baseName = row.name.replace(SUFFIX_RE, '').trim();
@@ -88,14 +143,15 @@ export function groupTieredProducts(rows) {
       stripe_price_id: row.stripe_price_id ?? null,
     };
   });
-  // Solo grupos con los 3 tramos completos (evita tarjetas a medias).
+  // Solo grupos con los 3 tramos del núcleo (evita tarjetas a medias); el
+  // trimestral es un extra que solo trae la Biblioteca digital.
   return [...groups.values()].filter((g) => TIER_ORDER.every((t) => g.tiers[t]));
 }
 
 // Portadas locales por título (mismo criterio que el Top ventas del panel).
 const COVERS = [
   { match: /fuerte|definid/i, src: '/mockup_fuerte_definido.png' },
-  { match: /cocina/i, src: '/mockup_cocina.png' },
+  { match: /cocina|bibliotec/i, src: '/mockup_cocina.png' },
 ];
 
 export function coverForCourse(baseName) {
@@ -114,25 +170,40 @@ function extractRows(data) {
   return null;
 }
 
+// Catálogo remoto agrupado, o null si no responde / trae un shape raro. Solo
+// se acepta si los grupos están completos y con precios sanos; si no, el
+// espejo local sigue mandando.
+async function fetchCatalogGroups() {
+  if (!PRODUCTS_ENDPOINT) return null;
+  try {
+    const res = await fetch(PRODUCTS_ENDPOINT);
+    if (!res.ok) return null;
+    const groups = groupTieredProducts(extractRows(await res.json()));
+    const sane = groups.every((g) => groupTierOrder(g).every((t) => g.tiers[t].price > 0));
+    return groups.length > 0 && sane ? groups : null;
+  } catch {
+    return null; // backend caído: caemos al espejo local
+  }
+}
+
 // Catálogo de cursos agrupado: del endpoint público cuando responda; espejo
 // local 15.1 mientras tanto (404 del endpoint, red caída o shape inesperado).
 export async function fetchTieredCourses() {
-  if (PRODUCTS_ENDPOINT) {
-    try {
-      const res = await fetch(PRODUCTS_ENDPOINT);
-      if (res.ok) {
-        const rows = extractRows(await res.json());
-        const groups = groupTieredProducts(rows).filter((g) => g.area === 'cursos');
-        // Solo se acepta el catálogo remoto si trae grupos completos con
-        // precios sanos; si no, el espejo local sigue mandando.
-        const sane = groups.every((g) => TIER_ORDER.every((t) => g.tiers[t].price > 0));
-        if (groups.length > 0 && sane) return groups;
-      }
-    } catch {
-      // Backend caído: caemos al espejo local
-    }
-  }
-  return groupTieredProducts(LOCAL_CATALOG);
+  const remote = await fetchCatalogGroups();
+  const groups = (remote || []).filter((g) => g.area === 'cursos');
+  if (groups.length > 0) return groups;
+  return groupTieredProducts(LOCAL_CATALOG).filter((g) => g.area === 'cursos');
+}
+
+// Un grupo concreto por nombre base (p. ej. «Biblioteca digital» para la
+// página de cocina), con el mismo fallback al espejo local.
+export async function fetchTieredGroup(baseName) {
+  const wanted = baseName.toLowerCase();
+  const byName = (g) => g.baseName.toLowerCase() === wanted;
+  const remote = await fetchCatalogGroups();
+  return (remote || []).find(byName)
+    || groupTieredProducts(LOCAL_CATALOG).find(byName)
+    || null;
 }
 
 export function formatEuros(n) {
@@ -155,7 +226,7 @@ export function buildTierCartItem(group, tierKey) {
     tier: tierKey,
     tierGroup: group,
     // '/mes' activa el desglose de pagos recurrentes del resumen del pedido.
-    period: tierKey === 'mensual' ? '/mes' : undefined,
+    period: tierKey === 'mensual' ? '/mes' : tierKey === 'trimestral' ? '/trimestre' : undefined,
     // Cobro: el paso de pago usa createTierCheckout() (detección en vivo), no
     // este campo; se mantiene por compat con carritos ya guardados.
     // product_name es la clave estable en la BD.
@@ -175,57 +246,79 @@ export function buildTierCartItem(group, tierKey) {
 //   { status: 'unavailable' }            → endpoint sin desplegar (404 en todas
 //                                          las rutas candidatas): aviso honesto
 // Lanza Error con mensaje del servidor en errores reales (400/401/500…).
+// Origin de retorno que el backend desplegado SÍ acepta (verificado 21-jul):
+// el checkout solo respeta success/cancel_url cuyo origin coincida con su
+// FRONTEND_URL/HOST de Cloud Run, hoy la URL de Vercel. Si las rechaza, su
+// fallback interno usa FRONTEND_URL, que NO está definida en Cloud Run →
+// Stripe da 400 «Invalid URL». Hasta que se añada esa variable (runbook), si
+// la web corre en otro origin (dominio propio, build de revisión) se reintenta
+// una vez con este origin conocido: el pago funciona y la vuelta cae en la
+// misma app servida desde Vercel.
+export const CHECKOUT_KNOWN_ORIGIN = 'https://squatfit-website.vercel.app';
+
 export async function createTierCheckout(item, { token } = {}) {
   let origin;
   try { origin = localStorage.getItem('sf_origin') || undefined; } catch { origin = undefined; }
 
-  const payload = {
-    items: [{ ...item.payload, quantity: 1 }],
-    // Contrato de vuelta: éxito → pantalla de gracias de /cart; cancelar → carrito.
-    success_url: `${window.location.origin}/cart?success=true`,
-    cancel_url: `${window.location.origin}/cart`,
-    origin,
-  };
+  const attempt = async (base) => {
+    const payload = {
+      items: [{ ...item.payload, quantity: 1 }],
+      // Contrato de vuelta: éxito → pantalla de gracias de /cart (el backend
+      // garantiza success=true y session_id); cancelar → carrito.
+      success_url: `${base}/cart?success=true`,
+      cancel_url: `${base}/cart`,
+      origin,
+    };
 
-  for (const endpoint of TIER_CHECKOUT_ENDPOINTS) {
-    let res;
-    try {
-      res = await fetch(endpoint, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        },
-        body: JSON.stringify(payload),
-      });
-    } catch {
-      // Red caída: no es un 404 de ruta; tratar como no disponible.
+    for (const endpoint of TIER_CHECKOUT_ENDPOINTS) {
+      let res;
+      try {
+        res = await fetch(endpoint, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          },
+          body: JSON.stringify(payload),
+        });
+      } catch {
+        // Red caída: no es un 404 de ruta; tratar como no disponible.
+        return { status: 'unavailable' };
+      }
+
+      // 404 de NestJS («Cannot POST …») = la ruta no existe todavía: probar la
+      // siguiente candidata. Cualquier otra respuesta viene del endpoint real.
+      if (res.status === 404) continue;
+
+      let data = {};
+      try { data = await res.json(); } catch { data = {}; }
+
+      if (!res.ok) {
+        const msg = data?.message || data?.error;
+        throw new Error(
+          typeof msg === 'string' ? msg : Array.isArray(msg) ? msg.join('. ') : 'No se pudo iniciar el pago',
+        );
+      }
+
+      const url = data.url || data.checkout_url || data.session_url || data.sessionUrl || data?.session?.url;
+      if (url) return { status: 'redirect', url };
+
+      const clientSecret = data.clientSecret || data.client_secret;
+      if (clientSecret) return { status: 'client_secret', clientSecret };
+
+      // Respuesta 2xx sin nada accionable: mejor el aviso honesto que colgarse.
       return { status: 'unavailable' };
     }
 
-    // 404 de NestJS («Cannot POST …») = la ruta no existe todavía: probar la
-    // siguiente candidata. Cualquier otra respuesta viene del endpoint real.
-    if (res.status === 404) continue;
-
-    let data = {};
-    try { data = await res.json(); } catch { data = {}; }
-
-    if (!res.ok) {
-      const msg = data?.message || data?.error;
-      throw new Error(
-        typeof msg === 'string' ? msg : Array.isArray(msg) ? msg.join('. ') : 'No se pudo iniciar el pago',
-      );
-    }
-
-    const url = data.url || data.checkout_url || data.session_url || data.sessionUrl || data?.session?.url;
-    if (url) return { status: 'redirect', url };
-
-    const clientSecret = data.clientSecret || data.client_secret;
-    if (clientSecret) return { status: 'client_secret', clientSecret };
-
-    // Respuesta 2xx sin nada accionable: mejor el aviso honesto que colgarse.
     return { status: 'unavailable' };
-  }
+  };
 
-  return { status: 'unavailable' };
+  try {
+    return await attempt(window.location.origin);
+  } catch (err) {
+    if (/invalid url/i.test(err?.message || '') && window.location.origin !== CHECKOUT_KNOWN_ORIGIN) {
+      return attempt(CHECKOUT_KNOWN_ORIGIN);
+    }
+    throw err;
+  }
 }
