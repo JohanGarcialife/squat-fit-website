@@ -127,7 +127,7 @@ export default function ProgramPricing() {
         <div className="rounded-[28px] bg-[#363C98] text-white p-7 sm:p-10 flex flex-col items-center text-center gap-4">
           <h3 className="font-extrabold text-2xl sm:text-3xl max-w-2xl">Hablemos de tu caso en una llamada</h3>
           <p className="text-white/80 text-base sm:text-lg max-w-2xl">
-            15-20 minutos, sin compromiso. Vemos tu situación y te decimos si podemos ayudarte y cómo.
+            25-40 minutos, sin compromiso. Vemos tu situación y te decimos si podemos ayudarte y cómo.
           </p>
           <BookButton className="mt-2 inline-block bg-primary hover:bg-[#e05b08] text-white font-bold text-lg px-9 py-4 rounded-2xl active:scale-95 transition-all duration-200 cursor-pointer">
             Reserva tu llamada gratuita

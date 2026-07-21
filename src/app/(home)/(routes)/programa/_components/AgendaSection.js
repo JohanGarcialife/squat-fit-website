@@ -43,7 +43,7 @@ export default function AgendaSection() {
             Elige día y hora ahora mismo
           </h2>
           <p className="text-slate-600 text-lg mt-4 max-w-2xl">
-            Sesión diagnóstica gratuita de 15-20 minutos. Escoge el hueco que mejor
+            Sesión diagnóstica gratuita de 25-40 minutos. Escoge el hueco que mejor
             te venga y hablamos de tu caso.
           </p>
         </div>
