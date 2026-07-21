@@ -50,7 +50,7 @@ const nextConfig = {
         headers: [
           {
             key: 'Content-Security-Policy',
-            value: "default-src 'self'; frame-src 'self' https://iframe.mediadelivery.net https://*.b-cdn.net https://js.stripe.com https://hooks.stripe.com; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com; connect-src 'self' https://api.stripe.com https://squatfit-api-cyrc2g3zra-no.a.run.app https://api.frankfurter.app https://storage.googleapis.com https://*.b-cdn.net https://images.pexels.com; img-src 'self' data: blob: https://images.unsplash.com https://storage.googleapis.com https://www.google.com https://*.b-cdn.net https://iframe.mediadelivery.net https://images.pexels.com; style-src 'self' 'unsafe-inline'; font-src 'self' data:;",
+            value: "default-src 'self'; frame-src 'self' https://iframe.mediadelivery.net https://*.b-cdn.net https://js.stripe.com https://hooks.stripe.com; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com; connect-src 'self' https://api.stripe.com https://squatfit-api-cyrc2g3zra-no.a.run.app https://open.er-api.com https://api.frankfurter.app https://storage.googleapis.com https://*.b-cdn.net https://images.pexels.com; img-src 'self' data: blob: https://images.unsplash.com https://storage.googleapis.com https://www.google.com https://*.b-cdn.net https://iframe.mediadelivery.net https://images.pexels.com; style-src 'self' 'unsafe-inline'; font-src 'self' data:;",
           },
         ],
       },

@@ -26,11 +26,22 @@ export default function FormData(props) {
   const total = subtotal + finalShipping;
 
   const triggerCheckoutFormSubmit = async () => {
-    if (checkoutFormRef.current) {
-      await checkoutFormRef.current(); 
-      if (isFormValid) {
-        setStep(3);
-      }
+    const formik = checkoutFormRef.current;
+    if (!formik) return;
+    // Validación REAL en el momento del clic (no el isFormValid del closure, que
+    // arranca en true por defecto de Formik y dejaba saltar el paso vacío).
+    const errs = await formik.validateForm();
+    if (Object.keys(errs).length === 0) {
+      // Persistimos los datos (onSubmit → updateFormData) y avanzamos al pago.
+      await formik.submitForm();
+      setIsFormValid(true);
+      setStep(3);
+    } else {
+      // Marcamos todos los campos con error como "tocados" para que se muestren.
+      formik.setTouched(
+        Object.keys(errs).reduce((acc, key) => ({ ...acc, [key]: true }), {}),
+      );
+      setIsFormValid(false);
     }
   };
 

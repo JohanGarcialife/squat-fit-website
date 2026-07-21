@@ -5,7 +5,15 @@ import Link from 'next/link';
 import { useCurrency } from './useCurrency';
 import CurrencySelector from './CurrencySelector';
 import { useCartStore } from '@/stores/cart.store';
-import { TIER_META, TIER_ORDER, buildTierCartItem, formatEuros } from '@/app/components/courseCatalog';
+import { TIER_META, groupTierOrder, buildTierCartItem, formatEuros } from '@/app/components/courseCatalog';
+
+// Sufijo de cobro por tramo (el trimestral se etiquetaba antes como «pago
+// único» porque el selector usaba un orden fijo de 3 tramos).
+const tierChargeSuffix = (tier) =>
+  tier === 'mensual' ? '/mes'
+  : tier === 'trimestral' ? '/trimestre'
+  : tier === 'anual' ? '/año'
+  : 'pago único';
 
 export default function Summary(props) {
     const {
@@ -156,7 +164,7 @@ export default function Summary(props) {
                                             {TIER_META[item.tier]?.label || item.tier}
                                         </div>
                                         <div className="absolute top-full left-0 w-full bg-white border border-indigo-100 rounded-lg shadow-lg hidden group-hover:block z-10 overflow-hidden min-w-[190px]">
-                                            {TIER_ORDER.map((key) => (
+                                            {groupTierOrder(item.tierGroup).map((key) => (
                                                 <button
                                                     key={key}
                                                     onClick={() => handleTierChange(item, key)}
@@ -231,7 +239,7 @@ export default function Summary(props) {
                                     {digitalVariants.find(v => v.id === item.id)?.period || '/mes'}
                                 </span>}
                                 {isCourseTier(item) && <span className="text-indigo-400 text-xs block">
-                                    {item.tier === 'mensual' ? '/mes' : 'pago único'}
+                                    {tierChargeSuffix(item.tier)}
                                 </span>}
                             </div>
                         </div>

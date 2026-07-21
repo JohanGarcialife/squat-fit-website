@@ -254,7 +254,7 @@ export function buildTierCartItem(group, tierKey) {
 // la web corre en otro origin (dominio propio, build de revisión) se reintenta
 // una vez con este origin conocido: el pago funciona y la vuelta cae en la
 // misma app servida desde Vercel.
-export const CHECKOUT_KNOWN_ORIGIN = 'https://squatfit-website.vercel.app';
+export const CHECKOUT_KNOWN_ORIGIN = 'https://squatfit.es';
 
 export async function createTierCheckout(item, { token } = {}) {
   let origin;

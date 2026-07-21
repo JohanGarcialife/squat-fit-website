@@ -32,13 +32,16 @@ function ForgotPasswordContent() {
 
   const handleRequestCode = async (values, { setSubmitting }) => {
     try {
+      // Email normalizado (minúsculas + sin espacios) igual que login/register:
+      // el teclado de iOS suele capitalizar o dejar un espacio y rompía el flujo.
+      const email = (values.email || '').trim().toLowerCase();
       const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/user/request-reset-password`, {
-        params: { email: values.email }
+        params: { email }
       });
-      
+
       if (response.data === true) {
         toast.success('Código de recuperación enviado a tu correo');
-        setUserEmail(values.email);
+        setUserEmail(email);
         setStep(2);
       } else {
         toast.error('No se pudo enviar el código. Verifica el correo.');
@@ -55,7 +58,8 @@ function ForgotPasswordContent() {
   const handleResetPassword = async (values, { setSubmitting }) => {
     try {
       const payload = {
-        email: userEmail,
+        // Normalizado también aquí por si el email llegó sin pasar por el paso 1.
+        email: (userEmail || '').trim().toLowerCase(),
         code: values.code,
         newPassword: values.password
       };

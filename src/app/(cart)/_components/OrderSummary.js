@@ -22,14 +22,23 @@ export default function OrderSummary(props) {
     const finalShipping = subtotal >= freeShippingThreshold ? 0 : shippingCost;
     const total = subtotal + finalShipping;
 
-    // Recurring Payment Logic
-    const monthlyItems = cart.filter(item => item.period === '/mes');
-    const recurringTotal = monthlyItems.reduce((acc, item) => acc + (item.price * (item.quantity || 1)), 0);
-    
-    // Today's total includes everything (monthly first payment + others)
-    // Assuming 'total' calculated above is correct for the first payment.
-    
+    // Lógica de pago recurrente: son suscripciones tanto el tramo mensual ('/mes')
+    // como el trimestral ('/trimestre'). El anual y el permanente son pago único,
+    // así que NO cuentan como recurrentes.
+    const recurringItems = cart.filter(item => item.period === '/mes' || item.period === '/trimestre');
+    const recurringTotal = recurringItems.reduce((acc, item) => acc + (item.price * (item.quantity || 1)), 0);
+
+    // Today's total includes everything (recurring first payment + others).
     const hasRecurring = recurringTotal > 0;
+
+    // Etiqueta del cobro siguiente según la periodicidad presente.
+    const hasQuarterly = recurringItems.some(item => item.period === '/trimestre');
+    const hasMonthly = recurringItems.some(item => item.period === '/mes');
+    const recurringLabel = hasMonthly && hasQuarterly
+      ? 'En cada renovación'
+      : hasQuarterly
+        ? 'Los siguientes trimestres'
+        : 'Los siguientes meses';
 
     return (
     <div className="w-full h-full p-6 lg:p-14 xl:p-20 font-sans flex flex-col justify-start lg:justify-center">
@@ -74,7 +83,7 @@ export default function OrderSummary(props) {
                   {item.type === 'digital'
                     ? item.period?.replace('/', '') || 'mes'
                     : item.tier
-                      ? { mensual: 'mensual', anual: 'anual', permanente: 'de por vida' }[item.tier] || item.tier
+                      ? { mensual: 'mensual', trimestral: 'trimestral', anual: 'anual', permanente: 'de por vida' }[item.tier] || item.tier
                       : `${item.quantity || 1} unidad`}
                 </span>
                 <span className="text-indigo-900 font-bold text-sm">
@@ -108,7 +117,7 @@ export default function OrderSummary(props) {
             
             {hasRecurring && (
                 <div className="flex justify-between items-center text-indigo-900 font-bold text-lg pt-2 border-t border-indigo-100/50">
-                    <span>Los siguientes meses</span>
+                    <span>{recurringLabel}</span>
                     <span>
                         {convertPrice(recurringTotal)} {symbol}
                     </span>
