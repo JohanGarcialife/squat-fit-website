@@ -4,11 +4,20 @@ import { useCartStore } from '@/stores/cart.store'
 import { useAuthStore } from '@/stores/auth.store'
 import { useUiStore } from '@/stores/ui.store'
 import { toast } from 'react-hot-toast'
+import {
+  TIER_META,
+  buildTierCartItem,
+  fetchTieredGroup,
+  groupTierOrder,
+} from '@/app/components/courseCatalog'
 
 // Sección de precios de Cocina Squad Fit: 4 tarjetas
-// (Impreso Vol 1 · Pack impreso · Digital de por vida · Bundle "Lo quiero todo").
-// Diseño portado de la página Divi de WordPress; la compra va por el
-// carrito/Stripe del proyecto, no por enlaces de WooCommerce.
+// (Impreso Vol 1 · Pack impreso · Biblioteca digital con tramos · Bundle
+// "Lo quiero todo"). Diseño portado de la página Divi de WordPress; la compra
+// va por el carrito/Stripe del proyecto, no por enlaces de WooCommerce.
+// La tarjeta digital usa el grupo «Biblioteca digital» del catálogo real
+// (Fase 13): selector mensual / trimestral / anual / de por vida, cobro por
+// el checkout de tramos de la Fase 9/12.
 
 // Colores del diseño
 const C = {
@@ -21,8 +30,6 @@ const C = {
   grayEdge: '#d4d4d4',
 }
 
-const PERMANENT_PRICE = 149
-
 function formatPrice(n) {
   if (n === null || n === undefined) return '—'
   const num = typeof n === 'string' ? parseFloat(n) : n
@@ -32,6 +39,7 @@ function formatPrice(n) {
 function PricingCard({
   tag, tagColor, edgeOff, edgeOn, title, titleColor, price, per, save,
   desc, ctaLabel, ctaColor, badge, selected, onSelect, onCta, disabled, disabledLabel,
+  selector,
 }) {
   return (
     <div
@@ -67,6 +75,8 @@ function PricingCard({
       <h3 className="text-[22px] font-bold leading-tight mb-3.5" style={{ color: titleColor }}>
         {title}
       </h3>
+
+      {selector}
 
       <div className="flex items-baseline justify-center gap-1 mb-1.5">
         <span className="text-lg font-semibold" style={{ color: tagColor }}>€</span>
@@ -108,11 +118,14 @@ export default function Shop() {
   const { subscriptionType } = useAuthStore()
   const { peekCart } = useUiStore()
 
-  const TIER_RANK = { monthly: 1, annual: 2, permanent: 3 }
-  const currentTierRank = TIER_RANK[subscriptionType] || 0
   const hasPermanent = subscriptionType === 'permanent'
 
   const [selectedCard, setSelectedCard] = useState('bundle')
+
+  // Grupo «Biblioteca digital» del catálogo real (4 tramos: mensual /
+  // trimestral / anual / de por vida) y tramo elegido en la tarjeta digital.
+  const [bibGroup, setBibGroup] = useState(null)
+  const [bibTier, setBibTier] = useState('permanente')
 
   // Productos físicos reales desde la API (volumen suelto y pack)
   const [vol1, setVol1] = useState(null)
@@ -123,6 +136,9 @@ export default function Shop() {
   const [testItem, setTestItem] = useState(null)
 
   React.useEffect(() => {
+    // Catálogo de tramos de la biblioteca (con espejo local de respaldo).
+    fetchTieredGroup('Biblioteca digital').then(setBibGroup).catch(() => {})
+
     async function fetchProducts() {
       try {
         const API = process.env.NEXT_PUBLIC_API_URL || 'https://squatfit-api-cyrc2g3zra-no.a.run.app'
@@ -248,7 +264,10 @@ export default function Shop() {
     peekCart()
   }
 
-  const buyDigitalPermanent = () => {
+  // Compra de la biblioteca con el tramo elegido: item de compra directa del
+  // catálogo (mismo flujo que los cursos con tramos → checkout de la Fase 9/12).
+  const buyBiblioteca = () => {
+    if (!bibGroup || !bibGroup.tiers[bibTier]) return
     if (hasPermanent) {
       toast.error('Ya tienes el acceso de por vida activo.')
       return
@@ -256,15 +275,9 @@ export default function Shop() {
     if (cart.length > 0 && !cart.some((item) => item.isDirectCheckout)) {
       toast.error('Tus productos físicos fueron removidos por seguridad (no se pueden mezclar suscripciones y productos).', { duration: 5000 })
     }
-    setDirectCheckoutItem({
-      id: 'digital-permanent',
-      name: 'Suscripción Digital - Permanente',
-      price: PERMANENT_PRICE,
-      image: '/Group32.png',
-      endpoint: '/api/v1/book/create-payment-intent-digital',
-      payload: { subscription_type: 'permanent' },
-    })
-    toast.success(currentTierRank > 0 ? 'Upgrade añadido al carrito' : 'Acceso de por vida añadido al carrito')
+    setDirectCheckoutItem(buildTierCartItem(bibGroup, bibTier))
+    toast.success(`Biblioteca digital (${TIER_META[bibTier].label.toLowerCase()}) añadida al carrito`)
+    peekCart()
   }
 
   const buyBundle = () => {
@@ -274,6 +287,44 @@ export default function Shop() {
       toast('Disponible muy pronto 🙌', { icon: '⏳' })
     }
   }
+
+  const bibTierData = bibGroup?.tiers?.[bibTier]
+  const bibPer =
+    bibTier === 'mensual' ? '/mes'
+    : bibTier === 'trimestral' ? '/trimestre'
+    : bibTier === 'anual' ? 'pago único · 12 meses'
+    : 'pago único'
+
+  // Selector de tramo 2×2 dentro de la tarjeta digital.
+  const bibSelector = bibGroup ? (
+    <div className="grid grid-cols-2 gap-1.5 bg-[#F3F2F9] rounded-2xl p-1.5 mb-4" role="tablist" aria-label="Modalidad de acceso a la biblioteca">
+      {groupTierOrder(bibGroup).map((key) => {
+        const active = key === bibTier
+        return (
+          <button
+            key={key}
+            type="button"
+            role="tab"
+            aria-selected={active}
+            onClick={(e) => { e.stopPropagation(); setBibTier(key); setSelectedCard('digital') }}
+            className={`rounded-xl py-1.5 text-[13px] font-bold transition-all cursor-pointer ${active ? 'bg-white shadow-sm' : 'hover:opacity-80'}`}
+            style={{ color: active ? C.digital : '#8B87C9' }}
+          >
+            {TIER_META[key].label}
+          </button>
+        )
+      })}
+    </div>
+  ) : null
+
+  // El «antes» del bundle = pack impreso + biblioteca de por vida, con los
+  // precios vivos cuando los hay (si falta alguno, el estático de siempre).
+  const bundleBefore = pack && bundle && bibGroup?.tiers?.permanente
+    ? pack.price + bibGroup.tiers.permanente.price
+    : null
+  const bundleSave = bundleBefore && bundleBefore > bundle.price
+    ? { before: `${formatPrice(bundleBefore)} €`, label: `ahorras ${formatPrice(bundleBefore - bundle.price)} €` }
+    : { before: '238 €', label: 'ahorras 79 €' }
 
   return (
     <section id="shop" className="py-16 px-4 bg-gray-50">
@@ -352,24 +403,25 @@ export default function Shop() {
             />
           )}
 
-          {/* 3. Digital de por vida (simple) */}
+          {/* 3. Biblioteca digital con tramos (grupo real del catálogo) */}
           <PricingCard
             tag="Digital"
             tagColor={C.digital}
             edgeOff={C.grayEdge}
             edgeOn={C.digitalSoft}
-            title="Digital de por vida"
+            title="Biblioteca digital"
             titleColor={C.digital}
-            price={formatPrice(PERMANENT_PRICE)}
-            per="pago único"
-            desc="Toda la biblioteca, ahora y siempre: Vol. 1, 2, el 3 (próximamente) y futuros. Con 5 recetas nuevas cada semana."
-            ctaLabel={currentTierRank > 0 && !hasPermanent ? 'Mejorar a de por vida' : 'Acceso de por vida'}
+            selector={bibSelector}
+            price={bibTierData ? formatPrice(bibTierData.price) : '—'}
+            per={bibPer}
+            desc="Toda la biblioteca: Vol. 1, 2, el 3 (próximamente) y futuros. Con 5 recetas nuevas cada semana."
+            ctaLabel={bibTier === 'mensual' || bibTier === 'trimestral' ? 'Suscribirme' : bibTier === 'anual' ? 'Acceso anual' : 'Acceso de por vida'}
             ctaColor={C.digital}
             selected={selectedCard === 'digital'}
             onSelect={() => setSelectedCard('digital')}
-            onCta={buyDigitalPermanent}
-            disabled={hasPermanent}
-            disabledLabel="✓ Ya lo tienes"
+            onCta={buyBiblioteca}
+            disabled={hasPermanent || !bibTierData}
+            disabledLabel={hasPermanent ? '✓ Ya lo tienes' : 'Cargando…'}
           />
 
           {/* 4. Bundle / hero (completa) */}
@@ -382,7 +434,7 @@ export default function Shop() {
             titleColor={C.heroText}
             price={bundle ? formatPrice(bundle.price) : '159'}
             per="+ envío"
-            save={{ before: '238 €', label: 'ahorras 79 €' }}
+            save={bundleSave}
             desc="Los dos libros físicos + la biblioteca digital completa y siempre actualizada, para siempre."
             ctaLabel="Lo quiero todo"
             ctaColor={C.hero}

@@ -7,6 +7,7 @@ import toast from 'react-hot-toast';
 import { useAuthStore } from '@/stores/auth.store';
 import ConfirmationModal from '@/app/components/ConfirmationModal';
 import AccessNotice from '@/app/components/AccessNotice';
+import NotificationPrefs from '@/app/components/NotificationPrefs';
 import {
   CreditCard,
   FileText,
@@ -442,6 +443,14 @@ export default function AjustesPage() {
               <span className={`absolute top-0.5 left-0.5 w-6 h-6 bg-white rounded-full shadow transition-transform ${notifications ? 'translate-x-5' : ''}`} />
             </button>
           </div>
+          {/* Preferencias por categoría y canal (mismas que en Alertas:
+              GET/PUT /alerts/preferences). Solo tienen efecto con el aviso
+              general activado. */}
+          {notifications && (
+            <div className="border-t border-slate-100 pt-4 mt-2">
+              <NotificationPrefs token={token} />
+            </div>
+          )}
           <button type="button" onClick={() => router.push('/panel-alertas')} className="w-full flex items-center justify-between p-3.5 hover:bg-slate-50 rounded-2xl transition text-[#363C98] font-bold text-sm cursor-pointer">
             <span>Historial de avisos y preferencias</span>
             <ChevronRight className="w-4 h-4 text-slate-300" />

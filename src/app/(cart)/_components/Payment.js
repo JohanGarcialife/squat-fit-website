@@ -174,7 +174,14 @@ export default function Payment(props) {
            setLoading(false);
          })
          .catch((err) => {
-           toast.error(err.message || 'No se pudo iniciar el pago');
+           // «Invalid URL» = el backend no tiene FRONTEND_URL configurada y
+           // rechazó nuestro origin (createTierCheckout ya reintentó con el
+           // conocido): aviso honesto en vez de un error críptico en inglés.
+           if (/invalid url/i.test(err?.message || '')) {
+             setPendingBackend(true);
+           } else {
+             toast.error(err.message || 'No se pudo iniciar el pago');
+           }
            setLoading(false);
          });
        return;

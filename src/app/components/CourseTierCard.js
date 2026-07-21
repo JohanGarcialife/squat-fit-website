@@ -8,10 +8,10 @@ import { useCartStore } from '@/stores/cart.store';
 import { useUiStore } from '@/stores/ui.store';
 import {
   TIER_META,
-  TIER_ORDER,
   buildTierCartItem,
   coverForCourse,
   formatEuros,
+  groupTierOrder,
 } from './courseCatalog';
 
 // UNA tarjeta por curso con el selector Mensual / Anual / De por vida (15.1):
@@ -19,7 +19,8 @@ import {
 // permanente = pago único con acceso para siempre. `group` viene de
 // groupTieredProducts()/fetchTieredCourses().
 export default function CourseTierCard({ group, defaultTier = 'anual', subtitle, goToCart = true }) {
-  const [tierKey, setTierKey] = useState(group.tiers[defaultTier] ? defaultTier : TIER_ORDER[0]);
+  const tierKeys = groupTierOrder(group);
+  const [tierKey, setTierKey] = useState(group.tiers[defaultTier] ? defaultTier : tierKeys[0]);
   const { setDirectCheckoutItem, cart } = useCartStore();
   const { peekCart } = useUiStore();
   const router = useRouter();
@@ -55,9 +56,10 @@ export default function CourseTierCard({ group, defaultTier = 'anual', subtitle,
         <h3 className="text-[#363C98] text-2xl font-extrabold leading-tight mb-1">{group.baseName}</h3>
         {subtitle && <p className="text-slate-400 text-sm mb-2">{subtitle}</p>}
 
-        {/* Selector de tramo */}
-        <div className="grid grid-cols-3 gap-1.5 bg-[#F3F2F9] rounded-2xl p-1.5 mt-4" role="tablist" aria-label="Modalidad de acceso">
-          {TIER_ORDER.map((key) => {
+        {/* Selector de tramo (2×2 si el grupo trae el trimestral, p. ej. la
+            Biblioteca digital; 3 en línea para los cursos) */}
+        <div className={`grid ${tierKeys.length === 4 ? 'grid-cols-2' : 'grid-cols-3'} gap-1.5 bg-[#F3F2F9] rounded-2xl p-1.5 mt-4`} role="tablist" aria-label="Modalidad de acceso">
+          {tierKeys.map((key) => {
             const active = key === tierKey;
             return (
               <button
@@ -88,7 +90,7 @@ export default function CourseTierCard({ group, defaultTier = 'anual', subtitle,
           onClick={handleBuy}
           className="mt-6 w-full bg-[#363C98] hover:bg-[#2c317c] text-white font-bold py-3.5 rounded-2xl text-base active:scale-[0.98] transition-all shadow-md cursor-pointer"
         >
-          {tierKey === 'mensual' ? 'Suscribirme' : 'Comprarlo'}
+          {tierKey === 'mensual' || tierKey === 'trimestral' ? 'Suscribirme' : 'Comprarlo'}
         </button>
       </div>
     </div>
