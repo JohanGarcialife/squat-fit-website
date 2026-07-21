@@ -114,7 +114,13 @@ export default function OrderSummary(props) {
                     {convertPrice(total)} {symbol}
                 </span>
             </div>
-            
+
+            {currency !== 'EUR' && (
+                <p className="text-indigo-400 text-xs leading-snug">
+                    El cobro se realiza en euros (EUR). El importe en {currency} es orientativo y puede variar según el cambio de tu banco.
+                </p>
+            )}
+
             {hasRecurring && (
                 <div className="flex justify-between items-center text-indigo-900 font-bold text-lg pt-2 border-t border-indigo-100/50">
                     <span>{recurringLabel}</span>
