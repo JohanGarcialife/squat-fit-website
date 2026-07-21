@@ -4,22 +4,27 @@
 // 12 meses de acceso vía access_months; permanente, acceso para siempre).
 //
 // DATOS: la fuente de verdad es la tabla `products` del backend (con
-// billing_period y access_months), pero hoy el único endpoint que la lista es
-// GET /api/v1/admin-panel/products, protegido para staff: NO existe todavía un
-// endpoint público de catálogo (verificado en el backend desplegado y en el
-// repo, 20 jul 2026). Mientras llega, ESPEJO LOCAL con las mismas filas y
-// precios reales que dejó el seed 15.1 en la BD de producción. Cuando el
-// backend exponga el catálogo, poned la URL en PRODUCTS_ENDPOINT y estas
-// mismas funciones agruparán las filas reales (con sus UUID y stripe_price_id).
-export const PRODUCTS_ENDPOINT = null; // p. ej. `${API}/api/v1/products/catalog`
+// billing_period y access_months). El catálogo público es el GET /api/v1/catalog
+// de la Fase 9 (backend). Si el endpoint aún no está desplegado (404) o no
+// responde, se usa el ESPEJO LOCAL con las mismas filas y precios reales que
+// dejó el seed 15.1 en la BD de producción — la tienda nunca se queda en blanco.
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://squatfit-api-cyrc2g3zra-no.a.run.app';
 
-// Checkout de estos productos: el checkout actual del backend solo acepta
-// version/pack/course/calculator, así que los tramos del catálogo aún no se
-// pueden cobrar online. Cuando exista el endpoint (Fase 6), poner aquí la ruta
-// (p. ej. '/api/v1/checkout/create-payment-intent') y el shape del payload en
-// buildTierCartItem. Con null, el paso de pago muestra un aviso honesto de
-// «disponible muy pronto» en lugar de un error críptico de Stripe.
-export const TIER_CHECKOUT_ENDPOINT = null;
+export const PRODUCTS_ENDPOINT = `${API_BASE}/api/v1/catalog`;
+
+// Checkout de tramos (Fase 9): debe devolver una Stripe Checkout Session (url)
+// o, en su defecto, un clientSecret de PaymentIntent. La ruta exacta la decide
+// la Fase 9, que corre en paralelo: se prueban candidatas en orden y un 404 en
+// todas significa «aún no desplegado» → el paso de pago mantiene el aviso
+// honesto de «disponible muy pronto». Añadid aquí la ruta real si difiere.
+export const TIER_CHECKOUT_ENDPOINTS = [
+  `${API_BASE}/api/v1/catalog/checkout`,
+  `${API_BASE}/api/v1/checkout/catalog`,
+  `${API_BASE}/api/v1/checkout/create-checkout-session`,
+  `${API_BASE}/api/v1/products/checkout`,
+];
+// Compat con items de carrito ya persistidos que guardan `endpoint`.
+export const TIER_CHECKOUT_ENDPOINT = TIER_CHECKOUT_ENDPOINTS[0];
 
 // Metadatos de cada tramo, con la copy validada (anual y permanente son pago
 // único, no suscripción).
@@ -97,16 +102,31 @@ export function coverForCourse(baseName) {
   return COVERS.find((c) => c.match.test(baseName))?.src || '/cursosheronew.png';
 }
 
-// Catálogo de cursos agrupado: del endpoint público cuando exista; espejo
-// local 15.1 mientras tanto.
+// El shape exacto de la respuesta del catálogo lo decide la Fase 9: se acepta
+// tanto un array directo como los envoltorios habituales.
+function extractRows(data) {
+  if (Array.isArray(data)) return data;
+  if (data && typeof data === 'object') {
+    for (const key of ['products', 'catalog', 'items', 'rows', 'data']) {
+      if (Array.isArray(data[key])) return data[key];
+    }
+  }
+  return null;
+}
+
+// Catálogo de cursos agrupado: del endpoint público cuando responda; espejo
+// local 15.1 mientras tanto (404 del endpoint, red caída o shape inesperado).
 export async function fetchTieredCourses() {
   if (PRODUCTS_ENDPOINT) {
     try {
       const res = await fetch(PRODUCTS_ENDPOINT);
       if (res.ok) {
-        const rows = await res.json();
+        const rows = extractRows(await res.json());
         const groups = groupTieredProducts(rows).filter((g) => g.area === 'cursos');
-        if (groups.length > 0) return groups;
+        // Solo se acepta el catálogo remoto si trae grupos completos con
+        // precios sanos; si no, el espejo local sigue mandando.
+        const sane = groups.every((g) => TIER_ORDER.every((t) => g.tiers[t].price > 0));
+        if (groups.length > 0 && sane) return groups;
       }
     } catch {
       // Backend caído: caemos al espejo local
@@ -136,8 +156,9 @@ export function buildTierCartItem(group, tierKey) {
     tierGroup: group,
     // '/mes' activa el desglose de pagos recurrentes del resumen del pedido.
     period: tierKey === 'mensual' ? '/mes' : undefined,
-    // Cobro: preparado tras TIER_CHECKOUT_ENDPOINT (null hoy → aviso honesto
-    // en el paso de pago). product_name es la clave estable en la BD.
+    // Cobro: el paso de pago usa createTierCheckout() (detección en vivo), no
+    // este campo; se mantiene por compat con carritos ya guardados.
+    // product_name es la clave estable en la BD.
     endpoint: TIER_CHECKOUT_ENDPOINT,
     payload: {
       product_id: tier.id,
@@ -145,4 +166,66 @@ export function buildTierCartItem(group, tierKey) {
       billing_period: tier.billing_period,
     },
   };
+}
+
+// Intenta crear el cobro de un curso con tramo contra el checkout de la Fase 9.
+// Devuelve:
+//   { status: 'redirect', url }          → Stripe Checkout Session: redirigir
+//   { status: 'client_secret', clientSecret } → PaymentIntent: Payment Element
+//   { status: 'unavailable' }            → endpoint sin desplegar (404 en todas
+//                                          las rutas candidatas): aviso honesto
+// Lanza Error con mensaje del servidor en errores reales (400/401/500…).
+export async function createTierCheckout(item, { token } = {}) {
+  let origin;
+  try { origin = localStorage.getItem('sf_origin') || undefined; } catch { origin = undefined; }
+
+  const payload = {
+    items: [{ ...item.payload, quantity: 1 }],
+    // Contrato de vuelta: éxito → pantalla de gracias de /cart; cancelar → carrito.
+    success_url: `${window.location.origin}/cart?success=true`,
+    cancel_url: `${window.location.origin}/cart`,
+    origin,
+  };
+
+  for (const endpoint of TIER_CHECKOUT_ENDPOINTS) {
+    let res;
+    try {
+      res = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify(payload),
+      });
+    } catch {
+      // Red caída: no es un 404 de ruta; tratar como no disponible.
+      return { status: 'unavailable' };
+    }
+
+    // 404 de NestJS («Cannot POST …») = la ruta no existe todavía: probar la
+    // siguiente candidata. Cualquier otra respuesta viene del endpoint real.
+    if (res.status === 404) continue;
+
+    let data = {};
+    try { data = await res.json(); } catch { data = {}; }
+
+    if (!res.ok) {
+      const msg = data?.message || data?.error;
+      throw new Error(
+        typeof msg === 'string' ? msg : Array.isArray(msg) ? msg.join('. ') : 'No se pudo iniciar el pago',
+      );
+    }
+
+    const url = data.url || data.checkout_url || data.session_url || data.sessionUrl || data?.session?.url;
+    if (url) return { status: 'redirect', url };
+
+    const clientSecret = data.clientSecret || data.client_secret;
+    if (clientSecret) return { status: 'client_secret', clientSecret };
+
+    // Respuesta 2xx sin nada accionable: mejor el aviso honesto que colgarse.
+    return { status: 'unavailable' };
+  }
+
+  return { status: 'unavailable' };
 }
