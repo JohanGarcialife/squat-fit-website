@@ -139,14 +139,17 @@ export default function CheckoutForm({ setStep, onValidationChange, submitRef })
             // setStep(3) will be handled by OrderSummary
           }}
         >
-          {({ isValid, dirty, setFieldValue, submitForm, values }) => {
+          {({ isValid, dirty, setFieldValue, submitForm, validateForm, setTouched, values }) => {
             useEffect(() => {
               onValidationChange(isValid, dirty);
             }, [isValid, dirty, onValidationChange]);
 
-            // Expose Formik's submitForm to the parent via the ref
+            // Exponemos los helpers de Formik al padre vía ref. El padre valida
+            // con validateForm() (resultado real, no el isValid del closure) antes
+            // de avanzar al paso de pago; setTouched marca los campos para mostrar
+            // los errores si faltan datos.
             if (submitRef) {
-              submitRef.current = submitForm;
+              submitRef.current = { submitForm, validateForm, setTouched };
             }
 
             return (

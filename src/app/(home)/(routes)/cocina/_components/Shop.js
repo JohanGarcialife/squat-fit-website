@@ -168,9 +168,10 @@ export default function Shop() {
 
         // Volumen 1 físico: se busca ENTRE TODOS los libros la versión cuyo
         // título case con "Vol(umen) 1" (admite "Vol. 1"); si ninguna versión
-        // casa, vale también que case el título del libro. Solo si no hay
-        // match se cae al comportamiento anterior (primera versión del primer
-        // libro), que hoy trae un producto equivocado. La 🧪 queda fuera.
+        // casa, vale también que case el título del libro. Si NO hay ningún
+        // match NO se muestra un producto arbitrario: vol1 queda null y la
+        // tarjeta se renderiza como «No disponible» (sin botón de compra), para
+        // no meter al carrito un item equivocado de 1000 €. La 🧪 queda fuera.
         if (Array.isArray(booksData)) {
           const VOL1_RE = /vol(umen)?\.?\s*1/i
           const noTest = (v) => !(v.version_title || '').startsWith('🧪')
@@ -185,15 +186,6 @@ export default function Shop() {
               book = b
               version = versions[0]
               // seguimos buscando por si otra versión casa directamente
-            }
-          }
-
-          // Fallback: primer libro con alguna versión que no sea la de prueba
-          if (!version) {
-            const withVersion = booksData.find((b) => (b.versions || []).some(noTest))
-            if (withVersion) {
-              book = withVersion
-              version = withVersion.versions.find(noTest)
             }
           }
 
@@ -212,13 +204,12 @@ export default function Shop() {
           // El bundle (físico + digital) se identifica por nombre; hasta que
           // exista en el backend, la tarjeta se muestra como "muy pronto".
           const bundlePack = packsData.find((p) => /todo|bundle|digital/i.test(p.name))
-          // Pack impreso: el que se llame "Vol 1 y 2" (o "1 y 2" / "1 + 2");
-          // si no hay match, el fallback anterior (primer pack que no sea el
-          // bundle), que hoy trae un pack equivocado.
+          // Pack impreso: el que se llame "Vol 1 y 2" (o "1 y 2" / "1 + 2").
+          // Si NO hay match NO se cae a un pack arbitrario: printPack queda
+          // undefined y la tarjeta se muestra como «No disponible» (sin botón),
+          // para no meter al carrito un pack equivocado.
           const printPack =
-            packsData.find((p) => /vol.*1.*(y|\+).*2|1\s*y\s*2/i.test(p.name || '')) ||
-            packsData.find((p) => p !== bundlePack) ||
-            packsData[0]
+            packsData.find((p) => /vol.*1.*(y|\+).*2|1\s*y\s*2/i.test(p.name || ''))
           if (printPack) {
             setPack({
               id: printPack.id,

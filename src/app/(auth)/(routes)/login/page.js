@@ -8,6 +8,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuthStore } from '../../../../stores/auth.store';
 import toast from 'react-hot-toast';
 import { Eye, EyeOff } from 'lucide-react';
+import { safeRedirectPath } from '@/app/components/safeRedirect';
 
 function LoginContent() {
   const router = useRouter();
@@ -88,7 +89,8 @@ function LoginContent() {
       if (token) {
         setToken(token);
         toast.success('Inicio de sesión exitoso!');
-        const redirect = searchParams.get('redirect') || '/panel-control';
+        // Saneado: solo rutas internas (evita open redirect vía ?redirect=).
+        const redirect = safeRedirectPath(searchParams.get('redirect'), '/panel-control');
         router.push(redirect);
       }
     } catch (error) {

@@ -233,6 +233,10 @@ export default function FormularioPage() {
         });
       } catch (e) {
         console.error('public-answer submit', e?.response?.data || e.message);
+        // Relanzamos para que FormRunner NO marque el formulario como enviado y
+        // el motor visual muestre el fallo (antes fingía «enviado» aunque el
+        // POST fallara). El seguimiento-semanal es aparte y sí guarda copia local.
+        throw e;
       }
     }
     saveLocalCopy(submission);
