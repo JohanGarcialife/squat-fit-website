@@ -7,6 +7,7 @@ import InvestmentSection from './_components/InvestmentSection';
 import RelatableSection from './_components/RelatableSection';
 import StepsSection from './_components/StepsSection';
 import PlanesTestimonials from './_components/PlanesTestimonials';
+import TrustpilotPrograma from './_components/TrustpilotPrograma';
 import ProgramPricing from './_components/ProgramPricing';
 import AgendaSection from './_components/AgendaSection';
 import GuaranteeSection from './_components/GuaranteeSection';
@@ -22,6 +23,7 @@ export default function page() {
       <Reveal><RelatableSection /></Reveal>
       <Reveal><StepsSection /></Reveal>
       <Reveal><PlanesTestimonials /></Reveal>
+      <Reveal><TrustpilotPrograma /></Reveal>
       <Reveal><ProgramPricing /></Reveal>
       <Reveal><AgendaSection /></Reveal>
       <Reveal><GuaranteeSection /></Reveal>
