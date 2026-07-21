@@ -69,19 +69,25 @@ const CarouselSection = ({ title, items, variant = 'default', onItemClick }) => 
   // slidesToShow adaptativo: si hay menos items que columnas, no dejar hueco
   // a un lado (era lo que hacía que se viera "ladeado").
   const perView = Math.min(3, Math.max(1, items.length));
+  // Solo tiene sentido centrar (y hacer loop) cuando hay más items que columnas.
+  // Con centerMode, el slide activo/seleccionado queda CENTRADO (como el resto de
+  // carruseles); antes, sin él, `focusOnSelect` mandaba el elegido al lateral.
+  const canScroll = items.length > perView;
   const settings = {
     dots: true,
-    infinite: items.length > perView,
+    infinite: canScroll,
     speed: 500,
     slidesToShow: perView,
     slidesToScroll: 1,
     focusOnSelect: true,
+    centerMode: canScroll,
+    centerPadding: '0px',
     arrows: items.length > 1,
     nextArrow: <ArrowBtn dir="next" />,
     prevArrow: <ArrowBtn dir="prev" />,
     responsive: [
-      { breakpoint: 1024, settings: { slidesToShow: Math.min(2, items.length) } },
-      { breakpoint: 640, settings: { slidesToShow: 1, arrows: false } },
+      { breakpoint: 1024, settings: { slidesToShow: Math.min(2, items.length), centerMode: items.length > Math.min(2, items.length), centerPadding: '0px' } },
+      { breakpoint: 640, settings: { slidesToShow: 1, arrows: false, centerMode: items.length > 1, centerPadding: '32px' } },
     ],
   };
 
