@@ -5,9 +5,10 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import axios from "axios";
 import { useAuthStore } from "@/stores/auth.store";
+import { handleApiError } from "@/app/components/handleApiError";
 import CourseTierShop from "@/app/components/CourseTierShop";
 import BrandTabs from "@/app/components/BrandTabs";
-import { RefreshCw, ArrowRight } from "lucide-react";
+import { RefreshCw, ArrowRight, AlertCircle } from "lucide-react";
 
 // ─── TEST VIDEO (Bunny.net iframe) ───────────────────────────────────────────
 // Remove this constant once the backend is returning real video_url fields
@@ -118,6 +119,9 @@ function CursosPageContent() {
   const [selectedVideo, setSelectedVideo] = useState(null);
   const [videoLoading, setVideoLoading] = useState(false);
   const [playerLoading, setPlayerLoading] = useState(false);
+  // Error al cargar el detalle del curso (no reproducimos el vídeo de prueba:
+  // el alumno creería estar viendo su clase). Guarda flag → botón reintentar.
+  const [playerError, setPlayerError] = useState(false);
 
   // ── Global loading / access ──────────────────────────────────────────────────
   const [loading, setLoading] = useState(true);
@@ -127,8 +131,11 @@ function CursosPageContent() {
 
   // ── Helpers ──────────────────────────────────────────────────────────────────
 
+  // Devuelve la URL real del vídeo, o null si no se pudo resolver. NUNCA
+  // devuelve el vídeo de prueba: si esto falla, el player muestra un error con
+  // botón de reintentar en vez de reproducir una clase que no es la del alumno.
   const getVideoUrl = async (videoId, headers, API) => {
-    if (!videoId || videoId === "placeholder") return TEST_VIDEO_URL;
+    if (!videoId || videoId === "placeholder") return null;
     try {
       const res = await axios.get(`${API}/api/v1/course/watch-video`, {
         params: { video_id: videoId },
@@ -136,9 +143,11 @@ function CursosPageContent() {
       });
       return typeof res.data === 'string'
         ? res.data
-        : res.data?.url || res.data?.video_url || res.data?.stream_url || TEST_VIDEO_URL;
-    } catch {
-      return TEST_VIDEO_URL;
+        : res.data?.url || res.data?.video_url || res.data?.stream_url || null;
+    } catch (err) {
+      // Token caducado → re-login; cualquier otro fallo → null (estado de error).
+      handleApiError(err, '/panel-cursos');
+      return null;
     }
   };
 
@@ -159,6 +168,7 @@ function CursosPageContent() {
     setActiveCourse(course);
     setModules([]);
     setSelectedVideo(null);
+    setPlayerError(false);
     setView('player');
     setPlayerLoading(true);
 
@@ -182,25 +192,27 @@ function CursosPageContent() {
         setSelectedVideo({ id: firstId, title: firstTitle, url: null, loading: true });
         setVideoLoading(true);
         const url = await getVideoUrl(firstId, headers, API);
-        setSelectedVideo({ id: firstId, title: firstTitle, url, loading: false });
+        // Sin URL real → estado de error (con reintento), nunca vídeo de prueba.
+        setSelectedVideo({ id: firstId, title: firstTitle, url, loading: false, error: !url });
         setVideoLoading(false);
       } else {
-        // Curso sin videos
+        // Curso sin videos todavía: estado honesto "contenido próximamente",
+        // sin reproducir un vídeo de prueba.
         setModules([{
           id: "dummy-1", name: "Contenido próximamente",
           videos: [{ video_id: "placeholder", video_title: "Videos disponibles pronto", video_url: null, views: { is_viewed: false } }]
         }]);
-        setSelectedVideo({ id: null, url: TEST_VIDEO_URL, title: "Vista previa", loading: false });
+        setSelectedVideo({ id: null, title: "Contenido próximamente", url: null, loading: false, empty: true });
         setExpandedModules({ "dummy-1": true });
       }
     } catch (err) {
+      // Token caducado → re-login. Otro fallo → estado de error con reintento;
+      // NO pintamos módulos/vídeo de prueba (el alumno creería ver su clase).
+      if (handleApiError(err, '/panel-cursos')) return;
       console.warn("Error al cargar detalle del curso:", err?.message);
-      setModules([{
-        id: "dummy-1", name: "Bloque 1: Introducción",
-        videos: [{ video_id: "1", video_title: "Clase 1: Bienvenida", video_url: TEST_VIDEO_URL, views: { is_viewed: false } }]
-      }]);
-      setSelectedVideo({ id: null, url: TEST_VIDEO_URL, title: "Vista previa", loading: false });
-      setExpandedModules({ "dummy-1": true });
+      setModules([]);
+      setSelectedVideo(null);
+      setPlayerError(true);
     } finally {
       setPlayerLoading(false);
     }
@@ -255,6 +267,8 @@ function CursosPageContent() {
         setNoAccess(true);
       }
     } catch (err) {
+      // Token caducado → re-login en vez de la tienda "no tienes acceso".
+      if (handleApiError(err, '/panel-cursos')) return;
       console.error("Error al cargar cursos:", err);
       setCourseList([]);
       setNoAccess(true);
@@ -305,13 +319,26 @@ function CursosPageContent() {
       const headers = { Authorization: `Bearer ${token}` };
       const API = process.env.NEXT_PUBLIC_API_URL;
       const url = await getVideoUrl(videoId, headers, API);
-      setSelectedVideo({ id: videoId, title: videoTitle, url, loading: false });
+      // Sin URL real → estado de error con reintento (nunca vídeo de prueba).
+      setSelectedVideo({ id: videoId, title: videoTitle, url, loading: false, error: !url });
       setVideoLoading(false);
     }
 
     if (playerRef.current) {
       playerRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
     }
+  };
+
+  // Reintentar la carga del vídeo seleccionado tras un error de watch-video.
+  const retryVideo = async () => {
+    if (!selectedVideo?.id) return;
+    setSelectedVideo((v) => ({ ...v, error: false, loading: true }));
+    setVideoLoading(true);
+    const headers = { Authorization: `Bearer ${token}` };
+    const API = process.env.NEXT_PUBLIC_API_URL;
+    const url = await getVideoUrl(selectedVideo.id, headers, API);
+    setSelectedVideo((v) => ({ ...v, url, loading: false, error: !url }));
+    setVideoLoading(false);
   };
 
   // ── Métricas de progreso ──────────────────────────────────────────────────────
@@ -517,10 +544,24 @@ function CursosPageContent() {
           {/* Video Player */}
           <div ref={playerRef}>
             {selectedVideo && (
-              selectedVideo.loading || videoLoading || !selectedVideo.url ? (
+              selectedVideo.loading || videoLoading ? (
                 <div className="w-full aspect-video rounded-[20px] bg-gray-100 flex flex-col items-center justify-center mb-8 shadow-lg gap-3">
                   <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#3932C0]"></div>
                   <p className="text-[#3932C0] font-medium text-sm">Cargando video...</p>
+                </div>
+              ) : selectedVideo.error || !selectedVideo.url ? (
+                // Error real: NO reproducimos el vídeo de prueba (el alumno creería
+                // estar viendo su clase). Estado de error con botón de reintentar.
+                <div className="w-full aspect-video rounded-[20px] bg-gray-100 flex flex-col items-center justify-center mb-8 shadow-lg gap-3 px-6 text-center">
+                  <p className="text-[#363C98] font-semibold">No hemos podido cargar este vídeo</p>
+                  <p className="text-[#6B6BA8] text-sm">Comprueba tu conexión e inténtalo de nuevo.</p>
+                  <button
+                    onClick={retryVideo}
+                    className="mt-1 rounded-xl px-5 py-2.5 font-bold text-white text-sm"
+                    style={{ backgroundColor: '#FF690B' }}
+                  >
+                    Reintentar
+                  </button>
                 </div>
               ) : (
                 <VideoPlayer videoUrl={selectedVideo.url} videoTitle={selectedVideo.title} />

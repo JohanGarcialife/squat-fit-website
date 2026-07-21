@@ -7,6 +7,7 @@ import axios from 'axios';
 import toast from 'react-hot-toast';
 import { useAuthStore } from '@/stores/auth.store';
 import AccessNotice from '@/app/components/AccessNotice';
+import { handleApiError } from '@/app/components/handleApiError';
 import NotificationPrefs from '@/app/components/NotificationPrefs';
 import {
   Bell,
@@ -70,6 +71,11 @@ export default function AlertasPage() {
           axios.get(`${API}/api/v1/alerts`, { headers }),
           axios.get(`${API}/api/v1/habits/state`, { headers }),
         ]);
+        // Token caducado (401 en cualquiera) → re-login en vez de "0 días".
+        const unauth = [st, list, hb].find(
+          (r) => r.status === 'rejected' && r.reason?.response?.status === 401
+        );
+        if (unauth && handleApiError(unauth.reason, '/panel-alertas')) return;
         if (st.status === 'fulfilled') setState(st.value.data);
         if (list.status === 'fulfilled' && Array.isArray(list.value.data)) setItems(list.value.data);
         if (hb.status === 'fulfilled' && hb.value.data) setHabits(hb.value.data);
@@ -180,7 +186,7 @@ export default function AlertasPage() {
               {habits.scores && (
                 <div className="text-right">
                   <p className="text-3xl font-extrabold text-[#363C98] leading-none">
-                    {habits.scores.total.toFixed(1).replace('.', ',')}<span className="text-slate-300 text-lg font-bold"> / 5</span>
+                    {Number(habits.scores.total).toFixed(1).replace('.', ',')}<span className="text-slate-300 text-lg font-bold"> / 5</span>
                   </p>
                   <p className="text-slate-400 text-xs font-semibold mt-1">puntuación global</p>
                 </div>

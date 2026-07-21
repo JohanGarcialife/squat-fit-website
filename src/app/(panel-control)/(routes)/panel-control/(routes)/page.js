@@ -4,6 +4,7 @@ import axios from 'axios'
 import TopVentas from '../_components/TopVentas'
 import { useAuthStore } from '@/stores/auth.store'
 import AccessNotice from '@/app/components/AccessNotice'
+import { handleApiError } from '@/app/components/handleApiError'
 
 export default function Page() {
   const [courses, setCourses] = useState([])
@@ -14,7 +15,7 @@ export default function Page() {
     const fetchCourses = async () => {
       try {
         const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/course/all`)
-        setCourses(response.data)
+        setCourses(Array.isArray(response.data) ? response.data : [])
         console.log('Cursos obtenidos desde la API:', response.data)
       } catch (error) {
         console.error('Error al obtener los cursos:', error)
@@ -47,6 +48,8 @@ export default function Page() {
 
         setUserCourses(initiated)
       } catch (error) {
+        // Token caducado → re-login en vez de un dashboard a medias.
+        if (handleApiError(error, '/panel-control')) return
         console.error('Error al obtener cursos del usuario:', error)
       }
     }

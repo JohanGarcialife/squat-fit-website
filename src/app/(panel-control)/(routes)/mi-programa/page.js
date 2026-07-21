@@ -5,6 +5,7 @@ import Link from 'next/link';
 import axios from 'axios';
 import { useAuthStore } from '@/stores/auth.store';
 import AccessNotice from '@/app/components/AccessNotice';
+import { handleApiError } from '@/app/components/handleApiError';
 import BrandTabs from '@/app/components/BrandTabs';
 import {
   ClipboardList,
@@ -125,7 +126,11 @@ export default function MiProgramaPage() {
           headers: { Authorization: `Bearer ${token}` },
         });
         if (res.data && typeof res.data === 'object') setAdvice(res.data);
-      } catch (e) { /* sin programa activo */ }
+      } catch (e) {
+        // Token caducado → re-login; otro error → simplemente sin programa.
+        if (handleApiError(e, '/mi-programa')) return;
+        /* sin programa activo */
+      }
       setLoading(false);
     })();
   }, [token]);

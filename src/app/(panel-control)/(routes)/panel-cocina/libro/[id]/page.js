@@ -6,6 +6,8 @@ import dynamic from "next/dynamic";
 import { ChevronLeft, ChevronRight, Link as LinkIcon, Menu } from "lucide-react";
 import { BookIndexSidebar } from "@/app/(panel-control)/(routes)/panel-control/_components/Sidebar";
 import { useAuthStore } from "@/stores/auth.store";
+import AccessNotice from "@/app/components/AccessNotice";
+import { handleApiError } from "@/app/components/handleApiError";
 import axios from "axios";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://squatfit-api-cyrc2g3zra-no.a.run.app';
@@ -134,6 +136,8 @@ export default function BookReaderPage({ params, searchParams }) {
         }
 
       } catch (err) {
+        // Token caducado → re-login en vez de un error genérico del lector.
+        if (handleApiError(err, '/panel-cocina')) return;
         console.error('Error al cargar el libro:', err);
         setError('Ocurrió un error al cargar el libro. Intenta nuevamente.');
       } finally {
@@ -170,6 +174,12 @@ export default function BookReaderPage({ params, searchParams }) {
       setPageNumber(page);
       setIsSidebarOpen(false); // Close sidebar after navigation
     }
+  }
+
+  // Sin sesión: aviso de acceso (como el resto del panel), no un lector vacío.
+  if (!token) {
+    const back = `/panel-cocina/libro/${bookId}${versionId ? `?v=${versionId}` : ''}`;
+    return <AccessNotice redirect={back} />;
   }
 
   if (loading) {
