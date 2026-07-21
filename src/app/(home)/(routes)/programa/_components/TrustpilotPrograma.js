@@ -24,12 +24,12 @@ const reviews = [
     text: 'Pesaba 145 kg cuando empecé. Perdí 50 kilos hasta el día de mi boda y me sentía capaz de todo. El proceso fue largo, pero nunca me soltó la mano.',
   },
   {
-    name: 'Marta',
+    name: 'Marta Quintans',
     title: 'Cercanía y firmeza',
     text: 'No hay nadie en quien confíe tanto como en María. Es muy humana, pero también firme para sacar lo mejor de ti.',
   },
   {
-    name: 'Víctor',
+    name: 'Víctor Espinosa',
     title: 'Su método funciona',
     text: 'María y Hamlet hacen un trabajo increíble. He mejorado mi físico y tengo mucha más energía en solo 2 meses. Siempre están atentos.',
   },
@@ -37,6 +37,11 @@ const reviews = [
     name: 'Sílvia Caballero',
     title: 'Superó mis expectativas',
     text: 'Mi experiencia superó todas mis expectativas. La relación ha ido mucho más allá de la de entrenadora-cliente.',
+  },
+  {
+    name: 'Katiuska García',
+    title: 'Resultados en la menopausia',
+    text: 'Llevo más de 6 meses con Squad Fit. Estoy en menopausia y, a pesar de cuidarme, no lograba eliminar grasa de algunas zonas; con el entreno de fuerza y la alimentación por fin lo estoy consiguiendo.',
   },
 ];
 
