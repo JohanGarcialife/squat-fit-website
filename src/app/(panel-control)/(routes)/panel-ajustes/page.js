@@ -7,6 +7,7 @@ import toast from 'react-hot-toast';
 import { useAuthStore } from '@/stores/auth.store';
 import ConfirmationModal from '@/app/components/ConfirmationModal';
 import AccessNotice from '@/app/components/AccessNotice';
+import { handleApiError } from '@/app/components/handleApiError';
 import NotificationPrefs from '@/app/components/NotificationPrefs';
 import {
   CreditCard,
@@ -131,7 +132,11 @@ export default function AjustesPage() {
         setUserId(info.id);
         setEmail(info.email || '');
         setNotifications(info.notifications !== false);
-      } catch (e) { /* degradado */ }
+      } catch (e) {
+        // Token caducado → re-login en vez de unos ajustes vacíos.
+        if (handleApiError(e, '/panel-ajustes')) return;
+        /* degradado */
+      }
       // Perfil de facturación (endpoint nuevo; puede no estar desplegado aún).
       try {
         const p = (await axios.get(`${API}/api/v1/billing/profile`, { headers })).data;

@@ -7,6 +7,8 @@ import axios from "axios";
 import { useAuthStore } from "@/stores/auth.store";
 import { BookOpen, Lock, ArrowRight } from "lucide-react";
 import RichProductCards from "@/app/components/RichProductCards";
+import AccessNotice from "@/app/components/AccessNotice";
+import { handleApiError } from "@/app/components/handleApiError";
 
 export default function CocinaPage() {
   const { token, isSubscribed } = useAuthStore();
@@ -35,6 +37,8 @@ export default function CocinaPage() {
         setBooks([]);
       }
     } catch (error) {
+      // Token caducado → re-login en vez de la tienda "no tienes acceso".
+      if (handleApiError(error, '/panel-cocina')) return;
       console.error("Error al obtener libros:", error);
       setBooks([]);
     } finally {
@@ -77,9 +81,12 @@ export default function CocinaPage() {
     }
   });
 
+  // Sin sesión: aviso de acceso (como el resto del panel), no la tienda.
+  if (!token) return <AccessNotice redirect="/panel-cocina" />;
+
   return (
     <div className="flex-1 w-full max-w-7xl mx-auto p-6 md:p-12 min-h-screen">
-      
+
       {/* Title */}
       <h1 className="text-[#3932C0] text-5xl font-bold mb-16">Cocina</h1>
 
