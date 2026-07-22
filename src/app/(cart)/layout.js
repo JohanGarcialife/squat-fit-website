@@ -1,5 +1,6 @@
 import { Inter } from "next/font/google";
 import "../globals.css";
+import GoogleAnalytics from "@/app/components/GoogleAnalytics";
 // import Header from "../components/Header";
 // import Footer from "../components/Footer";
 import ToasterProvider from "@/components/ToasterProvider";
@@ -30,6 +31,7 @@ export default function RootLayout({ children }) {
         {/* <Footer /> */}
         </div>
       <CookieBanner />
+        <GoogleAnalytics />
       </body>
     </html>
   );

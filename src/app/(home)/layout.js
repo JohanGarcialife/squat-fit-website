@@ -1,5 +1,6 @@
 import { Inter } from "next/font/google";
 import "../globals.css";
+import GoogleAnalytics from "@/app/components/GoogleAnalytics";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import FloatingCartWidget from "../components/FloatingCartWidget"; // Importar FloatingCartWidget
@@ -38,6 +39,7 @@ export default function RootLayout({ children }) {
         <CartDrawer />
         </div>
       <CookieBanner />
+        <GoogleAnalytics />
       </body>
     </html>
   );

@@ -1,5 +1,6 @@
 import { Inter } from "next/font/google";
 import "../globals.css";
+import GoogleAnalytics from "@/app/components/GoogleAnalytics";
 import "../form-motion.css";
 import ToasterProvider from "@/components/ToasterProvider";
 
@@ -21,6 +22,7 @@ export default function OnboardingLayout({ children }) {
       <body className={`${inter.variable} antialiased`}>
         <ToasterProvider />
         {children}
+        <GoogleAnalytics />
       </body>
     </html>
   );
