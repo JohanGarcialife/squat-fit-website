@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { useCurrency } from './useCurrency';
 import CurrencySelector from './CurrencySelector';
 import { useCartStore } from '@/stores/cart.store';
+import { useCheckoutStore } from '@/stores/checkout.store';
+import { arancelParaCarrito } from './aranceles';
 import { TIER_META, groupTierOrder, buildTierCartItem, formatEuros } from '@/app/components/courseCatalog';
 
 // Sufijo de cobro por tramo (el trimestral se etiquetaba antes como «pago
@@ -37,6 +39,15 @@ export default function Summary(props) {
     // se elimina llegando a 0 con el botón −.
     const { lastRemoved, undoRemove, setDirectCheckoutItem } = useCartStore();
 
+    // Solo hay envío (y banner de envío gratis) si el carrito lleva físicos.
+    const hasPhysicalItems = cart.some((item) => !item.isDirectCheckout);
+
+    // Aranceles de importación (solo envíos a EE. UU. con físicos): el país
+    // sale del checkout persistido (paso 2); línea aparte del envío. El cobro
+    // real llega con la Fase 16.
+    const { formData } = useCheckoutStore();
+    const arancel = arancelParaCarrito(cart, formData?.country);
+
     // Cursos con tramos (15.1): el item lleva su grupo completo, así que aquí
     // también se puede cambiar entre Mensual / Anual / De por vida.
     const isCourseTier = (item) => !!(item.tierGroup && item.tier);
@@ -62,13 +73,17 @@ export default function Summary(props) {
         if (!newVariant) return;
 
         // Construct the new item derived from the current one but with new variant details
-        // We preserve image and generic type, but update ID, Name, Price, Period
+        // We preserve image and generic type, but update ID, Name, Price, Period.
+        // OJO: endpoint/payload del tramo anterior fuera — si se heredaran, el
+        // pago cobraría el tramo viejo con el precio nuevo a la vista.
         const newItem = {
             ...currentItem,
             id: newVariant.id,
             name: newVariant.name,
             price: newVariant.price,
             period: newVariant.period,
+            endpoint: undefined,
+            payload: undefined,
             type: 'digital', // Ensure type is set
             description: 'Suscripción online' // Constant for digital
         };
@@ -279,18 +294,21 @@ export default function Summary(props) {
                 <CurrencySelector currency={currency} setCurrency={setCurrency} currencies={currencies} />
               </div>
 
-              {/* Free Shipping Message */}
-              <div className="text-center mb-12">
-                {remainingForFreeShipping > 0 ? (
-                  <p className="text-indigo-900 text-lg">
-                    *Añade <span className="font-bold">{convertPrice(remainingForFreeShipping)} {symbol}</span> para tener envío <span className="text-orange-500 font-bold">gratis</span>
-                  </p>
-                ) : (
-                  <p className="text-green-600 text-lg font-bold">
-                    ¡Tienes envío gratis!
-                  </p>
-                )}
-              </div>
+              {/* Free Shipping Message — solo con productos físicos en el
+                  carrito (en carritos 100 % digitales no hay envío que regalar) */}
+              {hasPhysicalItems && (
+                <div className="text-center mb-12">
+                  {remainingForFreeShipping > 0 ? (
+                    <p className="text-indigo-900 text-lg">
+                      *Añade <span className="font-bold">{convertPrice(remainingForFreeShipping)} {symbol}</span> para tener envío <span className="text-orange-500 font-bold">gratis</span>
+                    </p>
+                  ) : (
+                    <p className="text-green-600 text-lg font-bold">
+                      ¡Tienes envío gratis!
+                    </p>
+                  )}
+                </div>
+              )}
 
               {/* Totals */}
               <div className="space-y-6 mb-12 max-w-md mx-auto w-full">
@@ -306,12 +324,19 @@ export default function Summary(props) {
                       : convertPrice(shipping)} {symbol}
                   </span>
                 </div>
+                {arancel > 0 && (
+                  <div className="flex justify-between items-center text-indigo-900/80 text-xl">
+                    <span>Aranceles (EE. UU.)</span>
+                    <span>{convertPrice(arancel)} {symbol}</span>
+                  </div>
+                )}
                 <div className="flex justify-between items-center text-indigo-900 font-bold text-2xl pt-6 border-t border-indigo-100">
                   <span>Total</span>
                   <span>
                     {convertPrice(
                       subtotal +
-                      (subtotal >= freeShippingThreshold ? 0 : shipping)
+                      (subtotal >= freeShippingThreshold ? 0 : shipping) +
+                      arancel
                     )} {symbol}
                   </span>
                 </div>

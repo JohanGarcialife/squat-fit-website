@@ -175,10 +175,22 @@ export default function FormularioPage() {
   if (!token) return <AccessNotice redirect={`/formulario/${slug}`} />;
 
   const saveLocalCopy = (submission) => {
-    const key = `sqf-form-${slug}`;
-    const prev = JSON.parse(localStorage.getItem(key) || '[]');
-    prev.push(submission);
-    localStorage.setItem(key, JSON.stringify(prev));
+    // Copia local de cortesía: si localStorage viene corrupto o lleno, no
+    // puede tumbar el envío real (que ya salió al backend).
+    try {
+      const key = `sqf-form-${slug}`;
+      let prev;
+      try {
+        prev = JSON.parse(localStorage.getItem(key) || '[]');
+      } catch {
+        prev = [];
+      }
+      if (!Array.isArray(prev)) prev = [];
+      prev.push(submission);
+      localStorage.setItem(key, JSON.stringify(prev));
+    } catch {
+      // Sin localStorage (Safari privado, cuota llena): seguimos sin copia local.
+    }
   };
 
   const handleSubmit = async (answers) => {

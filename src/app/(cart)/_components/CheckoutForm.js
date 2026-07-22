@@ -144,6 +144,12 @@ export default function CheckoutForm({ setStep, onValidationChange, submitRef })
               onValidationChange(isValid, dirty);
             }, [isValid, dirty, onValidationChange]);
 
+            // País en vivo hacia el store: el resumen (OrderSummary) lo necesita
+            // antes del submit para pintar los aranceles de envíos a EE. UU.
+            useEffect(() => {
+              if (values.country) updateFormData({ country: values.country });
+            }, [values.country]);
+
             // Exponemos los helpers de Formik al padre vía ref. El padre valida
             // con validateForm() (resultado real, no el isValid del closure) antes
             // de avanzar al paso de pago; setTouched marca los campos para mostrar

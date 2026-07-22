@@ -11,6 +11,9 @@ import 'slick-carousel/slick/slick-theme.css';
 
 const Slider = dynamic(() => import('react-slick'), { ssr: false });
 
+// Reseñas de clientes sobre las recetas (Fase 15: la prueba social de cliente
+// se concentra aquí y en /cursos; /programa pasa a transformaciones + Trustpilot).
+// Copys adaptados de reseñas reales — PENDIENTE de confirmación de cada persona.
 const testimonials = [
   { quote: "Lo mejor no es que estén ricas. Es que ahora sé qué cenar sin improvisar cada día.", author: "Paloma Malagón" },
   { quote: "Antes me costaba comer suficiente proteína sin aburrirme. Ahora lo tengo fácil y rico.", author: "Pablo Guerra" },

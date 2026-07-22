@@ -10,6 +10,9 @@ import usePreloadImages from '@/hooks/usePreloadImages';
 
 const Slider = dynamic(() => import('react-slick'), { ssr: false });
 
+// Reseñas de clientes con sabor "curso" (Fase 15: la prueba social de cliente
+// se concentra aquí y en /cocina; /programa pasa a transformaciones + Trustpilot).
+// Copys adaptados de reseñas reales — PENDIENTE de confirmación de cada persona.
 const testimonials = [
     {
         name: 'Elena Armada',

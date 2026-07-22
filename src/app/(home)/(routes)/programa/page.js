@@ -6,7 +6,7 @@ import WhyWeFail from './_components/WhyWeFail';
 import InvestmentSection from './_components/InvestmentSection';
 import RelatableSection from './_components/RelatableSection';
 import StepsSection from './_components/StepsSection';
-import PlanesTestimonials from './_components/PlanesTestimonials';
+import Transformaciones from './_components/Transformaciones';
 import TrustpilotPrograma from './_components/TrustpilotPrograma';
 import ProgramPricing from './_components/ProgramPricing';
 import AgendaSection from './_components/AgendaSection';
@@ -22,7 +22,7 @@ export default function page() {
       <Reveal><InvestmentSection /></Reveal>
       <Reveal><RelatableSection /></Reveal>
       <Reveal><StepsSection /></Reveal>
-      <Reveal><PlanesTestimonials /></Reveal>
+      <Reveal><Transformaciones /></Reveal>
       <Reveal><TrustpilotPrograma /></Reveal>
       <Reveal><ProgramPricing /></Reveal>
       <Reveal><AgendaSection /></Reveal>
