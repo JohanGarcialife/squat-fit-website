@@ -1,5 +1,6 @@
 import { Inter } from "next/font/google";
 import "../globals.css";
+import GoogleAnalytics from "@/app/components/GoogleAnalytics";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -17,7 +18,8 @@ export const metadata = {
 export default function ActivateLayout({ children }) {
   return (
     <html lang="es">
-      <body className={`${inter.variable} antialiased`}>{children}</body>
+      <body className={`${inter.variable} antialiased`}>{children}  <GoogleAnalytics />
+      </body>
     </html>
   );
 }
