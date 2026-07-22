@@ -4,8 +4,10 @@ import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useCartStore } from '@/stores/cart.store';
+import { useCheckoutStore } from '@/stores/checkout.store';
 import { useCurrency } from './useCurrency';
 import CurrencySelector from './CurrencySelector';
+import { arancelParaCarrito } from './aranceles';
 
 export default function OrderSummary(props) {
     const { isFormValid, isFormDirty, triggerCheckoutFormSubmit } = props;
@@ -20,7 +22,13 @@ export default function OrderSummary(props) {
     const freeShippingThreshold = 90.00; // in EUR
     
     const finalShipping = subtotal >= freeShippingThreshold ? 0 : shippingCost;
-    const total = subtotal + finalShipping;
+
+    // Aranceles de importación (solo envíos a EE. UU. con productos físicos).
+    // Se muestran como línea aparte del envío; el cobro real llega en Fase 16.
+    const { formData } = useCheckoutStore();
+    const arancel = arancelParaCarrito(cart, formData?.country);
+
+    const total = subtotal + finalShipping + arancel;
 
     // Lógica de pago recurrente: son suscripciones tanto el tramo mensual ('/mes')
     // como el trimestral ('/trimestre'). El anual y el permanente son pago único,
@@ -108,18 +116,24 @@ export default function OrderSummary(props) {
         )}
 
         <div className="space-y-2">
+            {arancel > 0 && (
+                <>
+                    <div className="flex justify-between items-center text-indigo-900/70 text-base">
+                        <span>Envío</span>
+                        <span>{convertPrice(finalShipping)} {symbol}</span>
+                    </div>
+                    <div className="flex justify-between items-center text-indigo-900/70 text-base">
+                        <span>Aranceles (importación EE. UU.)</span>
+                        <span>{convertPrice(arancel)} {symbol}</span>
+                    </div>
+                </>
+            )}
             <div className="flex justify-between items-center text-indigo-900/80 text-lg">
                 <span>Hoy pagarás</span>
                 <span className="font-bold text-indigo-900 text-xl">
                     {convertPrice(total)} {symbol}
                 </span>
             </div>
-
-            {currency !== 'EUR' && (
-                <p className="text-indigo-400 text-xs leading-snug">
-                    El cobro se realiza en euros (EUR). El importe en {currency} es orientativo y puede variar según el cambio de tu banco.
-                </p>
-            )}
 
             {hasRecurring && (
                 <div className="flex justify-between items-center text-indigo-900 font-bold text-lg pt-2 border-t border-indigo-100/50">
