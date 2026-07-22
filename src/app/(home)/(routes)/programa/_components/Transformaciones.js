@@ -15,7 +15,6 @@ const Slider = dynamic(() => import('react-slick'), { ssr: false });
 // persona, en /public/transformaciones/<slug>-antes.jpg y -despues.jpg).
 const transformaciones = [
   { nombre: 'Rocío Maseda', meses: 6, slug: 'rocio-maseda' },
-  { nombre: 'Javier Contreras', meses: 10, slug: 'javier-contreras' },
   { nombre: 'Azize Pratt', meses: 5, slug: 'azize-pratt' },
   { nombre: 'Luis Benito', meses: 7, slug: 'luis-benito' },
   { nombre: 'Manuel Sánchez', meses: 4, slug: 'manuel-sanchez' },
