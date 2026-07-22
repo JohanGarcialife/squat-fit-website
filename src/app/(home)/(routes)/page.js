@@ -15,6 +15,7 @@ export default function Home() {
     { beforeSrc: "/transformaciones/diego-antes.jpg",  afterSrc: "/transformaciones/diego-despues.jpg",  text: "Diego Villarroel, después de 5 meses" },
     { beforeSrc: "/transformaciones/jesica-antes.jpg", afterSrc: "/transformaciones/jesica-despues.jpg", text: "Jésica Soto, después de 7 meses" },
     { beforeSrc: "/transformaciones/manuel-antes.jpg", afterSrc: "/transformaciones/manuel-despues.jpg", text: "Manuel López, después de 7 meses" },
+    { beforeSrc: "/transformaciones/javier-contreras-antes.jpg", afterSrc: "/transformaciones/javier-contreras-despues.jpg", text: "Javier Contreras, después de 10 meses" },
   ]
   
 
