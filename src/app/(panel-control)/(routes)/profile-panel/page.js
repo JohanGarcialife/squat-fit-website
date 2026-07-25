@@ -8,6 +8,8 @@ import { useAuthStore } from '@/stores/auth.store';
 import ConfirmationModal from '@/app/components/ConfirmationModal';
 import GdprCheckbox from '@/app/components/GdprCheckbox';
 import { normalizeName } from '@/app/components/nameUtils';
+import { fmtWeight, weightToKg } from '@/app/components/weightUnits';
+import { hasAcceptedPrivacy, markPrivacyAccepted } from '@/app/components/privacyConsent';
 import axios from 'axios';
 import PhoneInput from 'react-phone-input-2';
 import 'react-phone-input-2/lib/style.css';
@@ -50,21 +52,7 @@ const COUNTRY_OPTIONS = (() => {
   return [es, ...raw.filter((c) => c.code !== 'ES')].filter(Boolean);
 })();
 
-// --- Conversión de unidades --------------------------------------------------
-const KG_PER_LB = 0.45359237;
-const round1 = (n) => Math.round(n * 10) / 10;
-
-const fmtWeight = (kg, unit) => {
-  const n = parseFloat(kg);
-  if (isNaN(n)) return '';
-  const v = unit === 'kg' ? n : n / KG_PER_LB;
-  return String(round1(v)).replace('.', ',');
-};
-const weightToKg = (raw, unit) => {
-  const n = parseFloat(String(raw).replace(',', '.'));
-  if (isNaN(n)) return '';
-  return String(unit === 'kg' ? n : n * KG_PER_LB);
-};
+// --- Conversión de unidades (módulo compartido con el onboarding) -----------
 
 // --- Estilos compartidos de campo -------------------------------------------
 const fieldLabel = 'text-slate-400 text-xs font-semibold uppercase tracking-wider';
@@ -91,36 +79,46 @@ const ProfileSchema = Yup.object().shape({
 
 // --- Sub-componentes ---------------------------------------------------------
 
-// Anillo de progreso del perfil.
+// Gráfica del perfil completado: anillo de progreso circular con el % en el
+// centro, en colores de marca (arco naranja #FF690B, % en índigo #363C98).
 const ProgressRing = ({ pct }) => {
-  const r = 26;
+  const size = 84;
+  const r = 34;
   const c = 2 * Math.PI * r;
+  const clamped = Math.max(0, Math.min(100, pct));
   return (
-    <svg width="64" height="64" viewBox="0 0 64 64" className="shrink-0">
-      <circle cx="32" cy="32" r={r} fill="none" stroke="#FFE3CE" strokeWidth="6" />
+    <svg
+      width={size}
+      height={size}
+      viewBox={`0 0 ${size} ${size}`}
+      className="shrink-0"
+      role="img"
+      aria-label={`Perfil completado al ${clamped}%`}
+    >
+      <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="#EEF0FA" strokeWidth="8" />
       <circle
-        cx="32"
-        cy="32"
+        cx={size / 2}
+        cy={size / 2}
         r={r}
         fill="none"
         stroke="#FF690B"
-        strokeWidth="6"
+        strokeWidth="8"
         strokeLinecap="round"
         strokeDasharray={c}
-        strokeDashoffset={c * (1 - pct / 100)}
-        transform="rotate(-90 32 32)"
+        strokeDashoffset={c * (1 - clamped / 100)}
+        transform={`rotate(-90 ${size / 2} ${size / 2})`}
         style={{ transition: 'stroke-dashoffset 0.6s ease' }}
       />
       <text
-        x="32"
-        y="33"
+        x={size / 2}
+        y={size / 2 + 1}
         textAnchor="middle"
         dominantBaseline="central"
-        fontSize="15"
+        fontSize="19"
         fontWeight="800"
-        fill="#FF690B"
+        fill="#363C98"
       >
-        {pct}%
+        {clamped}%
       </text>
     </svg>
   );
@@ -309,6 +307,10 @@ export default function ProfilePage() {
   const { logout, token } = useAuthStore();
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
   const [gdprAccepted, setGdprAccepted] = useState(false);
+  // Política de privacidad UNA sola vez: si ya consta la aceptación, no se
+  // vuelve a mostrar el checkbox al guardar (petición de Hamlet).
+  const [privacyDone, setPrivacyDone] = useState(false);
+  useEffect(() => { setPrivacyDone(hasAcceptedPrivacy()); }, []);
   const [isPurchasesModalOpen, setIsPurchasesModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [advice, setAdvice] = useState(null);
@@ -346,6 +348,13 @@ export default function ProfilePage() {
     validationSchema: ProfileSchema,
     onSubmit: async (values) => {
       if (!userId) return;
+      // El PRIMER guardado exige aceptar la política; después ya consta y no
+      // se vuelve a pedir. Guard también aquí (Enter dentro del <form> envía
+      // sin pasar por el botón de la barra).
+      if (!privacyDone && !gdprAccepted) {
+        toast.error('Acepta la Política de Privacidad para guardar.');
+        return;
+      }
       try {
         let apiGender = '';
         if (values.sexo === 'Hombre') apiGender = 'male';
@@ -374,6 +383,10 @@ export default function ProfilePage() {
         await axios.put(`${API}/api/v1/user/update?user_id=${userId}`, formData, {
           headers: { Authorization: `Bearer ${token}` },
         });
+
+        // Aceptación registrada: no se volverá a pedir en próximos guardados.
+        markPrivacyAccepted();
+        setPrivacyDone(true);
 
         toast.success('Perfil actualizado correctamente');
         // Marca el formulario como limpio (oculta la barra de guardar).
@@ -528,20 +541,19 @@ export default function ProfilePage() {
   return (
     <div className="flex-1 bg-[#F8F9FC] p-6 md:p-10 min-h-screen overflow-y-auto">
       <div className="max-w-6xl mx-auto space-y-8 pb-28">
-        {/* --- CABECERA: PROGRESO DEL PERFIL --- */}
-        <div className="bg-white rounded-3xl border-2 border-[#FF690B]/30 p-5 sm:p-6 flex items-center gap-4 sm:gap-6 shadow-sm">
-          <ProgressRing pct={completion} />
-          <div className="flex-1 min-w-0">
-            <h2 className="text-[#363C98] font-extrabold text-lg sm:text-2xl leading-tight">
-              {completion >= 100 ? `¡Perfil completo, ${firstName}!` : `Perfil casi completo, ${firstName}`}
-            </h2>
-            <p className="text-slate-500 text-sm sm:text-base mt-0.5">
-              {completion >= 100
-                ? 'Tu coach tiene todo lo que necesita para ajustar tu plan.'
-                : 'Completa tus datos para que tu coach pueda ajustar tu plan.'}
-            </p>
-          </div>
-          {completion < 100 && (
+        {/* --- CABECERA: PROGRESO DEL PERFIL (gráfica de anillo) ---
+            Al llegar al 100% este bloque desaparece entero: es redundante. */}
+        {completion < 100 && (
+          <div className="bg-white rounded-3xl border-2 border-[#FF690B]/30 p-5 sm:p-6 flex items-center gap-4 sm:gap-6 shadow-sm">
+            <ProgressRing pct={completion} />
+            <div className="flex-1 min-w-0">
+              <h2 className="text-[#363C98] font-extrabold text-lg sm:text-2xl leading-tight">
+                {`Perfil casi completo, ${firstName}`}
+              </h2>
+              <p className="text-slate-500 text-sm sm:text-base mt-0.5">
+                Completa tus datos para que tu coach pueda ajustar tu plan.
+              </p>
+            </div>
             <button
               type="button"
               onClick={() => router.push('/onboarding')}
@@ -549,8 +561,8 @@ export default function ProfilePage() {
             >
               Completar
             </button>
-          )}
-        </div>
+          </div>
+        )}
 
         {/* --- GRID PRINCIPAL --- */}
         <form onSubmit={formik.handleSubmit} className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -888,7 +900,8 @@ export default function ProfilePage() {
         {formik.dirty && (
           <div className="fixed bottom-0 left-0 lg:left-64 right-0 bg-white border-t border-slate-100 p-4 sm:px-8 flex flex-wrap items-center justify-end gap-4 shadow-2xl z-40 animate-fade-in">
             <span className="mr-auto hidden sm:block text-slate-400 text-sm font-semibold">Tienes cambios sin guardar</span>
-            <GdprCheckbox checked={gdprAccepted} onChange={setGdprAccepted} id="gdpr-profile" />
+            {/* Solo en el PRIMER guardado: después la aceptación ya consta. */}
+            {!privacyDone && <GdprCheckbox checked={gdprAccepted} onChange={setGdprAccepted} id="gdpr-profile" />}
             <button
               type="button"
               onClick={() => formik.resetForm()}
@@ -899,7 +912,7 @@ export default function ProfilePage() {
             <button
               type="button"
               onClick={formik.handleSubmit}
-              disabled={formik.isSubmitting || !gdprAccepted}
+              disabled={formik.isSubmitting || (!privacyDone && !gdprAccepted)}
               className="bg-[#FF690B] text-white font-bold px-6 py-2.5 rounded-full hover:scale-105 active:scale-95 transition-all text-sm sm:text-base shadow-md hover:shadow-[#FF690B]/20 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:scale-100"
             >
               {formik.isSubmitting ? 'Guardando…' : 'Guardar cambios'}

@@ -7,7 +7,7 @@
 // Motor visual del onboarding (una pregunta por pantalla) + movimiento CSS
 // del briefing (clases sf-* de form-motion.css).
 
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import PhoneInput from 'react-phone-input-2';
@@ -236,6 +236,27 @@ export default function EmpiezaTuCambioPage() {
     }
   };
 
+  // Enter = Continuar (o Enviar en el último paso) si la respuesta es válida.
+  // EXCEPCIÓN: en los textarea (párrafos) Enter hace su salto de línea normal.
+  const enterRef = useRef(null);
+  enterRef.current = () => {
+    if (sent || saving || !step) return;
+    if (step.type === 'final') handleSubmit();
+    else goNext();
+  };
+  useEffect(() => {
+    const onKey = (e) => {
+      if (e.key !== 'Enter' || e.repeat || e.isComposing) return;
+      const t = e.target;
+      if (t && t.tagName === 'TEXTAREA') return; // salto de línea normal
+      if (t && t.closest && t.closest('a')) return; // no pisar enlaces (✕ salir)
+      e.preventDefault();
+      enterRef.current?.();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
+
   const progress = Math.round((index / (total - 1)) * 100);
 
   // ===== Pantalla de gracias =====
@@ -371,15 +392,20 @@ export default function EmpiezaTuCambioPage() {
             {step.type === 'text' && (
               <div className="max-w-md">
                 {step.long ? (
-                  <textarea
-                    autoFocus
-                    rows={4}
-                    value={answers[step.key]}
-                    onChange={(e) => set({ [step.key]: e.target.value })}
-                    placeholder={step.placeholder}
-                    className="w-full rounded-2xl border-2 px-5 py-3.5 font-bold outline-none bg-[#FFF9F5] placeholder:font-semibold placeholder:text-[#F0A876] resize-none"
-                    style={{ borderColor: '#FBD5B8', color: ORANGE }}
-                  />
+                  <>
+                    <textarea
+                      autoFocus
+                      rows={4}
+                      value={answers[step.key]}
+                      onChange={(e) => set({ [step.key]: e.target.value })}
+                      placeholder={step.placeholder}
+                      className="w-full rounded-2xl border-2 px-5 py-3.5 font-bold outline-none bg-[#FFF9F5] placeholder:font-semibold placeholder:text-[#F0A876] resize-none"
+                      style={{ borderColor: '#FBD5B8', color: ORANGE }}
+                    />
+                    <p className="text-xs font-semibold text-[#B4B1D6] mt-1.5 select-none">
+                      Enter añade una línea · pulsa Continuar para seguir
+                    </p>
+                  </>
                 ) : (
                   <Field placeholder={step.placeholder} value={answers[step.key]} onChange={(v) => set({ [step.key]: v })} autoFocus />
                 )}
