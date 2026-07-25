@@ -1,4 +1,5 @@
 import { Inter } from "next/font/google";
+import Script from "next/script";
 import "../globals.css";
 import GoogleAnalytics from "@/app/components/GoogleAnalytics";
 import Header from "../components/Header";
@@ -40,6 +41,13 @@ export default function RootLayout({ children }) {
         </div>
       <CookieBanner />
         <GoogleAnalytics />
+        {/* Trustpilot: script oficial de invitaciones (reseñas post-compra). */}
+        <Script id="trustpilot-invitations" strategy="afterInteractive">
+          {`(function(w,d,s,r,n){w.TrustpilotObject=n;w[n]=w[n]||function(){(w[n].q=w[n].q||[]).push(arguments)};
+a=d.createElement(s);a.async=1;a.src=r;a.type='text/java'+s;f=d.getElementsByTagName(s)[0];
+f.parentNode.insertBefore(a,f)})(window,document,'script','https://invitejs.trustpilot.com/tp.min.js','tp');
+tp('register','izhv6K6cD6ejsrjB');`}
+        </Script>
       </body>
     </html>
   );
