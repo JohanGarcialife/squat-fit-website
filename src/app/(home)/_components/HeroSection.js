@@ -15,7 +15,7 @@ export default function HeroSection() {
       <div className='xl:pl-36 px-5  w-full pt-12 max-w-screen'>
         <div >
 
-<p className='text-secondary text-center lg:text-start xl:max-w-[510px] max-w-screen font-bold text-5xl lg:text-6xl xl:text-7xl lg:leading-28 '>Logra tu mejor versión</p>
+<h1 className='text-secondary text-center lg:text-start xl:max-w-[510px] max-w-screen font-bold text-5xl lg:text-6xl xl:text-7xl lg:leading-28 '>Logra tu mejor versión</h1>
 <p className='text-black lg:max-w-[510px] text-center lg:text-start text-[1.35rem] lg:text-2xl mt-4'>El programa de dieta, entreno y mentalidad para un cambio físico real y duradero</p>
 <div className='flex flex-row w-full items-center lg:items-start lg:justify-center'>
 <div className='flex flex-row items-center justify-center lg:justify-start w-full'>
