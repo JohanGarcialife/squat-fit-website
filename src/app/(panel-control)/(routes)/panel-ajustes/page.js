@@ -9,6 +9,7 @@ import ConfirmationModal from '@/app/components/ConfirmationModal';
 import AccessNotice from '@/app/components/AccessNotice';
 import { handleApiError } from '@/app/components/handleApiError';
 import NotificationPrefs from '@/app/components/NotificationPrefs';
+import { TOUR_DONE_KEY, TOUR_EVENT } from '@/app/components/AppTour';
 import {
   CreditCard,
   FileText,
@@ -24,6 +25,7 @@ import {
   LifeBuoy,
   Users,
   Scale,
+  Sparkles,
 } from 'lucide-react';
 
 const API = 'https://squatfit-api-cyrc2g3zra-no.a.run.app';
@@ -476,6 +478,19 @@ export default function AjustesPage() {
           </button>
           <button type="button" onClick={() => router.push('/panel-contacto')} className="w-full flex items-center justify-between p-3.5 hover:bg-slate-50 rounded-2xl transition text-[#363C98] font-bold text-sm cursor-pointer">
             <span className="flex items-center gap-2.5"><LifeBuoy className="w-4 h-4 text-slate-400" /> Ayuda y soporte</span>
+            <ChevronRight className="w-4 h-4 text-slate-300" />
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              // Borra el flag «ya visto» y relanza el tour (AppTour vive en el
+              // layout del panel y escucha este evento).
+              try { localStorage.removeItem(TOUR_DONE_KEY); } catch { /* sin storage */ }
+              window.dispatchEvent(new Event(TOUR_EVENT));
+            }}
+            className="w-full flex items-center justify-between p-3.5 hover:bg-slate-50 rounded-2xl transition text-[#363C98] font-bold text-sm cursor-pointer"
+          >
+            <span className="flex items-center gap-2.5"><Sparkles className="w-4 h-4 text-slate-400" /> Ver el tour de bienvenida</span>
             <ChevronRight className="w-4 h-4 text-slate-300" />
           </button>
           <button type="button" onClick={() => router.push('/panel-ajustes/conocenos')} className="w-full flex items-center justify-between p-3.5 hover:bg-slate-50 rounded-2xl transition text-[#363C98] font-bold text-sm cursor-pointer">
