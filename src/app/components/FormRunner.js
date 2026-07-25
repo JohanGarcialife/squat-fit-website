@@ -19,7 +19,7 @@
 // Cada pregunta puede llevar `showIf(answers, ctx)` para condicionales
 // (p. ej. "solo mujeres", "solo si respondió Sí").
 
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 
@@ -106,6 +106,37 @@ export default function FormRunner({ definition, context = {}, onSubmit, exitHre
 
   const progress = total > 1 ? Math.round((index / (total - 1)) * 100) : 0;
   const isLast = index === total - 1;
+
+  // ── Enter = Continuar (petición de Hamlet) ────────────────────────────────
+  // Pulsar Enter avanza (o envía en el último paso) si la respuesta es válida.
+  // EXCEPCIÓN: dentro de un textarea (párrafo) Enter hace su salto de línea
+  // normal; ahí se muestra una pista bajo el campo. Se usa un ref para que el
+  // listener global lea siempre el estado actual sin re-suscribirse.
+  const enterRef = useRef(null);
+  enterRef.current = () => {
+    if (sent || saving || !step) return;
+    if (isLast) handleFinish();
+    else goNext();
+  };
+  useEffect(() => {
+    const onKey = (e) => {
+      if (e.key !== 'Enter' || e.repeat || e.isComposing) return;
+      const t = e.target;
+      if (t && t.tagName === 'TEXTAREA') return; // salto de línea normal
+      if (t && t.closest && t.closest('a')) return; // no pisar enlaces (✕ salir)
+      e.preventDefault();
+      enterRef.current?.();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
+
+  // Pista sutil bajo los párrafos: Enter no envía aquí.
+  const textareaHint = (
+    <p className="text-xs font-semibold text-[#B4B1D6] mt-1.5 select-none">
+      Enter añade una línea · pulsa Continuar para seguir
+    </p>
+  );
 
   if (sent && renderResult) {
     return renderResult(result);
@@ -243,15 +274,18 @@ export default function FormRunner({ definition, context = {}, onSubmit, exitHre
             {step.type === 'text' && (
               <div className="max-w-md">
                 {step.long ? (
-                  <textarea
-                    autoFocus
-                    rows={4}
-                    value={answers[step.key] || ''}
-                    onChange={(e) => set({ [step.key]: e.target.value })}
-                    placeholder={step.placeholder || 'Tu respuesta…'}
-                    className="w-full rounded-2xl border-2 px-5 py-3.5 font-bold outline-none bg-[#FFF9F5] placeholder:font-semibold placeholder:text-[#F0A876] resize-none"
-                    style={{ borderColor: '#FBD5B8', color: ORANGE }}
-                  />
+                  <>
+                    <textarea
+                      autoFocus
+                      rows={4}
+                      value={answers[step.key] || ''}
+                      onChange={(e) => set({ [step.key]: e.target.value })}
+                      placeholder={step.placeholder || 'Tu respuesta…'}
+                      className="w-full rounded-2xl border-2 px-5 py-3.5 font-bold outline-none bg-[#FFF9F5] placeholder:font-semibold placeholder:text-[#F0A876] resize-none"
+                      style={{ borderColor: '#FBD5B8', color: ORANGE }}
+                    />
+                    {textareaHint}
+                  </>
                 ) : (
                   <input
                     autoFocus
@@ -323,15 +357,18 @@ export default function FormRunner({ definition, context = {}, onSubmit, exitHre
 
             {step.type === 'mealtext' && (
               <div className="max-w-md flex flex-col gap-3">
-                <textarea
-                  rows={4}
-                  value={answers[step.key] || ''}
-                  disabled={!!answers[`${step.key}_none`]}
-                  onChange={(e) => set({ [step.key]: e.target.value })}
-                  placeholder={step.placeholder || 'Cantidades aproximadas, sin buscar la perfección…'}
-                  className="w-full rounded-2xl border-2 px-5 py-3.5 font-bold outline-none bg-[#FFF9F5] placeholder:font-semibold placeholder:text-[#F0A876] resize-none disabled:opacity-40"
-                  style={{ borderColor: '#FBD5B8', color: ORANGE }}
-                />
+                <div>
+                  <textarea
+                    rows={4}
+                    value={answers[step.key] || ''}
+                    disabled={!!answers[`${step.key}_none`]}
+                    onChange={(e) => set({ [step.key]: e.target.value })}
+                    placeholder={step.placeholder || 'Cantidades aproximadas, sin buscar la perfección…'}
+                    className="w-full rounded-2xl border-2 px-5 py-3.5 font-bold outline-none bg-[#FFF9F5] placeholder:font-semibold placeholder:text-[#F0A876] resize-none disabled:opacity-40"
+                    style={{ borderColor: '#FBD5B8', color: ORANGE }}
+                  />
+                  {!answers[`${step.key}_none`] && textareaHint}
+                </div>
                 <label className="flex items-center gap-3 cursor-pointer select-none">
                   <input
                     type="checkbox"

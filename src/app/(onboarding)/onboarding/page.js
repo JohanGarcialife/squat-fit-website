@@ -13,6 +13,8 @@ import { useAuthStore } from '@/stores/auth.store';
 import { normalizeName } from '@/app/components/nameUtils';
 import AccessNotice from '@/app/components/AccessNotice';
 import GdprCheckbox from '@/app/components/GdprCheckbox';
+import { fmtWeight, weightToKg } from '@/app/components/weightUnits';
+import { hasAcceptedPrivacy, markPrivacyAccepted } from '@/app/components/privacyConsent';
 
 const API = 'https://squatfit-api-cyrc2g3zra-no.a.run.app';
 const BLUE = '#3932C0';
@@ -51,8 +53,10 @@ const STEPS = [
   { phase: 0, type: 'basicos', title: 'Datos básicos' },
   { phase: 1, type: 'sexo', title: 'Sexo', subtitle: 'Selecciona una opción' },
   { phase: 1, type: 'number', key: 'altura', title: '¿Cuánto mides?', subtitle: 'En centímetros', unit: 'cm', min: 100, max: 250 },
-  { phase: 1, type: 'number', key: 'peso', title: '¿Cuánto pesas ahora?', subtitle: 'En kilos', unit: 'kg', min: 30, max: 350, decimal: true },
-  { phase: 1, type: 'number', key: 'pesoObjetivo', title: '¿Cuál es tu peso objetivo?', subtitle: 'En kilos', unit: 'kg', min: 30, max: 350, decimal: true },
+  // `weight: true` → input con selector kg/lb (mismo patrón del perfil). El
+  // valor guardado en `answers` es SIEMPRE en kilos; lb solo convierte en pantalla.
+  { phase: 1, type: 'number', key: 'peso', title: '¿Cuánto pesas ahora?', unit: 'kg', min: 30, max: 350, decimal: true, weight: true },
+  { phase: 1, type: 'number', key: 'pesoObjetivo', title: '¿Cuál es tu peso objetivo?', unit: 'kg', min: 30, max: 350, decimal: true, weight: true },
   { phase: 2, type: 'select', key: 'steps_peer_day_id', list: 'steps', title: '¿Cuántos pasos das al día?', subtitle: 'Aproximadamente' },
   { phase: 2, type: 'select', key: 'strength_training_id', list: 'strength', title: '¿Entrenas fuerza?', subtitle: 'Selecciona una opción' },
   { phase: 2, type: 'select', key: 'weekly_cardio_frequency_id', list: 'cardio', title: '¿Con qué frecuencia haces cardio?', subtitle: 'Selecciona una opción' },
@@ -77,7 +81,12 @@ export default function OnboardingPage() {
   const [exitOpen, setExitOpen] = useState(false);
   const [canAdvance, setCanAdvance] = useState(true); // para el retardo de lectura
   const [gdprAccepted, setGdprAccepted] = useState(false); // RGPD en el último paso
+  const [privacyDone, setPrivacyDone] = useState(false); // ya aceptada antes → no se vuelve a pedir
   const [dir, setDir] = useState(1); // dirección de la transición
+  const [weightUnit, setWeightUnit] = useState('kg'); // kg|lb solo en pantalla; se guarda kg
+
+  // La política de privacidad se acepta UNA vez: si ya consta, no re-pedimos.
+  useEffect(() => { setPrivacyDone(hasAcceptedPrivacy()); }, []);
 
   const step = STEPS[index];
   const total = STEPS.length;
@@ -150,7 +159,7 @@ export default function OnboardingPage() {
       case 'intro':
         return true;
       case 'done':
-        return gdprAccepted;
+        return privacyDone || gdprAccepted;
       case 'basicos':
         return answers.nombre.trim().length > 0 && answers.paisIdioma;
       case 'sexo':
@@ -164,7 +173,7 @@ export default function OnboardingPage() {
       default:
         return true;
     }
-  }, [step, answers, canAdvance, gdprAccepted]);
+  }, [step, answers, canAdvance, gdprAccepted, privacyDone]);
 
   const goNext = async () => {
     if (!isValid) return;
@@ -213,6 +222,9 @@ export default function OnboardingPage() {
         if (answers[k]) fd.append(k, answers[k]);
       });
       await axios.put(`${API}/api/v1/user/update?user_id=${uid}`, fd, { headers: { Authorization: `Bearer ${token}` } });
+      // Dejamos constancia de la aceptación de privacidad para no volver a
+      // pedirla en cada guardado del perfil (petición de Hamlet).
+      markPrivacyAccepted();
       toast.success('¡Perfil completado!');
       router.push('/panel-control');
     } catch (e) {
@@ -227,6 +239,27 @@ export default function OnboardingPage() {
       setSaving(false);
     }
   };
+
+  // Enter = Continuar (o guardar en el último paso) si la respuesta es válida.
+  // Con el modal de salir abierto, Enter no hace nada (evita avanzar «a ciegas»).
+  const enterRef = useRef(null);
+  enterRef.current = () => {
+    if (loading || saving || exitOpen || !step || !isValid) return;
+    if (step.type === 'done') handleFinish();
+    else goNext();
+  };
+  useEffect(() => {
+    const onKey = (e) => {
+      if (e.key !== 'Enter' || e.repeat || e.isComposing) return;
+      const t = e.target;
+      if (t && t.tagName === 'TEXTAREA') return; // salto de línea normal
+      if (t && t.closest && t.closest('a')) return; // no pisar enlaces
+      e.preventDefault();
+      enterRef.current?.();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
 
   if (!token) return <AccessNotice redirect="/onboarding" />;
   if (loading) {
@@ -261,7 +294,11 @@ export default function OnboardingPage() {
           <h1 className="font-extrabold leading-tight mb-3" style={{ color: BLUE, fontSize: 'clamp(1.75rem, 2.8vw, 2.5rem)' }}>
             {step.title}
           </h1>
-          {step.subtitle && <p className="text-[#6B6BA8] text-base sm:text-lg mb-7">{step.subtitle}</p>}
+          {(step.weight || step.subtitle) && (
+            <p className="text-[#6B6BA8] text-base sm:text-lg mb-7">
+              {step.weight ? (weightUnit === 'kg' ? 'En kilos' : 'En libras') : step.subtitle}
+            </p>
+          )}
 
           <div className="flex-1">
             {step.type === 'intro' && (
@@ -325,7 +362,17 @@ export default function OnboardingPage() {
               </div>
             )}
 
-            {step.type === 'number' && (
+            {step.type === 'number' && step.weight && (
+              <BigWeightInput
+                key={step.key}
+                valueKg={answers[step.key]}
+                unit={weightUnit}
+                onUnit={setWeightUnit}
+                onChangeKg={(kg) => set({ [step.key]: kg })}
+              />
+            )}
+
+            {step.type === 'number' && !step.weight && (
               <div className="max-w-xs">
                 <div className="flex items-baseline gap-3 border-b-2 pb-2" style={{ borderColor: ORANGE }}>
                   <input
@@ -380,7 +427,10 @@ export default function OnboardingPage() {
               <div className="mt-2">
                 <div className="text-6xl mb-4">🎉</div>
                 <p className="text-[#3932C0] text-lg sm:text-2xl leading-relaxed whitespace-pre-line">{step.body}</p>
-                <GdprCheckbox checked={gdprAccepted} onChange={setGdprAccepted} id="gdpr-onboarding" className="mt-8" />
+                {/* La política se acepta UNA sola vez: si ya consta, no se re-pide. */}
+                {!privacyDone && (
+                  <GdprCheckbox checked={gdprAccepted} onChange={setGdprAccepted} id="gdpr-onboarding" className="mt-8" />
+                )}
               </div>
             )}
           </div>
@@ -442,6 +492,63 @@ export default function OnboardingPage() {
       <style jsx global>{`
         .onb-phone .react-tel-input .form-control { height: auto; }
       `}</style>
+    </div>
+  );
+}
+
+// Interruptor de unidades kg|lb (mismo patrón visual del perfil).
+function UnitToggle({ options, value, onChange }) {
+  return (
+    <div className="inline-flex rounded-lg bg-slate-100 p-0.5">
+      {options.map((o) => (
+        <button
+          type="button"
+          key={o.value}
+          onClick={() => onChange(o.value)}
+          className={`px-2.5 py-0.5 rounded-md text-xs font-bold transition-colors cursor-pointer ${
+            value === o.value ? 'bg-white text-[#FF690B] shadow-sm' : 'text-slate-400 hover:text-slate-600'
+          }`}
+        >
+          {o.label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+// Peso grande del onboarding con selector kg/lb. `answers` guarda SIEMPRE kg
+// (el backend es métrico); lb solo convierte en pantalla, como en el perfil.
+function BigWeightInput({ valueKg, unit, onUnit, onChangeKg }) {
+  const [focused, setFocused] = useState(false);
+  const [buffer, setBuffer] = useState('');
+  const display = focused ? buffer : fmtWeight(valueKg, unit);
+  return (
+    <div className="max-w-xs">
+      <div className="flex justify-end mb-2">
+        <UnitToggle
+          options={[{ value: 'kg', label: 'kg' }, { value: 'lb', label: 'lb' }]}
+          value={unit}
+          onChange={onUnit}
+        />
+      </div>
+      <div className="flex items-baseline gap-3 border-b-2 pb-2" style={{ borderColor: ORANGE }}>
+        <input
+          autoFocus
+          inputMode="decimal"
+          value={display}
+          onFocus={() => { setBuffer(fmtWeight(valueKg, unit)); setFocused(true); }}
+          onBlur={() => setFocused(false)}
+          onChange={(e) => {
+            const raw = e.target.value.replace(/[^0-9.,]/g, '');
+            setBuffer(raw);
+            onChangeKg(weightToKg(raw, unit));
+          }}
+          placeholder="0"
+          className="w-full bg-transparent font-extrabold outline-none placeholder:text-slate-300"
+          style={{ color: BLUE, fontSize: 'clamp(2.5rem, 6vw, 4rem)' }}
+        />
+        <span className="text-2xl font-bold shrink-0" style={{ color: '#8B87C9' }}>{unit}</span>
+      </div>
     </div>
   );
 }
