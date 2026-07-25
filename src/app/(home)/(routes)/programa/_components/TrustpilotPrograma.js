@@ -40,8 +40,8 @@ const reviews = [
   },
   {
     name: 'Katiuska García',
-    title: 'Resultados en la menopausia',
-    text: 'Llevo más de 6 meses con Squad Fit. Estoy en menopausia y, a pesar de cuidarme, no lograba eliminar grasa de algunas zonas; con el entreno de fuerza y la alimentación por fin lo estoy consiguiendo.',
+    title: 'Resultados en < 6 meses',
+    text: 'Con la menopausia, a pesar de cuidarme, no lograba eliminar grasa; pero por fin lo estoy consiguiendo con el entreno y alimentación que me han pautado.',
   },
 ];
 

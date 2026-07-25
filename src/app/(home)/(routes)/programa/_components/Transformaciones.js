@@ -51,8 +51,8 @@ export default function Transformaciones() {
     className: 'center',
     centerMode: true,
     infinite: true,
-    centerPadding: w >= 1280 ? '0px' : w >= 640 ? '40px' : '28px',
-    slidesToShow: w >= 1280 ? 3 : 1,
+    centerPadding: w >= 1280 ? '18%' : w >= 640 ? '12%' : '24px',
+    slidesToShow: 1,
     speed,
     beforeChange: onBeforeChange,
     arrows: false,
@@ -61,7 +61,7 @@ export default function Transformaciones() {
 
   return (
     <section className="relative w-full py-20 sm:py-28 bg-white overflow-hidden">
-      <div className="w-full max-w-6xl mx-auto px-4 sm:px-6 md:px-8">
+      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
 
         {/* Cabecera en marca (mismo patrón que el resto de secciones) */}
         <div className="w-full flex flex-col items-center mb-14 text-center">
@@ -87,7 +87,7 @@ export default function Transformaciones() {
                   className="cursor-pointer px-2 py-6 outline-none"
                   onClick={() => sliderRef.current && sliderRef.current.slickGoTo(index)}
                 >
-                  <div className="transf-card h-full w-full max-w-[390px] sm:max-w-[420px] mx-auto rounded-[28px] overflow-hidden shadow-md border border-slate-100/50 bg-[#F8F9FC] flex flex-col text-left">
+                  <div className="transf-card h-full w-full max-w-[560px] sm:max-w-[720px] lg:max-w-[820px] mx-auto rounded-[28px] overflow-hidden shadow-md border border-slate-100/50 bg-[#F8F9FC] flex flex-col text-left">
                     <div className="flex">
                       <FotoEtiqueta
                         src={t.antes}
@@ -103,10 +103,10 @@ export default function Transformaciones() {
                       />
                     </div>
                     <div className="p-5 sm:p-6 flex items-end justify-between gap-3">
-                      <h3 className="text-lg sm:text-xl font-extrabold text-[#363C98] leading-tight">
+                      <h3 className="text-xl sm:text-2xl font-extrabold text-[#363C98] leading-tight">
                         {t.nombre}
                       </h3>
-                      <span className="shrink-0 text-sm sm:text-base font-bold text-[#FF690B]">
+                      <span className="shrink-0 text-base sm:text-xl font-bold text-[#FF690B]">
                         en {t.meses} meses
                       </span>
                     </div>
