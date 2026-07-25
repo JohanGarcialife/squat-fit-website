@@ -15,6 +15,7 @@ import 'react-phone-input-2/lib/style.css';
 import esPhone from 'react-phone-input-2/lang/es.json';
 import GdprCheckbox from '@/app/components/GdprCheckbox';
 import { normalizeName } from '@/app/components/nameUtils';
+import TextareaMeter from '@/app/components/TextareaMeter';
 
 const BLUE = '#3932C0';
 const ORANGE = '#FF690B';
@@ -88,7 +89,7 @@ const STEPS = [
     ],
   },
   {
-    type: 'text', key: 'empuja_a_cambiar', long: true,
+    type: 'text', key: 'empuja_a_cambiar', long: true, targetChars: 170,
     title: '¿Qué es lo que ya no quieres seguir sintiendo o viviendo hoy?',
     placeholder: 'Cuéntamelo con tus palabras…',
   },
@@ -111,7 +112,7 @@ const STEPS = [
     ],
   },
   {
-    type: 'text', key: 'obstaculo_importante', long: true,
+    type: 'text', key: 'obstaculo_importante', long: true, targetChars: 130,
     title: '¿Hay algo que pueda dificultar que empieces ahora mismo?',
     placeholder: 'Horarios, viajes, lesiones, dudas…',
   },
@@ -402,9 +403,7 @@ export default function EmpiezaTuCambioPage() {
                       className="w-full rounded-2xl border-2 px-5 py-3.5 font-bold outline-none bg-[#FFF9F5] placeholder:font-semibold placeholder:text-[#F0A876] resize-none"
                       style={{ borderColor: '#FBD5B8', color: ORANGE }}
                     />
-                    <p className="text-xs font-semibold text-[#B4B1D6] mt-1.5 select-none">
-                      Enter añade una línea · pulsa Continuar para seguir
-                    </p>
+                    <TextareaMeter value={answers[step.key]} targetChars={step.targetChars} />
                   </>
                 ) : (
                   <Field placeholder={step.placeholder} value={answers[step.key]} onChange={(v) => set({ [step.key]: v })} autoFocus />
