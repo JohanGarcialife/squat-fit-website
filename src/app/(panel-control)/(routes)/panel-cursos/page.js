@@ -8,6 +8,7 @@ import { useAuthStore } from "@/stores/auth.store";
 import { handleApiError } from "@/app/components/handleApiError";
 import CourseTierShop from "@/app/components/CourseTierShop";
 import BrandTabs from "@/app/components/BrandTabs";
+import TestQuiz from "./_components/TestQuiz";
 import { RefreshCw, ArrowRight, AlertCircle } from "lucide-react";
 
 // ─── TEST VIDEO (Bunny.net iframe) ───────────────────────────────────────────
@@ -122,6 +123,9 @@ function CursosPageContent() {
   // Error al cargar el detalle del curso (no reproducimos el vídeo de prueba:
   // el alumno creería estar viendo su clase). Guarda flag → botón reintentar.
   const [playerError, setPlayerError] = useState(false);
+  // Tests del curso (clase/módulo/final) y el test abierto en el modal (R1-F6).
+  const [courseTests, setCourseTests] = useState([]);
+  const [activeTest, setActiveTest] = useState(null);
 
   // ── Global loading / access ──────────────────────────────────────────────────
   const [loading, setLoading] = useState(true);
@@ -179,6 +183,13 @@ function CursosPageContent() {
       const detailRes = await axios.get(`${API}/api/v1/course/detail/${course.id}`, { headers });
       const detail = detailRes.data;
       const videos = detail?.videos || detail?.curriculum || detail?.lessons || [];
+
+      // Tests del curso (best-effort: si el endpoint falla, el curso funciona igual).
+      setCourseTests([]);
+      setActiveTest(null);
+      axios.get(`${API}/api/v1/course/tests`, { headers, params: { course_id: course.id } })
+        .then((r) => setCourseTests(Array.isArray(r.data) ? r.data : []))
+        .catch(() => setCourseTests([]));
 
       if (Array.isArray(videos) && videos.length > 0) {
         const modulesArray = buildModulesFromVideos(videos);
@@ -568,6 +579,41 @@ function CursosPageContent() {
               )
             )}
           </div>
+
+          {/* Tests del curso (R1-F6): el de la clase seleccionada + módulos/final */}
+          {(() => {
+            const classTest = selectedVideo?.id
+              ? courseTests.find((t) => t.kind === 'class' && t.video_id === selectedVideo.id)
+              : null;
+            const otherTests = courseTests.filter((t) => t.kind === 'module' || t.kind === 'final');
+            if (!classTest && otherTests.length === 0) return null;
+            return (
+              <div className="mb-8 flex flex-wrap items-center gap-2.5">
+                {classTest && (
+                  <button
+                    onClick={() => setActiveTest(classTest)}
+                    className="rounded-2xl bg-[#FF690B] px-5 py-2.5 text-sm sm:text-base font-bold text-white shadow-md hover:scale-[1.02] active:scale-95 transition-transform cursor-pointer"
+                  >
+                    📝 Test de esta clase
+                  </button>
+                )}
+                {otherTests.map((t) => (
+                  <button
+                    key={t.id}
+                    onClick={() => setActiveTest(t)}
+                    className="rounded-2xl border-2 border-[#363C98]/20 bg-white px-4 py-2.5 text-sm font-bold text-[#363C98] hover:border-[#FF690B] hover:text-[#FF690B] transition-colors cursor-pointer"
+                  >
+                    {t.kind === 'final' ? '🏁 Test final' : `📚 ${t.title || 'Test del módulo'}`}
+                  </button>
+                ))}
+              </div>
+            );
+          })()}
+
+          {/* Modal del quiz (overlay fijo) */}
+          {activeTest && (
+            <TestQuiz test={activeTest} token={token} onClose={() => setActiveTest(null)} />
+          )}
 
           {/* Progress Card */}
           <div className="bg-white border-2 border-gray-100 rounded-[20px] p-6 mb-12 shadow-sm">
