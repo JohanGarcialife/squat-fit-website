@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useAuthStore } from '@/stores/auth.store';
 import AccessNotice from '@/app/components/AccessNotice';
 import BrandTabs from '@/app/components/BrandTabs';
+import WelcomeVideoCard from '@/app/components/WelcomeVideoCard';
 import { useProgramAccess } from '@/app/components/useProgramAccess';
 import { SectionCard, EmptyState, LinkRow, CARD } from '@/app/components/ProgramSections';
 import {
@@ -112,6 +113,9 @@ export default function MiProgramaPage() {
     <div className="flex-1 bg-[#F8F9FC] p-6 md:p-10 min-h-screen overflow-y-auto">
       <div className="max-w-5xl mx-auto space-y-8 pb-24">
         <h1 className="text-3xl font-extrabold text-[#363C98]">Mi programa</h1>
+
+        {/* Vídeo de bienvenida (solo con programa activo; descartable). */}
+        <WelcomeVideoCard />
 
         {/* Cabecera del programa activo: datos reales de advice/by-user */}
         <div className="bg-[#FF690B] text-white rounded-3xl p-6 sm:p-8 shadow-lg">

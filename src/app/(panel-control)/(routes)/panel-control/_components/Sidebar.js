@@ -157,14 +157,15 @@ const InfoIcon = ({ filled }) => (
 // Menú definitivo (spec programas TMV + reestructura Mi entreno): Inicio ·
 // Mi programa · Mi entreno · Mis cursos · Mi cocina · Perfil, con Ajustes
 // abajo (Contacto, Conócenos, Legal y las notificaciones viven en Ajustes).
+// `tour` = ancla del tour de bienvenida (AppTour usa [data-tour="..."]).
 const MENU_ITEMS = [
-  { id: 0, label: 'Inicio', href: '/panel-control', Icon: HomeIcon },
-  { id: 3, label: 'Mi programa', href: '/mi-programa', Icon: StarIcon },
-  { id: 8, label: 'Mi entreno', href: '/mi-entreno', Icon: BarbellIcon },
-  { id: 4, label: 'Mis cursos', href: '/panel-cursos', Icon: SchoolIcon },
-  { id: 2, label: 'Mi cocina', href: '/panel-cocina', Icon: AppleIcon },
+  { id: 0, label: 'Inicio', href: '/panel-control', Icon: HomeIcon, tour: 'inicio' },
+  { id: 3, label: 'Mi programa', href: '/mi-programa', Icon: StarIcon, tour: 'mi-programa' },
+  { id: 8, label: 'Mi entreno', href: '/mi-entreno', Icon: BarbellIcon, tour: 'mi-entreno' },
+  { id: 4, label: 'Mis cursos', href: '/panel-cursos', Icon: SchoolIcon, tour: 'mis-cursos' },
+  { id: 2, label: 'Mi cocina', href: '/panel-cocina', Icon: AppleIcon, tour: 'mi-cocina' },
   { id: 5, label: 'Perfil', href: '/profile-panel', Icon: UserIcon },
-  { id: 7, label: 'Ajustes', href: '/panel-ajustes', Icon: SettingsIcon },
+  { id: 7, label: 'Ajustes', href: '/panel-ajustes', Icon: SettingsIcon, tour: 'ajustes' },
 ]
 
 // ─── Default (navigation) Sidebar ───────────────────────────────────────────
@@ -218,7 +219,7 @@ export default function Sidebar() {
           if (item.label === 'Ajustes') return null;
           const isActive = activeId === item.id
           const Content = (
-            <div className="flex items-center space-x-3 cursor-pointer group" onClick={() => handleItemClick(item.id)}>
+            <div data-tour={item.tour} className="flex items-center space-x-3 cursor-pointer group" onClick={() => handleItemClick(item.id)}>
               <div className="transition-transform group-hover:scale-110"><item.Icon filled={isActive} /></div>
               <span className={`text-lg transition-colors ${isActive ? 'font-bold text-[#FF690B]' : 'text-[#3932C0] group-hover:text-[#FF690B]'}`}>{item.label}</span>
             </div>
@@ -232,7 +233,7 @@ export default function Sidebar() {
         {menuItems.filter(item => item.label === 'Ajustes').map((item) => {
           const isActive = activeId === item.id
           const Content = (
-            <div className="flex items-center space-x-3 cursor-pointer group" onClick={() => handleItemClick(item.id)}>
+            <div data-tour={item.tour} className="flex items-center space-x-3 cursor-pointer group" onClick={() => handleItemClick(item.id)}>
               <div className="transition-transform group-hover:scale-110"><item.Icon filled={isActive} /></div>
               <span className={`text-lg transition-colors ${isActive ? 'font-bold text-[#FF690B]' : 'text-[#3932C0] group-hover:text-[#FF690B]'}`}>{item.label}</span>
             </div>
