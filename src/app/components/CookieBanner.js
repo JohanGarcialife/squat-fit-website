@@ -55,11 +55,8 @@ export default function CookieBanner() {
       <div className="pointer-events-auto mx-auto max-w-3xl rounded-[20px] bg-white shadow-2xl ring-1 ring-[#363C98]/10 p-4 sm:p-5">
         <div className="flex flex-col gap-3">
           <p className="text-sm text-[#363C98] leading-relaxed">
-            <span className="font-bold">🍪 Cookies en Squad Fit.</span>{' '}
-            Usamos almacenamiento propio para que la web funcione (sesión, carrito y tus
-            preferencias) y cookies de Stripe para pagar de forma segura. La analítica
-            (Google) está <strong>desactivada por defecto</strong>: solo se usa si tú la
-            activas en las{' '}
+            🍪 Usamos Cookies para que la web funcione correctamente (navegación,
+            carrito, analíticas). Al hacer clic en «aceptar» aceptas todas. Ver más en{' '}
             <button
               type="button"
               onClick={() => setShowPrefs((v) => !v)}
@@ -119,24 +116,25 @@ export default function CookieBanner() {
             </div>
           )}
 
+          {/* Aceptar a la IZQUIERDA (decisión de Hamlet: más intuitivo); acepta TODAS. */}
           <div className="flex flex-wrap gap-2 justify-end">
+            <button
+              type="button"
+              onClick={() => save('rejected', false)}
+              className="order-2 px-4 py-2 rounded-full text-sm font-bold text-[#363C98] border-2 border-[#363C98] hover:bg-[#363C98]/5 transition-colors cursor-pointer"
+            >
+              Rechazar
+            </button>
             <Link
               href="/politicas?tab=cookies"
-              className="px-4 py-2 rounded-full text-sm font-bold text-[#363C98] hover:bg-[#363C98]/5 transition-colors cursor-pointer"
+              className="order-3 px-4 py-2 rounded-full text-sm font-bold text-[#363C98] hover:bg-[#363C98]/5 transition-colors cursor-pointer"
             >
               Saber más
             </Link>
             <button
               type="button"
-              onClick={() => save('rejected', false)}
-              className="px-4 py-2 rounded-full text-sm font-bold text-[#363C98] border-2 border-[#363C98] hover:bg-[#363C98]/5 transition-colors cursor-pointer"
-            >
-              Rechazar
-            </button>
-            <button
-              type="button"
               onClick={() => save('accepted', true)}
-              className="px-5 py-2 rounded-full text-sm font-bold text-white bg-[#FF690B] hover:bg-[#e05b08] shadow-md transition-colors cursor-pointer"
+              className="order-1 px-5 py-2 rounded-full text-sm font-bold text-white bg-[#FF690B] hover:bg-[#e05b08] shadow-md transition-colors cursor-pointer"
             >
               Aceptar
             </button>
