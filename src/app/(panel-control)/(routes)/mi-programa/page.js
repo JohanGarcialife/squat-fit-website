@@ -1,12 +1,12 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
-import axios from 'axios';
 import { useAuthStore } from '@/stores/auth.store';
 import AccessNotice from '@/app/components/AccessNotice';
-import { handleApiError } from '@/app/components/handleApiError';
 import BrandTabs from '@/app/components/BrandTabs';
+import { useProgramAccess } from '@/app/components/useProgramAccess';
+import { SectionCard, EmptyState, LinkRow, CARD } from '@/app/components/ProgramSections';
 import {
   ClipboardList,
   CalendarCheck,
@@ -20,20 +20,14 @@ import {
   Camera,
   LineChart,
   Gauge,
-  Trophy,
   BookOpen,
   PlaySquare,
   FileDown,
   Replace,
   HelpCircle,
   Target,
-  ChevronRight,
   ArrowRight,
 } from 'lucide-react';
-
-const API = process.env.NEXT_PUBLIC_API_URL || 'https://squatfit-api-cyrc2g3zra-no.a.run.app';
-
-const CARD = 'bg-white rounded-3xl p-6 sm:p-8 border border-slate-100 shadow-sm';
 
 // Formularios del programa (motor tipo onboarding en /formulario/<slug>).
 // Son lo único de "Mi plan" que YA tiene backend real.
@@ -49,56 +43,7 @@ const TABS = [
   { id: 'recursos', label: 'Recursos' },
 ];
 
-// Encabezado de cada sub-sección dentro de una pestaña.
-function SectionCard({ Icon, title, children }) {
-  return (
-    <section className={CARD + ' space-y-4'}>
-      <div className="flex items-center gap-3 border-b border-slate-100 pb-4">
-        <div className="bg-[#FFF6F0] p-2.5 rounded-2xl text-[#FF690B]"><Icon className="w-6 h-6" /></div>
-        <h3 className="text-[#363C98] font-extrabold text-xl">{title}</h3>
-      </div>
-      {children}
-    </section>
-  );
-}
-
-// Estado vacío honesto para las áreas cuyo backend aún no existe: cuando el
-// coach publique el contenido real, se sustituye por los datos; mientras
-// tanto NO se muestra nada inventado.
-function EmptyState({ text, hint }) {
-  return (
-    <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50/60 px-5 py-6 text-center">
-      <span className="inline-block text-[10px] font-bold uppercase tracking-widest text-slate-400 bg-white border border-slate-200 rounded-full px-3 py-1 mb-3">
-        En preparación
-      </span>
-      <p className="text-slate-500 text-sm leading-relaxed">{text}</p>
-      {hint && <p className="text-slate-400 text-xs leading-relaxed mt-2">{hint}</p>}
-    </div>
-  );
-}
-
-// Fila-enlace reutilizable (a formularios, Mi Cocina, contacto…).
-function LinkRow({ href, Icon, title, desc }) {
-  return (
-    <Link
-      href={href}
-      className="flex items-center justify-between gap-4 bg-white border border-slate-200 rounded-2xl p-4 hover:shadow-md hover:border-[#FF690B]/40 transition-all group"
-    >
-      <div className="flex items-center gap-4 min-w-0">
-        <div className="p-2 bg-[#FFF6F0] rounded-xl shrink-0">
-          <Icon className="text-[#FF690B] w-6 h-6" strokeWidth={2} />
-        </div>
-        <div className="min-w-0">
-          <h4 className="font-bold text-[#363C98] truncate">{title}</h4>
-          {desc && <p className="text-slate-400 text-sm truncate">{desc}</p>}
-        </div>
-      </div>
-      <ChevronRight className="text-slate-300 w-5 h-5 shrink-0 group-hover:text-[#FF690B] transition-colors" />
-    </Link>
-  );
-}
-
-// Enlace contextual Pauta → Mi Cocina (recetas y alternativas).
+// Enlace contextual → Mi Cocina (recetas y alternativas).
 function CocinaLink({ text = 'Ver recetas y alternativas en Mi cocina' }) {
   return (
     <Link
@@ -113,27 +58,10 @@ function CocinaLink({ text = 'Ver recetas y alternativas en Mi cocina' }) {
 export default function MiProgramaPage() {
   const { token } = useAuthStore();
   const [tab, setTab] = useState('plan');
-  const [loading, setLoading] = useState(true);
-  const [advice, setAdvice] = useState(null);
-
-  useEffect(() => {
-    if (!token) return;
-    (async () => {
-      // Detección del programa activo: el objeto advice existe si el usuario
-      // tiene asesoría/programa (lo sincronizan los webhooks de Stripe).
-      try {
-        const res = await axios.get(`${API}/api/v1/advice/by-user`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (res.data && typeof res.data === 'object') setAdvice(res.data);
-      } catch (e) {
-        // Token caducado → re-login; otro error → simplemente sin programa.
-        if (handleApiError(e, '/mi-programa')) return;
-        /* sin programa activo */
-      }
-      setLoading(false);
-    })();
-  }, [token]);
+  // Detección del programa activo (advice/by-user) compartida con el Sidebar
+  // y el resto de pestañas: el objeto advice existe si el usuario tiene
+  // asesoría/programa (lo sincronizan los webhooks de Stripe).
+  const { loading, advice } = useProgramAccess();
 
   if (!token) return <AccessNotice redirect="/mi-programa" />;
 
@@ -147,8 +75,8 @@ export default function MiProgramaPage() {
   }
 
   // Sin programa: todos los programas Tu Mejor Versión incluyen esta zona
-  // (pauta + entrenamiento + seguimiento); quien no tiene programa ve el
-  // acceso a contratarlo, sin datos falsos.
+  // (plan + seguimiento + recursos); quien no tiene programa ve el acceso a
+  // contratarlo, sin datos falsos.
   if (!advice) {
     return (
       <div className="flex-1 bg-[#F8F9FC] p-6 md:p-10 min-h-screen overflow-y-auto">
@@ -160,9 +88,9 @@ export default function MiProgramaPage() {
             </div>
             <h2 className="text-2xl font-extrabold text-[#363C98] mb-3">Aún no tienes un programa activo</h2>
             <p className="text-slate-500 leading-relaxed max-w-md mx-auto mb-8">
-              Aquí verás tu pauta nutricional, tu entrenamiento y tu seguimiento
-              personalizado cuando empieces un programa Tu Mejor Versión con
-              nuestro equipo.
+              Aquí verás tu plan, tu seguimiento y tus recursos personalizados
+              cuando empieces un programa Tu Mejor Versión con nuestro equipo
+              (tu entreno vivirá en Mi entreno y tu pauta en Mi cocina).
             </p>
             <Link
               href="/programa"
@@ -211,6 +139,23 @@ export default function MiProgramaPage() {
           </div>
         </div>
 
+        {/* Reestructura: el entreno y la pauta ya no viven aquí. Enlaces
+            claros a sus nuevas pestañas, sin duplicar contenido. */}
+        <div className="grid sm:grid-cols-2 gap-3">
+          <LinkRow
+            href="/mi-entreno"
+            Icon={Dumbbell}
+            title="Tu entreno vive ahora en Mi entreno"
+            desc="Rutina, rendimiento y técnica"
+          />
+          <LinkRow
+            href="/panel-cocina"
+            Icon={UtensilsCrossed}
+            title="Tu pauta vive ahora en Mi cocina"
+            desc="Menús, recetas y alternativas"
+          />
+        </div>
+
         <BrandTabs tabs={TABS} active={tab} onChange={setTab} />
 
         {/* ════════ MI PLAN ════════ */}
@@ -220,21 +165,6 @@ export default function MiProgramaPage() {
               <EmptyState
                 text="Tus tareas del día aparecerán aquí cuando tu coach publique tu plan."
                 hint="Entrenamiento, comidas y hábitos del día, marcables al completarlos."
-              />
-            </SectionCard>
-
-            <SectionCard Icon={UtensilsCrossed} title="Pauta nutricional">
-              <EmptyState
-                text="Tu pauta personalizada aparecerá aquí cuando tu coach la publique."
-                hint="Menús, cantidades y notas adaptadas a tu objetivo."
-              />
-              <CocinaLink text="Mientras tanto, explora recetas y alternativas en Mi cocina" />
-            </SectionCard>
-
-            <SectionCard Icon={Dumbbell} title="Entrenamiento">
-              <EmptyState
-                text="Tu rutina de entrenamiento personalizada aparecerá aquí cuando tu coach la publique."
-                hint="Días, ejercicios, series y progresiones."
               />
             </SectionCard>
 
@@ -305,11 +235,13 @@ export default function MiProgramaPage() {
               />
             </SectionCard>
 
-            <SectionCard Icon={Trophy} title="Rendimiento">
-              <EmptyState
-                text="La progresión de tus marcas y cargas de entrenamiento aparecerá aquí."
-              />
-            </SectionCard>
+            {/* El rendimiento (marcas y cargas) vive ahora en Mi entreno. */}
+            <LinkRow
+              href="/mi-entreno"
+              Icon={Dumbbell}
+              title="Tu rendimiento vive en Mi entreno"
+              desc="Progresión de marcas y cargas"
+            />
           </div>
         )}
 
@@ -330,16 +262,19 @@ export default function MiProgramaPage() {
 
             <SectionCard Icon={Replace} title="Sustituciones">
               <p className="text-slate-500 text-sm leading-relaxed">
-                ¿No te encaja un alimento de tu pauta? En Mi cocina tienes recetas
-                y alternativas equivalentes.
+                ¿No te encaja un alimento de tu pauta? En Mi cocina tienes tu
+                pauta, recetas y alternativas equivalentes.
               </p>
               <CocinaLink text="Buscar alternativas en Mi cocina" />
-              <EmptyState text="Las tablas de sustituciones de tu pauta aparecerán aquí." />
             </SectionCard>
 
-            <SectionCard Icon={Dumbbell} title="Técnica de ejercicios">
-              <EmptyState text="La biblioteca de técnica (vídeos por ejercicio) aparecerá aquí." />
-            </SectionCard>
+            {/* La técnica de ejercicios vive ahora en Mi entreno. */}
+            <LinkRow
+              href="/mi-entreno"
+              Icon={Dumbbell}
+              title="La técnica de ejercicios vive en Mi entreno"
+              desc="Vídeos por ejercicio, junto a tu rutina"
+            />
 
             <SectionCard Icon={HelpCircle} title="FAQ">
               <EmptyState text="Las preguntas frecuentes del programa aparecerán aquí." />

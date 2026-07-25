@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { useProgramAccess } from '@/app/components/useProgramAccess'
 
 // --- Icon Components ---
 const TelegramIcon = () => (
@@ -80,6 +81,21 @@ const SchoolIcon = ({ filled }) => (
   </svg>
 )
 
+// Mi entreno: barra de pesas. Como en el birrete de Cursos, el estado activo
+// usa la MISMA forma de contorno pero en naranja y algo más gruesa.
+const BarbellIcon = ({ filled }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke={filled ? "#FF690B" : "#3932C0"} strokeWidth={filled ? "2.5" : "2"} strokeLinecap="round" strokeLinejoin="round">
+    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+    <path d="M2 12h1" />
+    <path d="M6 8h-2a1 1 0 0 0 -1 1v6a1 1 0 0 0 1 1h2" />
+    <path d="M6 7v10a1 1 0 0 0 1 1h1a1 1 0 0 0 1 -1v-10a1 1 0 0 0 -1 -1h-1a1 1 0 0 0 -1 1z" />
+    <path d="M9 12h6" />
+    <path d="M15 7v10a1 1 0 0 0 1 1h1a1 1 0 0 0 1 -1v-10a1 1 0 0 0 -1 -1h-1a1 1 0 0 0 -1 1z" />
+    <path d="M18 8h2a1 1 0 0 1 1 1v6a1 1 0 0 1 -1 1h-2" />
+    <path d="M22 12h-1" />
+  </svg>
+)
+
 const UserIcon = ({ filled }) => (
   <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill={filled ? "#FF690B" : "none"} stroke={filled ? "none" : "#3932C0"} strokeWidth={filled ? "0" : "2"} strokeLinecap="round" strokeLinejoin="round">
     <path stroke="none" d="M0 0h24v24H0z" fill="none" />
@@ -138,12 +154,13 @@ const InfoIcon = ({ filled }) => (
 )
 
 // --- Configuration ---
-// Menú definitivo (spec programas TMV): Inicio · Mi programa · Mis cursos ·
-// Mi cocina · Perfil, con Ajustes abajo (Contacto, Conócenos, Legal y las
-// notificaciones viven dentro de Ajustes).
+// Menú definitivo (spec programas TMV + reestructura Mi entreno): Inicio ·
+// Mi programa · Mi entreno · Mis cursos · Mi cocina · Perfil, con Ajustes
+// abajo (Contacto, Conócenos, Legal y las notificaciones viven en Ajustes).
 const MENU_ITEMS = [
   { id: 0, label: 'Inicio', href: '/panel-control', Icon: HomeIcon },
   { id: 3, label: 'Mi programa', href: '/mi-programa', Icon: StarIcon },
+  { id: 8, label: 'Mi entreno', href: '/mi-entreno', Icon: BarbellIcon },
   { id: 4, label: 'Mis cursos', href: '/panel-cursos', Icon: SchoolIcon },
   { id: 2, label: 'Mi cocina', href: '/panel-cocina', Icon: AppleIcon },
   { id: 5, label: 'Perfil', href: '/profile-panel', Icon: UserIcon },
@@ -155,6 +172,19 @@ export default function Sidebar() {
   const pathname = usePathname()
   const [activeId, setActiveId] = useState(0)
   const [mobileOpen, setMobileOpen] = useState(false)
+
+  // Mismos criterios de acceso que las páginas (advice/by-user y
+  // course/by-user, llamada compartida vía caché del hook):
+  //   - «Mi entreno» solo aparece con programa o con el curso Entrena en casa.
+  //   - «Mi programa» se oculta a quien SOLO tiene el curso Entrena en casa
+  //     (sin programa); con programa —o sin datos aún— se muestra como hasta
+  //     ahora (incluida la pantalla de contratar para quien no tiene nada).
+  const { checked, hasProgram, hasEntrenaCourse } = useProgramAccess()
+  const menuItems = MENU_ITEMS.filter((item) => {
+    if (item.label === 'Mi entreno') return checked && (hasProgram || hasEntrenaCourse)
+    if (item.label === 'Mi programa') return !(checked && !hasProgram && hasEntrenaCourse)
+    return true
+  })
 
   useEffect(() => {
     const activeItem = MENU_ITEMS.find(item => item.href && pathname.startsWith(item.href))
@@ -184,7 +214,7 @@ export default function Sidebar() {
 
       {/* Menu Items */}
       <div className="flex flex-col space-y-4 flex-grow">
-        {MENU_ITEMS.map((item) => {
+        {menuItems.map((item) => {
           if (item.label === 'Ajustes') return null;
           const isActive = activeId === item.id
           const Content = (
@@ -199,7 +229,7 @@ export default function Sidebar() {
 
       {/* Bottom Items (Ajustes) */}
       <div className="mt-auto pt-8">
-        {MENU_ITEMS.filter(item => item.label === 'Ajustes').map((item) => {
+        {menuItems.filter(item => item.label === 'Ajustes').map((item) => {
           const isActive = activeId === item.id
           const Content = (
             <div className="flex items-center space-x-3 cursor-pointer group" onClick={() => handleItemClick(item.id)}>
