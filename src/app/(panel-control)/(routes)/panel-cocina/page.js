@@ -5,13 +5,18 @@ import Image from "next/image";
 import Link from "next/link";
 import axios from "axios";
 import { useAuthStore } from "@/stores/auth.store";
-import { BookOpen, Lock, ArrowRight } from "lucide-react";
+import { BookOpen, Lock, ArrowRight, UtensilsCrossed, Replace } from "lucide-react";
 import RichProductCards from "@/app/components/RichProductCards";
 import AccessNotice from "@/app/components/AccessNotice";
 import { handleApiError } from "@/app/components/handleApiError";
+import { useProgramAccess } from "@/app/components/useProgramAccess";
+import { SectionCard, EmptyState } from "@/app/components/ProgramSections";
 
 export default function CocinaPage() {
   const { token, isSubscribed } = useAuthStore();
+  // Mi pauta: los menús del programa viven aquí (todo lo de comida junto).
+  // Solo se enseña si el usuario tiene programa activo (advice/by-user).
+  const { hasProgram } = useProgramAccess();
   const [books, setBooks] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -89,6 +94,29 @@ export default function CocinaPage() {
 
       {/* Title */}
       <h1 className="text-[#3932C0] text-5xl font-bold mb-16">Cocina</h1>
+
+      {/* ── MI PAUTA ─────────────────────────────────────────────────────────
+          Sección movida desde Mi programa: la pauta nutricional (menús) del
+          programa vive ahora aquí, encima de la biblioteca de recetas, para
+          tener todo lo de comida junto. Solo para usuarios con programa. */}
+      {hasProgram && (
+        <div className="mb-16 space-y-6">
+          <SectionCard Icon={UtensilsCrossed} title="Mi pauta">
+            <EmptyState
+              text="Tu pauta personalizada aparecerá aquí cuando tu coach la publique."
+              hint="Menús, cantidades y notas adaptadas a tu objetivo."
+            />
+          </SectionCard>
+          <SectionCard Icon={Replace} title="Sustituciones de mi pauta">
+            <p className="text-slate-500 text-sm leading-relaxed">
+              ¿No te encaja un alimento de tu pauta? Justo debajo tienes las
+              recetas de tu biblioteca para encontrar alternativas equivalentes.
+            </p>
+            <EmptyState text="Las tablas de sustituciones de tu pauta aparecerán aquí." />
+          </SectionCard>
+          <h2 className="text-[#3932C0] text-3xl font-bold pt-4">Mis recetas</h2>
+        </div>
+      )}
 
       {loading ? (
         <div className="flex justify-center items-center py-20">
