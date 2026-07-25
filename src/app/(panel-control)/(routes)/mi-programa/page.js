@@ -149,14 +149,14 @@ export default function MiProgramaPage() {
           <LinkRow
             href="/mi-entreno"
             Icon={Dumbbell}
-            title="Tu entreno vive ahora en Mi entreno"
-            desc="Rutina, rendimiento y técnica"
+            title="Ver tu entreno de hoy"
+            desc="Rutina, rendimiento y técnica en Mi entreno"
           />
           <LinkRow
             href="/panel-cocina"
             Icon={UtensilsCrossed}
-            title="Tu pauta vive ahora en Mi cocina"
-            desc="Menús, recetas y alternativas"
+            title="Ver tu pauta nutricional"
+            desc="Menús, recetas y alternativas en Mi cocina"
           />
         </div>
 
