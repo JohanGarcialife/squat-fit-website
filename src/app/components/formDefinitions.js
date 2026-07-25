@@ -78,9 +78,9 @@ const evaluacionInicial = {
     { type: 'checkbox', key: 'accesorios_cocina', phase: 'Tu cocina', title: 'Accesorios de cocina disponibles', subtitle: 'Marca las que apliquen', options: ['Báscula de comida', 'Sartén antiadherente', 'Tostadora', 'Aceite en spray', 'Cortador/laminador de verduras', 'Tuppers y ziplocs'] },
 
     // Paso 7: Tu alimentación
-    { type: 'text', long: true, key: 'alimentos_preferidos', phase: 'Tu alimentación', title: 'Tus alimentos preferidos a incluir' },
-    { type: 'text', long: true, key: 'alimentos_no_gustan', phase: 'Tu alimentación', title: 'Alimentos que no te gusten' },
-    { type: 'text', long: true, key: 'alimentos_mantener', phase: 'Tu alimentación', title: 'Alimentos actuales a mantener' },
+    { type: 'text', long: true, key: 'alimentos_preferidos', phase: 'Tu alimentación', title: 'Tus alimentos preferidos a incluir', targetChars: 90 },
+    { type: 'text', long: true, key: 'alimentos_no_gustan', phase: 'Tu alimentación', title: 'Alimentos que no te gusten', targetChars: 70 },
+    { type: 'text', long: true, key: 'alimentos_mantener', phase: 'Tu alimentación', title: 'Alimentos actuales a mantener', targetChars: 80 },
     { type: 'radio', key: 'restricciones_religiosas', phase: 'Tu alimentación', title: 'Restricciones dietéticas religiosas', options: SI_NO },
     followUp('restricciones_religiosas', 'Sobre tus restricciones religiosas, ¿dime cuáles?', 'Tu alimentación'),
     { type: 'radio', key: 'restricciones_personales', phase: 'Tu alimentación', title: 'Restricciones dietéticas personales', options: SI_NO },
@@ -93,14 +93,14 @@ const evaluacionInicial = {
     { type: 'radio', key: 'protocolos_restrictivos', phase: 'Tus costumbres', title: '¿Haces protocolos restrictivos entre semana?', options: SI_NO, allowOther: true },
     { type: 'radio', key: 'desvio_findes', phase: 'Tus costumbres', title: '¿Te desvías de tu dieta en findes?', options: SI_NO, allowOther: true },
     { type: 'radio', key: 'relacion_comida', phase: 'Tus costumbres', title: '¿Cómo es tu relación con la comida?', options: ['Buena', 'Mediocre', 'Mala'] },
-    { type: 'text', long: true, key: 'relacion_comida_detalle', phase: 'Tus costumbres', title: 'Explícanos por qué' },
+    { type: 'text', long: true, key: 'relacion_comida_detalle', phase: 'Tus costumbres', title: 'Explícanos por qué', targetChars: 160 },
 
     // Paso 9: Tu dieta reciente
     { type: 'radio', key: 'cambio_dieta_reciente', phase: 'Tu dieta reciente', title: '¿Has cambiado tu dieta recientemente?', options: SI_NO },
-    { type: 'text', long: true, key: 'cambio_dieta_reciente_detalle', phase: 'Tu dieta reciente', title: 'Explícanos por qué' },
-    { type: 'text', long: true, key: 'dieta_que_cuesta', phase: 'Tu dieta reciente', title: '¿Qué te cuesta más de una dieta?' },
-    { type: 'text', long: true, key: 'dieta_que_cambiarias', phase: 'Tu dieta reciente', title: '¿Qué cambiarías de las dietas previas?' },
-    { type: 'text', long: true, key: 'dieta_que_esperas', phase: 'Tu dieta reciente', title: '¿Qué esperas de un plan dietético?' },
+    { type: 'text', long: true, key: 'cambio_dieta_reciente_detalle', phase: 'Tu dieta reciente', title: 'Explícanos por qué', targetChars: 140 },
+    { type: 'text', long: true, key: 'dieta_que_cuesta', phase: 'Tu dieta reciente', title: '¿Qué te cuesta más de una dieta?', targetChars: 130 },
+    { type: 'text', long: true, key: 'dieta_que_cambiarias', phase: 'Tu dieta reciente', title: '¿Qué cambiarías de las dietas previas?', targetChars: 130 },
+    { type: 'text', long: true, key: 'dieta_que_esperas', phase: 'Tu dieta reciente', title: '¿Qué esperas de un plan dietético?', targetChars: 150 },
 
     // Paso 10: Suplementación
     { type: 'multitext', key: 'supl_dietetica', phase: 'Suplementación', title: 'Suplementación dietética', subtitle: 'Complementos alimenticios, vitaminas, etc' },
@@ -118,7 +118,7 @@ const evaluacionInicial = {
       followUp('anticonceptivos', 'Indica el tipo', 'Para mujeres'),
       { type: 'radio', key: 'trastorno_menstrual', title: 'Sobre el trastorno menstrual', options: ['Sí, lo tengo', 'He tenido antes', 'No tengo'] },
       { type: 'radio', key: 'sindrome_premenstrual', title: 'Sobre síndrome premenstrual', options: ['Sí, tengo SPM intenso', 'He tenido antes', 'No tengo'] },
-      { type: 'text', long: true, key: 'sintomas_periodo', title: 'Síntomas durante el periodo' },
+      { type: 'text', long: true, key: 'sintomas_periodo', title: 'Síntomas durante el periodo', targetChars: 90 },
       { type: 'radio', key: 'cambios_fisicos_ciclo', title: '¿Cambios físicos antes o durante el ciclo?', options: SI_NO, allowOther: true },
       followUp('cambios_fisicos_ciclo', 'Indica cuáles', 'Para mujeres'),
       { type: 'radio', key: 'rendimiento_ciclo', title: '¿Cambia tu rendimiento deportivo?', options: SI_NO, allowOther: true },
@@ -133,12 +133,12 @@ const evaluacionInicial = {
       type: 'intro', phase: 'Recuerdo de 24 h', title: 'Recuerdo de 24 h',
       body: 'Cuéntanos qué comiste ayer, comida a comida.\n\n• No busques hacerlo perfecto\n• Usa cantidades aproximadas\n• Añade detalles si lo deseas',
     },
-    { type: 'mealtext', key: 'recuerdo_desayuno', phase: 'Recuerdo de 24 h', title: 'Desayuno' },
-    { type: 'mealtext', key: 'recuerdo_media_manana', phase: 'Recuerdo de 24 h', title: 'Media mañana' },
-    { type: 'mealtext', key: 'recuerdo_comida', phase: 'Recuerdo de 24 h', title: 'De comida' },
-    { type: 'mealtext', key: 'recuerdo_merienda', phase: 'Recuerdo de 24 h', title: 'Merienda' },
-    { type: 'mealtext', key: 'recuerdo_cena', phase: 'Recuerdo de 24 h', title: 'Para cenar' },
-    { type: 'mealtext', key: 'recuerdo_pre_sueno', phase: 'Recuerdo de 24 h', title: 'Pre-sueño' },
+    { type: 'mealtext', key: 'recuerdo_desayuno', phase: 'Recuerdo de 24 h', title: 'Desayuno', targetChars: 110 },
+    { type: 'mealtext', key: 'recuerdo_media_manana', phase: 'Recuerdo de 24 h', title: 'Media mañana', targetChars: 70 },
+    { type: 'mealtext', key: 'recuerdo_comida', phase: 'Recuerdo de 24 h', title: 'De comida', targetChars: 120 },
+    { type: 'mealtext', key: 'recuerdo_merienda', phase: 'Recuerdo de 24 h', title: 'Merienda', targetChars: 70 },
+    { type: 'mealtext', key: 'recuerdo_cena', phase: 'Recuerdo de 24 h', title: 'Para cenar', targetChars: 110 },
+    { type: 'mealtext', key: 'recuerdo_pre_sueno', phase: 'Recuerdo de 24 h', title: 'Pre-sueño', targetChars: 60 },
 
     // Paso 13: Actividad física
     { type: 'text', key: 'profesion', phase: 'Actividad física', title: '¿Cuál es tu profesión actual?' },

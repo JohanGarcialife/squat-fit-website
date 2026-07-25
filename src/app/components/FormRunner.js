@@ -22,6 +22,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import TextareaMeter from './TextareaMeter';
 
 const BLUE = '#3932C0';
 const ORANGE = '#FF690B';
@@ -131,12 +132,11 @@ export default function FormRunner({ definition, context = {}, onSubmit, exitHre
     return () => window.removeEventListener('keydown', onKey);
   }, []);
 
-  // Pista sutil bajo los párrafos: Enter no envía aquí.
-  const textareaHint = (
-    <p className="text-xs font-semibold text-[#B4B1D6] mt-1.5 select-none">
-      Enter añade una línea · pulsa Continuar para seguir
-    </p>
-  );
+  // Bajo los párrafos: semáforo de longitud (y, con el campo vacío, el recordatorio
+  // de que Enter no envía). El objetivo va en `targetChars` de cada pregunta.
+  const textareaHint = step ? (
+    <TextareaMeter value={answers[step.key]} targetChars={step.targetChars} />
+  ) : null;
 
   if (sent && renderResult) {
     return renderResult(result);
