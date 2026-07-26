@@ -211,6 +211,10 @@ export default function EmpiezaTuCambioPage() {
   const [pidiendoSalir, setPidiendoSalir] = useState(false);
   // Progreso encontrado en el navegador al abrir (null si no hay).
   const [guardado, setGuardado] = useState(null);
+  // De qué enlace corto llegó (bio de Instagram, YouTube, email…).
+  const [origenLead, setOrigenLead] = useState(null);
+  // Modo landing sin salida (?directo=1): sin X en la cabecera.
+  const [sinSalida, setSinSalida] = useState(false);
   const progresoLeido = useRef(false);
   // El contenido espera a que termine de escribirse el título.
   const [titleDone, setTitleDone] = useState(false);
@@ -282,6 +286,27 @@ export default function EmpiezaTuCambioPage() {
   const contenidoListo = alreadySeen || (step?.type === 'intro' ? bodyDone : titleDone);
   const puedeAvanzar = isValid && contenidoListo;
 
+  // Atribución: de qué enlace corto vino (ver form-links.mjs). Se lee una sola
+  // vez al abrir, porque al retomar el formulario desde el botón flotante la URL
+  // ya no lleva los parámetros y se perdería.
+  useEffect(() => {
+    const p = new URLSearchParams(window.location.search);
+    // `?directo=1`: landing sin salida, para los enlaces que manda el equipo
+    // uno a uno por WhatsApp. Los enlaces de la bio, YouTube o los correos SÍ
+    // llevan la X: ahí la persona ha llegado por su cuenta y encerrarla solo
+    // consigue que se vaya por el botón de atrás, perdiendo lo respondido.
+    if (p.get('directo') === '1') setSinSalida(true);
+    const via = p.get('via');
+    if (!via) return;
+    setOrigenLead({
+      via,
+      utm_source: p.get('utm_source') || '',
+      utm_medium: p.get('utm_medium') || '',
+      utm_campaign: p.get('utm_campaign') || '',
+      utm_content: p.get('utm_content') || '',
+    });
+  }, []);
+
   // Al abrir: ¿hay un formulario a medias guardado en este navegador?
   useEffect(() => {
     if (progresoLeido.current) return;
@@ -300,8 +325,9 @@ export default function EmpiezaTuCambioPage() {
       total,
       titulo: 'Aquí empieza tu cambio',
       url: FORM_URL,
+      origen: origenLead,
     });
-  }, [answers, index, started, sent, total]);
+  }, [answers, index, started, sent, total, origenLead]);
 
   const goNext = () => {
     if (!puedeAvanzar || index >= total - 1) return;
@@ -336,13 +362,17 @@ export default function EmpiezaTuCambioPage() {
       first_name: normalizeName(answers.first_name),
       last_name: normalizeName(answers.last_name),
       timestamp: new Date().toISOString(),
-      origen: typeof window !== 'undefined' ? `web ${window.location.pathname}` : 'web',
+      origen: origenLead?.via
+        ? `web ${origenLead.via}`
+        : (typeof window !== 'undefined' ? `web ${window.location.pathname}` : 'web'),
+      ...(origenLead || {}),
     };
     try {
       if (SUBMIT_ENDPOINT) {
         // Contrato de POST /forms/public-answer: metadatos arriba, el resto de
         // respuestas como pares {question, answer}. website = honeypot vacío.
-        const META_KEYS = ['first_name', 'last_name', 'phone', 'timestamp', 'origen'];
+        const META_KEYS = ['first_name', 'last_name', 'phone', 'timestamp', 'origen',
+          'via', 'utm_source', 'utm_medium', 'utm_campaign', 'utm_content'];
         const body = {
           form_id: PRELLAMADA_FORM_ID,
           name: [submission.first_name, submission.last_name].filter(Boolean).join(' '),
@@ -459,6 +489,9 @@ export default function EmpiezaTuCambioPage() {
       if (retomar && guardado) {
         setAnswers((a) => ({ ...a, ...(guardado.respuestas || {}) }));
         setIndex(guardado.indice || 0);
+        // La atribución de origen se recupera con el resto: al volver desde el
+        // botón flotante la URL ya no trae los parámetros.
+        if (guardado.origen && !origenLead) setOrigenLead(guardado.origen);
       }
       const sinMovimiento = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
       if (sinMovimiento) { setStarted(true); return; }
@@ -517,7 +550,7 @@ export default function EmpiezaTuCambioPage() {
             <div className="h-full rounded-full sf-progress-fill" style={{ width: `${progress}%`, backgroundColor: BLUE }} />
           </div>
           <SoundButton />
-          <ExitButton onClick={() => setPidiendoSalir(true)} />
+          {!sinSalida && <ExitButton onClick={() => setPidiendoSalir(true)} />}
         </div>
 
         {/* Contenido */}

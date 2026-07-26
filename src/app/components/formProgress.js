@@ -44,9 +44,12 @@ function escribirTodo(forms) {
  * Guarda dónde se quedó. `meta` es lo que necesita el botón flotante para
  * ofrecer volver: título, url y por qué pregunta iba.
  */
-export function guardarProgreso(id, { respuestas, indice, total, titulo, url }) {
+export function guardarProgreso(id, { respuestas, indice, total, titulo, url, origen }) {
   const forms = leerTodo();
-  forms[id] = { respuestas, indice, total, titulo, url, ts: Date.now() };
+  // `origen` (de qué enlace corto vino) se guarda con el progreso a propósito:
+  // al volver desde el botón flotante la URL ya no lleva los UTM, y si no
+  // estuviera aquí el lead llegaría sin saber de dónde salió.
+  forms[id] = { respuestas, indice, total, titulo, url, origen, ts: Date.now() };
   escribirTodo(forms);
 }
 
