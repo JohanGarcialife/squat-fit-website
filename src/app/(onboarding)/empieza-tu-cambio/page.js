@@ -8,6 +8,7 @@
 // del briefing (clases sf-* de form-motion.css).
 
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import PhoneInput from 'react-phone-input-2';
@@ -17,9 +18,10 @@ import GdprCheckbox from '@/app/components/GdprCheckbox';
 import { normalizeName } from '@/app/components/nameUtils';
 import TextareaMeter from '@/app/components/TextareaMeter';
 import Typewriter from '@/app/components/Typewriter';
-import { ExitButton, BackButton, StepCounter, FormAside, StepsDrawer, SoundButton, useMicroFeedback, PausaPantalla, PAUSA_MS, ChildField } from '@/app/components/FormChrome';
+import { ExitButton, BackButton, StepCounter, FormAside, StepsDrawer, SoundButton, useMicroFeedback, PausaPantalla, PAUSA_MS, ChildField, SalidaDialogo } from '@/app/components/FormChrome';
 import { playSelect, playAdvance, playFinish, playKeypress, unlockAudio } from '@/app/components/formSounds';
 import { PAISES_EUROPA, PAISES_LATAM } from '@/app/components/paises';
+import { guardarProgreso, leerProgreso, borrarProgreso } from '@/app/components/formProgress';
 
 const BLUE = '#3932C0';
 const ORANGE = '#FF690B';
@@ -176,6 +178,10 @@ const ADVANCE_DELAY = 520;
 // --ms-portada-out de form-motion.css.
 const PORTADA_OUT_MS = 620;
 
+// Identificador del progreso guardado en el navegador.
+const FORM_ID = 'prellamada';
+const FORM_URL = '/empieza-tu-cambio';
+
 const esPhoneLocalization = { ...esPhone, gb: 'Inglaterra' };
 
 export default function EmpiezaTuCambioPage() {
@@ -199,7 +205,13 @@ export default function EmpiezaTuCambioPage() {
   // la primera pantalla se perdería en silencio.
   const [started, setStarted] = useState(false);
   // Fase intermedia: la portada apartándose. Sin esto el cambio sería un corte.
+  const router = useRouter();
   const [saliendoPortada, setSaliendoPortada] = useState(false);
+  // Salir: no se sale de golpe, primero se avisa de que queda guardado.
+  const [pidiendoSalir, setPidiendoSalir] = useState(false);
+  // Progreso encontrado en el navegador al abrir (null si no hay).
+  const [guardado, setGuardado] = useState(null);
+  const progresoLeido = useRef(false);
   // El contenido espera a que termine de escribirse el título.
   const [titleDone, setTitleDone] = useState(false);
   // Y el botón espera a que termine de escribirse TODO el texto de la pantalla.
@@ -270,6 +282,27 @@ export default function EmpiezaTuCambioPage() {
   const contenidoListo = alreadySeen || (step?.type === 'intro' ? bodyDone : titleDone);
   const puedeAvanzar = isValid && contenidoListo;
 
+  // Al abrir: ¿hay un formulario a medias guardado en este navegador?
+  useEffect(() => {
+    if (progresoLeido.current) return;
+    progresoLeido.current = true;
+    const p = leerProgreso(FORM_ID);
+    if (p && p.indice > 0) setGuardado(p);
+  }, []);
+
+  // Guardar en cada respuesta y en cada cambio de pregunta. No sale de este
+  // navegador: al servidor no se manda nada hasta que le da a enviar.
+  useEffect(() => {
+    if (!started || sent) return;
+    guardarProgreso(FORM_ID, {
+      respuestas: answers,
+      indice: index,
+      total,
+      titulo: 'Aquí empieza tu cambio',
+      url: FORM_URL,
+    });
+  }, [answers, index, started, sent, total]);
+
   const goNext = () => {
     if (!puedeAvanzar || index >= total - 1) return;
     playAdvance();
@@ -332,6 +365,7 @@ export default function EmpiezaTuCambioPage() {
         prev.push(submission);
         localStorage.setItem(STORAGE_KEY, JSON.stringify(prev));
       }
+      borrarProgreso(FORM_ID);
       setSent(true);
     } catch (e) {
       console.error('prellamada submit', e);
@@ -340,6 +374,7 @@ export default function EmpiezaTuCambioPage() {
         const prev = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
         prev.push(submission);
         localStorage.setItem(STORAGE_KEY, JSON.stringify(prev));
+        borrarProgreso(FORM_ID);
         setSent(true);
       } catch {}
     } finally {
@@ -418,9 +453,13 @@ export default function EmpiezaTuCambioPage() {
   // sonar nada hasta que el usuario toca algo, así que sin este botón la primera
   // pantalla se escribiría en silencio y el lead se perdería el efecto entero.
   if (!started) {
-    const arrancar = () => {
+    const arrancar = (retomar) => {
       unlockAudio();
       playAdvance();
+      if (retomar && guardado) {
+        setAnswers((a) => ({ ...a, ...(guardado.respuestas || {}) }));
+        setIndex(guardado.indice || 0);
+      }
       const sinMovimiento = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
       if (sinMovimiento) { setStarted(true); return; }
       setSaliendoPortada(true);
@@ -438,20 +477,30 @@ export default function EmpiezaTuCambioPage() {
           />
           <div className="sf-portada-texto flex flex-col items-center">
             <h1 className="font-extrabold mb-4" style={{ color: BLUE, fontSize: 'clamp(1.9rem, 4vw, 2.6rem)' }}>
-              Vamos a conocerte
+              {guardado ? '¿Seguimos donde lo dejaste?' : 'Vamos a conocerte'}
             </h1>
             <p className="text-[#6B6BA8] text-lg leading-relaxed mb-9">
-              Son unas preguntas rápidas sobre ti y tu objetivo. Tómate tu tiempo:
-              cuanto mejor te conozca, mejor podré ayudarte en la llamada.
+              {guardado
+                ? `Tenías ${guardado.indice} respuestas guardadas en este navegador. Puedes continuar por donde ibas o empezar de nuevo.`
+                : 'Son unas preguntas rápidas sobre ti y tu objetivo. Tómate tu tiempo: cuanto mejor te conozca, mejor podré ayudarte en la llamada.'}
             </p>
             <button
               type="button"
-              onClick={arrancar}
+              onClick={() => arrancar(!!guardado)}
               className="sf-cta is-enabled w-full max-w-xs rounded-2xl py-4 font-bold text-white text-lg cursor-pointer"
               style={{ backgroundColor: BLUE }}
             >
-              Empezar
+              {guardado ? 'Continuar' : 'Empezar'}
             </button>
+            {guardado && (
+              <button
+                type="button"
+                onClick={() => { borrarProgreso(FORM_ID); setGuardado(null); }}
+                className="mt-4 text-[#8B87C9] hover:text-[#3932C0] font-bold transition-colors cursor-pointer"
+              >
+                Empezar de nuevo
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -468,7 +517,7 @@ export default function EmpiezaTuCambioPage() {
             <div className="h-full rounded-full sf-progress-fill" style={{ width: `${progress}%`, backgroundColor: BLUE }} />
           </div>
           <SoundButton />
-          <ExitButton href="/programa" />
+          <ExitButton onClick={() => setPidiendoSalir(true)} />
         </div>
 
         {/* Contenido */}
@@ -698,6 +747,14 @@ export default function EmpiezaTuCambioPage() {
       />
 
       <PausaPantalla texto={pausa} />
+
+      <SalidaDialogo
+        abierto={pidiendoSalir}
+        indice={index}
+        total={total}
+        onSeguir={() => setPidiendoSalir(false)}
+        onSalir={() => router.push('/programa')}
+      />
 
       <style jsx global>{`
         .onb-phone .react-tel-input .form-control { height: auto; }

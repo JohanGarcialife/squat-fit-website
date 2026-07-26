@@ -116,6 +116,49 @@ export function ChildField({ children }) {
   );
 }
 
+/* ── Salir del formulario ─────────────────────────────────────────────────
+      No se sale de golpe: primero se dice que las respuestas quedan guardadas.
+      Es la mitad del trato de dejar salir — si no se dice, la persona asume que
+      pierde lo hecho y o bien no sale (se frustra) o bien sale y no vuelve. ── */
+export function SalidaDialogo({ abierto, indice, total, onSeguir, onSalir }) {
+  if (!abierto) return null;
+  const hechas = Math.max(0, indice);
+  return (
+    <div className="fixed inset-0 z-[130] flex flex-col items-center justify-center px-8 text-center bg-white"
+         role="dialog" aria-modal="true">
+      <div className="sf-screen-in max-w-md flex flex-col items-center">
+        <span className="grid place-items-center w-20 h-20 rounded-full mb-7"
+              style={{ backgroundColor: '#EFEEFA', color: BLUE }}>
+          <Check className="w-10 h-10" strokeWidth={3} />
+        </span>
+        <h2 className="font-extrabold mb-3" style={{ color: BLUE, fontSize: 'clamp(1.5rem, 4vw, 2rem)' }}>
+          Tranquilo, lo guardamos
+        </h2>
+        <p className="text-[#6B6BA8] text-lg leading-relaxed mb-9">
+          {hechas > 0
+            ? `Tus ${hechas} respuestas quedan guardadas en este navegador. Puedes irte a mirar la web y volver cuando quieras: seguirás justo por donde ibas.`
+            : 'Puedes irte a mirar la web y volver cuando quieras: seguirás justo por donde ibas.'}
+        </p>
+        <button
+          type="button"
+          onClick={onSeguir}
+          className="sf-cta is-enabled w-full max-w-xs rounded-2xl py-4 font-bold text-white text-lg cursor-pointer mb-4"
+          style={{ backgroundColor: BLUE }}
+        >
+          Seguir rellenando
+        </button>
+        <button
+          type="button"
+          onClick={onSalir}
+          className="text-[#8B87C9] hover:text-[#3932C0] font-bold transition-colors cursor-pointer"
+        >
+          Salir de todos modos
+        </button>
+      </div>
+    </div>
+  );
+}
+
 /* ── Silenciar/activar los sonidos del formulario ── */
 export function SoundButton() {
   const [mute, setMute] = React.useState(true);

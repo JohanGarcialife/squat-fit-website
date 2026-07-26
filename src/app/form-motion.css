@@ -219,6 +219,15 @@
   animation: sfLogoOut var(--ms-portada-out) var(--ease-ui) forwards;
 }
 
+/* 9c) Botón flotante de «termina tu formulario»: sube desde abajo al aparecer. */
+@keyframes sfFlotanteIn {
+  from { opacity: 0; transform: translate3d(0, 24px, 0); }
+  to   { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+.sf-flotante {
+  animation: sfFlotanteIn var(--ms-screen-in) var(--ease-ui) both;
+}
+
 /* 10) Panel lateral de pasos en móvil: entra deslizando desde la derecha
        (mismo gesto que el carrito). */
 @keyframes sfDrawerIn {
@@ -244,6 +253,7 @@
   .sf-stagger,
   .sf-child,
   .sf-portada-out,
+  .sf-flotante,
   .sf-drawer,
   .sf-backdrop,
   .sf-caret {
