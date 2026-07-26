@@ -4,14 +4,22 @@
    formulario (onboarding, prellamada, forms del dashboard…).
    ============================================================ */
 
+/* Tiempos: +60 % sobre los del briefing (26-jul). Con los valores originales el
+   movimiento era tan rápido que no se apreciaba ninguno de los efectos.
+   Los literales de más abajo (--ms-color, --ms-settle…) también salen de aquí. */
 :root {
   --ease-ui: cubic-bezier(0.2, 0.8, 0.2, 1);
-  --ms-press: 90ms;
-  --ms-fast: 180ms;
-  --ms-med: 220ms;
-  --ms-screen-in: 260ms;
-  --ms-screen-out: 180ms;
-  --ms-progress: 420ms;
+  --ms-press: 144ms;        /* 90  */
+  --ms-fast: 288ms;         /* 180 */
+  --ms-med: 352ms;          /* 220 */
+  --ms-screen-in: 416ms;    /* 260 */
+  --ms-screen-out: 288ms;   /* 180 */
+  --ms-progress: 672ms;     /* 420 */
+  --ms-color: 256ms;        /* 160 · color, borde y fondo */
+  --ms-settle: 224ms;       /* 140 · asentado del seleccionado */
+  --ms-shadow: 192ms;       /* 120 · sombra del CTA */
+  --ms-info: 384ms;         /* 240 · bloques informativos */
+  --ms-stagger: 80ms;       /* 50  · retardo entre opciones */
 }
 
 /* 1) Entrada de pantalla: fade + slide corto */
@@ -42,19 +50,19 @@
 /* 3) Opciones: entrada con stagger opcional (usar style="--i: N") */
 .sf-stagger {
   animation: sfScreenIn var(--ms-med) var(--ease-ui) both;
-  animation-delay: calc(var(--i, 0) * 50ms);
+  animation-delay: calc(var(--i, 0) * var(--ms-stagger));
 }
 
 /* 4-5) Botones de opción: press físico + estado seleccionado estable */
 .sf-choice {
   will-change: transform, box-shadow, opacity;
   transition:
-    opacity 160ms ease,
+    opacity var(--ms-color) ease,
     transform var(--ms-press) ease,
     box-shadow var(--ms-press) ease,
-    border-color 160ms ease,
-    color 160ms ease,
-    background-color 160ms ease;
+    border-color var(--ms-color) ease,
+    color var(--ms-color) ease,
+    background-color var(--ms-color) ease;
 }
 .sf-choice:active {
   transform: translateY(2px);
@@ -63,12 +71,12 @@
 .sf-choice.is-selected {
   transform: translateY(1px);
   transition:
-    transform 140ms var(--ease-ui),
-    box-shadow 140ms var(--ease-ui),
-    border-color 160ms ease,
-    color 160ms ease,
-    background-color 160ms ease,
-    opacity 160ms ease;
+    transform var(--ms-settle) var(--ease-ui),
+    box-shadow var(--ms-settle) var(--ease-ui),
+    border-color var(--ms-color) ease,
+    color var(--ms-color) ease,
+    background-color var(--ms-color) ease,
+    opacity var(--ms-color) ease;
 }
 
 /* 6-7) CTA inferior: atenuado hasta habilitarse + press físico */
@@ -78,8 +86,8 @@
   transition:
     opacity var(--ms-med) var(--ease-ui),
     transform var(--ms-med) var(--ease-ui),
-    background-color 160ms ease,
-    box-shadow 120ms ease;
+    background-color var(--ms-color) ease,
+    box-shadow var(--ms-shadow) ease;
 }
 .sf-cta.is-enabled {
   opacity: 1;
@@ -99,8 +107,8 @@
   opacity: 1;
   transform: translateY(0);
   transition:
-    opacity 240ms var(--ease-ui),
-    transform 240ms var(--ease-ui);
+    opacity var(--ms-info) var(--ease-ui),
+    transform var(--ms-info) var(--ease-ui);
 }
 
 /* Accesibilidad: sin transforms ni animaciones si el usuario lo pide */
