@@ -4,22 +4,23 @@
    formulario (onboarding, prellamada, forms del dashboard…).
    ============================================================ */
 
-/* Tiempos: +60 % sobre los del briefing (26-jul). Con los valores originales el
-   movimiento era tan rápido que no se apreciaba ninguno de los efectos.
-   Los literales de más abajo (--ms-color, --ms-settle…) también salen de aquí. */
+/* Tiempos afinados con Hamlet el 26-jul: +60 % sobre el briefing y luego +30 % más
+   (los comentarios de cada línea son el valor original del briefing). Con los
+   originales el movimiento era tan rápido que no se apreciaba ninguno de los efectos.
+   Todo el archivo tira de estos tokens: para volver a afinar, tocar solo aquí. */
 :root {
   --ease-ui: cubic-bezier(0.2, 0.8, 0.2, 1);
-  --ms-press: 144ms;        /* 90  */
-  --ms-fast: 288ms;         /* 180 */
-  --ms-med: 352ms;          /* 220 */
-  --ms-screen-in: 416ms;    /* 260 */
-  --ms-screen-out: 288ms;   /* 180 */
-  --ms-progress: 672ms;     /* 420 */
-  --ms-color: 256ms;        /* 160 · color, borde y fondo */
-  --ms-settle: 224ms;       /* 140 · asentado del seleccionado */
-  --ms-shadow: 192ms;       /* 120 · sombra del CTA */
-  --ms-info: 384ms;         /* 240 · bloques informativos */
-  --ms-stagger: 80ms;       /* 50  · retardo entre opciones */
+  --ms-press: 187ms;        /* 90  */
+  --ms-fast: 374ms;         /* 180 */
+  --ms-med: 458ms;          /* 220 */
+  --ms-screen-in: 541ms;    /* 260 */
+  --ms-screen-out: 374ms;   /* 180 */
+  --ms-progress: 874ms;     /* 420 */
+  --ms-color: 333ms;        /* 160 · color, borde y fondo */
+  --ms-settle: 291ms;       /* 140 · asentado del seleccionado */
+  --ms-shadow: 250ms;       /* 120 · sombra del CTA */
+  --ms-info: 499ms;         /* 240 · bloques informativos */
+  --ms-stagger: 104ms;       /* 50  · retardo entre opciones */
 }
 
 /* 1) Entrada de pantalla: fade + slide corto */

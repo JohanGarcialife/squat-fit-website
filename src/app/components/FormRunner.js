@@ -189,7 +189,7 @@ export default function FormRunner({ definition, context = {}, onSubmit, exitHre
 
         <div key={`${step.key || step.type}-${index}`} className="flex-1 flex flex-col max-w-xl w-full mx-auto sf-screen-in">
           {step.phase && <p className="text-[#FF690B] font-bold text-sm uppercase tracking-wider mb-2">{step.phase}</p>}
-          <h1 className="font-extrabold leading-tight mb-3" style={{ color: BLUE, fontSize: 'clamp(1.6rem, 2.6vw, 2.3rem)' }}>
+          <h1 className="font-extrabold leading-tight mb-3" style={{ color: BLUE, fontSize: 'clamp(1.35rem, 2.1vw, 1.9rem)' }}>
             {step.title}
           </h1>
           {step.subtitle && <p className="text-[#6B6BA8] text-base sm:text-lg mb-6">{step.subtitle}</p>}
@@ -214,7 +214,7 @@ export default function FormRunner({ definition, context = {}, onSubmit, exitHre
                         if (step.type === 'scale') patch[`${step.key}_label`] = label;
                         set(patch);
                       }}
-                      className={`rounded-2xl border-2 px-5 py-3.5 font-bold text-base sm:text-[17px] cursor-pointer text-left sf-choice sf-stagger ${active ? 'is-selected' : ''}`}
+                      className={`rounded-2xl border-2 px-5 py-3.5 font-bold text-[17px] sm:text-lg cursor-pointer text-left sf-choice sf-stagger ${active ? 'is-selected' : ''}`}
                       style={{ '--i': i, ...choiceStyle(active) }}
                     >
                       {label}
@@ -223,7 +223,7 @@ export default function FormRunner({ definition, context = {}, onSubmit, exitHre
                 })}
                 {step.allowOther && (
                   <div
-                    className={`rounded-2xl border-2 px-5 py-3.5 font-bold text-base cursor-pointer sf-choice ${isOtherSelected ? 'is-selected' : ''}`}
+                    className={`rounded-2xl border-2 px-5 py-3.5 font-bold text-[17px] sm:text-lg cursor-pointer sf-choice ${isOtherSelected ? 'is-selected' : ''}`}
                     style={{ '--i': step.options.length, ...choiceStyle(isOtherSelected) }}
                     onClick={() => { if (!isOtherSelected) set({ [step.key]: OTHER_PREFIX }); }}
                   >
@@ -255,7 +255,7 @@ export default function FormRunner({ definition, context = {}, onSubmit, exitHre
                         const cur = answers[step.key] || [];
                         set({ [step.key]: selected ? cur.filter((o) => o !== opt) : [...cur, opt] });
                       }}
-                      className={`flex items-center gap-3 rounded-2xl border-2 px-5 py-3.5 font-bold text-base cursor-pointer text-left sf-choice sf-stagger ${selected ? 'is-selected' : ''}`}
+                      className={`flex items-center gap-3 rounded-2xl border-2 px-5 py-3.5 font-bold text-[17px] sm:text-lg cursor-pointer text-left sf-choice sf-stagger ${selected ? 'is-selected' : ''}`}
                       style={{ '--i': i, ...choiceStyle(selected) }}
                     >
                       <span
