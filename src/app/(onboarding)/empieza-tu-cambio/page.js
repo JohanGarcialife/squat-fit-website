@@ -179,6 +179,15 @@ const ADVANCE_DELAY = 520;
 const PORTADA_OUT_MS = 620;
 
 // Identificador del progreso guardado en el navegador.
+// Traducción de nuestro utm_source al vocabulario de orígenes del back office.
+const CRM_SOURCE = {
+  youtube: 'youtube',
+  instagram: 'ig',
+  email: 'email',
+  tiktok: 'otro',
+  guia: 'web',
+};
+
 const FORM_ID = 'prellamada';
 const FORM_URL = '/empieza-tu-cambio';
 
@@ -380,7 +389,13 @@ export default function EmpiezaTuCambioPage() {
           answers: Object.entries(submission)
             .filter(([k]) => !META_KEYS.includes(k))
             .map(([question, answer]) => ({ question, answer })),
-          source: submission.origen,
+          // El back office pinta la etiqueta de origen contra un vocabulario
+          // cerrado (web | ig | email | youtube | otro), así que aquí se manda
+          // uno de ésos y el detalle fino («ig-bio-maria») viaja en `via`. Si se
+          // mandara el detalle en `source`, el CRM enseñaría la etiqueta vacía.
+          // OJO: TikTok no tiene hueco en ese vocabulario y cae en «otro» hasta
+          // que se le añada uno en el dashboard.
+          source: CRM_SOURCE[origenLead?.utm_source] || 'web',
           website: '',
         };
         const res = await fetch(SUBMIT_ENDPOINT, {
