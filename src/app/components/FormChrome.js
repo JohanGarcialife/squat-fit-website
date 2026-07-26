@@ -3,7 +3,8 @@
 import React, { useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { X, Check, ChevronLeft, ListChecks } from 'lucide-react';
+import { X, Check, ChevronLeft, ListChecks, Volume2, VolumeX } from 'lucide-react';
+import { isMuted, toggleMute } from './formSounds';
 
 const BLUE = '#3932C0';
 const ORANGE = '#FF690B';
@@ -22,6 +23,31 @@ export function ExitButton({ href, onClick, label = 'Salir' }) {
     <Link href={href} aria-label={label} className={clases}>{icono}</Link>
   ) : (
     <button type="button" onClick={onClick} aria-label={label} className={clases}>{icono}</button>
+  );
+}
+
+/* ── Silenciar/activar los sonidos del formulario ── */
+export function SoundButton() {
+  const [mute, setMute] = React.useState(true);
+  // En el primer render del servidor no hay localStorage: se lee al montar.
+  // Se lee al montar (en el servidor no hay localStorage). Blindado: si el
+  // navegador bloquea el almacenamiento, el formulario debe seguir funcionando.
+  useEffect(() => {
+    try { setMute(isMuted()); } catch { /* sin sonido, sin romper nada */ }
+  }, []);
+  return (
+    <button
+      type="button"
+      onClick={() => setMute(toggleMute())}
+      aria-label={mute ? 'Activar sonido' : 'Silenciar'}
+      title={mute ? 'Activar sonido' : 'Silenciar'}
+      className="shrink-0 grid place-items-center w-9 h-9 rounded-full text-[#8B87C9]
+                 hover:bg-[#F3F2F9] hover:text-[#3932C0] active:scale-95
+                 transition-all cursor-pointer"
+    >
+      {mute ? <VolumeX className="w-[18px] h-[18px]" strokeWidth={2.2} />
+            : <Volume2 className="w-[18px] h-[18px]" strokeWidth={2.2} />}
+    </button>
   );
 }
 

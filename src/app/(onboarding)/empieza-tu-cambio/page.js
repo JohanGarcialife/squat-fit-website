@@ -17,7 +17,8 @@ import GdprCheckbox from '@/app/components/GdprCheckbox';
 import { normalizeName } from '@/app/components/nameUtils';
 import TextareaMeter from '@/app/components/TextareaMeter';
 import Typewriter from '@/app/components/Typewriter';
-import { ExitButton, BackButton, StepCounter, FormAside, StepsDrawer } from '@/app/components/FormChrome';
+import { ExitButton, BackButton, StepCounter, FormAside, StepsDrawer, SoundButton } from '@/app/components/FormChrome';
+import { playSelect, playAdvance, playFinish } from '@/app/components/formSounds';
 
 const BLUE = '#3932C0';
 const ORANGE = '#FF690B';
@@ -180,6 +181,9 @@ export default function EmpiezaTuCambioPage() {
   const step = STEPS[index];
   const total = STEPS.length;
   const set = (patch) => setAnswers((a) => ({ ...a, ...patch }));
+  // Elegir una opción: mismo `set` pero con su sonido.
+  const choose = (patch) => { playSelect(); set(patch); };
+
 
   const isValid = useMemo(() => {
     if (!step) return false;
@@ -226,11 +230,12 @@ export default function EmpiezaTuCambioPage() {
     return () => clearTimeout(t);
   }, [stepId, step?.title]);
 
-  const goNext = () => { if (isValid && index < total - 1) setIndex((i) => i + 1); };
+  const goNext = () => { if (isValid && index < total - 1) { playAdvance(); setIndex((i) => i + 1); } };
   const goBack = () => setIndex((i) => Math.max(0, i - 1));
 
   const handleSubmit = async () => {
     if (!isValid || saving) return;
+    playFinish();
     setSaving(true);
     const submission = {
       ...answers,
@@ -353,6 +358,7 @@ export default function EmpiezaTuCambioPage() {
           <div className="flex-1 h-2.5 rounded-full bg-[#DEDCF5] overflow-hidden">
             <div className="h-full rounded-full sf-progress-fill" style={{ width: `${progress}%`, backgroundColor: BLUE }} />
           </div>
+          <SoundButton />
           <ExitButton href="/programa" />
         </div>
 
@@ -418,7 +424,7 @@ export default function EmpiezaTuCambioPage() {
                     <button
                       key={opt}
                       type="button"
-                      onClick={() => set({ [step.key]: opt })}
+                      onClick={() => choose({ [step.key]: opt })}
                       className={`rounded-2xl border-2 px-5 py-3.5 font-bold text-[17px] sm:text-lg cursor-pointer text-left sf-choice sf-stagger ${active ? 'is-selected' : ''}`}
                       style={active
                         ? { '--i': i, borderColor: ORANGE, backgroundColor: '#FFF6F0', color: ORANGE, boxShadow: '0 2px 10px rgba(255,105,11,0.15)' }
@@ -441,7 +447,7 @@ export default function EmpiezaTuCambioPage() {
                       type="button"
                       onClick={() => {
                         const cur = answers[step.key] || [];
-                        set({ [step.key]: selected ? cur.filter((o) => o !== opt) : [...cur, opt] });
+                        choose({ [step.key]: selected ? cur.filter((o) => o !== opt) : [...cur, opt] });
                       }}
                       className={`flex items-center gap-3 rounded-2xl border-2 px-5 py-3.5 font-bold text-[17px] sm:text-lg cursor-pointer text-left sf-choice sf-stagger ${selected ? 'is-selected' : ''}`}
                       style={selected

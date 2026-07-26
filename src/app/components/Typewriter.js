@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useRef, useState } from 'react';
+import { playTick } from './formSounds';
 
 // Texto que se escribe solo, para las pantallas de los formularios que son solo
 // texto (títulos, intros, pantallas informativas): así no cae de golpe un bloque
@@ -52,6 +53,8 @@ export default function Typewriter({
     const paso = () => {
       i += 1;
       setCount(i);
+      // Un tic cada 3 letras: en cada una sonaría a ametralladora.
+      if (i % 3 === 0) playTick();
       if (i < text.length) {
         timers.current.push(setTimeout(paso, speed));
       } else {
