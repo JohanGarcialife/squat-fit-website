@@ -1,3 +1,5 @@
+import legacyRedirects from './redirects-legacy.mjs';
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   // Permite builds independientes por instancia (dos URLs en paralelo):
@@ -41,6 +43,10 @@ const nextConfig = {
   async redirects() {
     return [
       { source: '/planes', destination: '/programa', permanent: true },
+      // Dominio viejo -> nuevo. Van al final para que las reglas propias de
+      // squadfit.es tengan preferencia (todas llevan condición de host, así que
+      // solo disparan en squatfit.es).
+      ...legacyRedirects,
     ];
   },
   async headers() {
