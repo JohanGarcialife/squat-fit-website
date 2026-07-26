@@ -39,6 +39,14 @@ export function isMuted() {
   return muted;
 }
 
+// Despierta el audio dentro de un gesto del usuario (el botón «Empezar»).
+// Los navegadores no dejan sonar nada hasta que alguien toca algo, así que si
+// la primera pantalla se escribiera sola, su tecleo se perdería. Llamando a
+// esto en el clic, todo lo que venga después ya suena desde el primer carácter.
+export function unlockAudio() {
+  audio();
+}
+
 export function toggleMute() {
   muted = !isMuted();
   try {

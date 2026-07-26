@@ -18,7 +18,7 @@ import { normalizeName } from '@/app/components/nameUtils';
 import TextareaMeter from '@/app/components/TextareaMeter';
 import Typewriter from '@/app/components/Typewriter';
 import { ExitButton, BackButton, StepCounter, FormAside, StepsDrawer, SoundButton, useMicroFeedback, MicroFeedback } from '@/app/components/FormChrome';
-import { playSelect, playAdvance, playFinish, playKeypress } from '@/app/components/formSounds';
+import { playSelect, playAdvance, playFinish, playKeypress, unlockAudio } from '@/app/components/formSounds';
 
 const BLUE = '#3932C0';
 const ORANGE = '#FF690B';
@@ -163,7 +163,7 @@ const STEPS = [
 const TITLE_SPEED = 11;
 
 // Pausa entre pulsar Continuar y que entre la pantalla siguiente.
-const ADVANCE_DELAY = 260;
+const ADVANCE_DELAY = 520;
 
 const esPhoneLocalization = { ...esPhone, gb: 'Inglaterra' };
 
@@ -181,8 +181,14 @@ export default function EmpiezaTuCambioPage() {
   const [sent, setSent] = useState(false);
   const [stepsOpen, setStepsOpen] = useState(false);
   const { mensaje: gesto, marcar: marcarGesto } = useMicroFeedback();
+  // Portada: nada se escribe hasta que el lead pulsa «Empezar». Ese clic es el
+  // gesto que el navegador exige para dejar sonar el audio; sin él, el tecleo de
+  // la primera pantalla se perdería en silencio.
+  const [started, setStarted] = useState(false);
   // El contenido espera a que termine de escribirse el título.
   const [titleDone, setTitleDone] = useState(false);
+  // Y el botón espera a que termine de escribirse TODO el texto de la pantalla.
+  const [bodyDone, setBodyDone] = useState(false);
   // Pasos ya vistos: al volver atrás el texto sale de golpe (ya se leyó).
   const seenSteps = useRef(new Set());
 
@@ -228,18 +234,25 @@ export default function EmpiezaTuCambioPage() {
   // por tiempo (longitud × velocidad) en vez de esperar un aviso del hijo: así
   // no depende del orden en que React dispara los efectos.
   useEffect(() => {
-    if (!stepId) return undefined;
+    if (!stepId || !started) return undefined;
     const visto = seenSteps.current.has(stepId);
     seenSteps.current.add(stepId);
-    if (visto) { setTitleDone(true); return undefined; }
+    if (visto) { setTitleDone(true); setBodyDone(true); return undefined; }
     setTitleDone(false);
+    setBodyDone(false);
     const ms = 150 + (step?.title?.length || 0) * TITLE_SPEED;
     const t = setTimeout(() => setTitleDone(true), ms);
     return () => clearTimeout(t);
-  }, [stepId, step?.title]);
+  }, [stepId, step?.title, started]);
+
+  // El botón de avanzar no se enciende hasta que la pantalla ha acabado de
+  // escribirse: la intro espera a su párrafo; el resto, al título (debajo van
+  // campos o casillas, que ya se pueden usar en cuanto aparecen).
+  const contenidoListo = alreadySeen || (step?.type === 'intro' ? bodyDone : titleDone);
+  const puedeAvanzar = isValid && contenidoListo;
 
   const goNext = () => {
-    if (!isValid || index >= total - 1) return;
+    if (!puedeAvanzar || index >= total - 1) return;
     playAdvance();
     if (step.type !== 'intro') marcarGesto();
     // Respiro: si la pregunta siguiente entra de golpe, se atropella con el
@@ -255,7 +268,7 @@ export default function EmpiezaTuCambioPage() {
   };
 
   const handleSubmit = async () => {
-    if (!isValid || saving) return;
+    if (!puedeAvanzar || saving) return;
     playFinish();
     setSaving(true);
     const submission = {
@@ -373,6 +386,40 @@ export default function EmpiezaTuCambioPage() {
     );
   }
 
+  // ===== Portada =====
+  // Existe por dos razones. La de forma: entrar a un formulario con el texto ya
+  // escribiéndose no da tiempo a situarse. Y la de fondo: el navegador no deja
+  // sonar nada hasta que el usuario toca algo, así que sin este botón la primera
+  // pantalla se escribiría en silencio y el lead se perdería el efecto entero.
+  if (!started) {
+    return (
+      <div className="min-h-[100svh] w-full flex flex-col items-center justify-center px-6 text-center bg-white">
+        <div className="sf-screen-in max-w-lg flex flex-col items-center">
+          <Image src="/LogotipoSquatfit.png" width={72} height={72} alt="Squad Fit" className="mb-8" />
+          <h1 className="font-extrabold mb-4" style={{ color: BLUE, fontSize: 'clamp(1.9rem, 4vw, 2.6rem)' }}>
+            Vamos a conocerte
+          </h1>
+          <p className="text-[#6B6BA8] text-lg leading-relaxed mb-9">
+            Son unas preguntas rápidas sobre ti y tu objetivo. Tómate tu tiempo:
+            cuanto mejor te conozca, mejor podré ayudarte en la llamada.
+          </p>
+          <button
+            type="button"
+            onClick={() => { unlockAudio(); playAdvance(); setStarted(true); }}
+            className="sf-cta is-enabled w-full max-w-xs rounded-2xl py-4 font-bold text-white text-lg cursor-pointer"
+            style={{ backgroundColor: BLUE }}
+          >
+            Empezar
+          </button>
+          <p className="mt-5 text-sm text-[#8B87C9]">
+            Se acompaña de sonido. Puedes quitarlo cuando quieras con el altavoz
+            de arriba.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-[100svh] lg:min-h-screen w-full flex">
       {/* ===== IZQUIERDA: pregunta activa ===== */}
@@ -417,6 +464,7 @@ export default function EmpiezaTuCambioPage() {
                 caret
                 instant={alreadySeen}
                 sound="body"
+                onDone={() => setBodyDone(true)}
                 className="text-[#3932C0] text-lg sm:text-2xl leading-relaxed mt-4"
               />
             )}
@@ -553,9 +601,9 @@ export default function EmpiezaTuCambioPage() {
           </div>
           <button
             onClick={step.type === 'final' ? handleSubmit : goNext}
-            disabled={!isValid || saving}
-            className={`w-full rounded-2xl py-4 font-bold text-white text-lg cursor-pointer disabled:cursor-not-allowed sf-cta ${isValid && !saving ? 'is-enabled' : ''}`}
-            style={{ backgroundColor: isValid && !saving ? BLUE : '#C6C3E8' }}
+            disabled={!puedeAvanzar || saving}
+            className={`w-full rounded-2xl py-4 font-bold text-white text-lg cursor-pointer disabled:cursor-not-allowed sf-cta ${puedeAvanzar && !saving ? 'is-enabled' : ''}`}
+            style={{ backgroundColor: puedeAvanzar && !saving ? BLUE : '#C6C3E8' }}
           >
             {saving ? 'Enviando…' : step.type === 'final' ? 'Enviar mis respuestas' : step.type === 'intro' ? 'Empezar' : 'Continuar'}
           </button>

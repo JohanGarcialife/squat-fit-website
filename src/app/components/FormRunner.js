@@ -24,7 +24,7 @@ import Link from 'next/link';
 import TextareaMeter from './TextareaMeter';
 import Typewriter from './Typewriter';
 import { ExitButton, BackButton, StepCounter, FormAside, StepsDrawer, SoundButton, useMicroFeedback, MicroFeedback } from './FormChrome';
-import { playSelect, playAdvance, playFinish, playKeypress } from './formSounds';
+import { playSelect, playAdvance, playFinish, playKeypress, unlockAudio } from './formSounds';
 
 const BLUE = '#3932C0';
 const ORANGE = '#FF690B';
@@ -35,7 +35,7 @@ const OTHER_PREFIX = 'Otro: ';
 const TITLE_SPEED = 11;
 
 // Pausa entre pulsar Continuar y que entre la pantalla siguiente.
-const ADVANCE_DELAY = 260;
+const ADVANCE_DELAY = 520;
 
 // `renderResult` (opcional): recibe lo que devuelva onSubmit y sustituye a la
 // pantalla final genérica — lo usa el Seguimiento semanal para pintar el
@@ -51,8 +51,13 @@ export default function FormRunner({ definition, context = {}, onSubmit, exitHre
   const [otherDraft, setOtherDraft] = useState('');
   const [stepsOpen, setStepsOpen] = useState(false);
   const { mensaje: gesto, marcar: marcarGesto } = useMicroFeedback();
+  // Portada: nada se escribe hasta pulsar «Empezar». Ese clic es el gesto que el
+  // navegador exige para dejar sonar el audio (ver la portada, más abajo).
+  const [started, setStarted] = useState(false);
   // El contenido espera a que termine de escribirse el título.
   const [titleDone, setTitleDone] = useState(false);
+  // Y el botón espera a que termine de escribirse TODO el texto de la pantalla.
+  const [bodyDone, setBodyDone] = useState(false);
   // Pasos ya vistos: al volver atrás el texto sale de golpe (ya se leyó).
   const seenSteps = useRef(new Set());
 
@@ -102,7 +107,7 @@ export default function FormRunner({ definition, context = {}, onSubmit, exitHre
   }, [step, answers]);
 
   const goNext = () => {
-    if (!isValid) return;
+    if (!puedeAvanzar) return;
     playAdvance();
     if (step.type !== 'intro') marcarGesto();
     setOtherDraft('');
@@ -119,7 +124,7 @@ export default function FormRunner({ definition, context = {}, onSubmit, exitHre
   };
 
   const handleFinish = async () => {
-    if (!isValid || saving) return;
+    if (!puedeAvanzar || saving) return;
     playFinish();
     setSaving(true);
     try {
@@ -144,15 +149,22 @@ export default function FormRunner({ definition, context = {}, onSubmit, exitHre
   // por tiempo (longitud × velocidad) en vez de esperar un aviso del hijo: así
   // no depende del orden en que React dispara los efectos.
   useEffect(() => {
-    if (!stepId) return undefined;
+    if (!stepId || !started) return undefined;
     const visto = seenSteps.current.has(stepId);
     seenSteps.current.add(stepId);
-    if (visto) { setTitleDone(true); return undefined; }
+    if (visto) { setTitleDone(true); setBodyDone(true); return undefined; }
     setTitleDone(false);
+    setBodyDone(false);
     const ms = 150 + (step?.title?.length || 0) * TITLE_SPEED;
     const t = setTimeout(() => setTitleDone(true), ms);
     return () => clearTimeout(t);
-  }, [stepId, step?.title]);
+  }, [stepId, step?.title, started]);
+
+  // El botón de avanzar no se enciende hasta que la pantalla ha acabado de
+  // escribirse: la intro espera a su párrafo; el resto, al título (debajo van
+  // campos o casillas, que ya se pueden usar en cuanto aparecen).
+  const contenidoListo = alreadySeen || (step?.type === 'intro' ? bodyDone : titleDone);
+  const puedeAvanzar = isValid && contenidoListo;
 
   // ── Enter = Continuar (petición de Hamlet) ────────────────────────────────
   // Pulsar Enter avanza (o envía en el último paso) si la respuesta es válida.
@@ -233,6 +245,39 @@ export default function FormRunner({ definition, context = {}, onSubmit, exitHre
 
   const isOtherSelected = typeof answers[step.key] === 'string' && answers[step.key].startsWith(OTHER_PREFIX);
 
+  // ===== Portada =====
+  // Entrar a un formulario con el texto ya escribiéndose no da tiempo a
+  // situarse; y, sobre todo, el navegador no deja sonar nada hasta que el
+  // usuario toca algo, así que sin este botón la primera pantalla se escribiría
+  // en silencio y se perdería el efecto.
+  if (!started) {
+    return (
+      <div className="min-h-[100svh] w-full flex flex-col items-center justify-center px-6 text-center bg-white">
+        <div className="sf-screen-in max-w-lg flex flex-col items-center">
+          <h1 className="font-extrabold mb-4" style={{ color: BLUE, fontSize: 'clamp(1.7rem, 3.4vw, 2.3rem)' }}>
+            {formTitle}
+          </h1>
+          <p className="text-[#6B6BA8] text-lg leading-relaxed mb-9">
+            Tómate tu tiempo para contestar: cuanto mejor sean tus respuestas,
+            mejor podremos ayudarte.
+          </p>
+          <button
+            type="button"
+            onClick={() => { unlockAudio(); playAdvance(); setStarted(true); }}
+            className="sf-cta is-enabled w-full max-w-xs rounded-2xl py-4 font-bold text-white text-lg cursor-pointer"
+            style={{ backgroundColor: BLUE }}
+          >
+            Empezar
+          </button>
+          <p className="mt-5 text-sm text-[#8B87C9]">
+            Se acompaña de sonido. Puedes quitarlo cuando quieras con el altavoz
+            de arriba.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-[100svh] lg:min-h-screen w-full flex">
       {/* ===== IZQUIERDA: pregunta activa ===== */}
@@ -276,6 +321,7 @@ export default function FormRunner({ definition, context = {}, onSubmit, exitHre
                 caret
                 instant={alreadySeen}
                 sound="body"
+                onDone={() => setBodyDone(true)}
                 className="text-[#3932C0] text-lg sm:text-2xl leading-relaxed mt-4"
               />
             )}
@@ -484,9 +530,9 @@ export default function FormRunner({ definition, context = {}, onSubmit, exitHre
           </div>
           <button
             onClick={isLast ? handleFinish : goNext}
-            disabled={!isValid || saving}
-            className={`w-full rounded-2xl py-4 font-bold text-white text-lg cursor-pointer disabled:cursor-not-allowed sf-cta ${isValid && !saving ? 'is-enabled' : ''}`}
-            style={{ backgroundColor: isValid && !saving ? BLUE : '#C6C3E8' }}
+            disabled={!puedeAvanzar || saving}
+            className={`w-full rounded-2xl py-4 font-bold text-white text-lg cursor-pointer disabled:cursor-not-allowed sf-cta ${puedeAvanzar && !saving ? 'is-enabled' : ''}`}
+            style={{ backgroundColor: puedeAvanzar && !saving ? BLUE : '#C6C3E8' }}
           >
             {saving ? 'Guardando…' : isLast ? 'Enviar mis respuestas' : index === 0 ? 'Empezar' : 'Continuar'}
           </button>
