@@ -80,30 +80,44 @@ export const VENDEDORES = [
 //    SIEMPRE el precio vigente — nada de precios congelados de la hoja vieja.
 //  · Las videoconsultas no están en el catálogo de tramos: precio fijo según
 //    "Precios y Cupones web.xlsx" (17-jul-2026).
+// `articulo`, `nombreCorto` y `beneficioCorto` alimentan el resumen animado del
+// resultado (condensan la "propuesta + beneficio" del copy largo de María).
 export const PRODUCTOS = {
   biblioteca: {
     nombre: 'Biblioteca de recetas',
     href: '/cocina',
     cta: 'Ver la Biblioteca',
     catalogBase: 'Biblioteca digital',
+    articulo: 'la',
+    nombreCorto: 'Biblioteca de recetas',
+    beneficioCorto: 'cubrir tu proteína diaria sin complicarte ni tener que pensar qué comer',
   },
   fyd: {
     nombre: 'Curso Fuerte y Definid@',
     href: '/cursos',
     cta: 'Ver el curso',
     catalogBase: 'Fuerte y Definid@',
+    articulo: 'mi',
+    nombreCorto: 'curso Fuerte y Definid@',
+    beneficioCorto: 'estructurar tu dieta y tus entrenos por tu cuenta',
   },
   cursoPG: {
     nombre: 'Curso de Pérdida de Grasa',
     href: '/cursos',
     cta: 'Ver el curso',
     catalogBase: 'Pérdida de Grasa',
+    articulo: 'mi',
+    nombreCorto: 'Curso de Pérdida de Grasa',
+    beneficioCorto: 'estructurar tu dieta para perder grasa de forma sostenible',
   },
   cursoGM: {
     nombre: 'Curso de Ganar Músculo',
     href: '/cursos',
     cta: 'Ver el curso',
     catalogBase: 'Ganar Músculo',
+    articulo: 'mi',
+    nombreCorto: 'Curso de Ganar Músculo',
+    beneficioCorto: 'organizar tu dieta para ganar músculo sin exceso de grasa',
   },
   vc_avanzada: {
     nombre: 'Videoconsulta avanzada · 1 hora',
@@ -112,6 +126,9 @@ export const PRODUCTOS = {
     precio: 99.97,
     precioAntes: 160,
     nota: 'Sesión única de 1 hora',
+    articulo: 'una',
+    nombreCorto: 'videoconsulta avanzada',
+    beneficioCorto: 'analizar tu caso a fondo y resolver tus dudas clave',
   },
   vc_estrategica: {
     nombre: 'Videoconsulta estratégica · 30 min',
@@ -119,8 +136,28 @@ export const PRODUCTOS = {
     cta: 'Reservar la videoconsulta',
     precio: 79.99,
     nota: 'Sesión única de 30 minutos',
+    articulo: 'una',
+    nombreCorto: 'videoconsulta estratégica',
+    beneficioCorto: 'mirar tu caso concreto en una llamada y empezar con claridad',
   },
 };
+
+// Resumen corto del resultado para la animación de escritura. El copy completo
+// de la hoja sigue intacto en los bloques (lo usa el chat); esto es la versión
+// condensada que pide la landing: una o dos frases, no cuatro párrafos.
+export function resumenCorto(combo) {
+  if (!combo) return '';
+  const objetivo = OBJETIVOS[combo.objetivo]?.label.toLowerCase() || '';
+  const [p1, p2] = combo.productos.map((id) => PRODUCTOS[id]);
+  if (!p1) return '';
+  let frase =
+    `Con tu objetivo de ${objetivo}, lo más coherente sería ` +
+    `${p1.articulo} ${p1.nombreCorto} para ${p1.beneficioCorto}.`;
+  if (p2) {
+    frase += ` Y tiene mucho sentido combinarlo con ${p2.articulo} ${p2.nombreCorto} para ${p2.beneficioCorto}.`;
+  }
+  return frase;
+}
 
 // scores = { recetas, nutricion, entreno, guia } con valores 0-10.
 export function claveFromScores(scores) {
