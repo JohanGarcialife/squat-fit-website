@@ -20,23 +20,29 @@
   --ms-settle: 291ms;       /* 140 · asentado del seleccionado */
   --ms-shadow: 250ms;       /* 120 · sombra del CTA */
   --ms-info: 499ms;         /* 240 · bloques informativos */
-  --ms-stagger: 104ms;       /* 50  · retardo entre opciones */
+  --ms-stagger: 104ms;      /* 50  · retardo entre opciones */
+  --ms-drawer: 340ms;       /* panel lateral de pasos (móvil) */
+
+  /* Recorridos: subidos sobre el briefing para que el movimiento se note */
+  --px-sweep: 34px;         /* barrido lateral al cambiar de pregunta */
+  --px-lift: 5px;           /* hundido del botón físico */
 }
 
-/* 1) Entrada de pantalla: fade + slide corto */
+/* 1) Entrada de pantalla: barrido lateral (entra desde la derecha) + fade.
+      Es el gesto de Duolingo: la pregunta nueva "empuja" hacia la izquierda. */
 @keyframes sfScreenIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from { opacity: 0; transform: translate3d(var(--px-sweep), 0, 0); }
+  to   { opacity: 1; transform: translate3d(0, 0, 0); }
 }
 .sf-screen-in {
   animation: sfScreenIn var(--ms-screen-in) var(--ease-ui) both;
   will-change: transform, opacity;
 }
 
-/* Salida (para quien orqueste la salida antes de desmontar) */
+/* Salida hacia la izquierda (para quien orqueste la salida antes de desmontar) */
 @keyframes sfScreenOut {
-  from { opacity: 1; transform: translateY(0); }
-  to   { opacity: 0; transform: translateY(-6px); }
+  from { opacity: 1; transform: translate3d(0, 0, 0); }
+  to   { opacity: 0; transform: translate3d(calc(var(--px-sweep) * -0.7), 0, 0); }
 }
 .sf-screen-out {
   animation: sfScreenOut var(--ms-screen-out) var(--ease-ui) both;
@@ -48,29 +54,35 @@
   will-change: width;
 }
 
-/* 3) Opciones: entrada con stagger opcional (usar style="--i: N") */
+/* 3) Opciones: entran barriendo, escalonadas (usar style="--i: N") */
+@keyframes sfOptionIn {
+  from { opacity: 0; transform: translate3d(calc(var(--px-sweep) * 0.65), 4px, 0); }
+  to   { opacity: 1; transform: translate3d(0, 0, 0); }
+}
 .sf-stagger {
-  animation: sfScreenIn var(--ms-med) var(--ease-ui) both;
+  animation: sfOptionIn var(--ms-med) var(--ease-ui) both;
   animation-delay: calc(var(--i, 0) * var(--ms-stagger));
 }
 
 /* 4-5) Botones de opción: press físico + estado seleccionado estable */
 .sf-choice {
   will-change: transform, box-shadow, opacity;
+  box-shadow: 0 3px 0 rgba(54, 60, 152, 0.12);
   transition:
     opacity var(--ms-color) ease,
-    transform var(--ms-press) ease,
-    box-shadow var(--ms-press) ease,
+    transform var(--ms-press) var(--ease-ui),
+    box-shadow var(--ms-press) var(--ease-ui),
     border-color var(--ms-color) ease,
     color var(--ms-color) ease,
     background-color var(--ms-color) ease;
 }
 .sf-choice:active {
-  transform: translateY(2px);
-  box-shadow: 0 4px 0 rgba(0, 0, 0, 0.12);
+  transform: translateY(3px);
+  box-shadow: 0 0 0 rgba(54, 60, 152, 0.12);
 }
 .sf-choice.is-selected {
   transform: translateY(1px);
+  box-shadow: 0 2px 0 rgba(255, 105, 11, 0.35);
   transition:
     transform var(--ms-settle) var(--ease-ui),
     box-shadow var(--ms-settle) var(--ease-ui),
@@ -80,10 +92,13 @@
     opacity var(--ms-color) ease;
 }
 
-/* 6-7) CTA inferior: atenuado hasta habilitarse + press físico */
+/* 6-7) CTA inferior: botón FÍSICO tipo Duolingo.
+        En reposo "flota" sobre su sombra sólida; al pulsarlo baja hasta pisarla. */
 .sf-cta {
   opacity: 0.35;
-  transform: translateY(6px);
+  transform: translateY(var(--px-lift));
+  box-shadow: none;
+  will-change: transform, box-shadow, opacity;
   transition:
     opacity var(--ms-med) var(--ease-ui),
     transform var(--ms-med) var(--ease-ui),
@@ -93,10 +108,30 @@
 .sf-cta.is-enabled {
   opacity: 1;
   transform: translateY(0);
+  box-shadow: 0 var(--px-lift) 0 rgba(23, 26, 87, 0.55);
 }
 .sf-cta.is-enabled:active {
-  transform: translateY(2px);
-  box-shadow: 0 6px 0 rgba(0, 0, 0, 0.14);
+  transform: translateY(var(--px-lift));
+  box-shadow: 0 0 0 rgba(23, 26, 87, 0.55);
+  transition:
+    transform var(--ms-press) var(--ease-ui),
+    box-shadow var(--ms-press) var(--ease-ui);
+}
+
+/* 8) Texto que se escribe solo: el cursor. El revelado lo hace <Typewriter>. */
+@keyframes sfCaret {
+  0%, 45%  { opacity: 1; }
+  50%, 95% { opacity: 0; }
+  100%     { opacity: 1; }
+}
+.sf-caret {
+  display: inline-block;
+  width: 2px;
+  height: 1em;
+  margin-left: 2px;
+  background: currentColor;
+  vertical-align: -0.12em;
+  animation: sfCaret 1s steps(1, end) infinite;
 }
 
 /* 9) Bloques informativos con entrada suave */
@@ -112,11 +147,32 @@
     transform var(--ms-info) var(--ease-ui);
 }
 
+/* 10) Panel lateral de pasos en móvil: entra deslizando desde la derecha
+       (mismo gesto que el carrito). */
+@keyframes sfDrawerIn {
+  from { transform: translate3d(100%, 0, 0); }
+  to   { transform: translate3d(0, 0, 0); }
+}
+@keyframes sfBackdropIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+.sf-drawer {
+  animation: sfDrawerIn var(--ms-drawer) var(--ease-ui) both;
+  will-change: transform;
+}
+.sf-backdrop {
+  animation: sfBackdropIn var(--ms-drawer) var(--ease-ui) both;
+}
+
 /* Accesibilidad: sin transforms ni animaciones si el usuario lo pide */
 @media (prefers-reduced-motion: reduce) {
   .sf-screen-in,
   .sf-screen-out,
-  .sf-stagger {
+  .sf-stagger,
+  .sf-drawer,
+  .sf-backdrop,
+  .sf-caret {
     animation: none !important;
   }
   .sf-choice,
@@ -129,4 +185,5 @@
   .sf-cta { opacity: 0.5; }
   .sf-cta.is-enabled { opacity: 1; }
   .sf-info { opacity: 1; }
+  .sf-caret { display: none; }
 }

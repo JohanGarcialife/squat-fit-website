@@ -20,9 +20,10 @@
 // (p. ej. "solo mujeres", "solo si respondió Sí").
 
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import Image from 'next/image';
 import Link from 'next/link';
 import TextareaMeter from './TextareaMeter';
+import Typewriter from './Typewriter';
+import { ExitButton, BackButton, StepCounter, FormAside, StepsDrawer } from './FormChrome';
 
 const BLUE = '#3932C0';
 const ORANGE = '#FF690B';
@@ -41,6 +42,7 @@ export default function FormRunner({ definition, context = {}, onSubmit, exitHre
   const [sent, setSent] = useState(false);
   const [result, setResult] = useState(null);
   const [otherDraft, setOtherDraft] = useState('');
+  const [stepsOpen, setStepsOpen] = useState(false);
 
   // Pasos visibles según condicionales (se recalcula con cada respuesta).
   const steps = useMemo(
@@ -175,28 +177,36 @@ export default function FormRunner({ definition, context = {}, onSubmit, exitHre
   const isOtherSelected = typeof answers[step.key] === 'string' && answers[step.key].startsWith(OTHER_PREFIX);
 
   return (
-    <div className="min-h-screen w-full flex">
+    <div className="min-h-[100svh] lg:min-h-screen w-full flex">
       {/* ===== IZQUIERDA: pregunta activa ===== */}
-      <div className="flex-1 flex flex-col px-6 sm:px-12 lg:px-20 py-8 relative">
+      <div className="flex-1 flex flex-col px-6 sm:px-12 lg:px-20 pt-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] sm:py-8 relative">
         <div className="flex items-center gap-4 mb-10 sm:mb-14">
           <div className="flex-1 h-2.5 rounded-full bg-[#DEDCF5] overflow-hidden">
             <div className="h-full rounded-full sf-progress-fill" style={{ width: `${progress}%`, backgroundColor: BLUE }} />
           </div>
-          <Link href={exitHref} aria-label="Salir" className="text-[#8B87C9] hover:text-[#3932C0] transition-colors cursor-pointer text-xl font-bold px-1">
-            ✕
-          </Link>
+          <ExitButton href={exitHref} />
         </div>
 
         <div key={`${step.key || step.type}-${index}`} className="flex-1 flex flex-col max-w-xl w-full mx-auto sf-screen-in">
           {step.phase && <p className="text-[#FF690B] font-bold text-sm uppercase tracking-wider mb-2">{step.phase}</p>}
-          <h1 className="font-extrabold leading-tight mb-3" style={{ color: BLUE, fontSize: 'clamp(1.35rem, 2.1vw, 1.9rem)' }}>
-            {step.title}
-          </h1>
+          <Typewriter
+            as="h1"
+            text={step.title}
+            speed={step.type === 'intro' ? 22 : 14}
+            className="font-extrabold leading-tight mb-3"
+            style={{ color: BLUE, fontSize: 'clamp(1.35rem, 2.1vw, 1.9rem)' }}
+          />
           {step.subtitle && <p className="text-[#6B6BA8] text-base sm:text-lg mb-6">{step.subtitle}</p>}
 
           <div className="flex-1">
             {step.type === 'intro' && (
-              <p className="text-[#3932C0] text-lg sm:text-2xl leading-relaxed whitespace-pre-line mt-4">{step.body}</p>
+              <Typewriter
+                text={step.body}
+                speed={14}
+                startDelay={step.title ? step.title.length * 22 + 260 : 200}
+                caret
+                className="text-[#3932C0] text-lg sm:text-2xl leading-relaxed mt-4"
+              />
             )}
 
             {(step.type === 'radio' || step.type === 'scale') && (
@@ -406,31 +416,25 @@ export default function FormRunner({ definition, context = {}, onSubmit, exitHre
             {saving ? 'Guardando…' : isLast ? 'Enviar mis respuestas' : index === 0 ? 'Empezar' : 'Continuar'}
           </button>
           <div className="flex items-center justify-between mt-4">
-            {index > 0 ? (
-              <button onClick={goBack} className="text-[#8B87C9] hover:text-[#3932C0] font-semibold transition-colors cursor-pointer flex items-center gap-1">
-                ‹ Atrás
-              </button>
-            ) : <span />}
-            <span className="text-[#B4B1D6] font-semibold text-sm">{index + 1}/{total}</span>
+            {index > 0 ? <BackButton onClick={goBack} /> : <span />}
+            <StepCounter index={index} total={total} onOpen={() => setStepsOpen(true)} />
           </div>
         </div>
       </div>
 
-      {/* ===== DERECHA: logo + fases ===== */}
-      <aside className="hidden lg:flex w-[34%] max-w-md flex-col items-center bg-[#F3F2F9] px-10 py-12">
-        <Image src="/LogotipoSquatfit.png" width={88} height={88} alt="Squad Fit" className="mb-12" />
-        <p className="text-[#8B87C9] font-bold mb-8 text-center">{formTitle}</p>
-        <div className="flex flex-col gap-4 items-center">
-          {phases.map((p) => {
-            const active = step.phase === p;
-            return (
-              <span key={p} className={`text-base text-center transition-colors ${active ? 'font-extrabold' : ''}`} style={{ color: active ? BLUE : '#A9A6CE' }}>
-                {p}
-              </span>
-            );
-          })}
-        </div>
-      </aside>
+      {/* ===== DERECHA: logo + fases (escritorio) ===== */}
+      <FormAside title={formTitle} phases={phases} currentPhase={step.phase} />
+
+      {/* Panel de pasos en móvil (desde el contador) */}
+      <StepsDrawer
+        open={stepsOpen}
+        onClose={() => setStepsOpen(false)}
+        title={formTitle}
+        phases={phases}
+        currentPhase={step.phase}
+        index={index}
+        total={total}
+      />
     </div>
   );
 }
