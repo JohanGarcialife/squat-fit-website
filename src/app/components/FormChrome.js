@@ -26,57 +26,92 @@ export function ExitButton({ href, onClick, label = 'Salir' }) {
   );
 }
 
-/* ── Gestos de validación tipo Duolingo ──────────────────────────────────
+/* ── Pausa entre preguntas ───────────────────────────────────────────────
    No sale en todas las respuestas (cansaría y delataría que es automático):
-   aparece cada 3-5 respuestas, con la frase elegida al azar y sin repetir la
-   anterior, para que parezca alguien reaccionando a lo que cuentas. */
+   aparece cada 3-5, con la frase elegida al azar y sin repetir la anterior,
+   para que parezca alguien reaccionando a lo que cuentas.
+
+   Ocupa la PANTALLA ENTERA y tapa la pregunta siguiente hasta que se va. Ese
+   es su trabajo: cortar la inercia de ir encadenando preguntas a toda prisa y
+   dar un respiro antes de la siguiente. */
 const FRASES = [
-  '¡Perfecto!', 'Anotado', 'Recibido', 'Vale, apuntado', 'Qué interesante',
-  'Buen dato', 'Tomo nota', 'Entendido', 'Genial', 'Gracias por contarlo',
-  'Me sirve mucho', 'Ajá, entiendo',
+  'Perfecto, voy anotando todo',
+  'Genial, seguimos',
+  'Anotado. Continuamos',
+  'Gracias, ya lo tengo',
+  'Vamos muy bien',
+  'Estupendo, sigo apuntando',
+  'Buen dato, seguimos',
+  'Recibido, continuamos',
 ];
 const sorteo = (n) => Math.floor(Math.random() * n);
 
+// Cuánto dura la pausa entera, de que entra a que ha terminado de irse. Tiene
+// que cuadrar con la animación `.sf-pausa` de form-motion.css.
+export const PAUSA_MS = 1520;
+
 export function useMicroFeedback() {
-  const [mensaje, setMensaje] = React.useState(null);
   const cuenta = React.useRef(0);
   const objetivo = React.useRef(3);
   const anterior = React.useRef('');
-  const temporizador = React.useRef(null);
 
   React.useEffect(() => {
     objetivo.current = 3 + sorteo(3); // 3, 4 o 5
-    return () => clearTimeout(temporizador.current);
   }, []);
 
+  // Devuelve la frase que toca mostrar, o null si a esta respuesta no le toca.
   const marcar = React.useCallback(() => {
     cuenta.current += 1;
-    if (cuenta.current < objetivo.current) return;
+    if (cuenta.current < objetivo.current) return null;
     cuenta.current = 0;
     objetivo.current = 3 + sorteo(3);
     let frase = anterior.current;
     while (frase === anterior.current) frase = FRASES[sorteo(FRASES.length)];
     anterior.current = frase;
-    setMensaje({ texto: frase, id: Date.now() });
-    clearTimeout(temporizador.current);
-    temporizador.current = setTimeout(() => setMensaje(null), 1700);
+    return frase;
   }, []);
 
-  return { mensaje, marcar };
+  return { marcar };
 }
 
-export function MicroFeedback({ mensaje }) {
-  if (!mensaje) return null;
+export function PausaPantalla({ texto }) {
+  if (!texto) return null;
   return (
-    <div className="flex justify-center pointer-events-none" aria-live="polite">
+    <div
+      className="fixed inset-0 z-[120] flex flex-col items-center justify-center px-8 text-center bg-white"
+      role="status"
+      aria-live="polite"
+    >
+      <div className="sf-pausa flex flex-col items-center">
+        <span
+          className="grid place-items-center w-20 h-20 rounded-full mb-7"
+          style={{ backgroundColor: '#FFF1E7', color: ORANGE }}
+        >
+          <Check className="w-10 h-10" strokeWidth={3} />
+        </span>
+        <p
+          className="font-extrabold leading-tight max-w-lg"
+          style={{ color: BLUE, fontSize: 'clamp(1.6rem, 4.5vw, 2.4rem)' }}
+        >
+          {texto}
+        </p>
+      </div>
+    </div>
+  );
+}
+
+/* ── Campo hijo: cuelga de la opción elegida con un corchete naranja, como en
+      el diseño de «Alergias o intolerancias». Se usa para las preguntas cuya
+      respuesta abre otra: «Europa» → ¿de qué país? ── */
+export function ChildField({ children }) {
+  return (
+    <div className="flex items-stretch gap-2 sf-child">
       <span
-        key={mensaje.id}
-        className="sf-nudge inline-flex items-center gap-1.5 rounded-full px-4 py-2
-                   font-extrabold text-sm bg-[#FFF6F0] text-[#FF690B]
-                   ring-1 ring-[#FF690B]/20"
-      >
-        {mensaje.texto}
-      </span>
+        aria-hidden
+        className="shrink-0 w-3.5 -mt-2 mb-2 rounded-l-xl border-l-2 border-t-2 border-b-2"
+        style={{ borderColor: ORANGE }}
+      />
+      <div className="flex-1 min-w-0">{children}</div>
     </div>
   );
 }

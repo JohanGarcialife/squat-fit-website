@@ -21,9 +21,10 @@
 
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import TextareaMeter from './TextareaMeter';
 import Typewriter from './Typewriter';
-import { ExitButton, BackButton, StepCounter, FormAside, StepsDrawer, SoundButton, useMicroFeedback, MicroFeedback } from './FormChrome';
+import { ExitButton, BackButton, StepCounter, FormAside, StepsDrawer, SoundButton, useMicroFeedback, PausaPantalla, PAUSA_MS, ChildField } from './FormChrome';
 import { playSelect, playAdvance, playFinish, playKeypress, unlockAudio } from './formSounds';
 
 const BLUE = '#3932C0';
@@ -36,6 +37,9 @@ const TITLE_SPEED = 11;
 
 // Pausa entre pulsar Continuar y que entre la pantalla siguiente.
 const ADVANCE_DELAY = 520;
+
+// Lo que tarda la portada en apartarse (ver --ms-portada-out).
+const PORTADA_OUT_MS = 620;
 
 // `renderResult` (opcional): recibe lo que devuelva onSubmit y sustituye a la
 // pantalla final genérica — lo usa el Seguimiento semanal para pintar el
@@ -50,10 +54,13 @@ export default function FormRunner({ definition, context = {}, onSubmit, exitHre
   const [result, setResult] = useState(null);
   const [otherDraft, setOtherDraft] = useState('');
   const [stepsOpen, setStepsOpen] = useState(false);
-  const { mensaje: gesto, marcar: marcarGesto } = useMicroFeedback();
+  const { marcar: marcarGesto } = useMicroFeedback();
+  // Frase de la pausa a pantalla completa entre una pregunta y la siguiente.
+  const [pausa, setPausa] = useState(null);
   // Portada: nada se escribe hasta pulsar «Empezar». Ese clic es el gesto que el
   // navegador exige para dejar sonar el audio (ver la portada, más abajo).
   const [started, setStarted] = useState(false);
+  const [saliendoPortada, setSaliendoPortada] = useState(false);
   // El contenido espera a que termine de escribirse el título.
   const [titleDone, setTitleDone] = useState(false);
   // Y el botón espera a que termine de escribirse TODO el texto de la pantalla.
@@ -109,11 +116,17 @@ export default function FormRunner({ definition, context = {}, onSubmit, exitHre
   const goNext = () => {
     if (!puedeAvanzar) return;
     playAdvance();
-    if (step.type !== 'intro') marcarGesto();
     setOtherDraft('');
-    // Respiro: si la pregunta siguiente entra de golpe, se atropella con el
-    // sonido de avance y la sensación es de ir a empujones.
-    if (index < total - 1) setTimeout(() => setIndex((i) => i + 1), ADVANCE_DELAY);
+    if (index >= total - 1) return;
+    // Cada 3-5 respuestas toca pausa a pantalla completa: tapa la pregunta
+    // siguiente hasta que se va, para cortar la inercia de ir a toda prisa.
+    const frase = step.type !== 'intro' ? marcarGesto() : null;
+    if (frase) {
+      setPausa(frase);
+      setTimeout(() => { setPausa(null); setIndex((i) => i + 1); }, PAUSA_MS);
+      return;
+    }
+    setTimeout(() => setIndex((i) => i + 1), ADVANCE_DELAY);
   };
   const goBack = () => { setOtherDraft(''); setIndex((i) => Math.max(0, i - 1)); };
 
@@ -253,26 +266,38 @@ export default function FormRunner({ definition, context = {}, onSubmit, exitHre
   if (!started) {
     return (
       <div className="min-h-[100svh] w-full flex flex-col items-center justify-center px-6 text-center bg-white">
-        <div className="sf-screen-in max-w-lg flex flex-col items-center">
-          <h1 className="font-extrabold mb-4" style={{ color: BLUE, fontSize: 'clamp(1.7rem, 3.4vw, 2.3rem)' }}>
-            {formTitle}
-          </h1>
-          <p className="text-[#6B6BA8] text-lg leading-relaxed mb-9">
-            Tómate tu tiempo para contestar: cuanto mejor sean tus respuestas,
-            mejor podremos ayudarte.
-          </p>
-          <button
-            type="button"
-            onClick={() => { unlockAudio(); playAdvance(); setStarted(true); }}
-            className="sf-cta is-enabled w-full max-w-xs rounded-2xl py-4 font-bold text-white text-lg cursor-pointer"
-            style={{ backgroundColor: BLUE }}
-          >
-            Empezar
-          </button>
-          <p className="mt-5 text-sm text-[#8B87C9]">
-            Se acompaña de sonido. Puedes quitarlo cuando quieras con el altavoz
-            de arriba.
-          </p>
+        <div className={`max-w-lg flex flex-col items-center ${saliendoPortada ? 'sf-portada-out' : 'sf-screen-in'}`}>
+          <Image
+            src="/LogotipoSquatfit.png"
+            width={72}
+            height={72}
+            alt="Squad Fit"
+            className="mb-8 sf-portada-logo"
+          />
+          <div className="sf-portada-texto flex flex-col items-center">
+            <h1 className="font-extrabold mb-4" style={{ color: BLUE, fontSize: 'clamp(1.7rem, 3.4vw, 2.3rem)' }}>
+              {formTitle}
+            </h1>
+            <p className="text-[#6B6BA8] text-lg leading-relaxed mb-9">
+              Tómate tu tiempo para contestar: cuanto mejor sean tus respuestas,
+              mejor podremos ayudarte.
+            </p>
+            <button
+              type="button"
+              onClick={() => {
+                unlockAudio();
+                playAdvance();
+                const sinMovimiento = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+                if (sinMovimiento) { setStarted(true); return; }
+                setSaliendoPortada(true);
+                setTimeout(() => setStarted(true), PORTADA_OUT_MS);
+              }}
+              className="sf-cta is-enabled w-full max-w-xs rounded-2xl py-4 font-bold text-white text-lg cursor-pointer"
+              style={{ backgroundColor: BLUE }}
+            >
+              Empezar
+            </button>
+          </div>
         </div>
       </div>
     );
@@ -525,9 +550,6 @@ export default function FormRunner({ definition, context = {}, onSubmit, exitHre
 
         {/* Pie */}
         <div className="max-w-xl w-full mx-auto mt-8">
-          <div className="h-9 mb-1 flex items-end justify-center">
-            <MicroFeedback mensaje={gesto} />
-          </div>
           <button
             onClick={isLast ? handleFinish : goNext}
             disabled={!puedeAvanzar || saving}
@@ -557,6 +579,8 @@ export default function FormRunner({ definition, context = {}, onSubmit, exitHre
         total={total}
         onGoTo={goToPhase}
       />
+
+      <PausaPantalla texto={pausa} />
     </div>
   );
 }

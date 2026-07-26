@@ -29,6 +29,7 @@
   --ms-option-start: 220ms; /* espera antes de la primera casilla, para que no
                                compita con la entrada de la pantalla */
   --ms-drawer: 340ms;       /* panel lateral de pasos (móvil) */
+  --ms-portada-out: 620ms;  /* la portada apartándose al pulsar «Empezar» */
 
   /* Recorridos: subidos sobre el briefing para que el movimiento se note */
   --px-sweep: 44px;         /* 34 · barrido lateral al cambiar de pregunta */
@@ -73,6 +74,16 @@
 .sf-stagger {
   animation: sfOptionIn var(--ms-option) var(--ease-ui) both;
   animation-delay: calc(var(--ms-option-start) + var(--i, 0) * var(--ms-stagger));
+}
+
+/* 3b) Campo que se despliega colgando de la opción elegida (¿de qué país?): baja
+      desde debajo de su opción, sin empujar de golpe. */
+@keyframes sfChildIn {
+  from { opacity: 0; transform: translate3d(0, -8px, 0); }
+  to   { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+.sf-child {
+  animation: sfChildIn var(--ms-option) var(--ease-ui) both;
 }
 
 /* 4-5) Botones de opción: press físico + estado seleccionado estable */
@@ -145,21 +156,25 @@
   animation: sfCaret 1s steps(1, end) infinite;
 }
 
-/* 8b) Gestos de validación ("¡Perfecto!", "Anotado"…): entran con un pequeño
-       impulso y se van solos. */
-@keyframes sfNudgeIn {
-  0%   { opacity: 0; transform: translate3d(0, 8px, 0) scale(0.94); }
-  60%  { opacity: 1; transform: translate3d(0, 0, 0) scale(1.03); }
+/* 8b) Pausa entre preguntas ("Perfecto, voy anotando todo"): ocupa la pantalla
+       entera, entra con un pequeño impulso, se queda un momento y se va hacia
+       arriba. Solo cuando ha terminado de irse entra la pregunta siguiente.
+       La suma de --ms-pausa-espera + la salida tiene que cuadrar con PAUSA_MS
+       de FormChrome.js (1520 ms). */
+@keyframes sfPausaIn {
+  0%   { opacity: 0; transform: translate3d(0, 14px, 0) scale(0.94); }
+  60%  { opacity: 1; transform: translate3d(0, 0, 0) scale(1.02); }
   100% { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
 }
-@keyframes sfNudgeOut {
-  from { opacity: 1; transform: translate3d(0, 0, 0); }
-  to   { opacity: 0; transform: translate3d(0, -8px, 0); }
+@keyframes sfPausaOut {
+  from { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+  to   { opacity: 0; transform: translate3d(0, -16px, 0) scale(1.02); }
 }
-.sf-nudge {
+.sf-pausa {
+  --ms-pausa-espera: 1100ms;
   animation:
-    sfNudgeIn var(--ms-med) var(--ease-ui) both,
-    sfNudgeOut var(--ms-fast) var(--ease-ui) forwards 1.25s;
+    sfPausaIn var(--ms-med) var(--ease-ui) both,
+    sfPausaOut var(--ms-fast) var(--ease-ui) forwards var(--ms-pausa-espera);
 }
 
 /* 9) Bloques informativos con entrada suave */
@@ -173,6 +188,35 @@
   transition:
     opacity var(--ms-info) var(--ease-ui),
     transform var(--ms-info) var(--ease-ui);
+}
+
+/* 9b) Salida de la portada al pulsar «Empezar». En vez de un corte seco, la
+       portada entera se desliza hacia ABAJO —como si la pantalla se apartara
+       para dejar paso— mientras el logo hace lo contrario: se estira un poco,
+       sale volando hacia arriba y se va girando. Solo cuando ha terminado entra
+       la primera pregunta con su barrido de siempre. */
+@keyframes sfPortadaSlide {
+  from { transform: translate3d(0, 0, 0); }
+  to   { transform: translate3d(0, 52px, 0); }
+}
+@keyframes sfPortadaFade {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+@keyframes sfLogoOut {
+  0%   { opacity: 1; transform: translate3d(0, 0, 0) scale(1) rotate(0deg); }
+  32%  { opacity: 1; transform: translate3d(0, -12px, 0) scale(1.14) rotate(-4deg); }
+  100% { opacity: 0; transform: translate3d(0, -80px, 0) scale(0.55) rotate(8deg); }
+}
+.sf-portada-out {
+  animation: sfPortadaSlide var(--ms-portada-out) var(--ease-ui) forwards;
+  pointer-events: none;
+}
+.sf-portada-out .sf-portada-texto {
+  animation: sfPortadaFade var(--ms-fast) var(--ease-ui) forwards;
+}
+.sf-portada-out .sf-portada-logo {
+  animation: sfLogoOut var(--ms-portada-out) var(--ease-ui) forwards;
 }
 
 /* 10) Panel lateral de pasos en móvil: entra deslizando desde la derecha
@@ -198,12 +242,13 @@
   .sf-screen-in,
   .sf-screen-out,
   .sf-stagger,
+  .sf-child,
+  .sf-portada-out,
   .sf-drawer,
   .sf-backdrop,
   .sf-caret {
     animation: none !important;
   }
-  .sf-nudge,
   .sf-choice,
   .sf-cta,
   .sf-progress-fill,

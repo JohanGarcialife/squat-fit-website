@@ -17,8 +17,9 @@ import GdprCheckbox from '@/app/components/GdprCheckbox';
 import { normalizeName } from '@/app/components/nameUtils';
 import TextareaMeter from '@/app/components/TextareaMeter';
 import Typewriter from '@/app/components/Typewriter';
-import { ExitButton, BackButton, StepCounter, FormAside, StepsDrawer, SoundButton, useMicroFeedback, MicroFeedback } from '@/app/components/FormChrome';
+import { ExitButton, BackButton, StepCounter, FormAside, StepsDrawer, SoundButton, useMicroFeedback, PausaPantalla, PAUSA_MS, ChildField } from '@/app/components/FormChrome';
 import { playSelect, playAdvance, playFinish, playKeypress, unlockAudio } from '@/app/components/formSounds';
+import { PAISES_EUROPA, PAISES_LATAM } from '@/app/components/paises';
 
 const BLUE = '#3932C0';
 const ORANGE = '#FF690B';
@@ -65,7 +66,13 @@ const STEPS = [
   { type: 'number', key: 'edad', title: '¿Qué edad tienes?', min: 14, max: 99 },
   {
     type: 'radio', key: 'region_vives', title: '¿Dónde vives actualmente?',
-    options: ['España / Europa', 'Estados Unidos', 'Latinoamérica'],
+    options: ['Europa', 'Estados Unidos', 'Latinoamérica'],
+    // Al elegir una opción con hijo se despliega debajo, colgando de ella, el
+    // selector del país concreto. Hasta que no se elija país, no se avanza.
+    hijos: {
+      Europa: { key: 'pais_vives', etiqueta: '¿De qué país?', opciones: PAISES_EUROPA },
+      Latinoamérica: { key: 'pais_vives', etiqueta: '¿De qué país?', opciones: PAISES_LATAM },
+    },
   },
   {
     type: 'radio', key: 'objetivo_principal',
@@ -165,12 +172,16 @@ const TITLE_SPEED = 11;
 // Pausa entre pulsar Continuar y que entre la pantalla siguiente.
 const ADVANCE_DELAY = 520;
 
+// Lo que tarda la portada en apartarse. Tiene que cuadrar con
+// --ms-portada-out de form-motion.css.
+const PORTADA_OUT_MS = 620;
+
 const esPhoneLocalization = { ...esPhone, gb: 'Inglaterra' };
 
 export default function EmpiezaTuCambioPage() {
   const [index, setIndex] = useState(0);
   const [answers, setAnswers] = useState({
-    first_name: '', last_name: '', edad: '', region_vives: '',
+    first_name: '', last_name: '', edad: '', region_vives: '', pais_vives: '',
     objetivo_principal: '', impide_lograr: [], intentos: '',
     prioridad_para_ti: '', empuja_a_cambiar: '', tiempo_y_esfuerzo: '',
     inversion: '', obstaculo_importante: '', coach_squat_fit: '',
@@ -180,11 +191,15 @@ export default function EmpiezaTuCambioPage() {
   const [saving, setSaving] = useState(false);
   const [sent, setSent] = useState(false);
   const [stepsOpen, setStepsOpen] = useState(false);
-  const { mensaje: gesto, marcar: marcarGesto } = useMicroFeedback();
+  const { marcar: marcarGesto } = useMicroFeedback();
+  // Frase de la pausa a pantalla completa entre una pregunta y la siguiente.
+  const [pausa, setPausa] = useState(null);
   // Portada: nada se escribe hasta que el lead pulsa «Empezar». Ese clic es el
   // gesto que el navegador exige para dejar sonar el audio; sin él, el tecleo de
   // la primera pantalla se perdería en silencio.
   const [started, setStarted] = useState(false);
+  // Fase intermedia: la portada apartándose. Sin esto el cambio sería un corte.
+  const [saliendoPortada, setSaliendoPortada] = useState(false);
   // El contenido espera a que termine de escribirse el título.
   const [titleDone, setTitleDone] = useState(false);
   // Y el botón espera a que termine de escribirse TODO el texto de la pantalla.
@@ -210,8 +225,12 @@ export default function EmpiezaTuCambioPage() {
         const n = parseInt(answers[step.key], 10);
         return !isNaN(n) && n >= step.min && n <= step.max;
       }
-      case 'radio':
-        return !!answers[step.key];
+      case 'radio': {
+        const elegido = answers[step.key];
+        if (!elegido) return false;
+        const hijo = step.hijos?.[elegido];
+        return hijo ? !!answers[hijo.key] : true;
+      }
       case 'checkbox':
         return (answers[step.key] || []).length > 0;
       case 'text':
@@ -254,9 +273,16 @@ export default function EmpiezaTuCambioPage() {
   const goNext = () => {
     if (!puedeAvanzar || index >= total - 1) return;
     playAdvance();
-    if (step.type !== 'intro') marcarGesto();
-    // Respiro: si la pregunta siguiente entra de golpe, se atropella con el
-    // sonido de avance y la sensación es de ir a empujones.
+    // Cada 3-5 respuestas toca pausa a pantalla completa: tapa la pregunta
+    // siguiente hasta que se va, para cortar la inercia de ir a toda prisa.
+    const frase = step.type !== 'intro' ? marcarGesto() : null;
+    if (frase) {
+      setPausa(frase);
+      setTimeout(() => { setPausa(null); setIndex((i) => i + 1); }, PAUSA_MS);
+      return;
+    }
+    // Sin pausa, al menos un respiro: si la pregunta siguiente entra de golpe,
+    // se atropella con el sonido de avance y da sensación de ir a empujones.
     setTimeout(() => setIndex((i) => i + 1), ADVANCE_DELAY);
   };
   const goBack = () => setIndex((i) => Math.max(0, i - 1));
@@ -392,29 +418,41 @@ export default function EmpiezaTuCambioPage() {
   // sonar nada hasta que el usuario toca algo, así que sin este botón la primera
   // pantalla se escribiría en silencio y el lead se perdería el efecto entero.
   if (!started) {
+    const arrancar = () => {
+      unlockAudio();
+      playAdvance();
+      const sinMovimiento = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+      if (sinMovimiento) { setStarted(true); return; }
+      setSaliendoPortada(true);
+      setTimeout(() => setStarted(true), PORTADA_OUT_MS);
+    };
     return (
       <div className="min-h-[100svh] w-full flex flex-col items-center justify-center px-6 text-center bg-white">
-        <div className="sf-screen-in max-w-lg flex flex-col items-center">
-          <Image src="/LogotipoSquatfit.png" width={72} height={72} alt="Squad Fit" className="mb-8" />
-          <h1 className="font-extrabold mb-4" style={{ color: BLUE, fontSize: 'clamp(1.9rem, 4vw, 2.6rem)' }}>
-            Vamos a conocerte
-          </h1>
-          <p className="text-[#6B6BA8] text-lg leading-relaxed mb-9">
-            Son unas preguntas rápidas sobre ti y tu objetivo. Tómate tu tiempo:
-            cuanto mejor te conozca, mejor podré ayudarte en la llamada.
-          </p>
-          <button
-            type="button"
-            onClick={() => { unlockAudio(); playAdvance(); setStarted(true); }}
-            className="sf-cta is-enabled w-full max-w-xs rounded-2xl py-4 font-bold text-white text-lg cursor-pointer"
-            style={{ backgroundColor: BLUE }}
-          >
-            Empezar
-          </button>
-          <p className="mt-5 text-sm text-[#8B87C9]">
-            Se acompaña de sonido. Puedes quitarlo cuando quieras con el altavoz
-            de arriba.
-          </p>
+        <div className={`max-w-lg flex flex-col items-center ${saliendoPortada ? 'sf-portada-out' : 'sf-screen-in'}`}>
+          <Image
+            src="/LogotipoSquatfit.png"
+            width={72}
+            height={72}
+            alt="Squad Fit"
+            className="mb-8 sf-portada-logo"
+          />
+          <div className="sf-portada-texto flex flex-col items-center">
+            <h1 className="font-extrabold mb-4" style={{ color: BLUE, fontSize: 'clamp(1.9rem, 4vw, 2.6rem)' }}>
+              Vamos a conocerte
+            </h1>
+            <p className="text-[#6B6BA8] text-lg leading-relaxed mb-9">
+              Son unas preguntas rápidas sobre ti y tu objetivo. Tómate tu tiempo:
+              cuanto mejor te conozca, mejor podré ayudarte en la llamada.
+            </p>
+            <button
+              type="button"
+              onClick={arrancar}
+              className="sf-cta is-enabled w-full max-w-xs rounded-2xl py-4 font-bold text-white text-lg cursor-pointer"
+              style={{ backgroundColor: BLUE }}
+            >
+              Empezar
+            </button>
+          </div>
         </div>
       </div>
     );
@@ -497,18 +535,45 @@ export default function EmpiezaTuCambioPage() {
               <div className="flex flex-col gap-3 max-w-md">
                 {step.options.map((opt, i) => {
                   const active = answers[step.key] === opt;
+                  const hijo = step.hijos?.[opt];
                   return (
-                    <button
-                      key={opt}
-                      type="button"
-                      onClick={() => choose({ [step.key]: opt })}
-                      className={`rounded-2xl border-2 px-5 py-3.5 font-bold text-[17px] sm:text-lg cursor-pointer text-left sf-choice sf-stagger ${active ? 'is-selected' : ''}`}
-                      style={active
-                        ? { '--i': i, borderColor: ORANGE, backgroundColor: '#FFF6F0', color: ORANGE, boxShadow: '0 2px 10px rgba(255,105,11,0.15)' }
-                        : { '--i': i, borderColor: '#E7E6F5', backgroundColor: '#fff', color: BLUE }}
-                    >
-                      {opt}
-                    </button>
+                    <React.Fragment key={opt}>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          // Al cambiar de opción se limpia la respuesta hija:
+                          // si no, quedaría un país de Europa con Latam marcada.
+                          const limpiar = {};
+                          Object.values(step.hijos || {}).forEach((h) => { limpiar[h.key] = ''; });
+                          choose({ ...limpiar, [step.key]: opt });
+                        }}
+                        className={`rounded-2xl border-2 px-5 py-3.5 font-bold text-[17px] sm:text-lg cursor-pointer text-left sf-choice sf-stagger ${active ? 'is-selected' : ''}`}
+                        style={active
+                          ? { '--i': i, borderColor: ORANGE, backgroundColor: '#FFF6F0', color: ORANGE, boxShadow: '0 2px 10px rgba(255,105,11,0.15)' }
+                          : { '--i': i, borderColor: '#E7E6F5', backgroundColor: '#fff', color: BLUE }}
+                      >
+                        {opt}
+                      </button>
+                      {hijo && active && (
+                        <ChildField>
+                          {/* <select> nativo a propósito: en móvil abre la rueda
+                              del sistema y en escritorio ya trae el salto por
+                              teclado (pulsar «M» lleva a México). */}
+                          <select
+                            autoFocus
+                            value={answers[hijo.key] || ''}
+                            onChange={(e) => choose({ [hijo.key]: e.target.value })}
+                            className="w-full rounded-2xl border-2 px-5 py-3.5 font-bold text-[17px] sm:text-lg outline-none cursor-pointer bg-[#FFF9F5] appearance-none"
+                            style={{ borderColor: '#FBD5B8', color: answers[hijo.key] ? ORANGE : '#F0A876' }}
+                          >
+                            <option value="" disabled>{hijo.etiqueta}</option>
+                            {hijo.opciones.map((pais) => (
+                              <option key={pais} value={pais} style={{ color: BLUE }}>{pais}</option>
+                            ))}
+                          </select>
+                        </ChildField>
+                      )}
+                    </React.Fragment>
                   );
                 })}
               </div>
@@ -596,9 +661,6 @@ export default function EmpiezaTuCambioPage() {
 
         {/* Pie: Continuar + Atrás + contador */}
         <div className="max-w-xl w-full mx-auto mt-8">
-          <div className="h-9 mb-1 flex items-end justify-center">
-            <MicroFeedback mensaje={gesto} />
-          </div>
           <button
             onClick={step.type === 'final' ? handleSubmit : goNext}
             disabled={!puedeAvanzar || saving}
@@ -634,6 +696,8 @@ export default function EmpiezaTuCambioPage() {
         total={total}
         onGoTo={goToPhase}
       />
+
+      <PausaPantalla texto={pausa} />
 
       <style jsx global>{`
         .onb-phone .react-tel-input .form-control { height: auto; }

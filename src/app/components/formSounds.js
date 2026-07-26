@@ -95,12 +95,14 @@ function tono({ freq, dur = 0.09, vol = 0.05, tipo = 'sine', desliz = 0 }) {
 // milisegundos, una nota se vuelve cargante. Ahí va un roce sordo —ruido muy
 // filtrado, con ataque suave— que acompaña sin llamar la atención.
 //
-// La cadencia del párrafo se ha bajado al 30 % de las veces que sonaba (185 ms
-// → 617): a María le seguía pareciendo atropellado. Ahora es un roce cada medio
-// segundo largo: se nota que «alguien está escribiendo» sin marcar el pulso.
+// El párrafo pasó de 185 ms a 617 (el 30 % de las veces que sonaba) y María lo
+// oyó casi como si solo sonara la campana del final. Le gustó, pero pedía que
+// entre medias se siguiese oyendo algo «bien discreto y suave». Así que el roce
+// vuelve a un ritmo intermedio (430 ms) pero MUCHO más apagado: la mitad de
+// volumen y el filtro más grave, casi un susurro debajo del texto.
 const TECLEO = {
   title: { tipo: 'nota',  ms: 175, freq: 320, vol: 0.081, dur: 0.16 },
-  body:  { tipo: 'roce',  ms: 617, corte: 780, vol: 0.020, dur: 0.055 },
+  body:  { tipo: 'roce',  ms: 430, corte: 520, vol: 0.010, dur: 0.075 },
 };
 
 let ruido = null;
