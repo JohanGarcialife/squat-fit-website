@@ -16,6 +16,8 @@ import esPhone from 'react-phone-input-2/lang/es.json';
 import GdprCheckbox from '@/app/components/GdprCheckbox';
 import { normalizeName } from '@/app/components/nameUtils';
 import TextareaMeter from '@/app/components/TextareaMeter';
+import Typewriter from '@/app/components/Typewriter';
+import { ExitButton, BackButton, StepCounter, FormAside, StepsDrawer } from '@/app/components/FormChrome';
 
 const BLUE = '#3932C0';
 const ORANGE = '#FF690B';
@@ -30,6 +32,22 @@ const BOOKING_URL = 'https://agenda.squatfit.es/sesion-diagnostica';
 const SUBMIT_ENDPOINT = 'https://squatfit-api-cyrc2g3zra-no.a.run.app/api/v1/forms/public-answer';
 const PRELLAMADA_FORM_ID = 'f0a11e00-0000-4000-a000-000000000001';
 const STORAGE_KEY = 'sqf-prellamada-solicitudes';
+
+// Fases: agrupan las pantallas para la columna lateral y el panel de móvil.
+const PHASES = ['Sobre ti', 'Tu objetivo', 'Tu momento', 'Cómo te contactamos'];
+
+// A qué fase pertenece cada pantalla (por su clave o su tipo).
+const PHASE_BY_KEY = {
+  nombre: 'Sobre ti', edad: 'Sobre ti', region_vives: 'Sobre ti',
+  objetivo_principal: 'Tu objetivo', impide_lograr: 'Tu objetivo',
+  intentos: 'Tu objetivo', prioridad_para_ti: 'Tu objetivo',
+  empuja_a_cambiar: 'Tu objetivo',
+  tiempo_y_esfuerzo: 'Tu momento', inversion: 'Tu momento',
+  obstaculo_importante: 'Tu momento', coach_squat_fit: 'Tu momento',
+  peso_altura: 'Cómo te contactamos', phone: 'Cómo te contactamos',
+  instagram: 'Cómo te contactamos', final: 'Cómo te contactamos',
+};
+const phaseOf = (step) => PHASE_BY_KEY[step?.key || step?.type] || null;
 
 // Pantallas del formulario: claves estables = atributos `name` del JSON.
 const STEPS = [
@@ -150,6 +168,7 @@ export default function EmpiezaTuCambioPage() {
   const [gdprAccepted, setGdprAccepted] = useState(false);
   const [saving, setSaving] = useState(false);
   const [sent, setSent] = useState(false);
+  const [stepsOpen, setStepsOpen] = useState(false);
 
   const step = STEPS[index];
   const total = STEPS.length;
@@ -290,29 +309,37 @@ export default function EmpiezaTuCambioPage() {
   }
 
   return (
-    <div className="min-h-screen w-full flex">
+    <div className="min-h-[100svh] lg:min-h-screen w-full flex">
       {/* ===== IZQUIERDA: pregunta activa ===== */}
-      <div className="flex-1 flex flex-col px-6 sm:px-12 lg:px-20 py-8 relative">
+      <div className="flex-1 flex flex-col px-6 sm:px-12 lg:px-20 pt-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] sm:py-8 relative">
         {/* Barra de progreso */}
         <div className="flex items-center gap-4 mb-12 sm:mb-16">
           <div className="flex-1 h-2.5 rounded-full bg-[#DEDCF5] overflow-hidden">
             <div className="h-full rounded-full sf-progress-fill" style={{ width: `${progress}%`, backgroundColor: BLUE }} />
           </div>
-          <Link href="/programa" aria-label="Salir" className="text-[#8B87C9] hover:text-[#3932C0] transition-colors cursor-pointer text-xl font-bold px-1">
-            ✕
-          </Link>
+          <ExitButton href="/programa" />
         </div>
 
         {/* Contenido */}
         <div key={index} className="flex-1 flex flex-col max-w-xl w-full mx-auto sf-screen-in">
-          <h1 className="font-extrabold leading-tight mb-3" style={{ color: BLUE, fontSize: 'clamp(1.45rem, 2.2vw, 2rem)' }}>
-            {step.title}
-          </h1>
+          <Typewriter
+            as="h1"
+            text={step.title}
+            speed={step.type === 'intro' ? 22 : 14}
+            className="font-extrabold leading-tight mb-3"
+            style={{ color: BLUE, fontSize: 'clamp(1.45rem, 2.2vw, 2rem)' }}
+          />
           {step.subtitle && <p className="text-[#6B6BA8] text-base sm:text-lg mb-7">{step.subtitle}</p>}
 
           <div className="flex-1">
             {step.type === 'intro' && (
-              <p className="text-[#3932C0] text-lg sm:text-2xl leading-relaxed whitespace-pre-line mt-4">{step.body}</p>
+              <Typewriter
+                text={step.body}
+                speed={14}
+                startDelay={step.title ? step.title.length * 22 + 260 : 200}
+                caret
+                className="text-[#3932C0] text-lg sm:text-2xl leading-relaxed mt-4"
+              />
             )}
 
             {step.type === 'nombre' && (
@@ -450,23 +477,30 @@ export default function EmpiezaTuCambioPage() {
             {saving ? 'Enviando…' : step.type === 'final' ? 'Enviar mis respuestas' : step.type === 'intro' ? 'Empezar' : 'Continuar'}
           </button>
           <div className="flex items-center justify-between mt-4">
-            {index > 0 ? (
-              <button onClick={goBack} className="text-[#8B87C9] hover:text-[#3932C0] font-semibold transition-colors cursor-pointer flex items-center gap-1">
-                ‹ Atrás
-              </button>
-            ) : <span />}
-            <span className="text-[#B4B1D6] font-semibold text-sm">{index + 1}/{total}</span>
+            {index > 0 ? <BackButton onClick={goBack} /> : <span />}
+            <StepCounter index={index} total={total} onOpen={() => setStepsOpen(true)} />
           </div>
         </div>
       </div>
 
-      {/* ===== DERECHA: logo (solo pantallas anchas) ===== */}
-      <aside className="hidden lg:flex w-[38%] max-w-lg flex-col items-center justify-center bg-[#F3F2F9] px-10 py-12">
-        <Image src="/LogotipoSquatfit.png" width={96} height={96} alt="Squad Fit" className="mb-10" />
-        <p className="text-[#8B87C9] font-bold text-center leading-relaxed">
-          Aquí empieza tu cambio.<br />2 minutos, {total - 2} preguntas.
-        </p>
-      </aside>
+      {/* ===== DERECHA: logo + fases (escritorio) ===== */}
+      <FormAside
+        title="Aquí empieza tu cambio"
+        subtitle={`2 minutos, ${total - 2} preguntas`}
+        phases={PHASES}
+        currentPhase={phaseOf(step)}
+      />
+
+      {/* Panel de pasos en móvil (desde el contador) */}
+      <StepsDrawer
+        open={stepsOpen}
+        onClose={() => setStepsOpen(false)}
+        title="Aquí empieza tu cambio"
+        phases={PHASES}
+        currentPhase={phaseOf(step)}
+        index={index}
+        total={total}
+      />
 
       <style jsx global>{`
         .onb-phone .react-tel-input .form-control { height: auto; }
