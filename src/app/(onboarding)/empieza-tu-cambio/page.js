@@ -17,8 +17,8 @@ import GdprCheckbox from '@/app/components/GdprCheckbox';
 import { normalizeName } from '@/app/components/nameUtils';
 import TextareaMeter from '@/app/components/TextareaMeter';
 import Typewriter from '@/app/components/Typewriter';
-import { ExitButton, BackButton, StepCounter, FormAside, StepsDrawer, SoundButton } from '@/app/components/FormChrome';
-import { playSelect, playAdvance, playFinish } from '@/app/components/formSounds';
+import { ExitButton, BackButton, StepCounter, FormAside, StepsDrawer, SoundButton, useMicroFeedback, MicroFeedback } from '@/app/components/FormChrome';
+import { playSelect, playAdvance, playFinish, playKeypress } from '@/app/components/formSounds';
 
 const BLUE = '#3932C0';
 const ORANGE = '#FF690B';
@@ -35,18 +35,22 @@ const PRELLAMADA_FORM_ID = 'f0a11e00-0000-4000-a000-000000000001';
 const STORAGE_KEY = 'sqf-prellamada-solicitudes';
 
 // Fases: agrupan las pantallas para la columna lateral y el panel de móvil.
-const PHASES = ['Sobre ti', 'Tu objetivo', 'Tu momento', 'Cómo te contactamos'];
+const PHASES = [
+  'Sobre ti', 'Tu objetivo', 'Qué te frena', 'Tu prioridad',
+  'Tu compromiso', 'Tu situación', 'Cómo te contactamos',
+];
 
 // A qué fase pertenece cada pantalla (por su clave o su tipo).
 const PHASE_BY_KEY = {
   nombre: 'Sobre ti', edad: 'Sobre ti', region_vives: 'Sobre ti',
-  objetivo_principal: 'Tu objetivo', impide_lograr: 'Tu objetivo',
-  intentos: 'Tu objetivo', prioridad_para_ti: 'Tu objetivo',
-  empuja_a_cambiar: 'Tu objetivo',
-  tiempo_y_esfuerzo: 'Tu momento', inversion: 'Tu momento',
-  obstaculo_importante: 'Tu momento', coach_squat_fit: 'Tu momento',
-  peso_altura: 'Cómo te contactamos', phone: 'Cómo te contactamos',
-  instagram: 'Cómo te contactamos', final: 'Cómo te contactamos',
+  objetivo_principal: 'Tu objetivo',
+  impide_lograr: 'Qué te frena', intentos: 'Qué te frena',
+  prioridad_para_ti: 'Tu prioridad', empuja_a_cambiar: 'Tu prioridad',
+  tiempo_y_esfuerzo: 'Tu compromiso', inversion: 'Tu compromiso',
+  obstaculo_importante: 'Tu situación', coach_squat_fit: 'Tu situación',
+  peso_altura: 'Tu situación',
+  phone: 'Cómo te contactamos', instagram: 'Cómo te contactamos',
+  final: 'Cómo te contactamos',
 };
 const phaseOf = (step) => PHASE_BY_KEY[step?.key || step?.type] || null;
 
@@ -158,6 +162,9 @@ const STEPS = [
 // El título se escribe algo más rápido que el cuerpo del texto.
 const TITLE_SPEED = 11;
 
+// Pausa entre pulsar Continuar y que entre la pantalla siguiente.
+const ADVANCE_DELAY = 260;
+
 const esPhoneLocalization = { ...esPhone, gb: 'Inglaterra' };
 
 export default function EmpiezaTuCambioPage() {
@@ -173,6 +180,7 @@ export default function EmpiezaTuCambioPage() {
   const [saving, setSaving] = useState(false);
   const [sent, setSent] = useState(false);
   const [stepsOpen, setStepsOpen] = useState(false);
+  const { mensaje: gesto, marcar: marcarGesto } = useMicroFeedback();
   // El contenido espera a que termine de escribirse el título.
   const [titleDone, setTitleDone] = useState(false);
   // Pasos ya vistos: al volver atrás el texto sale de golpe (ya se leyó).
@@ -230,8 +238,21 @@ export default function EmpiezaTuCambioPage() {
     return () => clearTimeout(t);
   }, [stepId, step?.title]);
 
-  const goNext = () => { if (isValid && index < total - 1) { playAdvance(); setIndex((i) => i + 1); } };
+  const goNext = () => {
+    if (!isValid || index >= total - 1) return;
+    playAdvance();
+    if (step.type !== 'intro') marcarGesto();
+    // Respiro: si la pregunta siguiente entra de golpe, se atropella con el
+    // sonido de avance y la sensación es de ir a empujones.
+    setTimeout(() => setIndex((i) => i + 1), ADVANCE_DELAY);
+  };
   const goBack = () => setIndex((i) => Math.max(0, i - 1));
+
+  // Volver a una sección ya completada desde el mapa de navegación.
+  const goToPhase = (fase) => {
+    const destino = STEPS.findIndex((st) => phaseOf(st) === fase);
+    if (destino > -1 && destino < index) setIndex(destino);
+  };
 
   const handleSubmit = async () => {
     if (!isValid || saving) return;
@@ -297,6 +318,9 @@ export default function EmpiezaTuCambioPage() {
   };
   useEffect(() => {
     const onKey = (e) => {
+      const escribiendo = e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA');
+      // Tecleo discreto mientras el usuario escribe en un campo.
+      if (escribiendo && !e.repeat && (e.key.length === 1 || e.key === 'Backspace')) playKeypress();
       if (e.key !== 'Enter' || e.repeat || e.isComposing) return;
       const t = e.target;
       const enCampo = t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA');
@@ -370,6 +394,7 @@ export default function EmpiezaTuCambioPage() {
             text={step.title}
             speed={TITLE_SPEED}
             instant={alreadySeen}
+            sound="title"
             className="font-extrabold leading-tight mb-3"
             style={{ color: BLUE, fontSize: 'clamp(1.45rem, 2.2vw, 2rem)' }}
           />
@@ -379,7 +404,10 @@ export default function EmpiezaTuCambioPage() {
 
           {/* <form>: en iOS da los botones nativos ‹ › del teclado para saltar
               entre campos. No envía: el envío va por el botón del pie. */}
-          <form className="flex-1" onSubmit={(e) => e.preventDefault()} style={{ visibility: titleDone ? 'visible' : 'hidden' }}>
+          <form className="flex-1" onSubmit={(e) => e.preventDefault()}>
+            {/* No basta con ocultarlo: si se monta, el texto se escribe (y suena)
+                por detrás mientras el título aún no ha terminado. */}
+            {titleDone && (<>
             {step.type === 'intro' && (
               <Typewriter
                 key={`body-${stepId}`}
@@ -388,6 +416,7 @@ export default function EmpiezaTuCambioPage() {
                 startDelay={160}
                 caret
                 instant={alreadySeen}
+                sound="body"
                 className="text-[#3932C0] text-lg sm:text-2xl leading-relaxed mt-4"
               />
             )}
@@ -513,11 +542,15 @@ export default function EmpiezaTuCambioPage() {
                 <GdprCheckbox checked={gdprAccepted} onChange={setGdprAccepted} id="gdpr-prellamada" />
               </div>
             )}
+            </>)}
           </form>
         </div>
 
         {/* Pie: Continuar + Atrás + contador */}
         <div className="max-w-xl w-full mx-auto mt-8">
+          <div className="h-9 mb-1 flex items-end justify-center">
+            <MicroFeedback mensaje={gesto} />
+          </div>
           <button
             onClick={step.type === 'final' ? handleSubmit : goNext}
             disabled={!isValid || saving}
@@ -539,6 +572,7 @@ export default function EmpiezaTuCambioPage() {
         subtitle={`2 minutos, ${total - 2} preguntas`}
         phases={PHASES}
         currentPhase={phaseOf(step)}
+        onGoTo={goToPhase}
       />
 
       {/* Panel de pasos en móvil (desde el contador) */}
@@ -550,6 +584,7 @@ export default function EmpiezaTuCambioPage() {
         currentPhase={phaseOf(step)}
         index={index}
         total={total}
+        onGoTo={goToPhase}
       />
 
       <style jsx global>{`

@@ -26,6 +26,61 @@ export function ExitButton({ href, onClick, label = 'Salir' }) {
   );
 }
 
+/* ── Gestos de validación tipo Duolingo ──────────────────────────────────
+   No sale en todas las respuestas (cansaría y delataría que es automático):
+   aparece cada 3-5 respuestas, con la frase elegida al azar y sin repetir la
+   anterior, para que parezca alguien reaccionando a lo que cuentas. */
+const FRASES = [
+  '¡Perfecto!', 'Anotado', 'Recibido', 'Vale, apuntado', 'Qué interesante',
+  'Buen dato', 'Tomo nota', 'Entendido', 'Genial', 'Gracias por contarlo',
+  'Me sirve mucho', 'Ajá, entiendo',
+];
+const sorteo = (n) => Math.floor(Math.random() * n);
+
+export function useMicroFeedback() {
+  const [mensaje, setMensaje] = React.useState(null);
+  const cuenta = React.useRef(0);
+  const objetivo = React.useRef(3);
+  const anterior = React.useRef('');
+  const temporizador = React.useRef(null);
+
+  React.useEffect(() => {
+    objetivo.current = 3 + sorteo(3); // 3, 4 o 5
+    return () => clearTimeout(temporizador.current);
+  }, []);
+
+  const marcar = React.useCallback(() => {
+    cuenta.current += 1;
+    if (cuenta.current < objetivo.current) return;
+    cuenta.current = 0;
+    objetivo.current = 3 + sorteo(3);
+    let frase = anterior.current;
+    while (frase === anterior.current) frase = FRASES[sorteo(FRASES.length)];
+    anterior.current = frase;
+    setMensaje({ texto: frase, id: Date.now() });
+    clearTimeout(temporizador.current);
+    temporizador.current = setTimeout(() => setMensaje(null), 1700);
+  }, []);
+
+  return { mensaje, marcar };
+}
+
+export function MicroFeedback({ mensaje }) {
+  if (!mensaje) return null;
+  return (
+    <div className="flex justify-center pointer-events-none" aria-live="polite">
+      <span
+        key={mensaje.id}
+        className="sf-nudge inline-flex items-center gap-1.5 rounded-full px-4 py-2
+                   font-extrabold text-sm bg-[#FFF6F0] text-[#FF690B]
+                   ring-1 ring-[#FF690B]/20"
+      >
+        {mensaje.texto}
+      </span>
+    </div>
+  );
+}
+
 /* ── Silenciar/activar los sonidos del formulario ── */
 export function SoundButton() {
   const [mute, setMute] = React.useState(true);
@@ -84,8 +139,9 @@ export function StepCounter({ index, total, onOpen }) {
   );
 }
 
-/* ── Lista de fases con hitos: hecha / actual / pendiente ── */
-export function PhasesList({ phases = [], currentPhase, compact = false }) {
+/* ── Lista de fases con hitos: hecha / actual / pendiente.
+      Las ya visitadas son clicables para volver a repasarlas. ── */
+export function PhasesList({ phases = [], currentPhase, onGoTo, compact = false }) {
   const actual = phases.indexOf(currentPhase);
   if (!phases.length) return null;
   return (
@@ -93,8 +149,18 @@ export function PhasesList({ phases = [], currentPhase, compact = false }) {
       {phases.map((p, i) => {
         const hecha = actual > -1 && i < actual;
         const activa = i === actual;
+        const navegable = hecha && typeof onGoTo === 'function';
+        const Fila = navegable ? 'button' : 'div';
         return (
-          <li key={p} className="flex items-center gap-3">
+          <li key={p}>
+          <Fila
+            type={navegable ? 'button' : undefined}
+            onClick={navegable ? () => onGoTo(p) : undefined}
+            title={navegable ? `Volver a «${p}»` : undefined}
+            className={`w-full flex items-center gap-3 rounded-xl px-2 -mx-2 text-left transition-colors ${
+              navegable ? 'cursor-pointer hover:bg-[#E7E5F4]' : ''
+            }`}
+          >
             <span
               className="shrink-0 grid place-items-center rounded-full transition-all"
               style={{
@@ -116,6 +182,7 @@ export function PhasesList({ phases = [], currentPhase, compact = false }) {
             >
               {p}
             </span>
+          </Fila>
           </li>
         );
       })}
@@ -124,21 +191,21 @@ export function PhasesList({ phases = [], currentPhase, compact = false }) {
 }
 
 /* ── Columna lateral de escritorio ── */
-export function FormAside({ title, subtitle, phases, currentPhase }) {
+export function FormAside({ title, subtitle, phases, currentPhase, onGoTo }) {
   return (
     <aside className="hidden lg:flex w-[34%] max-w-md flex-col items-center bg-[#F3F2F9] px-10 py-12">
       <Image src="/LogotipoSquatfit.png" width={88} height={88} alt="Squad Fit" className="mb-10" />
       {title && <p className="text-[#8B87C9] font-bold mb-2 text-center">{title}</p>}
       {subtitle && <p className="text-[#A9A6CE] text-sm font-semibold mb-8 text-center">{subtitle}</p>}
       <div className="w-full max-w-[240px] mt-2">
-        <PhasesList phases={phases} currentPhase={currentPhase} />
+        <PhasesList phases={phases} currentPhase={currentPhase} onGoTo={onGoTo} />
       </div>
     </aside>
   );
 }
 
 /* ── Panel lateral de móvil: mismo gesto que el carrito ── */
-export function StepsDrawer({ open, onClose, title, subtitle, phases, currentPhase, index, total }) {
+export function StepsDrawer({ open, onClose, title, subtitle, phases, currentPhase, index, total, onGoTo }) {
   useEffect(() => {
     if (!open) return undefined;
     const onKey = (e) => { if (e.key === 'Escape') onClose(); };
@@ -167,7 +234,16 @@ export function StepsDrawer({ open, onClose, title, subtitle, phases, currentPha
           <ExitButton onClick={onClose} label="Cerrar" />
         </div>
         <div className="px-6 pb-8 overflow-y-auto">
-          <PhasesList phases={phases} currentPhase={currentPhase} />
+          <PhasesList
+            phases={phases}
+            currentPhase={currentPhase}
+            onGoTo={onGoTo ? (p) => { onGoTo(p); onClose(); } : undefined}
+          />
+          {typeof onGoTo === 'function' && (
+            <p className="text-[#B4B1D6] text-xs font-semibold mt-6">
+              Toca una sección ya completada para volver a ella.
+            </p>
+          )}
         </div>
       </div>
     </div>

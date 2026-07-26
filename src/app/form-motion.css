@@ -140,6 +140,23 @@
   animation: sfCaret 1s steps(1, end) infinite;
 }
 
+/* 8b) Gestos de validación ("¡Perfecto!", "Anotado"…): entran con un pequeño
+       impulso y se van solos. */
+@keyframes sfNudgeIn {
+  0%   { opacity: 0; transform: translate3d(0, 8px, 0) scale(0.94); }
+  60%  { opacity: 1; transform: translate3d(0, 0, 0) scale(1.03); }
+  100% { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+}
+@keyframes sfNudgeOut {
+  from { opacity: 1; transform: translate3d(0, 0, 0); }
+  to   { opacity: 0; transform: translate3d(0, -8px, 0); }
+}
+.sf-nudge {
+  animation:
+    sfNudgeIn var(--ms-med) var(--ease-ui) both,
+    sfNudgeOut var(--ms-fast) var(--ease-ui) forwards 1.25s;
+}
+
 /* 9) Bloques informativos con entrada suave */
 .sf-info {
   opacity: 0;
@@ -181,6 +198,7 @@
   .sf-caret {
     animation: none !important;
   }
+  .sf-nudge,
   .sf-choice,
   .sf-cta,
   .sf-progress-fill,

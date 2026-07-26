@@ -23,8 +23,8 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import TextareaMeter from './TextareaMeter';
 import Typewriter from './Typewriter';
-import { ExitButton, BackButton, StepCounter, FormAside, StepsDrawer, SoundButton } from './FormChrome';
-import { playSelect, playAdvance, playFinish } from './formSounds';
+import { ExitButton, BackButton, StepCounter, FormAside, StepsDrawer, SoundButton, useMicroFeedback, MicroFeedback } from './FormChrome';
+import { playSelect, playAdvance, playFinish, playKeypress } from './formSounds';
 
 const BLUE = '#3932C0';
 const ORANGE = '#FF690B';
@@ -33,6 +33,9 @@ const OTHER_PREFIX = 'Otro: ';
 
 // El título se escribe algo más rápido que el cuerpo del texto.
 const TITLE_SPEED = 11;
+
+// Pausa entre pulsar Continuar y que entre la pantalla siguiente.
+const ADVANCE_DELAY = 260;
 
 // `renderResult` (opcional): recibe lo que devuelva onSubmit y sustituye a la
 // pantalla final genérica — lo usa el Seguimiento semanal para pintar el
@@ -47,6 +50,7 @@ export default function FormRunner({ definition, context = {}, onSubmit, exitHre
   const [result, setResult] = useState(null);
   const [otherDraft, setOtherDraft] = useState('');
   const [stepsOpen, setStepsOpen] = useState(false);
+  const { mensaje: gesto, marcar: marcarGesto } = useMicroFeedback();
   // El contenido espera a que termine de escribirse el título.
   const [titleDone, setTitleDone] = useState(false);
   // Pasos ya vistos: al volver atrás el texto sale de golpe (ya se leyó).
@@ -100,10 +104,19 @@ export default function FormRunner({ definition, context = {}, onSubmit, exitHre
   const goNext = () => {
     if (!isValid) return;
     playAdvance();
+    if (step.type !== 'intro') marcarGesto();
     setOtherDraft('');
-    if (index < total - 1) setIndex((i) => i + 1);
+    // Respiro: si la pregunta siguiente entra de golpe, se atropella con el
+    // sonido de avance y la sensación es de ir a empujones.
+    if (index < total - 1) setTimeout(() => setIndex((i) => i + 1), ADVANCE_DELAY);
   };
   const goBack = () => { setOtherDraft(''); setIndex((i) => Math.max(0, i - 1)); };
+
+  // Volver a una fase ya completada desde el mapa de navegación.
+  const goToPhase = (fase) => {
+    const destino = steps.findIndex((st) => st.phase === fase);
+    if (destino > -1 && destino < index) { setOtherDraft(''); setIndex(destino); }
+  };
 
   const handleFinish = async () => {
     if (!isValid || saving) return;
@@ -154,6 +167,9 @@ export default function FormRunner({ definition, context = {}, onSubmit, exitHre
   };
   useEffect(() => {
     const onKey = (e) => {
+      const escribiendo = e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA');
+      // Tecleo discreto mientras el usuario escribe en un campo.
+      if (escribiendo && !e.repeat && (e.key.length === 1 || e.key === 'Backspace')) playKeypress();
       if (e.key !== 'Enter' || e.repeat || e.isComposing) return;
       const t = e.target;
       const enCampo = t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA');
@@ -237,6 +253,7 @@ export default function FormRunner({ definition, context = {}, onSubmit, exitHre
             text={step.title}
             speed={TITLE_SPEED}
             instant={alreadySeen}
+            sound="title"
             className="font-extrabold leading-tight mb-3"
             style={{ color: BLUE, fontSize: 'clamp(1.35rem, 2.1vw, 1.9rem)' }}
           />
@@ -246,7 +263,10 @@ export default function FormRunner({ definition, context = {}, onSubmit, exitHre
 
           {/* <form>: en iOS da los botones nativos ‹ › del teclado para saltar
               entre campos. No envía: el envío va por el botón del pie. */}
-          <form className="flex-1" onSubmit={(e) => e.preventDefault()} style={{ visibility: titleDone ? 'visible' : 'hidden' }}>
+          <form className="flex-1" onSubmit={(e) => e.preventDefault()}>
+            {/* No basta con ocultarlo: si se monta, el texto se escribe (y suena)
+                por detrás mientras el título aún no ha terminado. */}
+            {titleDone && (<>
             {step.type === 'intro' && (
               <Typewriter
                 key={`body-${stepId}`}
@@ -255,6 +275,7 @@ export default function FormRunner({ definition, context = {}, onSubmit, exitHre
                 startDelay={160}
                 caret
                 instant={alreadySeen}
+                sound="body"
                 className="text-[#3932C0] text-lg sm:text-2xl leading-relaxed mt-4"
               />
             )}
@@ -452,11 +473,15 @@ export default function FormRunner({ definition, context = {}, onSubmit, exitHre
                 <span className="text-[#363C98]/90 leading-snug">{step.label}</span>
               </label>
             )}
+            </>)}
           </form>
         </div>
 
         {/* Pie */}
         <div className="max-w-xl w-full mx-auto mt-8">
+          <div className="h-9 mb-1 flex items-end justify-center">
+            <MicroFeedback mensaje={gesto} />
+          </div>
           <button
             onClick={isLast ? handleFinish : goNext}
             disabled={!isValid || saving}
@@ -473,7 +498,7 @@ export default function FormRunner({ definition, context = {}, onSubmit, exitHre
       </div>
 
       {/* ===== DERECHA: logo + fases (escritorio) ===== */}
-      <FormAside title={formTitle} phases={phases} currentPhase={step.phase} />
+      <FormAside title={formTitle} phases={phases} currentPhase={step.phase} onGoTo={goToPhase} />
 
       {/* Panel de pasos en móvil (desde el contador) */}
       <StepsDrawer
@@ -484,6 +509,7 @@ export default function FormRunner({ definition, context = {}, onSubmit, exitHre
         currentPhase={step.phase}
         index={index}
         total={total}
+        onGoTo={goToPhase}
       />
     </div>
   );

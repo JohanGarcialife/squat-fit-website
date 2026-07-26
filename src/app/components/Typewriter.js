@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useRef, useState } from 'react';
-import { playTick } from './formSounds';
+import { startTyping, playTypingEnd } from './formSounds';
 
 // Texto que se escribe solo, para las pantallas de los formularios que son solo
 // texto (títulos, intros, pantallas informativas): así no cae de golpe un bloque
@@ -25,6 +25,7 @@ export default function Typewriter({
   startDelay = 120,    // espera antes de arrancar
   caret = false,
   instant = false,
+  sound = null,       // 'title' | 'body' | null
   onDone,
   className = '',
   style,
@@ -49,22 +50,33 @@ export default function Typewriter({
     }
 
     setCount(0);
+    // El tecleo suena a ritmo constante mientras dura, no una vez por letra.
+    let pararSonido = () => {};
     let i = 0;
     const paso = () => {
       i += 1;
       setCount(i);
-      // Un tic cada 3 letras: en cada una sonaría a ametralladora.
-      if (i % 3 === 0) playTick();
+
       if (i < text.length) {
         timers.current.push(setTimeout(paso, speed));
       } else {
+        pararSonido();
+        // Campanita de cierre solo en el párrafo: el título encadena con el
+        // texto que viene detrás, y sonarían dos campanas seguidas.
+        if (sound === 'body') playTypingEnd();
         onDoneRef.current?.();
       }
     };
-    timers.current.push(setTimeout(paso, startDelay));
+    timers.current.push(setTimeout(() => {
+      if (sound) pararSonido = startTyping(sound);
+      paso();
+    }, startDelay));
 
-    return () => timers.current.forEach(clearTimeout);
-  }, [text, speed, startDelay, instant]);
+    return () => {
+      pararSonido();
+      timers.current.forEach(clearTimeout);
+    };
+  }, [text, speed, startDelay, instant, sound]);
 
   const escrito = text.slice(0, count);
   const pendiente = text.slice(count);
