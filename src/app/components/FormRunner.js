@@ -23,7 +23,8 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import TextareaMeter from './TextareaMeter';
 import Typewriter from './Typewriter';
-import { ExitButton, BackButton, StepCounter, FormAside, StepsDrawer } from './FormChrome';
+import { ExitButton, BackButton, StepCounter, FormAside, StepsDrawer, SoundButton } from './FormChrome';
+import { playSelect, playAdvance, playFinish } from './formSounds';
 
 const BLUE = '#3932C0';
 const ORANGE = '#FF690B';
@@ -60,6 +61,9 @@ export default function FormRunner({ definition, context = {}, onSubmit, exitHre
   const total = steps.length;
 
   const set = (patch) => setAnswers((a) => ({ ...a, ...patch }));
+  // Elegir una opción: mismo `set` pero con su sonido.
+  const choose = (patch) => { playSelect(); set(patch); };
+
 
   const isValid = useMemo(() => {
     if (!step) return false;
@@ -95,6 +99,7 @@ export default function FormRunner({ definition, context = {}, onSubmit, exitHre
 
   const goNext = () => {
     if (!isValid) return;
+    playAdvance();
     setOtherDraft('');
     if (index < total - 1) setIndex((i) => i + 1);
   };
@@ -102,6 +107,7 @@ export default function FormRunner({ definition, context = {}, onSubmit, exitHre
 
   const handleFinish = async () => {
     if (!isValid || saving) return;
+    playFinish();
     setSaving(true);
     try {
       const res = await onSubmit(answers);
@@ -219,6 +225,7 @@ export default function FormRunner({ definition, context = {}, onSubmit, exitHre
           <div className="flex-1 h-2.5 rounded-full bg-[#DEDCF5] overflow-hidden">
             <div className="h-full rounded-full sf-progress-fill" style={{ width: `${progress}%`, backgroundColor: BLUE }} />
           </div>
+          <SoundButton />
           <ExitButton href={exitHref} />
         </div>
 
@@ -265,7 +272,7 @@ export default function FormRunner({ definition, context = {}, onSubmit, exitHre
                       onClick={() => {
                         const patch = { [step.key]: value };
                         if (step.type === 'scale') patch[`${step.key}_label`] = label;
-                        set(patch);
+                        choose(patch);
                       }}
                       className={`rounded-2xl border-2 px-5 py-3.5 font-bold text-[17px] sm:text-lg cursor-pointer text-left sf-choice sf-stagger ${active ? 'is-selected' : ''}`}
                       style={{ '--i': i, ...choiceStyle(active) }}
@@ -306,7 +313,7 @@ export default function FormRunner({ definition, context = {}, onSubmit, exitHre
                       type="button"
                       onClick={() => {
                         const cur = answers[step.key] || [];
-                        set({ [step.key]: selected ? cur.filter((o) => o !== opt) : [...cur, opt] });
+                        choose({ [step.key]: selected ? cur.filter((o) => o !== opt) : [...cur, opt] });
                       }}
                       className={`flex items-center gap-3 rounded-2xl border-2 px-5 py-3.5 font-bold text-[17px] sm:text-lg cursor-pointer text-left sf-choice sf-stagger ${selected ? 'is-selected' : ''}`}
                       style={{ '--i': i, ...choiceStyle(selected) }}
