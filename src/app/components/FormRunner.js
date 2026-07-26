@@ -30,6 +30,9 @@ const ORANGE = '#FF690B';
 
 const OTHER_PREFIX = 'Otro: ';
 
+// El título se escribe algo más rápido que el cuerpo del texto.
+const TITLE_SPEED = 11;
+
 // `renderResult` (opcional): recibe lo que devuelva onSubmit y sustituye a la
 // pantalla final genérica — lo usa el Seguimiento semanal para pintar el
 // semáforo y las sugerencias del motor de hábitos.
@@ -43,6 +46,10 @@ export default function FormRunner({ definition, context = {}, onSubmit, exitHre
   const [result, setResult] = useState(null);
   const [otherDraft, setOtherDraft] = useState('');
   const [stepsOpen, setStepsOpen] = useState(false);
+  // El contenido espera a que termine de escribirse el título.
+  const [titleDone, setTitleDone] = useState(false);
+  // Pasos ya vistos: al volver atrás el texto sale de golpe (ya se leyó).
+  const seenSteps = useRef(new Set());
 
   // Pasos visibles según condicionales (se recalcula con cada respuesta).
   const steps = useMemo(
@@ -109,6 +116,24 @@ export default function FormRunner({ definition, context = {}, onSubmit, exitHre
 
   const progress = total > 1 ? Math.round((index / (total - 1)) * 100) : 0;
   const isLast = index === total - 1;
+  const stepId = step ? `${step.key || step.type}-${index}` : '';
+  // Se congela por paso: si no, cualquier re-render (marcar una opción, teclear)
+  // lo pondría a true y cortaría el mecanográfico a medias.
+  const alreadySeen = useMemo(() => seenSteps.current.has(stepId), [stepId]);
+
+  // El contenido aparece cuando el título ha terminado de escribirse. Se calcula
+  // por tiempo (longitud × velocidad) en vez de esperar un aviso del hijo: así
+  // no depende del orden en que React dispara los efectos.
+  useEffect(() => {
+    if (!stepId) return undefined;
+    const visto = seenSteps.current.has(stepId);
+    seenSteps.current.add(stepId);
+    if (visto) { setTitleDone(true); return undefined; }
+    setTitleDone(false);
+    const ms = 150 + (step?.title?.length || 0) * TITLE_SPEED;
+    const t = setTimeout(() => setTitleDone(true), ms);
+    return () => clearTimeout(t);
+  }, [stepId, step?.title]);
 
   // ── Enter = Continuar (petición de Hamlet) ────────────────────────────────
   // Pulsar Enter avanza (o envía en el último paso) si la respuesta es válida.
@@ -125,6 +150,16 @@ export default function FormRunner({ definition, context = {}, onSubmit, exitHre
     const onKey = (e) => {
       if (e.key !== 'Enter' || e.repeat || e.isComposing) return;
       const t = e.target;
+      const enCampo = t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA');
+
+      // MÓVIL (pantalla táctil): Enter cierra el teclado, NO avanza. Avanzar
+      // desde el teclado ocultaba preguntas con más de un campo.
+      const tactil = window.matchMedia?.('(pointer: coarse)').matches;
+      if (tactil) {
+        if (enCampo) { e.preventDefault(); t.blur(); }
+        return;
+      }
+
       if (t && t.tagName === 'TEXTAREA') return; // salto de línea normal
       if (t && t.closest && t.closest('a')) return; // no pisar enlaces (✕ salir)
       e.preventDefault();
@@ -191,20 +226,28 @@ export default function FormRunner({ definition, context = {}, onSubmit, exitHre
           {step.phase && <p className="text-[#FF690B] font-bold text-sm uppercase tracking-wider mb-2">{step.phase}</p>}
           <Typewriter
             as="h1"
+            key={stepId}
             text={step.title}
-            speed={step.type === 'intro' ? 22 : 14}
+            speed={TITLE_SPEED}
+            instant={alreadySeen}
             className="font-extrabold leading-tight mb-3"
             style={{ color: BLUE, fontSize: 'clamp(1.35rem, 2.1vw, 1.9rem)' }}
           />
-          {step.subtitle && <p className="text-[#6B6BA8] text-base sm:text-lg mb-6">{step.subtitle}</p>}
+          {step.subtitle && titleDone && (
+            <p className="text-[#6B6BA8] text-base sm:text-lg mb-6 sf-stagger">{step.subtitle}</p>
+          )}
 
-          <div className="flex-1">
+          {/* <form>: en iOS da los botones nativos ‹ › del teclado para saltar
+              entre campos. No envía: el envío va por el botón del pie. */}
+          <form className="flex-1" onSubmit={(e) => e.preventDefault()} style={{ visibility: titleDone ? 'visible' : 'hidden' }}>
             {step.type === 'intro' && (
               <Typewriter
+                key={`body-${stepId}`}
                 text={step.body}
-                speed={14}
-                startDelay={step.title ? step.title.length * 22 + 260 : 200}
+                speed={19}
+                startDelay={160}
                 caret
+                instant={alreadySeen}
                 className="text-[#3932C0] text-lg sm:text-2xl leading-relaxed mt-4"
               />
             )}
@@ -402,7 +445,7 @@ export default function FormRunner({ definition, context = {}, onSubmit, exitHre
                 <span className="text-[#363C98]/90 leading-snug">{step.label}</span>
               </label>
             )}
-          </div>
+          </form>
         </div>
 
         {/* Pie */}
