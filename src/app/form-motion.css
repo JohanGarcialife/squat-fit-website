@@ -20,11 +20,14 @@
   --ms-settle: 291ms;       /* 140 · asentado del seleccionado */
   --ms-shadow: 250ms;       /* 120 · sombra del CTA */
   --ms-info: 499ms;         /* 240 · bloques informativos */
-  --ms-stagger: 104ms;      /* 50  · retardo entre opciones */
+  --ms-option: 340ms;       /* entrada de cada casilla */
+  --ms-stagger: 170ms;      /* la MITAD de --ms-option: la siguiente arranca
+                               cuando la anterior va por la mitad */
   --ms-drawer: 340ms;       /* panel lateral de pasos (móvil) */
 
   /* Recorridos: subidos sobre el briefing para que el movimiento se note */
   --px-sweep: 34px;         /* barrido lateral al cambiar de pregunta */
+  --px-option: 14px;        /* recorrido corto de cada casilla (izq → der) */
   --px-lift: 5px;           /* hundido del botón físico */
 }
 
@@ -54,13 +57,16 @@
   will-change: width;
 }
 
-/* 3) Opciones: entran barriendo, escalonadas (usar style="--i: N") */
+/* 3) Casillas: entran de una en una con un deslizamiento CORTO de izquierda a
+      derecha (arrancan un poco antes de su sitio, no desde fuera de pantalla).
+      El retardo es la mitad de la duración: cada una sale cuando la anterior va
+      por la mitad, así el ojo las sigue sin que se haga lento. */
 @keyframes sfOptionIn {
-  from { opacity: 0; transform: translate3d(calc(var(--px-sweep) * 0.65), 4px, 0); }
+  from { opacity: 0; transform: translate3d(calc(var(--px-option) * -1), 0, 0); }
   to   { opacity: 1; transform: translate3d(0, 0, 0); }
 }
 .sf-stagger {
-  animation: sfOptionIn var(--ms-med) var(--ease-ui) both;
+  animation: sfOptionIn var(--ms-option) var(--ease-ui) both;
   animation-delay: calc(var(--i, 0) * var(--ms-stagger));
 }
 
