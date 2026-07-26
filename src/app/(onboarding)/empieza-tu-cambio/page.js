@@ -305,7 +305,7 @@ export default function EmpiezaTuCambioPage() {
 
         {/* Contenido */}
         <div key={index} className="flex-1 flex flex-col max-w-xl w-full mx-auto sf-screen-in">
-          <h1 className="font-extrabold leading-tight mb-3" style={{ color: BLUE, fontSize: 'clamp(1.75rem, 2.8vw, 2.5rem)' }}>
+          <h1 className="font-extrabold leading-tight mb-3" style={{ color: BLUE, fontSize: 'clamp(1.45rem, 2.2vw, 2rem)' }}>
             {step.title}
           </h1>
           {step.subtitle && <p className="text-[#6B6BA8] text-base sm:text-lg mb-7">{step.subtitle}</p>}
@@ -348,7 +348,7 @@ export default function EmpiezaTuCambioPage() {
                       key={opt}
                       type="button"
                       onClick={() => set({ [step.key]: opt })}
-                      className={`rounded-2xl border-2 px-5 py-3.5 font-bold text-base sm:text-[17px] cursor-pointer text-left sf-choice sf-stagger ${active ? 'is-selected' : ''}`}
+                      className={`rounded-2xl border-2 px-5 py-3.5 font-bold text-[17px] sm:text-lg cursor-pointer text-left sf-choice sf-stagger ${active ? 'is-selected' : ''}`}
                       style={active
                         ? { '--i': i, borderColor: ORANGE, backgroundColor: '#FFF6F0', color: ORANGE, boxShadow: '0 2px 10px rgba(255,105,11,0.15)' }
                         : { '--i': i, borderColor: '#E7E6F5', backgroundColor: '#fff', color: BLUE }}
@@ -372,7 +372,7 @@ export default function EmpiezaTuCambioPage() {
                         const cur = answers[step.key] || [];
                         set({ [step.key]: selected ? cur.filter((o) => o !== opt) : [...cur, opt] });
                       }}
-                      className={`flex items-center gap-3 rounded-2xl border-2 px-5 py-3.5 font-bold text-base sm:text-[17px] cursor-pointer text-left sf-choice sf-stagger ${selected ? 'is-selected' : ''}`}
+                      className={`flex items-center gap-3 rounded-2xl border-2 px-5 py-3.5 font-bold text-[17px] sm:text-lg cursor-pointer text-left sf-choice sf-stagger ${selected ? 'is-selected' : ''}`}
                       style={selected
                         ? { '--i': i, borderColor: ORANGE, backgroundColor: '#FFF6F0', color: ORANGE, boxShadow: '0 2px 10px rgba(255,105,11,0.15)' }
                         : { '--i': i, borderColor: '#E7E6F5', backgroundColor: '#fff', color: BLUE }}
