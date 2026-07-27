@@ -101,7 +101,7 @@ function tono({ freq, dur = 0.09, vol = 0.05, tipo = 'sine', desliz = 0 }) {
 // para que se oiga de verdad, manteniendo el carácter de roce y no de clic.
 const TECLEO = {
   title: { tipo: 'nota',  ms: 175, freq: 320, vol: 0.081, dur: 0.16 },
-  body:  { tipo: 'roce',  ms: 430, corte: 700, vol: 0.024, dur: 0.075 },
+  body:  { tipo: 'roce',  ms: 430, corte: 700, vol: 0.041, dur: 0.075 },
 };
 
 let ruido = null;
