@@ -178,14 +178,19 @@ export function ProductoCard({ productoId }) {
       {meta.catalogBase ? (
         group ? (
           <ul className="text-sm text-gray-600 space-y-1">
-            {groupTierOrder(group).map((tier) => (
-              <li key={tier} className="flex items-baseline justify-between gap-3">
-                <span>{TIER_META[tier].label}</span>
-                <span className="font-bold text-[#363C98] whitespace-nowrap">
-                  {formatEuros(group.tiers[tier].price)} {TIER_META[tier].priceSuffix}
-                </span>
-              </li>
-            ))}
+            {/* Solo el tramo ANUAL (pago único): es el que coincide con los
+                precios históricos del generador (el xlsx) y evita que el lead
+                del downsell compare mensualidades. Petición de María, 27-jul. */}
+            {groupTierOrder(group)
+              .filter((tier) => tier === 'anual' || groupTierOrder(group).length === 1)
+              .map((tier) => (
+                <li key={tier} className="flex items-baseline justify-between gap-3">
+                  <span>Acceso 12 meses · pago único</span>
+                  <span className="font-bold text-[#363C98] whitespace-nowrap">
+                    {formatEuros(group.tiers[tier].price)} €
+                  </span>
+                </li>
+              ))}
           </ul>
         ) : (
           <p className="text-sm text-gray-400">Cargando precios…</p>
