@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { X, Check, ChevronLeft, ListChecks, Volume2, VolumeX } from 'lucide-react';
 import { isMuted, toggleMute } from './formSounds';
 
-const BLUE = '#3932C0';
+const BLUE = '#363C98';
 const ORANGE = '#FF690B';
 
 // Piezas de chrome compartidas por los formularios (prellamada, onboarding y los
@@ -16,7 +16,7 @@ const ORANGE = '#FF690B';
 export function ExitButton({ href, onClick, label = 'Salir' }) {
   const clases =
     'shrink-0 grid place-items-center w-9 h-9 rounded-full text-[#8B87C9] ' +
-    'bg-[#F3F2F9] hover:bg-[#E7E5F4] hover:text-[#3932C0] active:scale-95 ' +
+    'bg-[#F3F2F9] hover:bg-[#E7E5F4] hover:text-[#363C98] active:scale-95 ' +
     'transition-all cursor-pointer';
   const icono = <X className="w-[18px] h-[18px]" strokeWidth={2.5} />;
   return href ? (
@@ -150,7 +150,7 @@ export function SalidaDialogo({ abierto, indice, total, onSeguir, onSalir }) {
         <button
           type="button"
           onClick={onSalir}
-          className="text-[#8B87C9] hover:text-[#3932C0] font-bold transition-colors cursor-pointer"
+          className="text-[#8B87C9] hover:text-[#363C98] font-bold transition-colors cursor-pointer"
         >
           Salir de todos modos
         </button>
@@ -175,7 +175,7 @@ export function SoundButton() {
       aria-label={mute ? 'Activar sonido' : 'Silenciar'}
       title={mute ? 'Activar sonido' : 'Silenciar'}
       className="shrink-0 grid place-items-center w-9 h-9 rounded-full text-[#8B87C9]
-                 hover:bg-[#F3F2F9] hover:text-[#3932C0] active:scale-95
+                 hover:bg-[#F3F2F9] hover:text-[#363C98] active:scale-95
                  transition-all cursor-pointer"
     >
       {mute ? <VolumeX className="w-[18px] h-[18px]" strokeWidth={2.2} />
@@ -191,7 +191,7 @@ export function BackButton({ onClick }) {
       type="button"
       onClick={onClick}
       className="inline-flex items-center gap-1 pl-2 pr-3.5 py-2 rounded-full font-bold text-sm
-                 text-[#6B6BA8] bg-[#F3F2F9] hover:bg-[#E7E5F4] hover:text-[#3932C0]
+                 text-[#6B6BA8] bg-[#F3F2F9] hover:bg-[#E7E5F4] hover:text-[#363C98]
                  active:scale-95 transition-all cursor-pointer"
     >
       <ChevronLeft className="w-4 h-4" strokeWidth={2.5} />
@@ -208,7 +208,7 @@ export function StepCounter({ index, total, onOpen }) {
       onClick={onOpen}
       aria-label="Ver los pasos del formulario"
       className="inline-flex items-center gap-1.5 pl-3 pr-2.5 py-2 rounded-full font-bold text-sm
-                 text-[#8B87C9] hover:bg-[#F3F2F9] hover:text-[#3932C0] active:scale-95
+                 text-[#8B87C9] hover:bg-[#F3F2F9] hover:text-[#363C98] active:scale-95
                  transition-all cursor-pointer"
     >
       {index + 1}/{total}

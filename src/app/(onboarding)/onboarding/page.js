@@ -17,7 +17,7 @@ import { fmtWeight, weightToKg } from '@/app/components/weightUnits';
 import { hasAcceptedPrivacy, markPrivacyAccepted } from '@/app/components/privacyConsent';
 
 const API = 'https://squatfit-api-cyrc2g3zra-no.a.run.app';
-const BLUE = '#3932C0';
+const BLUE = '#363C98';
 const ORANGE = '#FF690B';
 
 const esPhoneLocalization = { ...esPhone, gb: 'Inglaterra' };
@@ -282,7 +282,7 @@ export default function OnboardingPage() {
           <div className="flex-1 h-2.5 rounded-full bg-[#DEDCF5] overflow-hidden">
             <div className="h-full rounded-full sf-progress-fill" style={{ width: `${progress}%`, backgroundColor: BLUE }} />
           </div>
-          <button onClick={() => setExitOpen(true)} aria-label="Salir" className="text-[#8B87C9] hover:text-[#3932C0] transition-colors cursor-pointer text-xl font-bold px-1">
+          <button onClick={() => setExitOpen(true)} aria-label="Salir" className="text-[#8B87C9] hover:text-[#363C98] transition-colors cursor-pointer text-xl font-bold px-1">
             ✕
           </button>
         </div>
@@ -302,7 +302,7 @@ export default function OnboardingPage() {
 
           <div className="flex-1">
             {step.type === 'intro' && (
-              <p className="text-[#3932C0] text-lg sm:text-2xl leading-relaxed whitespace-pre-line mt-4">{step.body}</p>
+              <p className="text-[#363C98] text-lg sm:text-2xl leading-relaxed whitespace-pre-line mt-4">{step.body}</p>
             )}
 
             {step.type === 'basicos' && (
@@ -426,7 +426,7 @@ export default function OnboardingPage() {
             {step.type === 'done' && (
               <div className="mt-2">
                 <div className="text-6xl mb-4">🎉</div>
-                <p className="text-[#3932C0] text-lg sm:text-2xl leading-relaxed whitespace-pre-line">{step.body}</p>
+                <p className="text-[#363C98] text-lg sm:text-2xl leading-relaxed whitespace-pre-line">{step.body}</p>
                 {/* La política se acepta UNA sola vez: si ya consta, no se re-pide. */}
                 {!privacyDone && (
                   <GdprCheckbox checked={gdprAccepted} onChange={setGdprAccepted} id="gdpr-onboarding" className="mt-8" />
@@ -447,7 +447,7 @@ export default function OnboardingPage() {
             {saving ? 'Guardando…' : step.type === 'done' ? 'Ir a mi panel' : 'Continuar'}
           </button>
           <div className="flex items-center justify-between mt-4">
-            <button onClick={goBack} className="text-[#8B87C9] hover:text-[#3932C0] font-semibold transition-colors cursor-pointer flex items-center gap-1">
+            <button onClick={goBack} className="text-[#8B87C9] hover:text-[#363C98] font-semibold transition-colors cursor-pointer flex items-center gap-1">
               ‹ Atrás
             </button>
             <span className="text-[#B4B1D6] font-semibold text-sm">{index + 1}/{total}</span>

@@ -21,9 +21,10 @@ import Typewriter from '@/app/components/Typewriter';
 import { ExitButton, BackButton, StepCounter, FormAside, StepsDrawer, SoundButton, useMicroFeedback, PausaPantalla, PAUSA_MS, ChildField, SalidaDialogo } from '@/app/components/FormChrome';
 import { playSelect, playAdvance, playFinish, playKeypress, unlockAudio } from '@/app/components/formSounds';
 import { PAISES_EUROPA, PAISES_LATAM } from '@/app/components/paises';
+import LogoEspagueti from '@/app/components/LogoEspagueti';
 import { guardarProgreso, leerProgreso, borrarProgreso } from '@/app/components/formProgress';
 
-const BLUE = '#3932C0';
+const BLUE = '#363C98';
 const ORANGE = '#FF690B';
 
 // Enlace de reserva de la llamada. Hoy apunta a /contacto; cuando exista un
@@ -176,7 +177,7 @@ const ADVANCE_DELAY = 520;
 
 // Lo que tarda la portada en apartarse. Tiene que cuadrar con
 // --ms-portada-out de form-motion.css.
-const PORTADA_OUT_MS = 620;
+const PORTADA_OUT_MS = 1000;
 
 // Identificador del progreso guardado en el navegador.
 // Traducción de nuestro utm_source al vocabulario de orígenes del back office.
@@ -484,7 +485,7 @@ export default function EmpiezaTuCambioPage() {
           >
             Reservar mi llamada
           </Link>
-          <Link href="/" className="mt-5 text-[#8B87C9] hover:text-[#3932C0] font-semibold transition-colors">
+          <Link href="/" className="mt-5 text-[#8B87C9] hover:text-[#363C98] font-semibold transition-colors">
             Volver al inicio
           </Link>
         </div>
@@ -516,13 +517,7 @@ export default function EmpiezaTuCambioPage() {
     return (
       <div className="min-h-[100svh] w-full flex flex-col items-center justify-center px-6 text-center bg-white">
         <div className={`max-w-lg flex flex-col items-center ${saliendoPortada ? 'sf-portada-out' : 'sf-screen-in'}`}>
-          <Image
-            src="/LogotipoSquatfit.png"
-            width={72}
-            height={72}
-            alt="Squad Fit"
-            className="mb-8 sf-portada-logo"
-          />
+          <LogoEspagueti tamano={96} saliendo={saliendoPortada} className="mb-8" />
           <div className="sf-portada-texto flex flex-col items-center">
             <h1 className="font-extrabold mb-4" style={{ color: BLUE, fontSize: 'clamp(1.9rem, 4vw, 2.6rem)' }}>
               {guardado ? '¿Seguimos donde lo dejaste?' : 'Vamos a conocerte'}
@@ -544,7 +539,7 @@ export default function EmpiezaTuCambioPage() {
               <button
                 type="button"
                 onClick={() => { borrarProgreso(FORM_ID); setGuardado(null); }}
-                className="mt-4 text-[#8B87C9] hover:text-[#3932C0] font-bold transition-colors cursor-pointer"
+                className="mt-4 text-[#8B87C9] hover:text-[#363C98] font-bold transition-colors cursor-pointer"
               >
                 Empezar de nuevo
               </button>
@@ -600,7 +595,7 @@ export default function EmpiezaTuCambioPage() {
                 instant={alreadySeen}
                 sound="body"
                 onDone={() => setBodyDone(true)}
-                className="text-[#3932C0] text-lg sm:text-2xl leading-relaxed mt-4"
+                className="text-[#363C98] text-lg sm:text-2xl leading-relaxed mt-4"
               />
             )}
 
@@ -744,7 +739,7 @@ export default function EmpiezaTuCambioPage() {
 
             {step.type === 'final' && (
               <div className="mt-2 max-w-md">
-                <p className="text-[#3932C0] text-lg sm:text-xl leading-relaxed mb-8">
+                <p className="text-[#363C98] text-lg sm:text-xl leading-relaxed mb-8">
                   Ya casi está, {answers.first_name || ''} 💪. Revisa que todo sea
                   correcto y envíame tus respuestas: te contactaré por WhatsApp
                   para agendar tu llamada.

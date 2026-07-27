@@ -14,7 +14,7 @@ import { X, ArrowRight } from 'lucide-react';
 
 import { progresoPendiente } from './formProgress';
 
-const BLUE = '#3932C0';
+const BLUE = '#363C98';
 const ORANGE = '#FF690B';
 const OCULTO_KEY = 'sqf-form-pendiente-oculto';
 
@@ -67,7 +67,7 @@ export default function FormularioPendiente() {
             setOculto(true);
           }}
           className="shrink-0 grid place-items-center w-8 h-8 rounded-full text-[#B4B1D6]
-                     hover:bg-[#F3F2F9] hover:text-[#3932C0] active:scale-95 transition-all cursor-pointer"
+                     hover:bg-[#F3F2F9] hover:text-[#363C98] active:scale-95 transition-all cursor-pointer"
         >
           <X className="w-4 h-4" strokeWidth={2.5} />
         </button>
