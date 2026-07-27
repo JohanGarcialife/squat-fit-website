@@ -177,7 +177,7 @@ const ADVANCE_DELAY = 520;
 
 // Lo que tarda la portada en apartarse. Tiene que cuadrar con
 // --ms-portada-out de form-motion.css.
-const PORTADA_OUT_MS = 780;
+const PORTADA_OUT_MS = 1200;
 
 // Identificador del progreso guardado en el navegador.
 // Traducción de nuestro utm_source al vocabulario de orígenes del back office.
@@ -517,7 +517,7 @@ export default function EmpiezaTuCambioPage() {
     return (
       <div className="min-h-[100svh] w-full flex flex-col items-center justify-center px-6 text-center bg-white">
         <div className={`max-w-lg flex flex-col items-center ${saliendoPortada ? 'sf-portada-out' : 'sf-screen-in'}`}>
-          <LogoEspagueti tamano={96} saliendo={saliendoPortada} className="mb-8" />
+          <LogoEspagueti tamano={120} saliendo={saliendoPortada} className="-mb-8" />
           <div className="sf-portada-texto flex flex-col items-center">
             <h1 className="font-extrabold mb-4" style={{ color: BLUE, fontSize: 'clamp(1.9rem, 4vw, 2.6rem)' }}>
               {guardado ? '¿Seguimos donde lo dejaste?' : 'Vamos a conocerte'}

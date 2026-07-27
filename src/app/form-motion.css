@@ -29,7 +29,8 @@
   --ms-option-start: 220ms; /* espera antes de la primera casilla, para que no
                                compita con la entrada de la pantalla */
   --ms-drawer: 340ms;       /* panel lateral de pasos (móvil) */
-  --ms-portada-out: 780ms;  /* 1000 · la portada apartándose al pulsar «Empezar» */
+  --ms-portada-out: 1200ms; /* la portada apartándose al pulsar «Empezar» */
+  --ms-portal: 1200ms;      /* el portal que se traga el logo (−20 % sobre la demo) */
 
   /* Recorridos: subidos sobre el briefing para que el movimiento se note */
   --px-sweep: 44px;         /* 34 · barrido lateral al cambiar de pregunta */
@@ -203,49 +204,42 @@
   from { opacity: 1; }
   to   { opacity: 0; }
 }
-/* El logo no se va de una pieza: se parte en sus cuatro letras (ver
-   LogoEspagueti.js) y cada una sale en ESPIRAL hacia su esquina.
+/* El logo no se va de una pieza ni se rompe en trozos: se lo traga un PORTAL.
+   Ver LogoEspagueti.js para el porqué de cada decisión.
 
-   La primera versión las aplastaba (scale 0.2 × 3.4) y quedaba barata: una
-   letra estirada no es más que un rectángulo, y se nota. Esta gira de verdad.
+   Tres capas de movimiento, en este orden:
+   1. REBOTE (0-14 %): agranda y encoge rápido. Es la señal de «esto arranca».
+   2. El logo gira, encoge y se DESENFOCA mientras una máscara radial se lo come
+      desde los bordes (la máscara la mueve el componente, por JS: CSS no sabe
+      interpolar gradientes).
+   3. Los HILOS del portal se dibujan hacia el centro girando.
 
-   Cómo: cada letra va dentro de una «órbita» que rota, y la letra, dentro, se
-   aleja en línea recta. Recto dentro de algo que gira = espiral, sin tener que
-   calcular la curva a mano en los keyframes. Las cuatro giran en el MISMO
-   sentido, así que arrancan como un remolino único antes de separarse.
-
-   El carácter lo da la curva de tiempo: cubic-bezier(.55,0,.85,.25) es lenta al
-   principio y muy rápida al final — el logo parece succionado, no empujado. Y
-   el desenfoque creciente hace el resto: es lo que separa un movimiento con
-   cuerpo de uno de plantilla. */
-@keyframes sfOrbita {
-  0%   { transform: rotate(0deg); }
-  18%  { transform: rotate(-14deg); }
-  100% { transform: rotate(190deg); }
+   Lo que hace que no parezca roto sino absorbido es el desenfoque creciente
+   junto con la saturación: el logo se convierte en luz antes de irse. */
+@keyframes sfLogoPortal {
+  0%   { transform: scale(1) rotate(0deg);        filter: blur(0px) saturate(1); opacity: 1; }
+  7%   { transform: scale(1.12) rotate(-2deg);    filter: blur(0px) saturate(1.1); opacity: 1; }
+  14%  { transform: scale(0.97) rotate(2deg);     filter: blur(.4px) saturate(1.2); opacity: 1; }
+  45%  { transform: scale(.72) rotate(150deg);    filter: blur(2.2px) saturate(1.8); opacity: 1; }
+  72%  { transform: scale(.34) rotate(340deg);    filter: blur(4.6px) saturate(2.4); opacity: .85; }
+  100% { transform: scale(.03) rotate(520deg);    filter: blur(8px) saturate(2.8); opacity: 0; }
 }
-@keyframes sfVuelo {
-  0%   { transform: translate3d(0, 0, 0) scale(1);   filter: blur(0px); opacity: 1; }
-  18%  { transform: translate3d(0, 0, 0) scale(0.9); filter: blur(0px); opacity: 1; }
-  55%  { transform: translate3d(var(--dx), var(--dy), 60px) scale(0.72);
-         filter: blur(1px); opacity: 1; }
-  100% { transform: translate3d(calc(var(--dx) * 3.4), calc(var(--dy) * 3.4), 260px) scale(0.34);
-         filter: blur(7px); opacity: 0; }
-}
-.sf-orbita {
-  animation: sfOrbita var(--ms-portada-out) cubic-bezier(0.55, 0, 0.85, 0.25) forwards;
-  transform-style: preserve-3d;
-}
-.sf-vuelo {
-  animation: sfVuelo var(--ms-portada-out) cubic-bezier(0.55, 0, 0.85, 0.25) forwards;
+.sf-logo-portal {
+  animation: sfLogoPortal var(--ms-portal) cubic-bezier(.42, 0, .75, .3) forwards;
   will-change: transform, opacity, filter;
 }
-.sf-vuelo-S { --dx: -26px; --dy: -26px; }
-.sf-vuelo-Q { --dx:  26px; --dy: -26px; }
-.sf-vuelo-F { --dx: -26px; --dy:  26px; }
-.sf-vuelo-T { --dx:  26px; --dy:  26px; }
-.sf-orbita-Q, .sf-vuelo-Q { animation-delay: 45ms; }
-.sf-orbita-F, .sf-vuelo-F { animation-delay: 90ms; }
-.sf-orbita-T, .sf-vuelo-T { animation-delay: 135ms; }
+
+/* Los hilos se «dibujan» hacia dentro: el dashoffset recorriendo el path es lo
+   que da el flujo, y el scale colapsando es lo que lo cierra en el centro. */
+@keyframes sfHiloPortal {
+  0%   { stroke-dashoffset: 140;  opacity: 0;   transform: rotate(0deg) scale(1.15); }
+  30%  { opacity: .95; }
+  100% { stroke-dashoffset: -900; opacity: 0;   transform: rotate(var(--giro, 200deg)) scale(.1); }
+}
+.sf-hilo {
+  animation: sfHiloPortal var(--ms-portal) cubic-bezier(.4, 0, .7, .35) forwards;
+  transform-origin: center;
+}
 .sf-portada-out {
   animation: sfPortadaSlide var(--ms-portada-out) var(--ease-ui) forwards;
   pointer-events: none;
@@ -289,8 +283,8 @@
   .sf-stagger,
   .sf-child,
   .sf-portada-out,
-  .sf-orbita,
-  .sf-vuelo,
+  .sf-logo-portal,
+  .sf-hilo,
   .sf-flotante,
   .sf-drawer,
   .sf-backdrop,
