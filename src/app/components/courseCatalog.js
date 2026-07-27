@@ -263,6 +263,12 @@ export async function createTierCheckout(item, { token } = {}) {
   const attempt = async (base) => {
     const payload = {
       items: [{ ...item.payload, quantity: 1 }],
+      // Checkout INCRUSTADO: el pago se monta dentro de nuestra página en vez
+      // de mandar al cliente a checkout.stripe.com. Si el backend desplegado
+      // todavía no lo soporta, devolverá una `url` y seguimos redirigiendo
+      // como siempre — la web aguanta las dos respuestas.
+      embedded: true,
+      return_url: `${base}/cart?success=true&session_id={CHECKOUT_SESSION_ID}`,
       // Contrato de vuelta: éxito → pantalla de gracias de /cart (el backend
       // garantiza success=true y session_id); cancelar → carrito.
       success_url: `${base}/cart?success=true`,
@@ -300,10 +306,17 @@ export async function createTierCheckout(item, { token } = {}) {
         );
       }
 
+      // El secreto de una Checkout Session empieza por `cs_`; el de un
+      // PaymentIntent, por `pi_`. Son dos componentes distintos, así que hay
+      // que distinguirlos o se monta el que no es y no pinta nada.
+      const clientSecret = data.clientSecret || data.client_secret;
+      if (clientSecret && String(clientSecret).startsWith('cs_')) {
+        return { status: 'embedded', clientSecret };
+      }
+
       const url = data.url || data.checkout_url || data.session_url || data.sessionUrl || data?.session?.url;
       if (url) return { status: 'redirect', url };
 
-      const clientSecret = data.clientSecret || data.client_secret;
       if (clientSecret) return { status: 'client_secret', clientSecret };
 
       // Respuesta 2xx sin nada accionable: mejor el aviso honesto que colgarse.

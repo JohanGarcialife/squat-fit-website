@@ -1,71 +1,134 @@
 'use client';
 
-// El logo de la portada, partido en sus cuatro letras para que al arrancar el
-// formulario cada una salga girando en espiral hacia su esquina.
+// El logo de la portada y su salida: un portal que se lo traga.
 //
-// Truco para partirlo: no se recorta la imagen ni hace falta un SVG por letra.
-// El logo YA está maquetado en rejilla 2×2 —SQ arriba, FT abajo—, así que basta
-// con cuatro cuadrados que enseñan cada uno su cuarto de la misma imagen,
-// moviendo `background-position`. Se ve exactamente igual que el logo entero
-// hasta que empieza el movimiento.
+// Cómo funciona, que no es lo obvio:
 //
-// Truco para la espiral: cada letra va envuelta en un elemento «órbita». La
-// órbita GIRA y la letra, dentro, se ALEJA en línea recta. Un movimiento
-// rectilíneo dentro de algo que gira es, exactamente, una espiral — y sale sin
-// tener que calcular a mano los puntos de la curva en los keyframes.
-//
-// Direcciones de partida (las de la propia rejilla):  S ↖  Q ↗  F ↙  T ↘
+// 1. El logo NO se fragmenta. Partirlo en cuadraditos dejaba «migas» que se
+//    veían baratas. En su lugar gira, encoge, se desenfoca y una MÁSCARA
+//    RADIAL se lo va comiendo desde los bordes hacia el centro: eso es
+//    disolverse, no romperse.
+// 2. Los hilos del portal son espirales logarítmicas dibujadas con curvas de
+//    Bézier, no arcos rotados: son curvas por construcción. Se «dibujan» hacia
+//    dentro animando `stroke-dashoffset`, que es lo que da la sensación de
+//    flujo.
+// 3. Antes de irse hay un rebote corto (agranda y encoge rápido) que hace de
+//    señal de que la cosa arranca.
 
-import React from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 
-const LETRAS = [
-  { clave: 'S', fila: 0, columna: 0 },
-  { clave: 'Q', fila: 0, columna: 1 },
-  { clave: 'F', fila: 1, columna: 0 },
-  { clave: 'T', fila: 1, columna: 1 },
-];
+const COLORES = ['#363C98', '#FF690B', '#5A61C4', '#FF8F45', '#8E93DC', '#FFB37A'];
+/** Radio del portal en px. 50 es el que eligió María. */
+const RADIO = 50;
+const HILOS = 40;
 
-export default function LogoEspagueti({ tamano = 96, saliendo = false, className = '' }) {
-  const mitad = tamano / 2;
+/** Duración total de la salida. Tiene que cuadrar con PORTADA_OUT_MS. */
+export const PORTAL_MS = 1200;
+
+/** Espiral logarítmica como path de Bézier: curva de verdad, no arcos. */
+function espiral(i) {
+  const a0 = (i * 2.399) % (Math.PI * 2); // ángulo áureo: reparto sin repetir
+  const r0 = RADIO * (0.55 + ((i * 37) % 75) / 100);
+  const vueltas = 1.1 + ((i * 53) % 90) / 100;
+  const pts = [];
+  for (let s = 0; s <= 22; s += 1) {
+    const t = s / 22;
+    const ang = a0 + t * vueltas * Math.PI * 2;
+    const r = r0 * (1 - t) ** 1.25;
+    pts.push([Math.cos(ang) * r, Math.sin(ang) * r * 0.92]);
+  }
+  let d = `M${pts[0][0].toFixed(1)},${pts[0][1].toFixed(1)}`;
+  for (let j = 1; j < pts.length - 1; j += 1) {
+    const mx = (pts[j][0] + pts[j + 1][0]) / 2;
+    const my = (pts[j][1] + pts[j + 1][1]) / 2;
+    d += ` Q${pts[j][0].toFixed(1)},${pts[j][1].toFixed(1)} ${mx.toFixed(1)},${my.toFixed(1)}`;
+  }
+  return d;
+}
+
+export default function LogoEspagueti({ tamano = 120, saliendo = false, className = '' }) {
+  const logoRef = useRef(null);
+  const rafRef = useRef(0);
+
+  const hilos = useMemo(
+    () =>
+      Array.from({ length: HILOS }, (_, i) => ({
+        d: espiral(i),
+        color: COLORES[i % COLORES.length],
+        ancho: (1.2 + ((i * 29) % 26) / 10).toFixed(1),
+        giro: 160 + ((i * 43) % 120),
+        retardo: i * 16,
+      })),
+    [],
+  );
+
+  // La máscara no se puede animar por CSS (no interpola gradientes), así que
+  // se mueve a mano con requestAnimationFrame.
+  useEffect(() => {
+    const el = logoRef.current;
+    if (!el) return undefined;
+    if (!saliendo) {
+      el.style.webkitMaskImage = '';
+      el.style.maskImage = '';
+      return undefined;
+    }
+    const sinMovimiento = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    if (sinMovimiento) return undefined;
+
+    const t0 = performance.now();
+    const paso = (ahora) => {
+      const p = Math.min(1, (ahora - t0) / (PORTAL_MS * 0.93));
+      const borde = 100 - p * p * 100;
+      const m = `radial-gradient(circle at 50% 50%, #000 0%, #000 ${Math.max(0, borde - 18)}%, transparent ${Math.max(1, borde)}%)`;
+      el.style.webkitMaskImage = m;
+      el.style.maskImage = m;
+      if (p < 1) rafRef.current = requestAnimationFrame(paso);
+    };
+    rafRef.current = requestAnimationFrame(paso);
+    return () => cancelAnimationFrame(rafRef.current);
+  }, [saliendo]);
+
+  const lado = tamano * 2.6; // el lienzo del portal, más ancho que el logo
+
   return (
     <div
-      className={`relative shrink-0 ${className} ${saliendo ? 'sf-logo-saliendo' : ''}`}
-      // La perspectiva es lo que hace que el giro se vea con profundidad en vez
-      // de plano: las letras se van «hacia dentro» además de hacia fuera.
-      style={{ width: tamano, height: tamano, perspective: `${tamano * 8}px` }}
+      className={`relative grid place-items-center shrink-0 ${className}`}
+      style={{ width: lado, height: lado }}
       role="img"
       aria-label="Squad Fit"
     >
-      {LETRAS.map(({ clave, fila, columna }) => (
-        <span
-          key={clave}
-          aria-hidden
-          className={saliendo ? `sf-orbita sf-orbita-${clave}` : undefined}
-          style={{
-            position: 'absolute',
-            top: fila * mitad,
-            left: columna * mitad,
-            width: mitad,
-            height: mitad,
-            // El centro de giro es el centro del logo, no el de cada trozo: por
-            // eso las cuatro giran juntas como una sola pieza al arrancar.
-            transformOrigin: `${columna ? 0 : mitad}px ${fila ? 0 : mitad}px`,
-          }}
-        >
-          <span
-            className={saliendo ? `sf-vuelo sf-vuelo-${clave}` : undefined}
-            style={{
-              display: 'block',
-              width: '100%',
-              height: '100%',
-              backgroundImage: 'url(/LogotipoSquatfit.png)',
-              backgroundSize: `${tamano}px ${tamano}px`,
-              backgroundPosition: `${-columna * mitad}px ${-fila * mitad}px`,
-              backgroundRepeat: 'no-repeat',
-            }}
+      <svg
+        className="absolute pointer-events-none overflow-visible"
+        style={{ width: lado, height: lado }}
+        viewBox={`${-lado / 2} ${-lado / 2} ${lado} ${lado}`}
+        aria-hidden="true"
+      >
+        {hilos.map((h, i) => (
+          <path
+            key={i}
+            d={h.d}
+            fill="none"
+            stroke={h.color}
+            strokeWidth={h.ancho}
+            strokeLinecap="round"
+            strokeDasharray="140 1000"
+            strokeDashoffset={140}
+            opacity={0}
+            className={saliendo ? 'sf-hilo' : undefined}
+            style={saliendo ? { animationDelay: `${h.retardo}ms`, '--giro': `${h.giro}deg` } : undefined}
           />
-        </span>
-      ))}
+        ))}
+      </svg>
+      <img
+        ref={logoRef}
+        src="/LogotipoSquatfit-512.png"
+        alt=""
+        aria-hidden="true"
+        width={tamano}
+        height={tamano}
+        className={saliendo ? 'sf-logo-portal' : undefined}
+        style={{ width: tamano, height: tamano }}
+      />
     </div>
   );
 }

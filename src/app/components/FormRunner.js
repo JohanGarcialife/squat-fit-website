@@ -40,7 +40,7 @@ const TITLE_SPEED = 11;
 const ADVANCE_DELAY = 520;
 
 // Lo que tarda la portada en apartarse (ver --ms-portada-out).
-const PORTADA_OUT_MS = 780;
+const PORTADA_OUT_MS = 1200;
 
 // `renderResult` (opcional): recibe lo que devuelva onSubmit y sustituye a la
 // pantalla final genérica — lo usa el Seguimiento semanal para pintar el
@@ -268,7 +268,7 @@ export default function FormRunner({ definition, context = {}, onSubmit, exitHre
     return (
       <div className="min-h-[100svh] w-full flex flex-col items-center justify-center px-6 text-center bg-white">
         <div className={`max-w-lg flex flex-col items-center ${saliendoPortada ? 'sf-portada-out' : 'sf-screen-in'}`}>
-          <LogoEspagueti tamano={88} saliendo={saliendoPortada} className="mb-8" />
+          <LogoEspagueti tamano={110} saliendo={saliendoPortada} className="-mb-8" />
           <div className="sf-portada-texto flex flex-col items-center">
             <h1 className="font-extrabold mb-4" style={{ color: BLUE, fontSize: 'clamp(1.7rem, 3.4vw, 2.3rem)' }}>
               {formTitle}

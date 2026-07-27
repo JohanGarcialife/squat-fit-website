@@ -7,6 +7,7 @@ import OrderSummary from './OrderSummary';
 import { useCartStore } from '@/stores/cart.store';
 import { useAuthStore } from '@/stores/auth.store';
 import { useCheckoutStore } from '@/stores/checkout.store';
+import CheckoutIncrustado from './CheckoutIncrustado';
 import axios from 'axios';
 import { createTierCheckout } from '@/app/components/courseCatalog';
 import { loadStripe } from '@stripe/stripe-js';
@@ -126,6 +127,8 @@ export default function Payment(props) {
   const { cart } = useCartStore();
   const { token } = useAuthStore();
   const [clientSecret, setClientSecret] = useState('');
+  // Secreto de una Checkout Session (cs_…): el pago se monta incrustado.
+  const [embeddedSecret, setEmbeddedSecret] = useState(null);
   const [loading, setLoading] = useState(true);
   // Cursos con tramos (15.1) sin endpoint de cobro todavía (TIER_CHECKOUT_ENDPOINT
   // en null): aviso honesto en lugar de un error críptico de Stripe.
@@ -165,8 +168,13 @@ export default function Payment(props) {
     if (directItem && (directItem.tierGroup || directItem.tier)) {
        createTierCheckout(directItem, { token })
          .then((result) => {
+           if (result.status === 'embedded') {
+             // Lo normal desde ahora: el pago se pinta AQUÍ, sin salir de la web.
+             setEmbeddedSecret(result.clientSecret);
+             return;
+           }
            if (result.status === 'redirect') {
-             // El spinner se queda mientras el navegador salta a Stripe.
+             // Respaldo: backend antiguo que aún no soporta el incrustado.
              window.location.assign(result.url);
              return;
            }
@@ -307,6 +315,22 @@ export default function Payment(props) {
             </p>
             <button onClick={() => props.setStep(1)} className="text-secondary font-bold underline cursor-pointer">Volver al carrito</button>
         </div>
+    );
+  }
+
+  // Checkout incrustado: el pago de Stripe dentro de nuestra propia página,
+  // con la marca de la cuenta (logo, #363c98 y #ff6a0b) y sin salir del sitio.
+  if (embeddedSecret) {
+    return (
+      <div className="w-full max-w-xl mx-auto py-6">
+        <CheckoutIncrustado clientSecret={embeddedSecret} />
+        <button
+          onClick={() => props.setStep(1)}
+          className="mt-6 block mx-auto text-secondary font-bold underline cursor-pointer"
+        >
+          Volver al carrito
+        </button>
+      </div>
     );
   }
 
