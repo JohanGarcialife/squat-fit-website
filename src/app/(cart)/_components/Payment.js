@@ -13,8 +13,12 @@ import { loadStripe } from '@stripe/stripe-js';
 import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import { toast } from 'react-hot-toast';
 
-// Make sure to configure your .env.local with NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
-const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || 'pk_test_placeholder');
+// La clave publicable viene SIEMPRE del entorno (NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY).
+// Sin fallback de test: si falta, el pago embebido debe fallar a la vista, no
+// cargar Stripe en modo prueba en silencio (nos pasó de cara al lanzamiento).
+const stripePromise = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
+  ? loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY)
+  : Promise.reject(new Error('Falta NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY'));
 
 // Componente interno que ya tiene acceso a los hooks de Stripe
 function PaymentInner(props) {
