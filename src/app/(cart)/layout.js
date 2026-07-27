@@ -1,6 +1,7 @@
 import { Inter } from "next/font/google";
 import "../globals.css";
 import GoogleAnalytics from "@/app/components/GoogleAnalytics";
+import TrustpilotInvitations from "@/app/components/TrustpilotInvitations";
 // import Header from "../components/Header";
 // import Footer from "../components/Footer";
 import ToasterProvider from "@/components/ToasterProvider";
@@ -32,6 +33,7 @@ export default function RootLayout({ children }) {
         </div>
       <CookieBanner />
         <GoogleAnalytics />
+        <TrustpilotInvitations />
       </body>
     </html>
   );

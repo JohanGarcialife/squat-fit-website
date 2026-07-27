@@ -1,6 +1,7 @@
 import { Inter } from "next/font/google";
 import "../globals.css";
 import GoogleAnalytics from "@/app/components/GoogleAnalytics";
+import TrustpilotInvitations from "@/app/components/TrustpilotInvitations";
 import "../form-motion.css";
 import ToasterProvider from "@/components/ToasterProvider";
 
@@ -23,6 +24,7 @@ export default function OnboardingLayout({ children }) {
         <ToasterProvider />
         {children}
         <GoogleAnalytics />
+        <TrustpilotInvitations />
       </body>
     </html>
   );
