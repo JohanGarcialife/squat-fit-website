@@ -141,13 +141,15 @@ function Toc({ items }) {
   );
 }
 
-// Tabla real de cookies del sitio (auditada): localStorage propio + Stripe, y
-// las de Google Analytics SOLO si el usuario activa la analítica en el banner.
+// Tabla real de cookies del sitio (auditada): localStorage propio + Stripe +
+// Trustpilot, y las de Google Analytics SOLO si el usuario activa la analítica
+// en el banner.
 function CookiesTable() {
   const rows = [
     ['cart-storage · auth-storage · sf_origin · sqf-cookie-consent', 'Propia (local)', 'Recordar tu carrito, tu sesión iniciada, el origen de tu visita y tu elección de cookies.', 'Hasta que borres los datos del navegador'],
     ['__stripe_mid', 'De terceros (Stripe)', 'Procesar el pago de forma segura y prevenir el fraude (solo al pagar).', '1 año'],
     ['__stripe_sid', 'De terceros (Stripe)', 'Procesar el pago de forma segura y prevenir el fraude (solo al pagar).', '30 minutos'],
+    ['Trustpilot (invitejs.trustpilot.com)', 'De terceros (Trustpilot A/S)', 'Invitarte a valorar tu compra y los productos del pedido, y verificar que este dominio es nuestro. Se activa al confirmarse un pedido.', 'Sesión'],
     ['_ga', 'De terceros (Google Analytics)', 'Estadísticas anónimas de uso de la web. Solo si activas la analítica en las preferencias del banner (desactivada por defecto).', '2 años'],
     ['_ga_<id>', 'De terceros (Google Analytics)', 'Mantener el estado de la sesión de medición. Solo si activas la analítica en las preferencias del banner (desactivada por defecto).', '2 años'],
   ];
@@ -199,7 +201,8 @@ const cookiesExtra = (num) => ({
         Somos especialmente respetuosos con tu privacidad:{' '}
         <strong className="text-gray-800 font-semibold">no usamos cookies de publicidad ni de seguimiento de terceros, y la analítica (Google) está desactivada por defecto</strong>
         {' '}— solo se activa si tú lo eliges en las preferencias del banner de cookies. El resto es
-        el almacenamiento imprescindible para que la web funcione:
+        el almacenamiento imprescindible para que la web funcione, más los servicios de pago
+        (Stripe) y de reseñas (Trustpilot) que intervienen al comprar:
       </p>
       <CookiesTable />
     </React.Fragment>

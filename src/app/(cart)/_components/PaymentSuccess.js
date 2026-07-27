@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/stores/auth.store';
 import { useCartStore } from '@/stores/cart.store';
+import TrustpilotInvitation from './TrustpilotInvitation';
 
 export default function PaymentSuccess() {
   const router = useRouter();
@@ -36,8 +37,12 @@ export default function PaymentSuccess() {
 
   return (
     <div className="min-h-screen bg-white flex flex-col items-center justify-center px-4 font-sans">
+      {/* Invitación de reseña de Trustpilot: no pinta nada, solo dispara la
+          llamada una vez con los datos del pedido ya confirmado. */}
+      <TrustpilotInvitation />
+
       <div className="w-full max-w-2xl flex flex-col items-center text-center">
-        
+
         {/* --- Icono de Éxito animado --- */}
         <div className="w-20 h-20 bg-gradient-to-br from-orange-400 to-orange-600 rounded-2xl flex items-center justify-center mb-8 shadow-xl shadow-orange-100 animate-bounce-slow">
           <Check size={44} className="text-white" strokeWidth={3} />

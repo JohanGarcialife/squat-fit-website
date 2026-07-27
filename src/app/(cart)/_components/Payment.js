@@ -8,6 +8,7 @@ import { useCartStore } from '@/stores/cart.store';
 import { useAuthStore } from '@/stores/auth.store';
 import { useCheckoutStore } from '@/stores/checkout.store';
 import CheckoutIncrustado from './CheckoutIncrustado';
+import { ORDER_REF_KEY, saveOrderItems } from './TrustpilotInvitation';
 import axios from 'axios';
 import { createTierCheckout } from '@/app/components/courseCatalog';
 import { loadStripe } from '@stripe/stripe-js';
@@ -53,6 +54,12 @@ function PaymentInner(props) {
             ? 'Pago completado con éxito'
             : 'El pago se está procesando. Te avisaremos cuando se complete.';
           toast.success(msg, { id: toastId });
+
+          // Referencia del pedido para la invitación de Trustpilot: con
+          // `redirect: 'if_required'` Stripe confirma aquí mismo y la pantalla
+          // de gracias no recibe `session_id` ni `payment_intent` en la URL,
+          // así que se la dejamos escrita nosotros.
+          try { sessionStorage.setItem(ORDER_REF_KEY, paymentIntent.id); } catch {}
 
           // Limpiar el carrito y actualizar estado de suscripción en el store global
           useCartStore.getState().clearCart();
@@ -153,6 +160,12 @@ export default function Payment(props) {
 
   useEffect(() => {
     if (!cart || cart.length === 0) return;
+
+    // Foto de las líneas del pedido para la reseña de producto de Trustpilot.
+    // Hay que tomarla AQUÍ: la pantalla de gracias vacía el carrito antes de
+    // montarse, y en el checkout incrustado la vuelta de Stripe recarga la
+    // página, así que el carrito ya no existe cuando sale la invitación.
+    saveOrderItems(cart);
 
     let endpoint = '';
     let payload = {};

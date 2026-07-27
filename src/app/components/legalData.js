@@ -202,7 +202,9 @@ Mantendremos los datos durante el tiempo estrictamente necesario para la prestac
 
 ## QUÉ DATOS PERSONALES COMPARTIMOS CON TERCEROS
 
-No se prevén cesiones de datos salvo en aquellos casos en que exista una obligación legal o comunicación necesaria para poder prestarle el servicio solicitado adecuadamente. No hay previsión de transferencias de datos internacionales.`,
+No se prevén cesiones de datos salvo en aquellos casos en que exista una obligación legal o comunicación necesaria para poder prestarle el servicio solicitado adecuadamente. No hay previsión de transferencias de datos internacionales.
+
+Cuando finalizas un pedido, comunicamos tu nombre, tu dirección de correo electrónico y la referencia y los productos de ese pedido a Trustpilot A/S (Pilestræde 58, 1112 Copenhague, Dinamarca), encargado del tratamiento, con la única finalidad de invitarte a valorar tu compra. Trustpilot está en la Unión Europea, por lo que esta comunicación no supone una transferencia internacional de datos. Puedes consultar sus condiciones en https://es.legal.trustpilot.com y oponerte a recibir estas invitaciones escribiéndonos a hola@squatfit.es.`,
   cookies: `## ¿QUÉ ES UNA COOKIE?
 
 Este sitio web utiliza cookies y/o tecnologías similares que almacenan y recuperan información cuando navegas. En general, estas tecnologías pueden servir para finalidades muy diversas, como, por ejemplo, reconocerte como usuario, obtener información sobre tus hábitos de navegación o personalizar la forma en la que se muestra el contenido. Los usos concretos que hacemos de estas tecnologías se describen a continuación.
