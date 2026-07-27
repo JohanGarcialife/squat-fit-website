@@ -26,6 +26,12 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
+      <head>
+        {/* Trustpilot: script oficial de invitaciones (reseñas post-compra).
+            Tiene que ir dentro del <head> para que Trustpilot verifique el
+            dominio. */}
+        <TrustpilotInvitations />
+      </head>
       <body
         className={`${inter.variable} antialiased`}
       >
@@ -44,8 +50,6 @@ export default function RootLayout({ children }) {
         </div>
       <CookieBanner />
         <GoogleAnalytics />
-        {/* Trustpilot: script oficial de invitaciones (reseñas post-compra). */}
-        <TrustpilotInvitations />
       </body>
     </html>
   );
