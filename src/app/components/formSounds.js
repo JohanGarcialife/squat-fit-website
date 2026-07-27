@@ -222,6 +222,16 @@ export function playKeypress() {
   cuerpo.start(t); cuerpo.stop(t + 0.03);
 }
 
+// Tic corto del mecanografiado, letra a letra.
+//
+// Convive con `startTyping`, que es el otro enfoque (cadencia fija, roce sordo).
+// Se mantienen los dos a propósito: otra sesión está afinando el tecleo por la
+// vía del tic y quitarlo de aquí le rompería el código al rebasar.
+export function playTick() {
+  if (isMuted()) return;
+  tono({ freq: 880, dur: 0.03, vol: 0.028, tipo: 'sine' });
+}
+
 // Elegir una opción: nota corta y limpia.
 export function playSelect() {
   if (isMuted()) return;
