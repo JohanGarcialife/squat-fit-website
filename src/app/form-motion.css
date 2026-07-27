@@ -29,8 +29,7 @@
   --ms-option-start: 220ms; /* espera antes de la primera casilla, para que no
                                compita con la entrada de la pantalla */
   --ms-drawer: 340ms;       /* panel lateral de pasos (móvil) */
-  --ms-portada-out: 1000ms; /* 620 · la portada apartándose al pulsar «Empezar».
-                               Subido para que dé tiempo a ver espaguetizarse el logo */
+  --ms-portada-out: 780ms;  /* 1000 · la portada apartándose al pulsar «Empezar» */
 
   /* Recorridos: subidos sobre el briefing para que el movimiento se note */
   --px-sweep: 44px;         /* 34 · barrido lateral al cambiar de pregunta */
@@ -204,49 +203,49 @@
   from { opacity: 1; }
   to   { opacity: 0; }
 }
-/* El logo ya no se va de una pieza: se parte en sus cuatro letras (ver
-   LogoEspagueti.js) y cada una sale disparada a su esquina ESTIRÁNDOSE, como un
-   espagueti. Cada letra hace lo mismo en tres tiempos: primero se encoge un
-   poco —como tomando impulso—, luego se alarga en la dirección de su diagonal y
-   por último sale de pantalla desvaneciéndose.
+/* El logo no se va de una pieza: se parte en sus cuatro letras (ver
+   LogoEspagueti.js) y cada una sale en ESPIRAL hacia su esquina.
 
-   Las direcciones son las de la propia rejilla del logo:  S ↖  Q ↗  F ↙  T ↘  */
-@keyframes sfLetraS {
-  0%   { opacity: 1; transform: translate3d(0, 0, 0) rotate(0deg) scale(1, 1); }
-  22%  { opacity: 1; transform: translate3d(6px, 6px, 0) rotate(-6deg) scale(1.1, 0.82); }
-  55%  { opacity: 1; transform: translate3d(-72px, -84px, 0) rotate(-38deg) scale(0.6, 2.1); }
-  100% { opacity: 0; transform: translate3d(-190px, -220px, 0) rotate(-46deg) scale(0.2, 3.4); }
+   La primera versión las aplastaba (scale 0.2 × 3.4) y quedaba barata: una
+   letra estirada no es más que un rectángulo, y se nota. Esta gira de verdad.
+
+   Cómo: cada letra va dentro de una «órbita» que rota, y la letra, dentro, se
+   aleja en línea recta. Recto dentro de algo que gira = espiral, sin tener que
+   calcular la curva a mano en los keyframes. Las cuatro giran en el MISMO
+   sentido, así que arrancan como un remolino único antes de separarse.
+
+   El carácter lo da la curva de tiempo: cubic-bezier(.55,0,.85,.25) es lenta al
+   principio y muy rápida al final — el logo parece succionado, no empujado. Y
+   el desenfoque creciente hace el resto: es lo que separa un movimiento con
+   cuerpo de uno de plantilla. */
+@keyframes sfOrbita {
+  0%   { transform: rotate(0deg); }
+  18%  { transform: rotate(-14deg); }
+  100% { transform: rotate(190deg); }
 }
-@keyframes sfLetraQ {
-  0%   { opacity: 1; transform: translate3d(0, 0, 0) rotate(0deg) scale(1, 1); }
-  22%  { opacity: 1; transform: translate3d(-6px, 6px, 0) rotate(6deg) scale(1.1, 0.82); }
-  55%  { opacity: 1; transform: translate3d(72px, -84px, 0) rotate(38deg) scale(0.6, 2.1); }
-  100% { opacity: 0; transform: translate3d(190px, -220px, 0) rotate(46deg) scale(0.2, 3.4); }
+@keyframes sfVuelo {
+  0%   { transform: translate3d(0, 0, 0) scale(1);   filter: blur(0px); opacity: 1; }
+  18%  { transform: translate3d(0, 0, 0) scale(0.9); filter: blur(0px); opacity: 1; }
+  55%  { transform: translate3d(var(--dx), var(--dy), 60px) scale(0.72);
+         filter: blur(1px); opacity: 1; }
+  100% { transform: translate3d(calc(var(--dx) * 3.4), calc(var(--dy) * 3.4), 260px) scale(0.34);
+         filter: blur(7px); opacity: 0; }
 }
-@keyframes sfLetraF {
-  0%   { opacity: 1; transform: translate3d(0, 0, 0) rotate(0deg) scale(1, 1); }
-  22%  { opacity: 1; transform: translate3d(6px, -6px, 0) rotate(6deg) scale(1.1, 0.82); }
-  55%  { opacity: 1; transform: translate3d(-72px, 84px, 0) rotate(38deg) scale(0.6, 2.1); }
-  100% { opacity: 0; transform: translate3d(-190px, 220px, 0) rotate(46deg) scale(0.2, 3.4); }
+.sf-orbita {
+  animation: sfOrbita var(--ms-portada-out) cubic-bezier(0.55, 0, 0.85, 0.25) forwards;
+  transform-style: preserve-3d;
 }
-@keyframes sfLetraT {
-  0%   { opacity: 1; transform: translate3d(0, 0, 0) rotate(0deg) scale(1, 1); }
-  22%  { opacity: 1; transform: translate3d(-6px, -6px, 0) rotate(-6deg) scale(1.1, 0.82); }
-  55%  { opacity: 1; transform: translate3d(72px, 84px, 0) rotate(-38deg) scale(0.6, 2.1); }
-  100% { opacity: 0; transform: translate3d(190px, 220px, 0) rotate(-46deg) scale(0.2, 3.4); }
+.sf-vuelo {
+  animation: sfVuelo var(--ms-portada-out) cubic-bezier(0.55, 0, 0.85, 0.25) forwards;
+  will-change: transform, opacity, filter;
 }
-.sf-letra {
-  will-change: transform, opacity;
-  /* Un pelín escalonadas: si salen las cuatro clavadas parece un corte de
-     tijera; con 40 ms de diferencia parece que se van despegando. */
-  animation-duration: var(--ms-portada-out);
-  animation-timing-function: cubic-bezier(0.55, 0, 0.35, 1);
-  animation-fill-mode: forwards;
-}
-.sf-letra-S { animation-name: sfLetraS; }
-.sf-letra-Q { animation-name: sfLetraQ; animation-delay: 40ms; }
-.sf-letra-F { animation-name: sfLetraF; animation-delay: 80ms; }
-.sf-letra-T { animation-name: sfLetraT; animation-delay: 120ms; }
+.sf-vuelo-S { --dx: -26px; --dy: -26px; }
+.sf-vuelo-Q { --dx:  26px; --dy: -26px; }
+.sf-vuelo-F { --dx: -26px; --dy:  26px; }
+.sf-vuelo-T { --dx:  26px; --dy:  26px; }
+.sf-orbita-Q, .sf-vuelo-Q { animation-delay: 45ms; }
+.sf-orbita-F, .sf-vuelo-F { animation-delay: 90ms; }
+.sf-orbita-T, .sf-vuelo-T { animation-delay: 135ms; }
 .sf-portada-out {
   animation: sfPortadaSlide var(--ms-portada-out) var(--ease-ui) forwards;
   pointer-events: none;
@@ -290,7 +289,8 @@
   .sf-stagger,
   .sf-child,
   .sf-portada-out,
-  .sf-letra,
+  .sf-orbita,
+  .sf-vuelo,
   .sf-flotante,
   .sf-drawer,
   .sf-backdrop,

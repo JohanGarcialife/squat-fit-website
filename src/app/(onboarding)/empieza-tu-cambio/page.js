@@ -177,7 +177,7 @@ const ADVANCE_DELAY = 520;
 
 // Lo que tarda la portada en apartarse. Tiene que cuadrar con
 // --ms-portada-out de form-motion.css.
-const PORTADA_OUT_MS = 1000;
+const PORTADA_OUT_MS = 780;
 
 // Identificador del progreso guardado en el navegador.
 // Traducción de nuestro utm_source al vocabulario de orígenes del back office.

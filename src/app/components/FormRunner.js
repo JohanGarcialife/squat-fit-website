@@ -40,7 +40,7 @@ const TITLE_SPEED = 11;
 const ADVANCE_DELAY = 520;
 
 // Lo que tarda la portada en apartarse (ver --ms-portada-out).
-const PORTADA_OUT_MS = 1000;
+const PORTADA_OUT_MS = 780;
 
 // `renderResult` (opcional): recibe lo que devuelva onSubmit y sustituye a la
 // pantalla final genérica — lo usa el Seguimiento semanal para pintar el
