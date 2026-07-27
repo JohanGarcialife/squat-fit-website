@@ -101,6 +101,14 @@ const MAP = [
   // --- Pretty Links --------------------------------------------------------
   // Enlaces cortos que servía el plugin Pretty Links (307) desde WordPress.
   // Son los de más tráfico de todo el dominio; sin esto se pierden.
+  // ENLACES DE AFILIACIÓN. No van a nuestra web: van a programas de terceros
+  // que pagan comisión. El catch-all de más abajo se los tragaría y perderíamos
+  // 252 clics/mes de ingresos. Se mantienen apuntando a su destino externo tal
+  // cual estaban en Pretty Links.
+  ['/fitgeneration', 'https://go.fitgeneration.es/tsd/?utm_source=embajador&utm_medium=MariaCasas&utm_campaign=YoutubeMayo'],
+  ['/fitgen603b', 'https://go.fitgeneration.es/tsd/?utm_source=embajador&utm_medium=MariaCasas&el=embajador-MariaCasas&utm_campaign=ytbjunio'],
+  ['/cecotec', 'https://clk.tradedoubler.com/click?p=283907&a=3485811&url=https%3A%2F%2Fcecotec.es%2Fes%2Ffreidoras-sin-aceite%2Fcecofry-duolevel-10000-duosize-window'],
+
   // CORRECCIÓN 27-jul: estos NO eran enlaces a la landing, eran los Pretty
   // Links del formulario, uno por origen. Van al mismo slug en el dominio
   // nuevo, que ya redirige al formulario con su atribución (ver form-links.mjs).
@@ -131,7 +139,9 @@ const legacyRedirects = HOSTS.flatMap((host) =>
   MAP.map(([source, target]) => ({
     source,
     has: [{ type: 'host', value: host }],
-    destination: `${NEW}${target}`,
+    // Los enlaces de afiliación ya traen su destino absoluto: anteponerles
+    // nuestro dominio los rompería.
+    destination: /^https?:\/\//.test(target) ? target : `${NEW}${target}`,
     statusCode: 301,
   })),
 );
