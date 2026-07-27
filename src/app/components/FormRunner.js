@@ -21,18 +21,26 @@
 
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
+import LogoEspagueti from './LogoEspagueti';
 import TextareaMeter from './TextareaMeter';
 import Typewriter from './Typewriter';
-import { ExitButton, BackButton, StepCounter, FormAside, StepsDrawer, SoundButton } from './FormChrome';
-import { playSelect, playAdvance, playFinish } from './formSounds';
+import { ExitButton, BackButton, StepCounter, FormAside, StepsDrawer, SoundButton, useMicroFeedback, PausaPantalla, PAUSA_MS, ChildField } from './FormChrome';
+import { playSelect, playAdvance, playFinish, playKeypress, unlockAudio } from './formSounds';
 
-const BLUE = '#3932C0';
+const BLUE = '#363C98';
 const ORANGE = '#FF690B';
 
 const OTHER_PREFIX = 'Otro: ';
 
 // El título se escribe algo más rápido que el cuerpo del texto.
 const TITLE_SPEED = 11;
+
+// Pausa entre pulsar Continuar y que entre la pantalla siguiente.
+const ADVANCE_DELAY = 520;
+
+// Lo que tarda la portada en apartarse (ver --ms-portada-out).
+const PORTADA_OUT_MS = 780;
 
 // `renderResult` (opcional): recibe lo que devuelva onSubmit y sustituye a la
 // pantalla final genérica — lo usa el Seguimiento semanal para pintar el
@@ -47,8 +55,17 @@ export default function FormRunner({ definition, context = {}, onSubmit, exitHre
   const [result, setResult] = useState(null);
   const [otherDraft, setOtherDraft] = useState('');
   const [stepsOpen, setStepsOpen] = useState(false);
+  const { marcar: marcarGesto } = useMicroFeedback();
+  // Frase de la pausa a pantalla completa entre una pregunta y la siguiente.
+  const [pausa, setPausa] = useState(null);
+  // Portada: nada se escribe hasta pulsar «Empezar». Ese clic es el gesto que el
+  // navegador exige para dejar sonar el audio (ver la portada, más abajo).
+  const [started, setStarted] = useState(false);
+  const [saliendoPortada, setSaliendoPortada] = useState(false);
   // El contenido espera a que termine de escribirse el título.
   const [titleDone, setTitleDone] = useState(false);
+  // Y el botón espera a que termine de escribirse TODO el texto de la pantalla.
+  const [bodyDone, setBodyDone] = useState(false);
   // Pasos ya vistos: al volver atrás el texto sale de golpe (ya se leyó).
   const seenSteps = useRef(new Set());
 
@@ -98,15 +115,30 @@ export default function FormRunner({ definition, context = {}, onSubmit, exitHre
   }, [step, answers]);
 
   const goNext = () => {
-    if (!isValid) return;
+    if (!puedeAvanzar) return;
     playAdvance();
     setOtherDraft('');
-    if (index < total - 1) setIndex((i) => i + 1);
+    if (index >= total - 1) return;
+    // Cada 3-5 respuestas toca pausa a pantalla completa: tapa la pregunta
+    // siguiente hasta que se va, para cortar la inercia de ir a toda prisa.
+    const frase = step.type !== 'intro' ? marcarGesto() : null;
+    if (frase) {
+      setPausa(frase);
+      setTimeout(() => { setPausa(null); setIndex((i) => i + 1); }, PAUSA_MS);
+      return;
+    }
+    setTimeout(() => setIndex((i) => i + 1), ADVANCE_DELAY);
   };
   const goBack = () => { setOtherDraft(''); setIndex((i) => Math.max(0, i - 1)); };
 
+  // Volver a una fase ya completada desde el mapa de navegación.
+  const goToPhase = (fase) => {
+    const destino = steps.findIndex((st) => st.phase === fase);
+    if (destino > -1 && destino < index) { setOtherDraft(''); setIndex(destino); }
+  };
+
   const handleFinish = async () => {
-    if (!isValid || saving) return;
+    if (!puedeAvanzar || saving) return;
     playFinish();
     setSaving(true);
     try {
@@ -131,15 +163,22 @@ export default function FormRunner({ definition, context = {}, onSubmit, exitHre
   // por tiempo (longitud × velocidad) en vez de esperar un aviso del hijo: así
   // no depende del orden en que React dispara los efectos.
   useEffect(() => {
-    if (!stepId) return undefined;
+    if (!stepId || !started) return undefined;
     const visto = seenSteps.current.has(stepId);
     seenSteps.current.add(stepId);
-    if (visto) { setTitleDone(true); return undefined; }
+    if (visto) { setTitleDone(true); setBodyDone(true); return undefined; }
     setTitleDone(false);
+    setBodyDone(false);
     const ms = 150 + (step?.title?.length || 0) * TITLE_SPEED;
     const t = setTimeout(() => setTitleDone(true), ms);
     return () => clearTimeout(t);
-  }, [stepId, step?.title]);
+  }, [stepId, step?.title, started]);
+
+  // El botón de avanzar no se enciende hasta que la pantalla ha acabado de
+  // escribirse: la intro espera a su párrafo; el resto, al título (debajo van
+  // campos o casillas, que ya se pueden usar en cuanto aparecen).
+  const contenidoListo = alreadySeen || (step?.type === 'intro' ? bodyDone : titleDone);
+  const puedeAvanzar = isValid && contenidoListo;
 
   // ── Enter = Continuar (petición de Hamlet) ────────────────────────────────
   // Pulsar Enter avanza (o envía en el último paso) si la respuesta es válida.
@@ -154,6 +193,9 @@ export default function FormRunner({ definition, context = {}, onSubmit, exitHre
   };
   useEffect(() => {
     const onKey = (e) => {
+      const escribiendo = e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA');
+      // Tecleo discreto mientras el usuario escribe en un campo.
+      if (escribiendo && !e.repeat && (e.key.length === 1 || e.key === 'Backspace')) playKeypress();
       if (e.key !== 'Enter' || e.repeat || e.isComposing) return;
       const t = e.target;
       const enCampo = t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA');
@@ -217,6 +259,45 @@ export default function FormRunner({ definition, context = {}, onSubmit, exitHre
 
   const isOtherSelected = typeof answers[step.key] === 'string' && answers[step.key].startsWith(OTHER_PREFIX);
 
+  // ===== Portada =====
+  // Entrar a un formulario con el texto ya escribiéndose no da tiempo a
+  // situarse; y, sobre todo, el navegador no deja sonar nada hasta que el
+  // usuario toca algo, así que sin este botón la primera pantalla se escribiría
+  // en silencio y se perdería el efecto.
+  if (!started) {
+    return (
+      <div className="min-h-[100svh] w-full flex flex-col items-center justify-center px-6 text-center bg-white">
+        <div className={`max-w-lg flex flex-col items-center ${saliendoPortada ? 'sf-portada-out' : 'sf-screen-in'}`}>
+          <LogoEspagueti tamano={88} saliendo={saliendoPortada} className="mb-8" />
+          <div className="sf-portada-texto flex flex-col items-center">
+            <h1 className="font-extrabold mb-4" style={{ color: BLUE, fontSize: 'clamp(1.7rem, 3.4vw, 2.3rem)' }}>
+              {formTitle}
+            </h1>
+            <p className="text-[#6B6BA8] text-lg leading-relaxed mb-9">
+              Tómate tu tiempo para contestar: cuanto mejor sean tus respuestas,
+              mejor podremos ayudarte.
+            </p>
+            <button
+              type="button"
+              onClick={() => {
+                unlockAudio();
+                playAdvance();
+                const sinMovimiento = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+                if (sinMovimiento) { setStarted(true); return; }
+                setSaliendoPortada(true);
+                setTimeout(() => setStarted(true), PORTADA_OUT_MS);
+              }}
+              className="sf-cta is-enabled w-full max-w-xs rounded-2xl py-4 font-bold text-white text-lg cursor-pointer"
+              style={{ backgroundColor: BLUE }}
+            >
+              Empezar
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-[100svh] lg:min-h-screen w-full flex">
       {/* ===== IZQUIERDA: pregunta activa ===== */}
@@ -237,6 +318,7 @@ export default function FormRunner({ definition, context = {}, onSubmit, exitHre
             text={step.title}
             speed={TITLE_SPEED}
             instant={alreadySeen}
+            sound="title"
             className="font-extrabold leading-tight mb-3"
             style={{ color: BLUE, fontSize: 'clamp(1.35rem, 2.1vw, 1.9rem)' }}
           />
@@ -246,7 +328,10 @@ export default function FormRunner({ definition, context = {}, onSubmit, exitHre
 
           {/* <form>: en iOS da los botones nativos ‹ › del teclado para saltar
               entre campos. No envía: el envío va por el botón del pie. */}
-          <form className="flex-1" onSubmit={(e) => e.preventDefault()} style={{ visibility: titleDone ? 'visible' : 'hidden' }}>
+          <form className="flex-1" onSubmit={(e) => e.preventDefault()}>
+            {/* No basta con ocultarlo: si se monta, el texto se escribe (y suena)
+                por detrás mientras el título aún no ha terminado. */}
+            {titleDone && (<>
             {step.type === 'intro' && (
               <Typewriter
                 key={`body-${stepId}`}
@@ -255,7 +340,9 @@ export default function FormRunner({ definition, context = {}, onSubmit, exitHre
                 startDelay={160}
                 caret
                 instant={alreadySeen}
-                className="text-[#3932C0] text-lg sm:text-2xl leading-relaxed mt-4"
+                sound="body"
+                onDone={() => setBodyDone(true)}
+                className="text-[#363C98] text-lg sm:text-2xl leading-relaxed mt-4"
               />
             )}
 
@@ -398,7 +485,7 @@ export default function FormRunner({ definition, context = {}, onSubmit, exitHre
                   <button
                     type="button"
                     onClick={() => set({ [step.key]: [...(answers[step.key] || ['']), ''] })}
-                    className="text-left text-[#3932C0] font-bold hover:underline cursor-pointer"
+                    className="text-left text-[#363C98] font-bold hover:underline cursor-pointer"
                   >
                     + añadir otro
                   </button>
@@ -452,6 +539,7 @@ export default function FormRunner({ definition, context = {}, onSubmit, exitHre
                 <span className="text-[#363C98]/90 leading-snug">{step.label}</span>
               </label>
             )}
+            </>)}
           </form>
         </div>
 
@@ -459,9 +547,9 @@ export default function FormRunner({ definition, context = {}, onSubmit, exitHre
         <div className="max-w-xl w-full mx-auto mt-8">
           <button
             onClick={isLast ? handleFinish : goNext}
-            disabled={!isValid || saving}
-            className={`w-full rounded-2xl py-4 font-bold text-white text-lg cursor-pointer disabled:cursor-not-allowed sf-cta ${isValid && !saving ? 'is-enabled' : ''}`}
-            style={{ backgroundColor: isValid && !saving ? BLUE : '#C6C3E8' }}
+            disabled={!puedeAvanzar || saving}
+            className={`w-full rounded-2xl py-4 font-bold text-white text-lg cursor-pointer disabled:cursor-not-allowed sf-cta ${puedeAvanzar && !saving ? 'is-enabled' : ''}`}
+            style={{ backgroundColor: puedeAvanzar && !saving ? BLUE : '#C6C3E8' }}
           >
             {saving ? 'Guardando…' : isLast ? 'Enviar mis respuestas' : index === 0 ? 'Empezar' : 'Continuar'}
           </button>
@@ -473,7 +561,7 @@ export default function FormRunner({ definition, context = {}, onSubmit, exitHre
       </div>
 
       {/* ===== DERECHA: logo + fases (escritorio) ===== */}
-      <FormAside title={formTitle} phases={phases} currentPhase={step.phase} />
+      <FormAside title={formTitle} phases={phases} currentPhase={step.phase} onGoTo={goToPhase} />
 
       {/* Panel de pasos en móvil (desde el contador) */}
       <StepsDrawer
@@ -484,7 +572,10 @@ export default function FormRunner({ definition, context = {}, onSubmit, exitHre
         currentPhase={step.phase}
         index={index}
         total={total}
+        onGoTo={goToPhase}
       />
+
+      <PausaPantalla texto={pausa} />
     </div>
   );
 }

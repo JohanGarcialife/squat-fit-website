@@ -101,10 +101,20 @@ const MAP = [
   // --- Pretty Links --------------------------------------------------------
   // Enlaces cortos que servía el plugin Pretty Links (307) desde WordPress.
   // Son los de más tráfico de todo el dominio; sin esto se pierden.
-  ['/unete', '/programa'],   // ~6.883 clics/mes — bio de Instagram
-  ['/form', '/programa'],    // ~2.169 clics/mes — descripciones de YouTube
-  ['/sform', '/programa'],   // ~951 clics/mes — stories
-  ['/eform', '/programa'],   // ~316 clics/mes — emails
+  // CORRECCIÓN 27-jul: estos NO eran enlaces a la landing, eran los Pretty
+  // Links del formulario, uno por origen. Van al mismo slug en el dominio
+  // nuevo, que ya redirige al formulario con su atribución (ver form-links.mjs).
+  // Si fuesen a /programa se perdería de dónde viene la persona.
+  ['/unete', '/unete'],      // ~6.883 clics/mes — bio de Instagram (María)
+  ['/acceder', '/acceder'],  // bio de Instagram (Hamlet)
+  ['/form', '/form'],        // ~2.169 clics/mes — YouTube (María)
+  ['/forms', '/forms'],      // YouTube (Hamlet)
+  ['/sform', '/sform'],      // ~951 clics/mes — stories (María)
+  ['/hform', '/hform'],      // stories (Hamlet)
+  ['/aplica', '/aplica'],    // TikTok (María)
+  ['/aplicar', '/aplicar'],  // TikTok (Hamlet)
+  ['/eform', '/eform'],      // ~316 clics/mes — emails
+  ['/guia', '/guia'],        // guías
 
   // --- Restos de WordPress -------------------------------------------------
   ['/en-construccion', '/'],

@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { X, Check, ChevronLeft, ListChecks, Volume2, VolumeX } from 'lucide-react';
 import { isMuted, toggleMute } from './formSounds';
 
-const BLUE = '#3932C0';
+const BLUE = '#363C98';
 const ORANGE = '#FF690B';
 
 // Piezas de chrome compartidas por los formularios (prellamada, onboarding y los
@@ -16,13 +16,146 @@ const ORANGE = '#FF690B';
 export function ExitButton({ href, onClick, label = 'Salir' }) {
   const clases =
     'shrink-0 grid place-items-center w-9 h-9 rounded-full text-[#8B87C9] ' +
-    'bg-[#F3F2F9] hover:bg-[#E7E5F4] hover:text-[#3932C0] active:scale-95 ' +
+    'bg-[#F3F2F9] hover:bg-[#E7E5F4] hover:text-[#363C98] active:scale-95 ' +
     'transition-all cursor-pointer';
   const icono = <X className="w-[18px] h-[18px]" strokeWidth={2.5} />;
   return href ? (
     <Link href={href} aria-label={label} className={clases}>{icono}</Link>
   ) : (
     <button type="button" onClick={onClick} aria-label={label} className={clases}>{icono}</button>
+  );
+}
+
+/* ── Pausa entre preguntas ───────────────────────────────────────────────
+   No sale en todas las respuestas (cansaría y delataría que es automático):
+   aparece cada 3-5, con la frase elegida al azar y sin repetir la anterior,
+   para que parezca alguien reaccionando a lo que cuentas.
+
+   Ocupa la PANTALLA ENTERA y tapa la pregunta siguiente hasta que se va. Ese
+   es su trabajo: cortar la inercia de ir encadenando preguntas a toda prisa y
+   dar un respiro antes de la siguiente. */
+const FRASES = [
+  'Perfecto, voy anotando todo',
+  'Genial, seguimos',
+  'Anotado. Continuamos',
+  'Gracias, ya lo tengo',
+  'Vamos muy bien',
+  'Estupendo, sigo apuntando',
+  'Buen dato, seguimos',
+  'Recibido, continuamos',
+];
+const sorteo = (n) => Math.floor(Math.random() * n);
+
+// Cuánto dura la pausa entera, de que entra a que ha terminado de irse. Tiene
+// que cuadrar con la animación `.sf-pausa` de form-motion.css.
+export const PAUSA_MS = 1520;
+
+export function useMicroFeedback() {
+  const cuenta = React.useRef(0);
+  const objetivo = React.useRef(3);
+  const anterior = React.useRef('');
+
+  React.useEffect(() => {
+    objetivo.current = 3 + sorteo(3); // 3, 4 o 5
+  }, []);
+
+  // Devuelve la frase que toca mostrar, o null si a esta respuesta no le toca.
+  const marcar = React.useCallback(() => {
+    cuenta.current += 1;
+    if (cuenta.current < objetivo.current) return null;
+    cuenta.current = 0;
+    objetivo.current = 3 + sorteo(3);
+    let frase = anterior.current;
+    while (frase === anterior.current) frase = FRASES[sorteo(FRASES.length)];
+    anterior.current = frase;
+    return frase;
+  }, []);
+
+  return { marcar };
+}
+
+export function PausaPantalla({ texto }) {
+  if (!texto) return null;
+  return (
+    <div
+      className="fixed inset-0 z-[120] flex flex-col items-center justify-center px-8 text-center bg-white"
+      role="status"
+      aria-live="polite"
+    >
+      <div className="sf-pausa flex flex-col items-center">
+        <span
+          className="grid place-items-center w-20 h-20 rounded-full mb-7"
+          style={{ backgroundColor: '#FFF1E7', color: ORANGE }}
+        >
+          <Check className="w-10 h-10" strokeWidth={3} />
+        </span>
+        <p
+          className="font-extrabold leading-tight max-w-lg"
+          style={{ color: BLUE, fontSize: 'clamp(1.6rem, 4.5vw, 2.4rem)' }}
+        >
+          {texto}
+        </p>
+      </div>
+    </div>
+  );
+}
+
+/* ── Campo hijo: cuelga de la opción elegida con un corchete naranja, como en
+      el diseño de «Alergias o intolerancias». Se usa para las preguntas cuya
+      respuesta abre otra: «Europa» → ¿de qué país? ── */
+export function ChildField({ children }) {
+  return (
+    <div className="flex items-stretch gap-2 sf-child">
+      <span
+        aria-hidden
+        className="shrink-0 w-3.5 -mt-2 mb-2 rounded-l-xl border-l-2 border-t-2 border-b-2"
+        style={{ borderColor: ORANGE }}
+      />
+      <div className="flex-1 min-w-0">{children}</div>
+    </div>
+  );
+}
+
+/* ── Salir del formulario ─────────────────────────────────────────────────
+      No se sale de golpe: primero se dice que las respuestas quedan guardadas.
+      Es la mitad del trato de dejar salir — si no se dice, la persona asume que
+      pierde lo hecho y o bien no sale (se frustra) o bien sale y no vuelve. ── */
+export function SalidaDialogo({ abierto, indice, total, onSeguir, onSalir }) {
+  if (!abierto) return null;
+  const hechas = Math.max(0, indice);
+  return (
+    <div className="fixed inset-0 z-[130] flex flex-col items-center justify-center px-8 text-center bg-white"
+         role="dialog" aria-modal="true">
+      <div className="sf-screen-in max-w-md flex flex-col items-center">
+        <span className="grid place-items-center w-20 h-20 rounded-full mb-7"
+              style={{ backgroundColor: '#EFEEFA', color: BLUE }}>
+          <Check className="w-10 h-10" strokeWidth={3} />
+        </span>
+        <h2 className="font-extrabold mb-3" style={{ color: BLUE, fontSize: 'clamp(1.5rem, 4vw, 2rem)' }}>
+          Tranquilo, lo guardamos
+        </h2>
+        <p className="text-[#6B6BA8] text-lg leading-relaxed mb-9">
+          {hechas > 0
+            ? `Tus ${hechas} respuestas quedan guardadas en este navegador. Puedes irte a mirar la web y volver cuando quieras: seguirás justo por donde ibas.`
+            : 'Puedes irte a mirar la web y volver cuando quieras: seguirás justo por donde ibas.'}
+        </p>
+        <button
+          type="button"
+          onClick={onSeguir}
+          className="sf-cta is-enabled w-full max-w-xs rounded-2xl py-4 font-bold text-white text-lg cursor-pointer mb-4"
+          style={{ backgroundColor: BLUE }}
+        >
+          Seguir rellenando
+        </button>
+        <button
+          type="button"
+          onClick={onSalir}
+          className="text-[#8B87C9] hover:text-[#363C98] font-bold transition-colors cursor-pointer"
+        >
+          Salir de todos modos
+        </button>
+      </div>
+    </div>
   );
 }
 
@@ -42,7 +175,7 @@ export function SoundButton() {
       aria-label={mute ? 'Activar sonido' : 'Silenciar'}
       title={mute ? 'Activar sonido' : 'Silenciar'}
       className="shrink-0 grid place-items-center w-9 h-9 rounded-full text-[#8B87C9]
-                 hover:bg-[#F3F2F9] hover:text-[#3932C0] active:scale-95
+                 hover:bg-[#F3F2F9] hover:text-[#363C98] active:scale-95
                  transition-all cursor-pointer"
     >
       {mute ? <VolumeX className="w-[18px] h-[18px]" strokeWidth={2.2} />
@@ -58,7 +191,7 @@ export function BackButton({ onClick }) {
       type="button"
       onClick={onClick}
       className="inline-flex items-center gap-1 pl-2 pr-3.5 py-2 rounded-full font-bold text-sm
-                 text-[#6B6BA8] bg-[#F3F2F9] hover:bg-[#E7E5F4] hover:text-[#3932C0]
+                 text-[#6B6BA8] bg-[#F3F2F9] hover:bg-[#E7E5F4] hover:text-[#363C98]
                  active:scale-95 transition-all cursor-pointer"
     >
       <ChevronLeft className="w-4 h-4" strokeWidth={2.5} />
@@ -75,7 +208,7 @@ export function StepCounter({ index, total, onOpen }) {
       onClick={onOpen}
       aria-label="Ver los pasos del formulario"
       className="inline-flex items-center gap-1.5 pl-3 pr-2.5 py-2 rounded-full font-bold text-sm
-                 text-[#8B87C9] hover:bg-[#F3F2F9] hover:text-[#3932C0] active:scale-95
+                 text-[#8B87C9] hover:bg-[#F3F2F9] hover:text-[#363C98] active:scale-95
                  transition-all cursor-pointer"
     >
       {index + 1}/{total}
@@ -84,8 +217,9 @@ export function StepCounter({ index, total, onOpen }) {
   );
 }
 
-/* ── Lista de fases con hitos: hecha / actual / pendiente ── */
-export function PhasesList({ phases = [], currentPhase, compact = false }) {
+/* ── Lista de fases con hitos: hecha / actual / pendiente.
+      Las ya visitadas son clicables para volver a repasarlas. ── */
+export function PhasesList({ phases = [], currentPhase, onGoTo, compact = false }) {
   const actual = phases.indexOf(currentPhase);
   if (!phases.length) return null;
   return (
@@ -93,8 +227,18 @@ export function PhasesList({ phases = [], currentPhase, compact = false }) {
       {phases.map((p, i) => {
         const hecha = actual > -1 && i < actual;
         const activa = i === actual;
+        const navegable = hecha && typeof onGoTo === 'function';
+        const Fila = navegable ? 'button' : 'div';
         return (
-          <li key={p} className="flex items-center gap-3">
+          <li key={p}>
+          <Fila
+            type={navegable ? 'button' : undefined}
+            onClick={navegable ? () => onGoTo(p) : undefined}
+            title={navegable ? `Volver a «${p}»` : undefined}
+            className={`w-full flex items-center gap-3 rounded-xl px-2 -mx-2 text-left transition-colors ${
+              navegable ? 'cursor-pointer hover:bg-[#E7E5F4]' : ''
+            }`}
+          >
             <span
               className="shrink-0 grid place-items-center rounded-full transition-all"
               style={{
@@ -116,6 +260,7 @@ export function PhasesList({ phases = [], currentPhase, compact = false }) {
             >
               {p}
             </span>
+          </Fila>
           </li>
         );
       })}
@@ -124,21 +269,21 @@ export function PhasesList({ phases = [], currentPhase, compact = false }) {
 }
 
 /* ── Columna lateral de escritorio ── */
-export function FormAside({ title, subtitle, phases, currentPhase }) {
+export function FormAside({ title, subtitle, phases, currentPhase, onGoTo }) {
   return (
     <aside className="hidden lg:flex w-[34%] max-w-md flex-col items-center bg-[#F3F2F9] px-10 py-12">
       <Image src="/LogotipoSquatfit.png" width={88} height={88} alt="Squad Fit" className="mb-10" />
       {title && <p className="text-[#8B87C9] font-bold mb-2 text-center">{title}</p>}
       {subtitle && <p className="text-[#A9A6CE] text-sm font-semibold mb-8 text-center">{subtitle}</p>}
       <div className="w-full max-w-[240px] mt-2">
-        <PhasesList phases={phases} currentPhase={currentPhase} />
+        <PhasesList phases={phases} currentPhase={currentPhase} onGoTo={onGoTo} />
       </div>
     </aside>
   );
 }
 
 /* ── Panel lateral de móvil: mismo gesto que el carrito ── */
-export function StepsDrawer({ open, onClose, title, subtitle, phases, currentPhase, index, total }) {
+export function StepsDrawer({ open, onClose, title, subtitle, phases, currentPhase, index, total, onGoTo }) {
   useEffect(() => {
     if (!open) return undefined;
     const onKey = (e) => { if (e.key === 'Escape') onClose(); };
@@ -167,7 +312,16 @@ export function StepsDrawer({ open, onClose, title, subtitle, phases, currentPha
           <ExitButton onClick={onClose} label="Cerrar" />
         </div>
         <div className="px-6 pb-8 overflow-y-auto">
-          <PhasesList phases={phases} currentPhase={currentPhase} />
+          <PhasesList
+            phases={phases}
+            currentPhase={currentPhase}
+            onGoTo={onGoTo ? (p) => { onGoTo(p); onClose(); } : undefined}
+          />
+          {typeof onGoTo === 'function' && (
+            <p className="text-[#B4B1D6] text-xs font-semibold mt-6">
+              Toca una sección ya completada para volver a ella.
+            </p>
+          )}
         </div>
       </div>
     </div>

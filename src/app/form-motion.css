@@ -4,30 +4,36 @@
    formulario (onboarding, prellamada, forms del dashboard…).
    ============================================================ */
 
-/* Tiempos afinados con Hamlet el 26-jul: +60 % sobre el briefing y luego +30 % más
-   (los comentarios de cada línea son el valor original del briefing). Con los
-   originales el movimiento era tan rápido que no se apreciaba ninguno de los efectos.
+/* Tiempos afinados con Hamlet el 26-jul (+60 % sobre el briefing y luego +30 %) y
+   otra vuelta con María esa misma noche: seguía sintiéndose atropellado y hacía
+   que el lead corriese en vez de pararse a contestar bien. Los comentarios de
+   cada línea son el valor anterior.
    Todo el archivo tira de estos tokens: para volver a afinar, tocar solo aquí. */
 :root {
   --ease-ui: cubic-bezier(0.2, 0.8, 0.2, 1);
-  --ms-press: 187ms;        /* 90  */
-  --ms-fast: 374ms;         /* 180 */
-  --ms-med: 458ms;          /* 220 */
-  --ms-screen-in: 541ms;    /* 260 */
-  --ms-screen-out: 374ms;   /* 180 */
-  --ms-progress: 874ms;     /* 420 */
-  --ms-color: 333ms;        /* 160 · color, borde y fondo */
-  --ms-settle: 291ms;       /* 140 · asentado del seleccionado */
-  --ms-shadow: 250ms;       /* 120 · sombra del CTA */
-  --ms-info: 499ms;         /* 240 · bloques informativos */
-  --ms-option: 340ms;       /* entrada de cada casilla */
-  --ms-stagger: 170ms;      /* la MITAD de --ms-option: la siguiente arranca
-                               cuando la anterior va por la mitad */
+  --ms-press: 187ms;        /* = · el press del dedo SÍ debe ser inmediato */
+  --ms-fast: 440ms;         /* 374 */
+  --ms-med: 620ms;          /* 458 */
+  --ms-screen-in: 820ms;    /* 541 · la pregunta nueva entra con calma */
+  --ms-screen-out: 480ms;   /* 374 */
+  --ms-progress: 1100ms;    /* 874 */
+  --ms-color: 400ms;        /* 333 · color, borde y fondo */
+  --ms-settle: 340ms;       /* 291 · asentado del seleccionado */
+  --ms-shadow: 250ms;       /* = · sombra del CTA */
+  --ms-info: 560ms;         /* 499 · bloques informativos */
+  --ms-option: 520ms;       /* 340 · entrada de cada casilla */
+  --ms-stagger: 320ms;      /* 170 · antes era la MITAD de --ms-option y las
+                               casillas se solapaban tanto que parecían aparecer
+                               todas de golpe. Ahora cada una arranca cuando la
+                               anterior va por dos tercios: se ven de una en una. */
+  --ms-option-start: 220ms; /* espera antes de la primera casilla, para que no
+                               compita con la entrada de la pantalla */
   --ms-drawer: 340ms;       /* panel lateral de pasos (móvil) */
+  --ms-portada-out: 780ms;  /* 1000 · la portada apartándose al pulsar «Empezar» */
 
   /* Recorridos: subidos sobre el briefing para que el movimiento se note */
-  --px-sweep: 34px;         /* barrido lateral al cambiar de pregunta */
-  --px-option: 14px;        /* recorrido corto de cada casilla (izq → der) */
+  --px-sweep: 44px;         /* 34 · barrido lateral al cambiar de pregunta */
+  --px-option: 24px;        /* 14 · recorrido de cada casilla (izq → der) */
   --px-lift: 5px;           /* hundido del botón físico */
 }
 
@@ -67,7 +73,17 @@
 }
 .sf-stagger {
   animation: sfOptionIn var(--ms-option) var(--ease-ui) both;
-  animation-delay: calc(var(--i, 0) * var(--ms-stagger));
+  animation-delay: calc(var(--ms-option-start) + var(--i, 0) * var(--ms-stagger));
+}
+
+/* 3b) Campo que se despliega colgando de la opción elegida (¿de qué país?): baja
+      desde debajo de su opción, sin empujar de golpe. */
+@keyframes sfChildIn {
+  from { opacity: 0; transform: translate3d(0, -8px, 0); }
+  to   { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+.sf-child {
+  animation: sfChildIn var(--ms-option) var(--ease-ui) both;
 }
 
 /* 4-5) Botones de opción: press físico + estado seleccionado estable */
@@ -140,6 +156,27 @@
   animation: sfCaret 1s steps(1, end) infinite;
 }
 
+/* 8b) Pausa entre preguntas ("Perfecto, voy anotando todo"): ocupa la pantalla
+       entera, entra con un pequeño impulso, se queda un momento y se va hacia
+       arriba. Solo cuando ha terminado de irse entra la pregunta siguiente.
+       La suma de --ms-pausa-espera + la salida tiene que cuadrar con PAUSA_MS
+       de FormChrome.js (1520 ms). */
+@keyframes sfPausaIn {
+  0%   { opacity: 0; transform: translate3d(0, 14px, 0) scale(0.94); }
+  60%  { opacity: 1; transform: translate3d(0, 0, 0) scale(1.02); }
+  100% { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+}
+@keyframes sfPausaOut {
+  from { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+  to   { opacity: 0; transform: translate3d(0, -16px, 0) scale(1.02); }
+}
+.sf-pausa {
+  --ms-pausa-espera: 1100ms;
+  animation:
+    sfPausaIn var(--ms-med) var(--ease-ui) both,
+    sfPausaOut var(--ms-fast) var(--ease-ui) forwards var(--ms-pausa-espera);
+}
+
 /* 9) Bloques informativos con entrada suave */
 .sf-info {
   opacity: 0;
@@ -151,6 +188,80 @@
   transition:
     opacity var(--ms-info) var(--ease-ui),
     transform var(--ms-info) var(--ease-ui);
+}
+
+/* 9b) Salida de la portada al pulsar «Empezar». En vez de un corte seco, la
+       portada entera se desliza hacia ABAJO —como si la pantalla se apartara
+       para dejar paso— mientras el logo hace lo contrario: se estira un poco,
+       sale volando hacia arriba y se va girando. Solo cuando ha terminado entra
+       la primera pregunta con su barrido de siempre. */
+@keyframes sfPortadaSlide {
+  from { transform: translate3d(0, 0, 0); }
+  to   { transform: translate3d(0, 90px, 0); }
+}
+@keyframes sfPortadaFade {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+/* El logo no se va de una pieza: se parte en sus cuatro letras (ver
+   LogoEspagueti.js) y cada una sale en ESPIRAL hacia su esquina.
+
+   La primera versión las aplastaba (scale 0.2 × 3.4) y quedaba barata: una
+   letra estirada no es más que un rectángulo, y se nota. Esta gira de verdad.
+
+   Cómo: cada letra va dentro de una «órbita» que rota, y la letra, dentro, se
+   aleja en línea recta. Recto dentro de algo que gira = espiral, sin tener que
+   calcular la curva a mano en los keyframes. Las cuatro giran en el MISMO
+   sentido, así que arrancan como un remolino único antes de separarse.
+
+   El carácter lo da la curva de tiempo: cubic-bezier(.55,0,.85,.25) es lenta al
+   principio y muy rápida al final — el logo parece succionado, no empujado. Y
+   el desenfoque creciente hace el resto: es lo que separa un movimiento con
+   cuerpo de uno de plantilla. */
+@keyframes sfOrbita {
+  0%   { transform: rotate(0deg); }
+  18%  { transform: rotate(-14deg); }
+  100% { transform: rotate(190deg); }
+}
+@keyframes sfVuelo {
+  0%   { transform: translate3d(0, 0, 0) scale(1);   filter: blur(0px); opacity: 1; }
+  18%  { transform: translate3d(0, 0, 0) scale(0.9); filter: blur(0px); opacity: 1; }
+  55%  { transform: translate3d(var(--dx), var(--dy), 60px) scale(0.72);
+         filter: blur(1px); opacity: 1; }
+  100% { transform: translate3d(calc(var(--dx) * 3.4), calc(var(--dy) * 3.4), 260px) scale(0.34);
+         filter: blur(7px); opacity: 0; }
+}
+.sf-orbita {
+  animation: sfOrbita var(--ms-portada-out) cubic-bezier(0.55, 0, 0.85, 0.25) forwards;
+  transform-style: preserve-3d;
+}
+.sf-vuelo {
+  animation: sfVuelo var(--ms-portada-out) cubic-bezier(0.55, 0, 0.85, 0.25) forwards;
+  will-change: transform, opacity, filter;
+}
+.sf-vuelo-S { --dx: -26px; --dy: -26px; }
+.sf-vuelo-Q { --dx:  26px; --dy: -26px; }
+.sf-vuelo-F { --dx: -26px; --dy:  26px; }
+.sf-vuelo-T { --dx:  26px; --dy:  26px; }
+.sf-orbita-Q, .sf-vuelo-Q { animation-delay: 45ms; }
+.sf-orbita-F, .sf-vuelo-F { animation-delay: 90ms; }
+.sf-orbita-T, .sf-vuelo-T { animation-delay: 135ms; }
+.sf-portada-out {
+  animation: sfPortadaSlide var(--ms-portada-out) var(--ease-ui) forwards;
+  pointer-events: none;
+}
+.sf-portada-out .sf-portada-texto {
+  animation: sfPortadaFade var(--ms-fast) var(--ease-ui) forwards;
+}
+
+
+/* 9c) Botón flotante de «termina tu formulario»: sube desde abajo al aparecer. */
+@keyframes sfFlotanteIn {
+  from { opacity: 0; transform: translate3d(0, 24px, 0); }
+  to   { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+.sf-flotante {
+  animation: sfFlotanteIn var(--ms-screen-in) var(--ease-ui) both;
 }
 
 /* 10) Panel lateral de pasos en móvil: entra deslizando desde la derecha
@@ -176,6 +287,11 @@
   .sf-screen-in,
   .sf-screen-out,
   .sf-stagger,
+  .sf-child,
+  .sf-portada-out,
+  .sf-orbita,
+  .sf-vuelo,
+  .sf-flotante,
   .sf-drawer,
   .sf-backdrop,
   .sf-caret {

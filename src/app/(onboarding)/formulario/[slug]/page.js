@@ -52,7 +52,7 @@ function WeeklyResultScreen({ result }) {
       <div className="min-h-screen w-full flex flex-col items-center justify-center px-6 text-center bg-white">
         <div className="sf-screen-in max-w-lg flex flex-col items-center">
           <div className="text-6xl mb-4">📝</div>
-          <h1 className="font-extrabold mb-4 text-[#3932C0]" style={{ fontSize: 'clamp(1.9rem, 4vw, 2.6rem)' }}>
+          <h1 className="font-extrabold mb-4 text-[#363C98]" style={{ fontSize: 'clamp(1.9rem, 4vw, 2.6rem)' }}>
             Respuestas guardadas
           </h1>
           <p className="text-[#6B6BA8] text-lg leading-relaxed mb-8">
@@ -80,7 +80,7 @@ function WeeklyResultScreen({ result }) {
     <div className="min-h-screen w-full flex flex-col items-center justify-center px-6 py-12 bg-white">
       <div className="sf-screen-in max-w-lg w-full flex flex-col items-center text-center">
         <div className="text-6xl mb-4">{ui.emoji}</div>
-        <h1 className="font-extrabold mb-2 text-[#3932C0]" style={{ fontSize: 'clamp(1.9rem, 4vw, 2.6rem)' }}>
+        <h1 className="font-extrabold mb-2 text-[#363C98]" style={{ fontSize: 'clamp(1.9rem, 4vw, 2.6rem)' }}>
           {engine.semaphore_label || ui.fallback}
         </h1>
         <p className="text-[#8B87C9] font-semibold mb-6">
@@ -140,7 +140,7 @@ function WeeklyResultScreen({ result }) {
         >
           Ver mis alertas y hábitos
         </Link>
-        <Link href="/mi-programa" className="mt-4 text-[#8B87C9] hover:text-[#3932C0] font-semibold transition-colors">
+        <Link href="/mi-programa" className="mt-4 text-[#8B87C9] hover:text-[#363C98] font-semibold transition-colors">
           Volver a mi panel
         </Link>
       </div>

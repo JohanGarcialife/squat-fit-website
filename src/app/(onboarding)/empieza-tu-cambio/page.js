@@ -8,6 +8,7 @@
 // del briefing (clases sf-* de form-motion.css).
 
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import PhoneInput from 'react-phone-input-2';
@@ -17,10 +18,13 @@ import GdprCheckbox from '@/app/components/GdprCheckbox';
 import { normalizeName } from '@/app/components/nameUtils';
 import TextareaMeter from '@/app/components/TextareaMeter';
 import Typewriter from '@/app/components/Typewriter';
-import { ExitButton, BackButton, StepCounter, FormAside, StepsDrawer, SoundButton } from '@/app/components/FormChrome';
-import { playSelect, playAdvance, playFinish } from '@/app/components/formSounds';
+import { ExitButton, BackButton, StepCounter, FormAside, StepsDrawer, SoundButton, useMicroFeedback, PausaPantalla, PAUSA_MS, ChildField, SalidaDialogo } from '@/app/components/FormChrome';
+import { playSelect, playAdvance, playFinish, playKeypress, unlockAudio } from '@/app/components/formSounds';
+import { PAISES_EUROPA, PAISES_LATAM } from '@/app/components/paises';
+import LogoEspagueti from '@/app/components/LogoEspagueti';
+import { guardarProgreso, leerProgreso, borrarProgreso } from '@/app/components/formProgress';
 
-const BLUE = '#3932C0';
+const BLUE = '#363C98';
 const ORANGE = '#FF690B';
 
 // Enlace de reserva de la llamada. Hoy apunta a /contacto; cuando exista un
@@ -35,18 +39,22 @@ const PRELLAMADA_FORM_ID = 'f0a11e00-0000-4000-a000-000000000001';
 const STORAGE_KEY = 'sqf-prellamada-solicitudes';
 
 // Fases: agrupan las pantallas para la columna lateral y el panel de móvil.
-const PHASES = ['Sobre ti', 'Tu objetivo', 'Tu momento', 'Cómo te contactamos'];
+const PHASES = [
+  'Sobre ti', 'Tu objetivo', 'Qué te frena', 'Tu prioridad',
+  'Tu compromiso', 'Tu situación', 'Cómo te contactamos',
+];
 
 // A qué fase pertenece cada pantalla (por su clave o su tipo).
 const PHASE_BY_KEY = {
   nombre: 'Sobre ti', edad: 'Sobre ti', region_vives: 'Sobre ti',
-  objetivo_principal: 'Tu objetivo', impide_lograr: 'Tu objetivo',
-  intentos: 'Tu objetivo', prioridad_para_ti: 'Tu objetivo',
-  empuja_a_cambiar: 'Tu objetivo',
-  tiempo_y_esfuerzo: 'Tu momento', inversion: 'Tu momento',
-  obstaculo_importante: 'Tu momento', coach_squat_fit: 'Tu momento',
-  peso_altura: 'Cómo te contactamos', phone: 'Cómo te contactamos',
-  instagram: 'Cómo te contactamos', final: 'Cómo te contactamos',
+  objetivo_principal: 'Tu objetivo',
+  impide_lograr: 'Qué te frena', intentos: 'Qué te frena',
+  prioridad_para_ti: 'Tu prioridad', empuja_a_cambiar: 'Tu prioridad',
+  tiempo_y_esfuerzo: 'Tu compromiso', inversion: 'Tu compromiso',
+  obstaculo_importante: 'Tu situación', coach_squat_fit: 'Tu situación',
+  peso_altura: 'Tu situación',
+  phone: 'Cómo te contactamos', instagram: 'Cómo te contactamos',
+  final: 'Cómo te contactamos',
 };
 const phaseOf = (step) => PHASE_BY_KEY[step?.key || step?.type] || null;
 
@@ -61,7 +69,13 @@ const STEPS = [
   { type: 'number', key: 'edad', title: '¿Qué edad tienes?', min: 14, max: 99 },
   {
     type: 'radio', key: 'region_vives', title: '¿Dónde vives actualmente?',
-    options: ['España / Europa', 'Estados Unidos', 'Latinoamérica'],
+    options: ['Europa', 'Estados Unidos', 'Latinoamérica'],
+    // Al elegir una opción con hijo se despliega debajo, colgando de ella, el
+    // selector del país concreto. Hasta que no se elija país, no se avanza.
+    hijos: {
+      Europa: { key: 'pais_vives', etiqueta: '¿De qué país?', opciones: PAISES_EUROPA },
+      Latinoamérica: { key: 'pais_vives', etiqueta: '¿De qué país?', opciones: PAISES_LATAM },
+    },
   },
   {
     type: 'radio', key: 'objetivo_principal',
@@ -158,12 +172,32 @@ const STEPS = [
 // El título se escribe algo más rápido que el cuerpo del texto.
 const TITLE_SPEED = 11;
 
+// Pausa entre pulsar Continuar y que entre la pantalla siguiente.
+const ADVANCE_DELAY = 520;
+
+// Lo que tarda la portada en apartarse. Tiene que cuadrar con
+// --ms-portada-out de form-motion.css.
+const PORTADA_OUT_MS = 780;
+
+// Identificador del progreso guardado en el navegador.
+// Traducción de nuestro utm_source al vocabulario de orígenes del back office.
+const CRM_SOURCE = {
+  youtube: 'youtube',
+  instagram: 'ig',
+  email: 'email',
+  tiktok: 'otro',
+  guia: 'web',
+};
+
+const FORM_ID = 'prellamada';
+const FORM_URL = '/empieza-tu-cambio';
+
 const esPhoneLocalization = { ...esPhone, gb: 'Inglaterra' };
 
 export default function EmpiezaTuCambioPage() {
   const [index, setIndex] = useState(0);
   const [answers, setAnswers] = useState({
-    first_name: '', last_name: '', edad: '', region_vives: '',
+    first_name: '', last_name: '', edad: '', region_vives: '', pais_vives: '',
     objetivo_principal: '', impide_lograr: [], intentos: '',
     prioridad_para_ti: '', empuja_a_cambiar: '', tiempo_y_esfuerzo: '',
     inversion: '', obstaculo_importante: '', coach_squat_fit: '',
@@ -173,8 +207,29 @@ export default function EmpiezaTuCambioPage() {
   const [saving, setSaving] = useState(false);
   const [sent, setSent] = useState(false);
   const [stepsOpen, setStepsOpen] = useState(false);
+  const { marcar: marcarGesto } = useMicroFeedback();
+  // Frase de la pausa a pantalla completa entre una pregunta y la siguiente.
+  const [pausa, setPausa] = useState(null);
+  // Portada: nada se escribe hasta que el lead pulsa «Empezar». Ese clic es el
+  // gesto que el navegador exige para dejar sonar el audio; sin él, el tecleo de
+  // la primera pantalla se perdería en silencio.
+  const [started, setStarted] = useState(false);
+  // Fase intermedia: la portada apartándose. Sin esto el cambio sería un corte.
+  const router = useRouter();
+  const [saliendoPortada, setSaliendoPortada] = useState(false);
+  // Salir: no se sale de golpe, primero se avisa de que queda guardado.
+  const [pidiendoSalir, setPidiendoSalir] = useState(false);
+  // Progreso encontrado en el navegador al abrir (null si no hay).
+  const [guardado, setGuardado] = useState(null);
+  // De qué enlace corto llegó (bio de Instagram, YouTube, email…).
+  const [origenLead, setOrigenLead] = useState(null);
+  // Modo landing sin salida (?directo=1): sin X en la cabecera.
+  const [sinSalida, setSinSalida] = useState(false);
+  const progresoLeido = useRef(false);
   // El contenido espera a que termine de escribirse el título.
   const [titleDone, setTitleDone] = useState(false);
+  // Y el botón espera a que termine de escribirse TODO el texto de la pantalla.
+  const [bodyDone, setBodyDone] = useState(false);
   // Pasos ya vistos: al volver atrás el texto sale de golpe (ya se leyó).
   const seenSteps = useRef(new Set());
 
@@ -196,8 +251,12 @@ export default function EmpiezaTuCambioPage() {
         const n = parseInt(answers[step.key], 10);
         return !isNaN(n) && n >= step.min && n <= step.max;
       }
-      case 'radio':
-        return !!answers[step.key];
+      case 'radio': {
+        const elegido = answers[step.key];
+        if (!elegido) return false;
+        const hijo = step.hijos?.[elegido];
+        return hijo ? !!answers[hijo.key] : true;
+      }
       case 'checkbox':
         return (answers[step.key] || []).length > 0;
       case 'text':
@@ -220,21 +279,91 @@ export default function EmpiezaTuCambioPage() {
   // por tiempo (longitud × velocidad) en vez de esperar un aviso del hijo: así
   // no depende del orden en que React dispara los efectos.
   useEffect(() => {
-    if (!stepId) return undefined;
+    if (!stepId || !started) return undefined;
     const visto = seenSteps.current.has(stepId);
     seenSteps.current.add(stepId);
-    if (visto) { setTitleDone(true); return undefined; }
+    if (visto) { setTitleDone(true); setBodyDone(true); return undefined; }
     setTitleDone(false);
+    setBodyDone(false);
     const ms = 150 + (step?.title?.length || 0) * TITLE_SPEED;
     const t = setTimeout(() => setTitleDone(true), ms);
     return () => clearTimeout(t);
-  }, [stepId, step?.title]);
+  }, [stepId, step?.title, started]);
 
-  const goNext = () => { if (isValid && index < total - 1) { playAdvance(); setIndex((i) => i + 1); } };
+  // El botón de avanzar no se enciende hasta que la pantalla ha acabado de
+  // escribirse: la intro espera a su párrafo; el resto, al título (debajo van
+  // campos o casillas, que ya se pueden usar en cuanto aparecen).
+  const contenidoListo = alreadySeen || (step?.type === 'intro' ? bodyDone : titleDone);
+  const puedeAvanzar = isValid && contenidoListo;
+
+  // Atribución: de qué enlace corto vino (ver form-links.mjs). Se lee una sola
+  // vez al abrir, porque al retomar el formulario desde el botón flotante la URL
+  // ya no lleva los parámetros y se perdería.
+  useEffect(() => {
+    const p = new URLSearchParams(window.location.search);
+    // `?directo=1`: landing sin salida, para los enlaces que manda el equipo
+    // uno a uno por WhatsApp. Los enlaces de la bio, YouTube o los correos SÍ
+    // llevan la X: ahí la persona ha llegado por su cuenta y encerrarla solo
+    // consigue que se vaya por el botón de atrás, perdiendo lo respondido.
+    if (p.get('directo') === '1') setSinSalida(true);
+    const via = p.get('via');
+    if (!via) return;
+    setOrigenLead({
+      via,
+      utm_source: p.get('utm_source') || '',
+      utm_medium: p.get('utm_medium') || '',
+      utm_campaign: p.get('utm_campaign') || '',
+      utm_content: p.get('utm_content') || '',
+    });
+  }, []);
+
+  // Al abrir: ¿hay un formulario a medias guardado en este navegador?
+  useEffect(() => {
+    if (progresoLeido.current) return;
+    progresoLeido.current = true;
+    const p = leerProgreso(FORM_ID);
+    if (p && p.indice > 0) setGuardado(p);
+  }, []);
+
+  // Guardar en cada respuesta y en cada cambio de pregunta. No sale de este
+  // navegador: al servidor no se manda nada hasta que le da a enviar.
+  useEffect(() => {
+    if (!started || sent) return;
+    guardarProgreso(FORM_ID, {
+      respuestas: answers,
+      indice: index,
+      total,
+      titulo: 'Aquí empieza tu cambio',
+      url: FORM_URL,
+      origen: origenLead,
+    });
+  }, [answers, index, started, sent, total, origenLead]);
+
+  const goNext = () => {
+    if (!puedeAvanzar || index >= total - 1) return;
+    playAdvance();
+    // Cada 3-5 respuestas toca pausa a pantalla completa: tapa la pregunta
+    // siguiente hasta que se va, para cortar la inercia de ir a toda prisa.
+    const frase = step.type !== 'intro' ? marcarGesto() : null;
+    if (frase) {
+      setPausa(frase);
+      setTimeout(() => { setPausa(null); setIndex((i) => i + 1); }, PAUSA_MS);
+      return;
+    }
+    // Sin pausa, al menos un respiro: si la pregunta siguiente entra de golpe,
+    // se atropella con el sonido de avance y da sensación de ir a empujones.
+    setTimeout(() => setIndex((i) => i + 1), ADVANCE_DELAY);
+  };
   const goBack = () => setIndex((i) => Math.max(0, i - 1));
 
+  // Volver a una sección ya completada desde el mapa de navegación.
+  const goToPhase = (fase) => {
+    const destino = STEPS.findIndex((st) => phaseOf(st) === fase);
+    if (destino > -1 && destino < index) setIndex(destino);
+  };
+
   const handleSubmit = async () => {
-    if (!isValid || saving) return;
+    if (!puedeAvanzar || saving) return;
     playFinish();
     setSaving(true);
     const submission = {
@@ -243,13 +372,17 @@ export default function EmpiezaTuCambioPage() {
       first_name: normalizeName(answers.first_name),
       last_name: normalizeName(answers.last_name),
       timestamp: new Date().toISOString(),
-      origen: typeof window !== 'undefined' ? `web ${window.location.pathname}` : 'web',
+      origen: origenLead?.via
+        ? `web ${origenLead.via}`
+        : (typeof window !== 'undefined' ? `web ${window.location.pathname}` : 'web'),
+      ...(origenLead || {}),
     };
     try {
       if (SUBMIT_ENDPOINT) {
         // Contrato de POST /forms/public-answer: metadatos arriba, el resto de
         // respuestas como pares {question, answer}. website = honeypot vacío.
-        const META_KEYS = ['first_name', 'last_name', 'phone', 'timestamp', 'origen'];
+        const META_KEYS = ['first_name', 'last_name', 'phone', 'timestamp', 'origen',
+          'via', 'utm_source', 'utm_medium', 'utm_campaign', 'utm_content'];
         const body = {
           form_id: PRELLAMADA_FORM_ID,
           name: [submission.first_name, submission.last_name].filter(Boolean).join(' '),
@@ -257,7 +390,13 @@ export default function EmpiezaTuCambioPage() {
           answers: Object.entries(submission)
             .filter(([k]) => !META_KEYS.includes(k))
             .map(([question, answer]) => ({ question, answer })),
-          source: submission.origen,
+          // El back office pinta la etiqueta de origen contra un vocabulario
+          // cerrado (web | ig | email | youtube | otro), así que aquí se manda
+          // uno de ésos y el detalle fino («ig-bio-maria») viaja en `via`. Si se
+          // mandara el detalle en `source`, el CRM enseñaría la etiqueta vacía.
+          // OJO: TikTok no tiene hueco en ese vocabulario y cae en «otro» hasta
+          // que se le añada uno en el dashboard.
+          source: CRM_SOURCE[origenLead?.utm_source] || 'web',
           website: '',
         };
         const res = await fetch(SUBMIT_ENDPOINT, {
@@ -272,6 +411,7 @@ export default function EmpiezaTuCambioPage() {
         prev.push(submission);
         localStorage.setItem(STORAGE_KEY, JSON.stringify(prev));
       }
+      borrarProgreso(FORM_ID);
       setSent(true);
     } catch (e) {
       console.error('prellamada submit', e);
@@ -280,6 +420,7 @@ export default function EmpiezaTuCambioPage() {
         const prev = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
         prev.push(submission);
         localStorage.setItem(STORAGE_KEY, JSON.stringify(prev));
+        borrarProgreso(FORM_ID);
         setSent(true);
       } catch {}
     } finally {
@@ -297,6 +438,9 @@ export default function EmpiezaTuCambioPage() {
   };
   useEffect(() => {
     const onKey = (e) => {
+      const escribiendo = e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA');
+      // Tecleo discreto mientras el usuario escribe en un campo.
+      if (escribiendo && !e.repeat && (e.key.length === 1 || e.key === 'Backspace')) playKeypress();
       if (e.key !== 'Enter' || e.repeat || e.isComposing) return;
       const t = e.target;
       const enCampo = t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA');
@@ -341,9 +485,66 @@ export default function EmpiezaTuCambioPage() {
           >
             Reservar mi llamada
           </Link>
-          <Link href="/" className="mt-5 text-[#8B87C9] hover:text-[#3932C0] font-semibold transition-colors">
+          <Link href="/" className="mt-5 text-[#8B87C9] hover:text-[#363C98] font-semibold transition-colors">
             Volver al inicio
           </Link>
+        </div>
+      </div>
+    );
+  }
+
+  // ===== Portada =====
+  // Existe por dos razones. La de forma: entrar a un formulario con el texto ya
+  // escribiéndose no da tiempo a situarse. Y la de fondo: el navegador no deja
+  // sonar nada hasta que el usuario toca algo, así que sin este botón la primera
+  // pantalla se escribiría en silencio y el lead se perdería el efecto entero.
+  if (!started) {
+    const arrancar = (retomar) => {
+      unlockAudio();
+      playAdvance();
+      if (retomar && guardado) {
+        setAnswers((a) => ({ ...a, ...(guardado.respuestas || {}) }));
+        setIndex(guardado.indice || 0);
+        // La atribución de origen se recupera con el resto: al volver desde el
+        // botón flotante la URL ya no trae los parámetros.
+        if (guardado.origen && !origenLead) setOrigenLead(guardado.origen);
+      }
+      const sinMovimiento = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+      if (sinMovimiento) { setStarted(true); return; }
+      setSaliendoPortada(true);
+      setTimeout(() => setStarted(true), PORTADA_OUT_MS);
+    };
+    return (
+      <div className="min-h-[100svh] w-full flex flex-col items-center justify-center px-6 text-center bg-white">
+        <div className={`max-w-lg flex flex-col items-center ${saliendoPortada ? 'sf-portada-out' : 'sf-screen-in'}`}>
+          <LogoEspagueti tamano={96} saliendo={saliendoPortada} className="mb-8" />
+          <div className="sf-portada-texto flex flex-col items-center">
+            <h1 className="font-extrabold mb-4" style={{ color: BLUE, fontSize: 'clamp(1.9rem, 4vw, 2.6rem)' }}>
+              {guardado ? '¿Seguimos donde lo dejaste?' : 'Vamos a conocerte'}
+            </h1>
+            <p className="text-[#6B6BA8] text-lg leading-relaxed mb-9">
+              {guardado
+                ? `Tenías ${guardado.indice} respuestas guardadas en este navegador. Puedes continuar por donde ibas o empezar de nuevo.`
+                : 'Son unas preguntas rápidas sobre ti y tu objetivo. Tómate tu tiempo: cuanto mejor te conozca, mejor podré ayudarte en la llamada.'}
+            </p>
+            <button
+              type="button"
+              onClick={() => arrancar(!!guardado)}
+              className="sf-cta is-enabled w-full max-w-xs rounded-2xl py-4 font-bold text-white text-lg cursor-pointer"
+              style={{ backgroundColor: BLUE }}
+            >
+              {guardado ? 'Continuar' : 'Empezar'}
+            </button>
+            {guardado && (
+              <button
+                type="button"
+                onClick={() => { borrarProgreso(FORM_ID); setGuardado(null); }}
+                className="mt-4 text-[#8B87C9] hover:text-[#363C98] font-bold transition-colors cursor-pointer"
+              >
+                Empezar de nuevo
+              </button>
+            )}
+          </div>
         </div>
       </div>
     );
@@ -359,7 +560,7 @@ export default function EmpiezaTuCambioPage() {
             <div className="h-full rounded-full sf-progress-fill" style={{ width: `${progress}%`, backgroundColor: BLUE }} />
           </div>
           <SoundButton />
-          <ExitButton href="/programa" />
+          {!sinSalida && <ExitButton onClick={() => setPidiendoSalir(true)} />}
         </div>
 
         {/* Contenido */}
@@ -370,6 +571,7 @@ export default function EmpiezaTuCambioPage() {
             text={step.title}
             speed={TITLE_SPEED}
             instant={alreadySeen}
+            sound="title"
             className="font-extrabold leading-tight mb-3"
             style={{ color: BLUE, fontSize: 'clamp(1.45rem, 2.2vw, 2rem)' }}
           />
@@ -379,7 +581,10 @@ export default function EmpiezaTuCambioPage() {
 
           {/* <form>: en iOS da los botones nativos ‹ › del teclado para saltar
               entre campos. No envía: el envío va por el botón del pie. */}
-          <form className="flex-1" onSubmit={(e) => e.preventDefault()} style={{ visibility: titleDone ? 'visible' : 'hidden' }}>
+          <form className="flex-1" onSubmit={(e) => e.preventDefault()}>
+            {/* No basta con ocultarlo: si se monta, el texto se escribe (y suena)
+                por detrás mientras el título aún no ha terminado. */}
+            {titleDone && (<>
             {step.type === 'intro' && (
               <Typewriter
                 key={`body-${stepId}`}
@@ -388,7 +593,9 @@ export default function EmpiezaTuCambioPage() {
                 startDelay={160}
                 caret
                 instant={alreadySeen}
-                className="text-[#3932C0] text-lg sm:text-2xl leading-relaxed mt-4"
+                sound="body"
+                onDone={() => setBodyDone(true)}
+                className="text-[#363C98] text-lg sm:text-2xl leading-relaxed mt-4"
               />
             )}
 
@@ -420,18 +627,45 @@ export default function EmpiezaTuCambioPage() {
               <div className="flex flex-col gap-3 max-w-md">
                 {step.options.map((opt, i) => {
                   const active = answers[step.key] === opt;
+                  const hijo = step.hijos?.[opt];
                   return (
-                    <button
-                      key={opt}
-                      type="button"
-                      onClick={() => choose({ [step.key]: opt })}
-                      className={`rounded-2xl border-2 px-5 py-3.5 font-bold text-[17px] sm:text-lg cursor-pointer text-left sf-choice sf-stagger ${active ? 'is-selected' : ''}`}
-                      style={active
-                        ? { '--i': i, borderColor: ORANGE, backgroundColor: '#FFF6F0', color: ORANGE, boxShadow: '0 2px 10px rgba(255,105,11,0.15)' }
-                        : { '--i': i, borderColor: '#E7E6F5', backgroundColor: '#fff', color: BLUE }}
-                    >
-                      {opt}
-                    </button>
+                    <React.Fragment key={opt}>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          // Al cambiar de opción se limpia la respuesta hija:
+                          // si no, quedaría un país de Europa con Latam marcada.
+                          const limpiar = {};
+                          Object.values(step.hijos || {}).forEach((h) => { limpiar[h.key] = ''; });
+                          choose({ ...limpiar, [step.key]: opt });
+                        }}
+                        className={`rounded-2xl border-2 px-5 py-3.5 font-bold text-[17px] sm:text-lg cursor-pointer text-left sf-choice sf-stagger ${active ? 'is-selected' : ''}`}
+                        style={active
+                          ? { '--i': i, borderColor: ORANGE, backgroundColor: '#FFF6F0', color: ORANGE, boxShadow: '0 2px 10px rgba(255,105,11,0.15)' }
+                          : { '--i': i, borderColor: '#E7E6F5', backgroundColor: '#fff', color: BLUE }}
+                      >
+                        {opt}
+                      </button>
+                      {hijo && active && (
+                        <ChildField>
+                          {/* <select> nativo a propósito: en móvil abre la rueda
+                              del sistema y en escritorio ya trae el salto por
+                              teclado (pulsar «M» lleva a México). */}
+                          <select
+                            autoFocus
+                            value={answers[hijo.key] || ''}
+                            onChange={(e) => choose({ [hijo.key]: e.target.value })}
+                            className="w-full rounded-2xl border-2 px-5 py-3.5 font-bold text-[17px] sm:text-lg outline-none cursor-pointer bg-[#FFF9F5] appearance-none"
+                            style={{ borderColor: '#FBD5B8', color: answers[hijo.key] ? ORANGE : '#F0A876' }}
+                          >
+                            <option value="" disabled>{hijo.etiqueta}</option>
+                            {hijo.opciones.map((pais) => (
+                              <option key={pais} value={pais} style={{ color: BLUE }}>{pais}</option>
+                            ))}
+                          </select>
+                        </ChildField>
+                      )}
+                    </React.Fragment>
                   );
                 })}
               </div>
@@ -505,7 +739,7 @@ export default function EmpiezaTuCambioPage() {
 
             {step.type === 'final' && (
               <div className="mt-2 max-w-md">
-                <p className="text-[#3932C0] text-lg sm:text-xl leading-relaxed mb-8">
+                <p className="text-[#363C98] text-lg sm:text-xl leading-relaxed mb-8">
                   Ya casi está, {answers.first_name || ''} 💪. Revisa que todo sea
                   correcto y envíame tus respuestas: te contactaré por WhatsApp
                   para agendar tu llamada.
@@ -513,6 +747,7 @@ export default function EmpiezaTuCambioPage() {
                 <GdprCheckbox checked={gdprAccepted} onChange={setGdprAccepted} id="gdpr-prellamada" />
               </div>
             )}
+            </>)}
           </form>
         </div>
 
@@ -520,9 +755,9 @@ export default function EmpiezaTuCambioPage() {
         <div className="max-w-xl w-full mx-auto mt-8">
           <button
             onClick={step.type === 'final' ? handleSubmit : goNext}
-            disabled={!isValid || saving}
-            className={`w-full rounded-2xl py-4 font-bold text-white text-lg cursor-pointer disabled:cursor-not-allowed sf-cta ${isValid && !saving ? 'is-enabled' : ''}`}
-            style={{ backgroundColor: isValid && !saving ? BLUE : '#C6C3E8' }}
+            disabled={!puedeAvanzar || saving}
+            className={`w-full rounded-2xl py-4 font-bold text-white text-lg cursor-pointer disabled:cursor-not-allowed sf-cta ${puedeAvanzar && !saving ? 'is-enabled' : ''}`}
+            style={{ backgroundColor: puedeAvanzar && !saving ? BLUE : '#C6C3E8' }}
           >
             {saving ? 'Enviando…' : step.type === 'final' ? 'Enviar mis respuestas' : step.type === 'intro' ? 'Empezar' : 'Continuar'}
           </button>
@@ -539,6 +774,7 @@ export default function EmpiezaTuCambioPage() {
         subtitle={`2 minutos, ${total - 2} preguntas`}
         phases={PHASES}
         currentPhase={phaseOf(step)}
+        onGoTo={goToPhase}
       />
 
       {/* Panel de pasos en móvil (desde el contador) */}
@@ -550,6 +786,17 @@ export default function EmpiezaTuCambioPage() {
         currentPhase={phaseOf(step)}
         index={index}
         total={total}
+        onGoTo={goToPhase}
+      />
+
+      <PausaPantalla texto={pausa} />
+
+      <SalidaDialogo
+        abierto={pidiendoSalir}
+        indice={index}
+        total={total}
+        onSeguir={() => setPidiendoSalir(false)}
+        onSalir={() => router.push('/programa')}
       />
 
       <style jsx global>{`

@@ -1,4 +1,5 @@
 import legacyRedirects from './redirects-legacy.mjs';
+import { formLinkRedirects } from './form-links.mjs';
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
@@ -43,10 +44,13 @@ const nextConfig = {
   async redirects() {
     return [
       { source: '/planes', destination: '/programa', permanent: true },
-      // Dominio viejo -> nuevo. Van al final para que las reglas propias de
-      // squadfit.es tengan preferencia (todas llevan condición de host, así que
-      // solo disparan en squatfit.es).
+      // Dominio viejo -> nuevo. Van PRIMERO: todas llevan condición de host, así
+      // que en squadfit.es no disparan nunca, y en squatfit.es tienen que ganar
+      // a los enlaces cortos de abajo. Si no, /unete en el dominio viejo se
+      // quedaría allí en vez de mandar a la web nueva.
       ...legacyRedirects,
+      // Enlaces cortos al formulario, uno por origen (los antiguos Pretty Links).
+      ...formLinkRedirects,
     ];
   },
   async headers() {
