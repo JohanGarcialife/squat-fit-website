@@ -20,10 +20,13 @@ export const metadata = {
 export default function FunnelLayout({ children }) {
   return (
     <html lang="es">
+      <head>
+        {/* Trustpilot: dentro del <head> para que verifique el dominio. */}
+        <TrustpilotInvitations />
+      </head>
       <body className={`${inter.variable} antialiased`}>
         {children}
         <GoogleAnalytics />
-        <TrustpilotInvitations />
       </body>
     </html>
   );

@@ -20,11 +20,14 @@ export const metadata = {
 export default function OnboardingLayout({ children }) {
   return (
     <html lang="es">
+      <head>
+        {/* Trustpilot: dentro del <head> para que verifique el dominio. */}
+        <TrustpilotInvitations />
+      </head>
       <body className={`${inter.variable} antialiased`}>
         <ToasterProvider />
         {children}
         <GoogleAnalytics />
-        <TrustpilotInvitations />
       </body>
     </html>
   );
