@@ -153,16 +153,37 @@ export default function OrderSummary(props) {
           El texto es pequeño en móvil y crece a partir de `sm:`. */}
       <div className="space-y-4 mb-8">
         <div className="space-y-2">
-            {arancel > 0 && (
+            {/* Desglose. La línea de Envío se pinta SIEMPRE que el pedido lleve
+                envío, no solo cuando además hay aranceles.
+                Antes toda la caja colgaba de `arancel > 0`, así que con envío a
+                España (el caso normal) desplegar «Ver resumen» enseñaba el libro
+                a 34,95 € y «Hoy pagarás 39,94 €» sin decir de dónde salían los
+                4,99: los únicos que veían el desglose eran los envíos a EE. UU.
+                Con envío gratis (subtotal ≥ 90 €) la línea sigue apareciendo y
+                dice «Gratis», que es lo que explica por qué el total no sube.
+                Aquí NO se toca ningún importe ni ningún cálculo: `finalShipping`,
+                `arancel` y `total` son los de antes, letra por letra. Lo único
+                que cambia es qué líneas se enseñan. El desajuste conocido de que
+                el envío se muestre y Stripe no lo cobre está en espera y no se
+                toca desde aquí. */}
+            {(hasPhysicalItems || arancel > 0) && (
                 <div className={`${expanded ? 'block' : 'hidden'} lg:block space-y-2`}>
-                    <div className="flex justify-between items-center text-indigo-900/70 text-sm sm:text-base">
-                        <span>Envío</span>
-                        <span>{convertPrice(finalShipping)} {symbol}</span>
-                    </div>
-                    <div className="flex justify-between items-center text-indigo-900/70 text-sm sm:text-base">
-                        <span>Aranceles (importación EE. UU.)</span>
-                        <span>{convertPrice(arancel)} {symbol}</span>
-                    </div>
+                    {hasPhysicalItems && (
+                        <div className="flex justify-between items-center text-indigo-900/70 text-sm sm:text-base">
+                            <span>Envío</span>
+                            <span>
+                                {finalShipping > 0
+                                    ? `${convertPrice(finalShipping)} ${symbol}`
+                                    : 'Gratis'}
+                            </span>
+                        </div>
+                    )}
+                    {arancel > 0 && (
+                        <div className="flex justify-between items-center text-indigo-900/70 text-sm sm:text-base">
+                            <span>Aranceles (importación EE. UU.)</span>
+                            <span>{convertPrice(arancel)} {symbol}</span>
+                        </div>
+                    )}
                 </div>
             )}
             <div className="flex justify-between items-center text-indigo-900/80 text-sm sm:text-base lg:text-lg">

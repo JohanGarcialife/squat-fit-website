@@ -94,18 +94,31 @@ export default function PaymentSuccess() {
           {comprado.map((entrada) => {
             const Icono = ICONO[entrada.tipo] || Package;
 
-            // Sin destino real (libro en papel): tarjeta informativa, no enlace.
+            // Sin destino real (libro en papel): tarjeta INFORMATIVA, no enlace.
+            //
+            // Se ve distinta a propósito. Antes llevaba el mismo borde índigo, el
+            // mismo fondo y el mismo cuadrado relleno con el icono en blanco que
+            // la tarjeta de «Mi panel», que sí es un enlace: lo único que las
+            // separaba era la flecha de 16 px del pie, y en la captura de
+            // escritorio las dos parecían botones. Un cliente que acaba de pagar
+            // no debe pulsar dos veces una tarjeta que no lleva a ningún sitio.
+            //
+            // Las señales de «esto no se toca», todas a la vez para que funcione
+            // aunque se pierda alguna: sin color de marca (gris, no índigo ni
+            // naranja), borde DISCONTINUO, icono en hueco en vez de sobre un
+            // cuadrado relleno, `cursor-default` y sin ningún estado :hover.
+            // Y sigue sin flecha, que es lo único que la distinguía antes.
             if (!entrada.href) {
               return (
                 <div
                   key={`${entrada.tipo}-${entrada.id}`}
-                  className="flex flex-col items-center gap-3 p-6 rounded-2xl border-2 border-indigo-100 bg-indigo-50/60"
+                  className="h-full flex flex-col items-center gap-3 p-6 rounded-2xl border-2 border-dashed border-gray-200 bg-gray-50/70 cursor-default"
                 >
-                  <div className="w-12 h-12 bg-indigo-700 rounded-xl flex items-center justify-center">
-                    <Icono size={24} className="text-white" />
+                  <div className="w-12 h-12 rounded-xl border-2 border-gray-200 bg-white flex items-center justify-center">
+                    <Icono size={24} className="text-gray-400" />
                   </div>
-                  <span className="font-bold text-indigo-900 text-base">{entrada.titulo}</span>
-                  <span className="text-indigo-600 text-sm">{PIE[entrada.tipo]}</span>
+                  <span className="font-bold text-gray-600 text-base">{entrada.titulo}</span>
+                  <span className="text-gray-500 text-sm">{PIE[entrada.tipo]}</span>
                 </div>
               );
             }
