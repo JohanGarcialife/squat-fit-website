@@ -23,6 +23,7 @@ import { playSelect, playAdvance, playFinish, playKeypress, unlockAudio } from '
 import { PAISES_EUROPA, PAISES_LATAM } from '@/app/components/paises';
 import LogoEspagueti from '@/app/components/LogoEspagueti';
 import { guardarProgreso, leerProgreso, borrarProgreso } from '@/app/components/formProgress';
+import { useAuthStore } from '@/stores/auth.store';
 
 const BLUE = '#363C98';
 const ORANGE = '#FF690B';
@@ -194,6 +195,50 @@ const FORM_URL = '/empieza-tu-cambio';
 
 const esPhoneLocalization = { ...esPhone, gb: 'Inglaterra' };
 
+// ── Prellenado desde la cuenta (15.x, pedido por María) ──────────────────────
+// La página es pública, pero mucha gente llega ya con la sesión iniciada. A esos
+// no se les vuelve a preguntar el nombre ni la edad: se leen de su perfil y esas
+// pantallas se saltan. Solo se saltan las que quedan REALMENTE contestadas: si el
+// perfil no tiene fecha de nacimiento, la pantalla de la edad se sigue enseñando.
+const USER_INFO_URL =
+  `${process.env.NEXT_PUBLIC_API_URL || 'https://squatfit-api-cyrc2g3zra-no.a.run.app'}/api/v1/user/info`;
+
+// Años cumplidos a partir de la fecha de nacimiento del perfil (ISO).
+function edadDesdeNacimiento(iso) {
+  if (!iso) return '';
+  const nac = new Date(iso);
+  if (isNaN(nac.getTime())) return '';
+  const hoy = new Date();
+  let años = hoy.getFullYear() - nac.getFullYear();
+  const cumpleEsteAño =
+    hoy.getMonth() > nac.getMonth() ||
+    (hoy.getMonth() === nac.getMonth() && hoy.getDate() >= nac.getDate());
+  if (!cumpleEsteAño) años -= 1;
+  return años >= 14 && años <= 99 ? String(años) : '';
+}
+
+// ¿Esta pantalla queda contestada con lo que sabemos del perfil? Se decide por
+// el contenido de la respuesta, no por la posición, para que siga valiendo si
+// mañana se reordenan o se añaden pantallas.
+function cubiertaPorPerfil(step, datos) {
+  if (!step || !datos) return false;
+  if (step.type === 'nombre') {
+    return !!(datos.first_name?.trim() && datos.last_name?.trim());
+  }
+  if (step.key === 'edad') {
+    const n = parseInt(datos.edad, 10);
+    return !isNaN(n) && n >= 14 && n <= 99;
+  }
+  return false;
+}
+
+// Primera pantalla que sí hay que enseñar (la 0 es la intro).
+function primeraPantallaPendiente(datos) {
+  let i = 1;
+  while (i < STEPS.length - 1 && cubiertaPorPerfil(STEPS[i], datos)) i += 1;
+  return i;
+}
+
 export default function EmpiezaTuCambioPage() {
   const [index, setIndex] = useState(0);
   const [answers, setAnswers] = useState({
@@ -232,6 +277,10 @@ export default function EmpiezaTuCambioPage() {
   const [bodyDone, setBodyDone] = useState(false);
   // Pasos ya vistos: al volver atrás el texto sale de golpe (ya se leyó).
   const seenSteps = useRef(new Set());
+  // Nombre y edad traídos de la cuenta, si el visitante llega con sesión.
+  const token = useAuthStore((s) => s.token);
+  const [delPerfil, setDelPerfil] = useState(null);
+  const perfilPedido = useRef(false);
 
   const step = STEPS[index];
   const total = STEPS.length;
@@ -325,6 +374,41 @@ export default function EmpiezaTuCambioPage() {
     if (p && p.indice > 0) setGuardado(p);
   }, []);
 
+  // Si llega con sesión iniciada, traemos su nombre y su edad del perfil para no
+  // volver a preguntárselos. Se pide mientras lee la portada, así que casi
+  // siempre ha llegado antes de que pulse «Empezar»; si no llega a tiempo o el
+  // token está caducado, el formulario arranca entero como siempre.
+  useEffect(() => {
+    // OJO: el token hay que leerlo suscribiéndose al store, no con getState() al
+    // montar. La sesión se guarda en localStorage y zustand la rehidrata DESPUÉS
+    // del primer render, así que un getState() de arranque la ve siempre vacía.
+    if (perfilPedido.current || !token) return;
+    perfilPedido.current = true;
+    let vivo = true;
+    fetch(USER_INFO_URL, { headers: { Authorization: `Bearer ${token}` } })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((info) => {
+        if (!vivo || !info) return;
+        const datos = {
+          first_name: (info.firstName || '').trim(),
+          last_name: (info.lastName || '').trim(),
+          edad: edadDesdeNacimiento(info.birth),
+        };
+        if (!datos.first_name && !datos.last_name && !datos.edad) return;
+        setDelPerfil(datos);
+        // Solo se rellena lo que esté en blanco: si ya escribió algo (o venía de
+        // un progreso guardado), manda lo suyo.
+        setAnswers((a) => ({
+          ...a,
+          first_name: a.first_name || datos.first_name,
+          last_name: a.last_name || datos.last_name,
+          edad: a.edad || datos.edad,
+        }));
+      })
+      .catch(() => {});
+    return () => { vivo = false; };
+  }, [token]);
+
   // Guardar en cada respuesta y en cada cambio de pregunta. No sale de este
   // navegador: al servidor no se manda nada hasta que le da a enviar.
   useEffect(() => {
@@ -339,9 +423,19 @@ export default function EmpiezaTuCambioPage() {
     });
   }, [answers, index, started, sent, total, origenLead]);
 
+  // Al salir de la intro, si el perfil ya contestó las primeras pantallas se
+  // salta directo a la primera de verdad. El salto se hace SOLO aquí y una vez:
+  // dentro del formulario se avanza siempre de una en una, para que nadie se
+  // encuentre con dos pantallas pasando de golpe.
+  const saltoDesdeIntro = delPerfil ? primeraPantallaPendiente(answers) : 1;
+
   const goNext = () => {
     if (!puedeAvanzar || index >= total - 1) return;
     playAdvance();
+    if (index === 0 && saltoDesdeIntro > 1) {
+      setTimeout(() => setIndex(saltoDesdeIntro), ADVANCE_DELAY);
+      return;
+    }
     // Cada 3-5 respuestas toca pausa a pantalla completa: tapa la pregunta
     // siguiente hasta que se va, para cortar la inercia de ir a toda prisa.
     const frase = step.type !== 'intro' ? marcarGesto() : null;
@@ -526,6 +620,16 @@ export default function EmpiezaTuCambioPage() {
               {guardado
                 ? `Tenías ${guardado.indice} respuestas guardadas en este navegador. Puedes continuar por donde ibas o empezar de nuevo.`
                 : 'Son unas preguntas rápidas sobre ti y tu objetivo. Tómate tu tiempo: cuanto mejor te conozca, mejor podré ayudarte en la llamada.'}
+              {!guardado && delPerfil && primeraPantallaPendiente(answers) > 1 && (
+                <>
+                  <br />
+                  <span className="text-base text-[#8B87C9]">
+                    {delPerfil.first_name
+                      ? `Como ya has entrado con tu cuenta, ${delPerfil.first_name}, me salto lo que ya sé de ti.`
+                      : 'Como ya has entrado con tu cuenta, me salto lo que ya sé de ti.'}
+                  </span>
+                </>
+              )}
             </p>
             <button
               type="button"
