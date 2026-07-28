@@ -335,3 +335,23 @@ export async function createTierCheckout(item, { token } = {}) {
     throw err;
   }
 }
+
+// Auditoría julio, hallazgo #17: `/cart?success=true` vaciaba el carrito y
+// pintaba la pantalla de gracias solo por leer la URL, sin comprobar que
+// Stripe hubiera cobrado de verdad. El `session_id` (cs_...) viaja siempre en
+// el success_url del checkout de tramos (alojado e incrustado, ver arriba),
+// así que la vuelta a /cart lo consulta aquí antes de dar nada por bueno.
+export const SESSION_STATUS_ENDPOINT = `${API_BASE}/api/v1/catalog/checkout/session-status`;
+
+export async function verifyCheckoutSession(sessionId) {
+  if (!sessionId) return { paid: false };
+  try {
+    const res = await fetch(`${SESSION_STATUS_ENDPOINT}?session_id=${encodeURIComponent(sessionId)}`);
+    if (!res.ok) return { paid: false };
+    const data = await res.json();
+    return { paid: Boolean(data?.paid) };
+  } catch {
+    // Red caída: no se puede confirmar, así que NO se trata como pagado.
+    return { paid: false };
+  }
+}
