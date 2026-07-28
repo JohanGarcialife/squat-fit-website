@@ -27,7 +27,7 @@ import TextareaMeter from './TextareaMeter';
 import Typewriter from './Typewriter';
 import { ExitButton, BackButton, StepCounter, FormAside, StepsDrawer, SoundButton, useMicroFeedback, PausaPantalla, PAUSA_MS, ChildField } from './FormChrome';
 import { playSelect, playAdvance, playFinish, playKeypress, unlockAudio } from './formSounds';
-import { moverFocoOpciones, elegirOpcionEnfocada, escribiendoEnCampo } from './formOptionKeys';
+import { moverFocoOpciones, elegirOpcionEnfocada, escribiendoEnCampo, bloquearTeclasDeOpciones } from './formOptionKeys';
 
 const BLUE = '#363C98';
 const ORANGE = '#FF690B';
@@ -152,6 +152,10 @@ export default function FormRunner({ definition, context = {}, onSubmit, exitHre
       setSaving(false);
     }
   };
+
+  // Mientras el cajón de pasos o la pausa tapan la pregunta, las flechas y el
+  // Enter no deben tocar las opciones de debajo.
+  bloquearTeclasDeOpciones(stepsOpen || pausa !== null);
 
   const progress = total > 1 ? Math.round((index / (total - 1)) * 100) : 0;
   const isLast = index === total - 1;
@@ -393,8 +397,19 @@ export default function FormRunner({ definition, context = {}, onSubmit, exitHre
                     </button>
                   );
                 })}
+                {/* «Otro: ___» entra en el recorrido de las flechas como una
+                    opción más. Es importante que lleve `data-elegida` cuando
+                    está activa: si no, al pulsar ↑/↓ el recorrido no la ve como
+                    la respuesta actual, entra por la primera opción fija y el
+                    siguiente Enter borraría el texto que el usuario escribió
+                    aquí sin avisar. */}
                 {step.allowOther && (
                   <div
+                    data-opcion
+                    data-elegida={isOtherSelected ? 'true' : undefined}
+                    role="radio"
+                    aria-checked={isOtherSelected}
+                    tabIndex={0}
                     className={`rounded-2xl border-2 px-5 py-3.5 font-bold text-[17px] sm:text-lg cursor-pointer sf-choice ${isOtherSelected ? 'is-selected' : ''}`}
                     style={{ '--i': step.options.length, ...choiceStyle(isOtherSelected) }}
                     onClick={() => { if (!isOtherSelected) set({ [step.key]: OTHER_PREFIX }); }}
