@@ -49,8 +49,17 @@ export function marketingAllowed() {
 
 // Guarda la elección y avisa a quien esté escuchando (GoogleAnalytics,
 // TrustpilotInvitations, otras pestañas del propio banner) para que se
-// activen/desactiven sin recargar.
+// activen sin recargar.
+//
+// RETIRAR un permiso es distinto de darlo: un script de terceros que YA se
+// ejecutó no se puede «desejecutar» quitando su etiqueta del DOM — Google
+// Analytics se queda con `window.gtag` vivo y Trustpilot con su `tp`. Así que
+// cuando la elección nueva quita una categoría que estaba concedida, se recarga
+// la página: es la única forma de dejar la pestaña realmente limpia, y es lo que
+// hacen los gestores de consentimiento serios. Conceder permisos no recarga
+// nada (eso sí funciona en caliente).
 export function saveCookieConsent({ analytics = false, marketing = false, choice = 'custom' } = {}) {
+  const anterior = getCookieConsent();
   const value = {
     necessary: true,
     analytics: !!analytics,
@@ -58,6 +67,10 @@ export function saveCookieConsent({ analytics = false, marketing = false, choice
     choice,
     date: new Date().toISOString(),
   };
+  const retiraPermiso =
+    (anterior?.analytics === true && value.analytics === false) ||
+    (anterior?.marketing === true && value.marketing === false);
+
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(value));
   } catch {
@@ -68,6 +81,13 @@ export function saveCookieConsent({ analytics = false, marketing = false, choice
     window.dispatchEvent(new CustomEvent(CONSENT_EVENT, { detail: value }));
   } catch {
     // entorno sin CustomEvent (no debería pasar en navegadores soportados)
+  }
+
+  if (retiraPermiso) {
+    // Un respiro para que el banner pinte el cambio antes de irse.
+    setTimeout(() => {
+      try { window.location.reload(); } catch { /* no-op */ }
+    }, 400);
   }
   return value;
 }
