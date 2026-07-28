@@ -19,6 +19,26 @@ import {
 // (Fase 13): selector mensual / trimestral / anual / de por vida, cobro por
 // el checkout de tramos de la Fase 9/12.
 
+// Identificadores reales de los productos físicos en producción (28-jul-2026).
+// El emparejamiento va PRIMERO por id y solo después por nombre: los títulos que
+// tienen en la BD son frases de marketing («Comienza la verdadera transformacion
+// hoy» para el Volumen 1, pack «Nutricion» para los dos volúmenes) y NO contienen
+// «Vol 1» ni «Vol 1 y 2», así que las regex de abajo no casaban con nada y las
+// dos tarjetas salían «No disponible» en la landing pública. Las regex se quedan
+// como red de seguridad por si algún día se recrean los productos con otros ids.
+const PRINT_IDS = {
+  vol1Version: 'fff42a02-ce53-4fed-9be4-6e9fcccd51a4', // versión de «Libro de cocina 1» · 49 €
+  printPack: '8559bb5e-3f26-48f6-8ac9-04d3db678c37',   // pack «Nutricion» = los dos volúmenes
+}
+
+// Nombres de tarjeta y de carrito: los ponemos aquí y no los tomamos de la BD.
+// El diseño de esta landing es fijo (portado de Divi) y los nombres de la BD no
+// describen el producto, así que mostrarlos confundiría al comprador.
+const PRINT_TITLES = {
+  vol1: 'Volumen 1',
+  pack: 'Pack Vol. 1 y 2',
+}
+
 // Colores del diseño
 const C = {
   print: '#FF690B',       // naranja de marca (impreso)
@@ -178,14 +198,22 @@ export default function Shop() {
 
           let book = null
           let version = null
+          // 1) por id real de producción
           for (const b of booksData) {
-            const versions = (b.versions || []).filter(noTest)
-            const v = versions.find((x) => VOL1_RE.test(x.version_title || ''))
+            const v = (b.versions || []).find((x) => x.version_id === PRINT_IDS.vol1Version)
             if (v) { book = b; version = v; break }
-            if (!book && VOL1_RE.test(b.title || '') && versions.length > 0) {
-              book = b
-              version = versions[0]
-              // seguimos buscando por si otra versión casa directamente
+          }
+          // 2) red de seguridad por nombre, por si el producto se recrea con otro id
+          if (!version) {
+            for (const b of booksData) {
+              const versions = (b.versions || []).filter(noTest)
+              const v = versions.find((x) => VOL1_RE.test(x.version_title || ''))
+              if (v) { book = b; version = v; break }
+              if (!book && VOL1_RE.test(b.title || '') && versions.length > 0) {
+                book = b
+                version = versions[0]
+                // seguimos buscando por si otra versión casa directamente
+              }
             }
           }
 
@@ -193,31 +221,40 @@ export default function Shop() {
             setVol1({
               id: version.version_id,
               type: 'version',
-              name: version.version_title || book.title,
+              name: PRINT_TITLES.vol1,
               price: version.version_price,
               image: version.version_image || book.image || '/LibrosFisicos.png',
             })
+          } else {
+            console.warn('[cocina] No se encontró el Volumen 1 físico en /book/all')
           }
         }
 
         if (Array.isArray(packsData) && packsData.length > 0) {
+          // Pack impreso: primero por id real y, si ese id ya no existe, el que
+          // se llame "Vol 1 y 2" (o "1 y 2" / "1 + 2"). Si NO hay match NO se
+          // cae a un pack arbitrario: printPack queda undefined y la tarjeta se
+          // muestra como «No disponible» (sin botón), para no meter al carrito
+          // un pack equivocado.
+          const printPack =
+            packsData.find((p) => p.id === PRINT_IDS.printPack) ||
+            packsData.find((p) => /vol.*1.*(y|\+).*2|1\s*y\s*2/i.test(p.name || ''))
           // El bundle (físico + digital) se identifica por nombre; hasta que
           // exista en el backend, la tarjeta se muestra como "muy pronto".
-          const bundlePack = packsData.find((p) => /todo|bundle|digital/i.test(p.name))
-          // Pack impreso: el que se llame "Vol 1 y 2" (o "1 y 2" / "1 + 2").
-          // Si NO hay match NO se cae a un pack arbitrario: printPack queda
-          // undefined y la tarjeta se muestra como «No disponible» (sin botón),
-          // para no meter al carrito un pack equivocado.
-          const printPack =
-            packsData.find((p) => /vol.*1.*(y|\+).*2|1\s*y\s*2/i.test(p.name || ''))
+          // Nunca puede ser el pack impreso: son dos tarjetas distintas.
+          const bundlePack = packsData.find(
+            (p) => /todo|bundle|digital/i.test(p.name) && p.id !== printPack?.id
+          )
           if (printPack) {
             setPack({
               id: printPack.id,
               type: 'pack',
-              name: printPack.name,
+              name: PRINT_TITLES.pack,
               price: parseFloat(printPack.price),
               image: printPack.image || '/LibrosFisicos.png',
             })
+          } else {
+            console.warn('[cocina] No se encontró el pack impreso en /book/packs')
           }
           if (bundlePack) {
             setBundle({
@@ -339,7 +376,7 @@ export default function Shop() {
             tagColor={C.print}
             edgeOff={C.grayEdge}
             edgeOn={C.printSoft}
-            title={vol1 ? vol1.name : 'Volumen 1'}
+            title={PRINT_TITLES.vol1}
             titleColor={C.print}
             price={vol1 ? formatPrice(vol1.price) : '—'}
             per="+ envío"
@@ -359,7 +396,7 @@ export default function Shop() {
             tagColor={C.print}
             edgeOff={C.printSoft}
             edgeOn={C.print}
-            title={pack ? pack.name : 'Pack Vol. 1 y 2'}
+            title={PRINT_TITLES.pack}
             titleColor={C.print}
             price={pack ? formatPrice(pack.price) : '—'}
             per="+ envío"
