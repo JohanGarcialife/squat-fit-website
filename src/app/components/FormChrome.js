@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { X, Check, ChevronLeft, ListChecks, Volume2, VolumeX } from 'lucide-react';
@@ -35,12 +35,81 @@ export function useFocoDevuelto(abierto) {
   }, [abierto]);
 }
 
+/* ── ¿Movimiento sí o no? ─────────────────────────────────────────────────
+   Una sola lectura de la preferencia del sistema, para no repetir el
+   matchMedia por medio archivo. En el servidor devuelve `false` (no animar):
+   si algo se renderiza allí, sale ya en su sitio y visible. ── */
+export function sinMovimiento() {
+  if (typeof window === 'undefined') return true;
+  return !!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+}
+
+/* ── Bloques informativos (puntos 9 y 10 del briefing) ────────────────────
+   Al entrar a una pantalla de SOLO LECTURA no se enciende el texto de golpe:
+   se espera medio segundo y luego entran los bloques de uno en uno, 90 ms
+   entre ellos. El medio segundo es el que separa «he pulsado Continuar» de
+   «esto es lo siguiente que tengo que leer»: sin él el párrafo aparece bajo
+   el dedo y se lee a medias.
+
+   Dos cosas que NO hay que romper aquí:
+
+   1. El bloque está SIEMPRE montado. La espera solo añade la clase
+      `.is-visible`. Es lo que permite que, con «reducir animaciones»
+      activado, el CSS deje el texto visible desde el primer frame (ver el
+      @media de form-motion.css) y que un lector de pantalla lo lea entero
+      desde el principio, sin esperar a ningún temporizador.
+   2. Con «reducir animaciones» tampoco se espera en el JS: el respiro existe
+      para que el fundido se lea, y sin fundido serían 500 ms de pantalla
+      vacía a cambio de nada.
+
+   Los milisegundos son el espejo de --ms-info-pausa / --ms-info-parrafo. ── */
+export const PAUSA_INFO_MS = 500;
+export const INFO_PARRAFO_MS = 90;
+
+export function InfoBlock({
+  children,
+  orden = 0,
+  pausa = PAUSA_INFO_MS,
+  as: Tag = 'div',
+  className = '',
+  ...resto
+}) {
+  const [visible, setVisible] = useState(false);
+  useEffect(() => {
+    if (sinMovimiento()) { setVisible(true); return undefined; }
+    const t = setTimeout(() => setVisible(true), pausa + orden * INFO_PARRAFO_MS);
+    return () => clearTimeout(t);
+  }, [pausa, orden]);
+  return (
+    <Tag className={`sf-info ${visible ? 'is-visible' : ''} ${className}`} {...resto}>
+      {children}
+    </Tag>
+  );
+}
+
+/* ── Badge tipo píldora (punto 11) ────────────────────────────────────────
+   Etiqueta pequeña que crece un pelo al entrar. Mismo trato de accesibilidad
+   que InfoBlock: siempre montada, solo cambia la clase. ── */
+export function Badge({ children, className = '', style }) {
+  const [visible, setVisible] = useState(false);
+  useEffect(() => { setVisible(true); }, []);
+  return (
+    <span
+      className={`sf-badge ${visible ? 'is-visible' : ''} inline-flex items-center self-start
+                  rounded-full px-3 py-1 text-xs font-extrabold uppercase tracking-wider ${className}`}
+      style={style}
+    >
+      {children}
+    </span>
+  );
+}
+
 /* ── Salir: botón circular, en vez del carácter ✕ suelto ── */
 export function ExitButton({ href, onClick, label = 'Salir' }) {
   const clases =
     'shrink-0 grid place-items-center w-9 h-9 rounded-full text-[#8B87C9] ' +
     'bg-[#F3F2F9] hover:bg-[#E7E5F4] hover:text-[#363C98] active:scale-95 ' +
-    'transition-all cursor-pointer';
+    'sf-tap cursor-pointer';
   const icono = <X className="w-[18px] h-[18px]" strokeWidth={2.5} />;
   return href ? (
     <Link href={href} aria-label={label} className={clases}>{icono}</Link>
@@ -201,7 +270,7 @@ export function SoundButton() {
       title={mute ? 'Activar sonido' : 'Silenciar'}
       className="shrink-0 grid place-items-center w-9 h-9 rounded-full text-[#8B87C9]
                  hover:bg-[#F3F2F9] hover:text-[#363C98] active:scale-95
-                 transition-all cursor-pointer"
+                 sf-tap cursor-pointer"
     >
       {mute ? <VolumeX className="w-[18px] h-[18px]" strokeWidth={2.2} />
             : <Volume2 className="w-[18px] h-[18px]" strokeWidth={2.2} />}
@@ -217,7 +286,7 @@ export function BackButton({ onClick }) {
       onClick={onClick}
       className="inline-flex items-center gap-1 pl-2 pr-3.5 py-2 rounded-full font-bold text-sm
                  text-[#6B6BA8] bg-[#F3F2F9] hover:bg-[#E7E5F4] hover:text-[#363C98]
-                 active:scale-95 transition-all cursor-pointer"
+                 active:scale-95 sf-tap cursor-pointer"
     >
       <ChevronLeft className="w-4 h-4" strokeWidth={2.5} />
       Atrás
@@ -234,7 +303,7 @@ export function StepCounter({ index, total, onOpen }) {
       aria-label="Ver los pasos del formulario"
       className="inline-flex items-center gap-1.5 pl-3 pr-2.5 py-2 rounded-full font-bold text-sm
                  text-[#8B87C9] hover:bg-[#F3F2F9] hover:text-[#363C98] active:scale-95
-                 transition-all cursor-pointer"
+                 sf-tap cursor-pointer"
     >
       {index + 1}/{total}
       <ListChecks className="w-4 h-4 lg:hidden" strokeWidth={2.5} />

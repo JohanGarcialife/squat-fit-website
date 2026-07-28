@@ -15,6 +15,7 @@ import AccessNotice from '@/app/components/AccessNotice';
 import GdprCheckbox from '@/app/components/GdprCheckbox';
 import { fmtWeight, weightToKg } from '@/app/components/weightUnits';
 import { hasAcceptedPrivacy, markPrivacyAccepted } from '@/app/components/privacyConsent';
+import { InfoBlock } from '@/app/components/FormChrome';
 
 const API = 'https://squatfit-api-cyrc2g3zra-no.a.run.app';
 const BLUE = '#363C98';
@@ -301,8 +302,15 @@ export default function OnboardingPage() {
           )}
 
           <div className="flex-1">
+            {/* Punto 10: pantalla de solo lectura → el texto no cae de golpe,
+                espera medio segundo. Este formulario no tiene mecanográfico
+                (el texto aparece entero), así que el respiro es lo único que
+                separa «se acaba de cargar» de «lee esto». El botón ya lo
+                retiene aparte `readDelay`, que es mucho más largo. */}
             {step.type === 'intro' && (
-              <p className="text-[#363C98] text-lg sm:text-2xl leading-relaxed whitespace-pre-line mt-4">{step.body}</p>
+              <InfoBlock as="p" orden={0} className="text-[#363C98] text-lg sm:text-2xl leading-relaxed whitespace-pre-line mt-4">
+                {step.body}
+              </InfoBlock>
             )}
 
             {step.type === 'basicos' && (
@@ -425,8 +433,14 @@ export default function OnboardingPage() {
 
             {step.type === 'done' && (
               <div className="mt-2">
-                <div className="text-6xl mb-4">🎉</div>
-                <p className="text-[#363C98] text-lg sm:text-2xl leading-relaxed whitespace-pre-line">{step.body}</p>
+                {/* Punto 10 + 9: se llega aquí pulsando «Continuar» y no hay
+                    nada que contestar, solo leer. Respiro y luego los dos
+                    bloques encendiéndose con 90 ms entre ellos. La casilla del
+                    RGPD queda fuera: es interactiva y enciende el botón. */}
+                <InfoBlock orden={0} className="text-6xl mb-4">🎉</InfoBlock>
+                <InfoBlock as="p" orden={1} className="text-[#363C98] text-lg sm:text-2xl leading-relaxed whitespace-pre-line">
+                  {step.body}
+                </InfoBlock>
                 {/* La política se acepta UNA sola vez: si ya consta, no se re-pide. */}
                 {!privacyDone && (
                   <GdprCheckbox checked={gdprAccepted} onChange={setGdprAccepted} id="gdpr-onboarding" className="mt-8" />
