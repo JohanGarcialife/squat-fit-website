@@ -147,7 +147,7 @@ function Toc({ items }) {
 // en el banner.
 function CookiesTable() {
   const rows = [
-    ['cart-storage · auth-storage · sf_origin · sqf-cookie-consent', 'Propia (local)', 'Recordar tu carrito, tu sesión iniciada, el origen de tu visita y tu elección de cookies.', 'Hasta que borres los datos del navegador'],
+    ['cart-storage · auth-storage · sf_origin · sqf_attrib · sqf-cookie-consent', 'Propia (local)', 'Recordar tu carrito, tu sesión iniciada, el origen de tu visita (incluida la recomendación personalizada, si llegaste desde una) y tu elección de cookies.', 'Hasta que borres los datos del navegador'],
     ['__stripe_mid', 'De terceros (Stripe)', 'Procesar el pago de forma segura y prevenir el fraude (solo al pagar).', '1 año'],
     ['__stripe_sid', 'De terceros (Stripe)', 'Procesar el pago de forma segura y prevenir el fraude (solo al pagar).', '30 minutos'],
     ['Trustpilot (invitejs.trustpilot.com)', 'De terceros (Trustpilot A/S)', 'Invitarte a valorar tu compra y los productos del pedido. Solo si activas la categoría Marketing en las preferencias del banner (desactivada por defecto).', 'Sesión'],

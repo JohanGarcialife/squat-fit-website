@@ -1,6 +1,36 @@
 'use client';
 
 import { useEffect } from 'react';
+import { VENDEDORES } from '@/app/components/downsellEngine';
+
+/**
+ * Origen final que viaja en el payload del checkout (columna `origin` de
+ * `orders`, mismo campo de siempre). Prioridad: si el lead viene del
+ * recomendador (localStorage `sqf_attrib`, escrito por RecomendadorClient
+ * cuando la URL trae ?via=), esa atribución manda sobre la genérica de
+ * UTMCapture — identifica al vendedor concreto, que es más específico que
+ * "UTM: ..." o "Directo". Si no hay downsell, se cae al `sf_origin` de
+ * siempre (sin cambios de comportamiento para el resto del tráfico).
+ */
+export function resolveOrigin() {
+  try {
+    const raw = localStorage.getItem('sqf_attrib');
+    if (raw) {
+      const { via } = JSON.parse(raw) || {};
+      if (via) {
+        const nombre = VENDEDORES.find((v) => v.key === via)?.label || via;
+        return `Downsell: ${nombre}`;
+      }
+    }
+  } catch {
+    // localStorage corrupto o inaccesible: seguir con sf_origin
+  }
+  try {
+    return localStorage.getItem('sf_origin') || undefined;
+  } catch {
+    return undefined;
+  }
+}
 
 /**
  * Captura la atribución de la visita para el módulo de Pedidos del back office.
