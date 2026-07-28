@@ -342,14 +342,33 @@ export default function Payment(props) {
   // con la marca de la cuenta (logo, #363c98 y #ff6a0b) y sin salir del sitio.
   if (embeddedSecret) {
     return (
-      <div className="w-full max-w-xl mx-auto py-6">
-        <CheckoutIncrustado clientSecret={embeddedSecret} />
-        <button
-          onClick={() => props.setStep(1)}
-          className="mt-6 block mx-auto text-secondary font-bold underline cursor-pointer"
-        >
-          Volver al carrito
-        </button>
+      <div className="min-h-screen bg-white font-sans">
+        {/* El ancho de la columna (max-w-xl, sin padding lateral a partir de
+            md) se mantiene igual que antes: el padding solo entra en móvil. */}
+        <div className="w-full max-w-xl mx-auto px-6 md:px-0 py-6">
+
+          {/* Cabecera: la misma que los pasos 1, 2 y el pago con Payment
+              Element. Sin ella, si el iframe de Stripe no llega a pintar (nos
+              pasó el 28-jul: la CSP lo bloqueó) el cliente ve una página
+              vacía y da por hecho que el "Continuar" del paso 2 no hizo nada
+              y que nunca llegó al pago. */}
+          <div className="mb-10">
+              <span className="text-indigo-900 text-lg font-medium">Paso 3 de 3</span>
+              <div onClick={() => props.setStep(2)} className="flex items-center gap-2 mt-2 cursor-pointer text-indigo-900 group">
+                  <ChevronLeft size={28} className="group-hover:-translate-x-1 transition-transform" />
+                  <h1 className="text-3xl md:text-4xl font-bold">Pago</h1>
+              </div>
+          </div>
+
+          <CheckoutIncrustado clientSecret={embeddedSecret} />
+
+          <button
+            onClick={() => props.setStep(1)}
+            className="mt-6 block mx-auto text-secondary font-bold underline cursor-pointer"
+          >
+            Volver al carrito
+          </button>
+        </div>
       </div>
     );
   }
