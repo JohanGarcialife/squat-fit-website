@@ -231,18 +231,26 @@ export default function Shop() {
         }
 
         if (Array.isArray(packsData) && packsData.length > 0) {
+          // Solo packs a la venta. `GET /book/packs` NO filtra por is_active
+          // (el back office usa ese mismo listado para gestionarlos, y ahí sí
+          // hacen falta los apagados), así que el filtro va aquí. Sin esto, un
+          // pack desactivado se seguiría anunciando en la landing y la compra
+          // moriría con un 400 «Pack not found», porque el backend sí lo
+          // excluye al cobrar.
+          const alaVenta = packsData.filter((p) => p.is_active !== false)
+
           // Pack impreso: primero por id real y, si ese id ya no existe, el que
           // se llame "Vol 1 y 2" (o "1 y 2" / "1 + 2"). Si NO hay match NO se
           // cae a un pack arbitrario: printPack queda undefined y la tarjeta se
           // muestra como «No disponible» (sin botón), para no meter al carrito
           // un pack equivocado.
           const printPack =
-            packsData.find((p) => p.id === PRINT_IDS.printPack) ||
-            packsData.find((p) => /vol.*1.*(y|\+).*2|1\s*y\s*2/i.test(p.name || ''))
+            alaVenta.find((p) => p.id === PRINT_IDS.printPack) ||
+            alaVenta.find((p) => /vol.*1.*(y|\+).*2|1\s*y\s*2/i.test(p.name || ''))
           // El bundle (físico + digital) se identifica por nombre; hasta que
           // exista en el backend, la tarjeta se muestra como "muy pronto".
           // Nunca puede ser el pack impreso: son dos tarjetas distintas.
-          const bundlePack = packsData.find(
+          const bundlePack = alaVenta.find(
             (p) => /todo|bundle|digital/i.test(p.name) && p.id !== printPack?.id
           )
           if (printPack) {
