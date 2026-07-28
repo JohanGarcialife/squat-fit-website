@@ -11,6 +11,7 @@ import CheckoutIncrustado from './CheckoutIncrustado';
 import { ORDER_REF_KEY, saveOrderItems } from './TrustpilotInvitation';
 import axios from 'axios';
 import { createTierCheckout } from '@/app/components/courseCatalog';
+import { resolveOrigin } from '@/app/components/UTMCapture';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import { toast } from 'react-hot-toast';
@@ -238,10 +239,10 @@ export default function Payment(props) {
        
        const item = cart[0];
        
-       // Origen/atribución de la venta (capturado por UTMCapture) para que el
-       // pedido llegue al back office con su columna Origen rellena
-       let origin;
-       try { origin = localStorage.getItem('sf_origin') || undefined; } catch { origin = undefined; }
+       // Origen/atribución de la venta (capturado por UTMCapture, o por el
+       // downsell si el lead llegó desde /recomendador) para que el pedido
+       // llegue al back office con su columna Origen rellena
+       const origin = resolveOrigin();
 
        // Dirección de envío del paso 2 (formulario de checkout): el pedido la
        // necesita en el back office para preparar el envío del producto físico

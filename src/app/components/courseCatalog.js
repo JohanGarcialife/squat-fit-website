@@ -8,6 +8,8 @@
 // de la Fase 9 (backend). Si el endpoint aún no está desplegado (404) o no
 // responde, se usa el ESPEJO LOCAL con las mismas filas y precios reales que
 // dejó el seed 15.1 en la BD de producción — la tienda nunca se queda en blanco.
+import { resolveOrigin } from '@/app/components/UTMCapture';
+
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://squatfit-api-cyrc2g3zra-no.a.run.app';
 
 export const PRODUCTS_ENDPOINT = `${API_BASE}/api/v1/catalog`;
@@ -257,8 +259,7 @@ export function buildTierCartItem(group, tierKey) {
 export const CHECKOUT_KNOWN_ORIGIN = 'https://squadfit.es';
 
 export async function createTierCheckout(item, { token } = {}) {
-  let origin;
-  try { origin = localStorage.getItem('sf_origin') || undefined; } catch { origin = undefined; }
+  const origin = resolveOrigin();
 
   const attempt = async (base) => {
     const payload = {
