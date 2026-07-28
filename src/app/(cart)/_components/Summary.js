@@ -35,6 +35,13 @@ export default function Summary(props) {
     // Moneda: hook compartido (Euro y Dólar primero + monedas de países principales)
     const { currency, setCurrency, symbol, convertPrice, currencies } = useCurrency();
 
+    // En MÓVIL el detalle (subtotal, envío, aranceles) va PLEGADO: en el
+    // bottom sheet junto a «Continuar» solo tiene que verse el total, que es lo
+    // que el cliente va a pagar. Misma regla que el resumen de los pasos 2 y 3:
+    // el bloque plegable lleva `lg:block` y la barra `lg:hidden`, así que en
+    // escritorio no cambia nada.
+    const [detalleAbierto, setDetalleAbierto] = useState(false);
+
     // Deshacer: igual que en el pop-up del carrito, también cuando el producto
     // se elimina llegando a 0 con el botón −.
     const { lastRemoved, undoRemove, setDirectCheckoutItem } = useCartStore();
@@ -297,40 +304,69 @@ export default function Summary(props) {
               {/* Free Shipping Message — solo con productos físicos en el
                   carrito (en carritos 100 % digitales no hay envío que regalar) */}
               {hasPhysicalItems && (
-                <div className="text-center mb-12">
+                <div className="text-center mb-6 sm:mb-8 lg:mb-12">
                   {remainingForFreeShipping > 0 ? (
-                    <p className="text-indigo-900 text-lg">
+                    <p className="text-indigo-900 text-sm sm:text-base lg:text-lg">
                       *Añade <span className="font-bold">{convertPrice(remainingForFreeShipping)} {symbol}</span> para tener envío <span className="text-orange-500 font-bold">gratis</span>
                     </p>
                   ) : (
-                    <p className="text-green-600 text-lg font-bold">
+                    <p className="text-green-600 text-sm sm:text-base lg:text-lg font-bold">
                       ¡Tienes envío gratis!
                     </p>
                   )}
                 </div>
               )}
 
-              {/* Totals */}
-              <div className="space-y-6 mb-12 max-w-md mx-auto w-full">
-                <div className="flex justify-between items-center text-indigo-900/80 text-xl">
-                  <span>Subtotal</span>
-                  <span>{convertPrice(subtotal)} {symbol}</span>
-                </div>
-                <div className="flex justify-between items-center text-indigo-900/80 text-xl">
-                  <span>Envío</span>
-                  <span>
-                    {subtotal >= freeShippingThreshold
-                      ? "0,00"
-                      : convertPrice(shipping)} {symbol}
+              {/* Totals — en móvil el texto es pequeño y discreto; crece a
+                  partir de `sm:` (en el móvil de María, 375 px, se comía media
+                  pantalla). */}
+              <div className="mb-6 sm:mb-8 lg:mb-12 max-w-md mx-auto w-full">
+
+                {/* Barra para plegar/desplegar el detalle — SOLO móvil */}
+                <button
+                  type="button"
+                  onClick={() => setDetalleAbierto((v) => !v)}
+                  aria-expanded={detalleAbierto}
+                  aria-controls="detalle-carrito"
+                  className="lg:hidden flex items-center justify-between w-full gap-3 mb-3 cursor-pointer"
+                >
+                  <span className="text-indigo-900 font-bold text-sm">
+                    {detalleAbierto ? 'Ocultar detalle' : 'Ver detalle'}
                   </span>
-                </div>
-                {arancel > 0 && (
-                  <div className="flex justify-between items-center text-indigo-900/80 text-xl">
-                    <span>Aranceles (EE. UU.)</span>
-                    <span>{convertPrice(arancel)} {symbol}</span>
+                  <ChevronDown
+                    size={18}
+                    className={`text-indigo-900 shrink-0 transition-transform ${detalleAbierto ? 'rotate-180' : ''}`}
+                  />
+                </button>
+
+                {/* Detalle: plegado en móvil, siempre visible en escritorio */}
+                <div
+                  id="detalle-carrito"
+                  className={`${detalleAbierto ? 'block' : 'hidden'} lg:block space-y-2 sm:space-y-4 lg:space-y-6`}
+                >
+                  <div className="flex justify-between items-center text-indigo-900/80 text-sm sm:text-lg lg:text-xl">
+                    <span>Subtotal</span>
+                    <span>{convertPrice(subtotal)} {symbol}</span>
                   </div>
-                )}
-                <div className="flex justify-between items-center text-indigo-900 font-bold text-2xl pt-6 border-t border-indigo-100">
+                  <div className="flex justify-between items-center text-indigo-900/80 text-sm sm:text-lg lg:text-xl">
+                    <span>Envío</span>
+                    <span>
+                      {subtotal >= freeShippingThreshold
+                        ? "0,00"
+                        : convertPrice(shipping)} {symbol}
+                    </span>
+                  </div>
+                  {arancel > 0 && (
+                    <div className="flex justify-between items-center text-indigo-900/80 text-sm sm:text-lg lg:text-xl">
+                      <span>Aranceles (EE. UU.)</span>
+                      <span>{convertPrice(arancel)} {symbol}</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Total: lo único que se ve con el detalle plegado. El filete
+                    de separación solo tiene sentido si hay algo encima. */}
+                <div className={`flex justify-between items-center text-indigo-900 font-bold text-base sm:text-xl lg:text-2xl pt-3 sm:pt-4 lg:pt-6 lg:border-t lg:border-indigo-100 ${detalleAbierto ? 'border-t border-indigo-100 mt-2 sm:mt-4' : ''} lg:mt-6`}>
                   <span>Total</span>
                   <span>
                     {convertPrice(

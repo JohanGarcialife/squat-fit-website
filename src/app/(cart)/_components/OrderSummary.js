@@ -146,31 +146,34 @@ export default function OrderSummary(props) {
       </div>
       {/* fin del detalle plegable */}
 
-      {/* Totales y botón: SIEMPRE a la vista, también con el resumen plegado —
-          es lo que el cliente necesita para decidir y seguir. */}
+      {/* Totales y botón. Con el resumen plegado se ve SOLO lo que se paga: el
+          desglose (envío, aranceles) se va con el detalle, porque plegado no
+          debe quedar media lista a la vista. El cobro recurrente sí se queda
+          siempre: no es detalle, es lo que se le seguirá cobrando.
+          El texto es pequeño en móvil y crece a partir de `sm:`. */}
       <div className="space-y-4 mb-8">
         <div className="space-y-2">
             {arancel > 0 && (
-                <>
-                    <div className="flex justify-between items-center text-indigo-900/70 text-base">
+                <div className={`${expanded ? 'block' : 'hidden'} lg:block space-y-2`}>
+                    <div className="flex justify-between items-center text-indigo-900/70 text-sm sm:text-base">
                         <span>Envío</span>
                         <span>{convertPrice(finalShipping)} {symbol}</span>
                     </div>
-                    <div className="flex justify-between items-center text-indigo-900/70 text-base">
+                    <div className="flex justify-between items-center text-indigo-900/70 text-sm sm:text-base">
                         <span>Aranceles (importación EE. UU.)</span>
                         <span>{convertPrice(arancel)} {symbol}</span>
                     </div>
-                </>
+                </div>
             )}
-            <div className="flex justify-between items-center text-indigo-900/80 text-lg">
+            <div className="flex justify-between items-center text-indigo-900/80 text-sm sm:text-base lg:text-lg">
                 <span>Hoy pagarás</span>
-                <span className="font-bold text-indigo-900 text-xl">
+                <span className="font-bold text-indigo-900 text-base sm:text-lg lg:text-xl">
                     {convertPrice(total)} {symbol}
                 </span>
             </div>
 
             {hasRecurring && (
-                <div className="flex justify-between items-center text-indigo-900 font-bold text-lg pt-2 border-t border-indigo-100/50">
+                <div className="flex justify-between items-center text-indigo-900 font-bold text-sm sm:text-base lg:text-lg pt-2 border-t border-indigo-100/50">
                     <span>{recurringLabel}</span>
                     <span>
                         {convertPrice(recurringTotal)} {symbol}
