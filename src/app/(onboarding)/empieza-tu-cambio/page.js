@@ -638,7 +638,7 @@ export default function EmpiezaTuCambioPage() {
     return (
       <div className="min-h-[100svh] w-full flex flex-col items-center justify-center px-6 text-center bg-white">
         <div className={`max-w-lg flex flex-col items-center ${saliendoPortada ? 'sf-portada-out' : 'sf-screen-in'}`}>
-          <LogoEspagueti tamano={120} saliendo={saliendoPortada} className="-mb-8" />
+          <LogoEspagueti tamano={120} saliendo={saliendoPortada} className="mb-8" />
           <div className="sf-portada-texto flex flex-col items-center">
             <h1 className="font-extrabold mb-4" style={{ color: BLUE, fontSize: 'clamp(1.9rem, 4vw, 2.6rem)' }}>
               {guardado ? '¿Seguimos donde lo dejaste?' : 'Vamos a conocerte'}

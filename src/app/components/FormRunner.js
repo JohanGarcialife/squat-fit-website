@@ -297,7 +297,7 @@ export default function FormRunner({ definition, context = {}, onSubmit, exitHre
     return (
       <div className="min-h-[100svh] w-full flex flex-col items-center justify-center px-6 text-center bg-white">
         <div className={`max-w-lg flex flex-col items-center ${saliendoPortada ? 'sf-portada-out' : 'sf-screen-in'}`}>
-          <LogoEspagueti tamano={110} saliendo={saliendoPortada} className="-mb-8" />
+          <LogoEspagueti tamano={110} saliendo={saliendoPortada} className="mb-8" />
           <div className="sf-portada-texto flex flex-col items-center">
             <h1 className="font-extrabold mb-4" style={{ color: BLUE, fontSize: 'clamp(1.7rem, 3.4vw, 2.3rem)' }}>
               {formTitle}
