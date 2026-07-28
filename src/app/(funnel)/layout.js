@@ -2,6 +2,7 @@ import { Inter } from "next/font/google";
 import "../globals.css";
 import GoogleAnalytics from "@/app/components/GoogleAnalytics";
 import TrustpilotInvitations from "@/app/components/TrustpilotInvitations";
+import CookieBanner from "@/app/components/CookieBanner";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -26,6 +27,7 @@ export default function FunnelLayout({ children }) {
       </head>
       <body className={`${inter.variable} antialiased`}>
         {children}
+        <CookieBanner />
         <GoogleAnalytics />
       </body>
     </html>

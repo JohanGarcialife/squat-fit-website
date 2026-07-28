@@ -4,6 +4,7 @@ import GoogleAnalytics from "@/app/components/GoogleAnalytics";
 import TrustpilotInvitations from "@/app/components/TrustpilotInvitations";
 import "../form-motion.css";
 import ToasterProvider from "@/components/ToasterProvider";
+import CookieBanner from "@/app/components/CookieBanner";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -27,6 +28,7 @@ export default function OnboardingLayout({ children }) {
       <body className={`${inter.variable} antialiased`}>
         <ToasterProvider />
         {children}
+        <CookieBanner />
         <GoogleAnalytics />
       </body>
     </html>
