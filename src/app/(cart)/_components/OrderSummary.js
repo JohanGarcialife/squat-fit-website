@@ -1,8 +1,9 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { ChevronDown } from 'lucide-react';
 import { useCartStore } from '@/stores/cart.store';
 import { useCheckoutStore } from '@/stores/checkout.store';
 import { useCurrency } from './useCurrency';
@@ -13,8 +14,17 @@ export default function OrderSummary(props) {
     const { isFormValid, isFormDirty, triggerCheckoutFormSubmit } = props;
     const { cart } = useCartStore();
 
+    // En MÓVIL el resumen va plegado: ocupaba media pantalla y empujaba el
+    // formulario fuera de la vista. Solo se despliega al tocar la barra. En
+    // escritorio no cambia nada (el bloque plegable lleva `lg:block`, la barra
+    // `lg:hidden`), que es la regla de la casa al tocar responsive.
+    // El total y el botón de continuar quedan SIEMPRE a la vista: son lo que
+    // el cliente necesita para decidir y avanzar sin desplegar nada.
+    const [expanded, setExpanded] = useState(false);
+
     const { currency, setCurrency, symbol, convertPrice, currencies } = useCurrency();
 
+    const totalItems = cart.reduce((acc, item) => acc + (item.quantity || 1), 0);
     const subtotal = cart.reduce((acc, item) => acc + item.price * item.quantity, 0);
     // Only apply shipping if the cart contains physical products (non-direct checkouts)
     const hasPhysicalItems = cart.some(item => !item.isDirectCheckout);
@@ -58,6 +68,26 @@ export default function OrderSummary(props) {
           <Image src="/LogotipoSquatfit.png" layout="fill" objectFit="contain" alt="Logo Squad Fit" />
         </div>
       </Link>
+      {/* Barra para plegar/desplegar el detalle — SOLO móvil */}
+      <button
+        type="button"
+        onClick={() => setExpanded((v) => !v)}
+        aria-expanded={expanded}
+        aria-controls="resumen-pedido"
+        className="lg:hidden flex items-center justify-between w-full gap-3 mb-4 cursor-pointer"
+      >
+        <span className="text-indigo-900 font-bold">
+          {expanded ? 'Ocultar resumen' : `Ver resumen (${totalItems})`}
+        </span>
+        <ChevronDown
+          size={20}
+          className={`text-indigo-900 shrink-0 transition-transform ${expanded ? 'rotate-180' : ''}`}
+        />
+      </button>
+
+      {/* Detalle: plegado en móvil, siempre visible en escritorio */}
+      <div id="resumen-pedido" className={`${expanded ? 'block' : 'hidden'} lg:block`}>
+
       <div className="mb-6 flex justify-center">
         <CurrencySelector currency={currency} setCurrency={setCurrency} currencies={currencies} />
       </div>
@@ -104,8 +134,6 @@ export default function OrderSummary(props) {
         ))}
       </div>
 
-      {/* Payment Breakdown */}
-      <div className="space-y-4 mb-8">
         {hasRecurring && (
             <div className="text-center mb-6">
                 <p className="text-indigo-500 text-sm font-medium leading-relaxed">
@@ -115,6 +143,12 @@ export default function OrderSummary(props) {
             </div>
         )}
 
+      </div>
+      {/* fin del detalle plegable */}
+
+      {/* Totales y botón: SIEMPRE a la vista, también con el resumen plegado —
+          es lo que el cliente necesita para decidir y seguir. */}
+      <div className="space-y-4 mb-8">
         <div className="space-y-2">
             {arancel > 0 && (
                 <>
