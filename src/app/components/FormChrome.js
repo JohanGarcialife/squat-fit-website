@@ -37,8 +37,9 @@ export function useFocoDevuelto(abierto) {
 
 /* ── ¿Movimiento sí o no? ─────────────────────────────────────────────────
    Una sola lectura de la preferencia del sistema, para no repetir el
-   matchMedia por medio archivo. En el servidor devuelve `false` (no animar):
-   si algo se renderiza allí, sale ya en su sitio y visible. ── */
+   matchMedia por medio archivo. Sin `window` (render del servidor) devuelve
+   `true`, o sea «no animes»: si algo se pinta allí, que salga ya en su sitio
+   y visible, nunca esperando un temporizador que no existe. ── */
 export function sinMovimiento() {
   if (typeof window === 'undefined') return true;
   return !!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
