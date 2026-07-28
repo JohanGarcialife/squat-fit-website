@@ -183,7 +183,13 @@ export default function Payment(props) {
          .then((result) => {
            if (result.status === 'embedded') {
              // Lo normal desde ahora: el pago se pinta AQUÍ, sin salir de la web.
+             // OJO: hay que apagar `loading` ANTES de salir. El render comprueba
+             // `loading` antes que `embeddedSecret`, así que si se sale sin
+             // apagarlo el spinner se queda para siempre y el pago no aparece
+             // nunca. (Se coló así al añadir el incrustado y dejó el carrito
+             // colgado en producción.)
              setEmbeddedSecret(result.clientSecret);
+             setLoading(false);
              return;
            }
            if (result.status === 'redirect') {
