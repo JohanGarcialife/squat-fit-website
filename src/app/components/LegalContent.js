@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { LEGAL_DATA } from './legalData';
+import { openCookiePreferences } from './cookieConsent';
 
 // Contenido legal compartido entre la web pública (/politicas) y el panel del
 // cliente (panel-info). Los textos reales del cliente están en legalData.js
@@ -149,11 +150,15 @@ function CookiesTable() {
     ['cart-storage · auth-storage · sf_origin · sqf-cookie-consent', 'Propia (local)', 'Recordar tu carrito, tu sesión iniciada, el origen de tu visita y tu elección de cookies.', 'Hasta que borres los datos del navegador'],
     ['__stripe_mid', 'De terceros (Stripe)', 'Procesar el pago de forma segura y prevenir el fraude (solo al pagar).', '1 año'],
     ['__stripe_sid', 'De terceros (Stripe)', 'Procesar el pago de forma segura y prevenir el fraude (solo al pagar).', '30 minutos'],
-    ['Trustpilot (invitejs.trustpilot.com)', 'De terceros (Trustpilot A/S)', 'Invitarte a valorar tu compra y los productos del pedido, y verificar que este dominio es nuestro. Se activa al confirmarse un pedido.', 'Sesión'],
+    ['Trustpilot (invitejs.trustpilot.com)', 'De terceros (Trustpilot A/S)', 'Invitarte a valorar tu compra y los productos del pedido. Solo si activas la categoría Marketing en las preferencias del banner (desactivada por defecto).', 'Sesión'],
     ['_ga', 'De terceros (Google Analytics)', 'Estadísticas anónimas de uso de la web. Solo si activas la analítica en las preferencias del banner (desactivada por defecto).', '2 años'],
     ['_ga_<id>', 'De terceros (Google Analytics)', 'Mantener el estado de la sesión de medición. Solo si activas la analítica en las preferencias del banner (desactivada por defecto).', '2 años'],
   ];
-  const isConditional = (name) => name.startsWith('_ga');
+  const conditionalLabel = (name) => {
+    if (name.startsWith('_ga')) return 'solo si activas analítica';
+    if (name.startsWith('Trustpilot')) return 'solo si activas marketing';
+    return null;
+  };
   return (
     <div className="overflow-x-auto rounded-2xl border border-slate-200 my-5">
       <table className="w-full text-left text-sm border-collapse min-w-[540px]">
@@ -166,24 +171,41 @@ function CookiesTable() {
           </tr>
         </thead>
         <tbody>
-          {rows.map((r, i) => (
-            <tr key={i} className="border-t border-slate-100 text-gray-600">
-              <td className="p-3 font-mono text-xs">
-                {r[0]}
-                {isConditional(r[0]) && (
-                  <span className="ml-2 inline-block align-middle rounded-full bg-[#FFF6F0] text-[#FF690B] text-[10px] font-bold px-2 py-0.5 whitespace-nowrap">
-                    solo si activas analítica
-                  </span>
-                )}
-              </td>
-              <td className="p-3">{r[1]}</td>
-              <td className="p-3">{r[2]}</td>
-              <td className="p-3">{r[3]}</td>
-            </tr>
-          ))}
+          {rows.map((r, i) => {
+            const label = conditionalLabel(r[0]);
+            return (
+              <tr key={i} className="border-t border-slate-100 text-gray-600">
+                <td className="p-3 font-mono text-xs">
+                  {r[0]}
+                  {label && (
+                    <span className="ml-2 inline-block align-middle rounded-full bg-[#FFF6F0] text-[#FF690B] text-[10px] font-bold px-2 py-0.5 whitespace-nowrap">
+                      {label}
+                    </span>
+                  )}
+                </td>
+                <td className="p-3">{r[1]}</td>
+                <td className="p-3">{r[2]}</td>
+                <td className="p-3">{r[3]}</td>
+              </tr>
+            );
+          })}
         </tbody>
       </table>
     </div>
+  );
+}
+
+// Botón para reabrir el banner en modo preferencias desde dentro de la
+// propia política de cookies (además del enlace del pie de página).
+function ChangeCookiePrefsButton() {
+  return (
+    <button
+      type="button"
+      onClick={openCookiePreferences}
+      className="my-2 inline-flex items-center gap-2 rounded-full border-2 border-[#363C98] px-4 py-2 text-sm font-bold text-[#363C98] hover:bg-[#363C98]/5 transition-colors cursor-pointer"
+    >
+      Cambiar tu elección de cookies
+    </button>
   );
 }
 
@@ -199,12 +221,16 @@ const cookiesExtra = (num) => ({
       </h2>
       <p className="text-gray-600 leading-relaxed my-3">
         Somos especialmente respetuosos con tu privacidad:{' '}
-        <strong className="text-gray-800 font-semibold">no usamos cookies de publicidad ni de seguimiento de terceros, y la analítica (Google) está desactivada por defecto</strong>
-        {' '}— solo se activa si tú lo eliges en las preferencias del banner de cookies. El resto es
-        el almacenamiento imprescindible para que la web funcione, más los servicios de pago
-        (Stripe) y de reseñas (Trustpilot) que intervienen al comprar:
+        <strong className="text-gray-800 font-semibold">la analítica (Google) y las invitaciones de reseña (Trustpilot) están desactivadas por defecto</strong>
+        {' '}— solo se activan si tú lo eliges en las preferencias del banner de cookies, y no
+        cargamos ninguno de esos dos scripts antes de que elijas. El resto es el almacenamiento
+        imprescindible para que la web funcione, más el servicio de pago seguro (Stripe), que
+        interviene solo al comprar.
       </p>
       <CookiesTable />
+      <p className="my-4">
+        <ChangeCookiePrefsButton />
+      </p>
     </React.Fragment>
   ),
 });

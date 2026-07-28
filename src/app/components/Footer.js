@@ -3,6 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { rememberCartReturnPoint } from '@/app/components/CartScrollRestore';
+import { openCookiePreferences } from '@/app/components/cookieConsent';
 
 const LINK_CLASS = 'text-[#FF690B] font-medium text-xs sm:text-base leading-snug sm:leading-relaxed hover:text-[#363C98] transition-colors';
 const HEADING_CLASS = 'text-[#363C98] font-bold text-[15px] sm:text-lg leading-snug mb-4 sm:mb-6';
@@ -41,6 +42,11 @@ export default function Footer() {
               <li><Link href="/nosotros" className={LINK_CLASS}>Nosotros</Link></li>
               <li><Link href="/politicas" className={LINK_CLASS}>Legal</Link></li>
               <li><Link href="/contacto" className={LINK_CLASS}>Contacto</Link></li>
+              <li>
+                <button type="button" onClick={openCookiePreferences} className={`${LINK_CLASS} cursor-pointer`}>
+                  Preferencias de cookies
+                </button>
+              </li>
             </ul>
           </div>
 

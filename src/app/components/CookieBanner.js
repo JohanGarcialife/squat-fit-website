@@ -2,50 +2,59 @@
 
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
+import {
+  getCookieConsent,
+  hasChosenConsent,
+  saveCookieConsent,
+  OPEN_PREFS_EVENT,
+} from './cookieConsent';
 
-const STORAGE_KEY = 'sqf-cookie-consent';
+// Re-exportadas por compatibilidad: por si algo importa estas funciones desde
+// CookieBanner.js en vez de desde cookieConsent.js directamente.
+export { getCookieConsent, analyticsAllowed, marketingAllowed } from './cookieConsent';
 
-// Lee el consentimiento guardado. Devuelve null si aún no se ha elegido.
-export function getCookieConsent() {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? JSON.parse(raw) : null;
-  } catch {
-    return null;
-  }
-}
-
-// ¿Puede cargarse Google Analytics? (consent mode: denegado por defecto).
-// Cuando se instale Site Kit/GA4, condicionar la carga del script a esto.
-export function analyticsAllowed() {
-  return getCookieConsent()?.analytics === true;
-}
-
-// Banner de cookies v2 (13.6): tres acciones — Aceptar (todo), Rechazar (solo
-// esenciales) y Saber más (política). El panel de preferencias añade la
-// categoría «Analítica (Google)», desactivada por defecto y persistida en
-// sqf-cookie-consent, lista para el consent mode cuando se instale GA4.
+// Banner de cookies v3 (F2 — gestor de consentimiento propio): tres
+// categorías reales — Esenciales (siempre activas), Analítica (Google) y
+// Marketing (invitaciones de Trustpilot) — que GOBIERNAN de verdad qué
+// scripts de terceros carga la web (ver GoogleAnalytics.js y
+// TrustpilotInvitations.js, que solo se insertan si su categoría está
+// aceptada). La elección se persiste en `sqf-cookie-consent` y se puede
+// cambiar después desde el pie de página o desde /politicas?tab=cookies
+// (ambos disparan OPEN_PREFS_EVENT, que este componente escucha para
+// reaparecer con las preferencias actuales precargadas).
 export default function CookieBanner() {
   const [visible, setVisible] = useState(false);
   const [showPrefs, setShowPrefs] = useState(false);
   const [analytics, setAnalytics] = useState(false);
+  const [marketing, setMarketing] = useState(false);
 
+  // Primera visita sin elección guardada: mostrar el banner.
   useEffect(() => {
     try {
-      if (!localStorage.getItem(STORAGE_KEY)) setVisible(true);
+      if (!hasChosenConsent()) setVisible(true);
     } catch {
       // Sin localStorage (modo privado antiguo): no bloqueamos la página
     }
   }, []);
 
-  const save = (choice, analyticsOn) => {
-    try {
-      localStorage.setItem(
-        STORAGE_KEY,
-        JSON.stringify({ choice, analytics: !!analyticsOn, date: new Date().toISOString() })
-      );
-    } catch {}
+  // Reabrir en modo preferencias desde el footer o /politicas, con los
+  // valores ya guardados precargados (no se resetea a "todo apagado").
+  useEffect(() => {
+    const reopen = () => {
+      const saved = getCookieConsent();
+      setAnalytics(saved?.analytics === true);
+      setMarketing(saved?.marketing === true);
+      setShowPrefs(true);
+      setVisible(true);
+    };
+    window.addEventListener(OPEN_PREFS_EVENT, reopen);
+    return () => window.removeEventListener(OPEN_PREFS_EVENT, reopen);
+  }, []);
+
+  const save = (choice, analyticsOn, marketingOn) => {
+    saveCookieConsent({ analytics: analyticsOn, marketing: marketingOn, choice });
     setVisible(false);
+    setShowPrefs(false);
   };
 
   if (!visible) return null;
@@ -106,9 +115,28 @@ export default function CookieBanner() {
                   <span className={`h-4 w-4 rounded-full bg-white transition-transform ${analytics ? 'translate-x-5' : ''}`} />
                 </button>
               </div>
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <p className="font-bold text-[#363C98]">Marketing (Trustpilot)</p>
+                  <p className="text-[#363C98]/70">
+                    Nos permite invitarte a valorar tu compra en Trustpilot. Desactivada
+                    por defecto; hoy no cargamos ese script hasta que tú lo actives.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={marketing}
+                  aria-label="Activar invitaciones de Trustpilot"
+                  onClick={() => setMarketing((v) => !v)}
+                  className={`shrink-0 mt-1 inline-flex h-6 w-11 items-center rounded-full px-1 transition-colors cursor-pointer ${marketing ? 'bg-[#FF690B]' : 'bg-[#C6C3E8]'}`}
+                >
+                  <span className={`h-4 w-4 rounded-full bg-white transition-transform ${marketing ? 'translate-x-5' : ''}`} />
+                </button>
+              </div>
               <button
                 type="button"
-                onClick={() => save(analytics ? 'custom-analytics' : 'custom-essential', analytics)}
+                onClick={() => save('custom', analytics, marketing)}
                 className="self-end px-4 py-2 rounded-full text-sm font-bold text-white bg-[#363C98] hover:bg-[#2c317c] transition-colors cursor-pointer"
               >
                 Guardar preferencias
@@ -120,7 +148,7 @@ export default function CookieBanner() {
           <div className="flex flex-wrap gap-2 justify-end">
             <button
               type="button"
-              onClick={() => save('rejected', false)}
+              onClick={() => save('rejected', false, false)}
               className="order-2 px-4 py-2 rounded-full text-sm font-bold text-[#363C98] border-2 border-[#363C98] hover:bg-[#363C98]/5 transition-colors cursor-pointer"
             >
               Rechazar
@@ -133,7 +161,7 @@ export default function CookieBanner() {
             </Link>
             <button
               type="button"
-              onClick={() => save('accepted', true)}
+              onClick={() => save('accepted', true, true)}
               className="order-1 px-5 py-2 rounded-full text-sm font-bold text-white bg-[#FF690B] hover:bg-[#e05b08] shadow-md transition-colors cursor-pointer"
             >
               Aceptar

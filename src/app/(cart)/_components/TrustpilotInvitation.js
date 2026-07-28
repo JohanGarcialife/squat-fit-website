@@ -10,8 +10,11 @@
 // Manda reseña de SERVICIO (la tienda) y, si el pedido trae líneas, también de
 // PRODUCTO (`products` + `productSkus`).
 //
-// TODO: condicionar a consentimiento de cookies (es un script de un tercero;
-// hoy dispara siempre, igual que el snippet hermano del <head>).
+// Consentimiento de cookies (F2): no hace falta comprobarlo aquí — el
+// snippet hermano del <head> (TrustpilotInvitations) ya no se carga si el
+// visitante no aceptó la categoría "Marketing", así que `window.tp` no
+// existe y el guard de más abajo ("Si el snippet del <head> no llegó a
+// cargar...") ya evita mandar nada sin consentimiento.
 
 import { useEffect, useRef } from 'react';
 import { useAuthStore } from '@/stores/auth.store';
