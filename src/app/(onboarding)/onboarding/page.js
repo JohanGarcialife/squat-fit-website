@@ -434,16 +434,23 @@ export default function OnboardingPage() {
             {step.type === 'done' && (
               <div className="mt-2">
                 {/* Punto 10 + 9: se llega aquí pulsando «Continuar» y no hay
-                    nada que contestar, solo leer. Respiro y luego los dos
-                    bloques encendiéndose con 90 ms entre ellos. La casilla del
-                    RGPD queda fuera: es interactiva y enciende el botón. */}
+                    nada que contestar, solo leer. Respiro y luego los bloques
+                    encendiéndose con 90 ms entre ellos. Aquí el ancla del
+                    milisegundo 0 ya la pone el <h1> de arriba (`step.title`),
+                    que no es un bloque info: la pantalla nunca se queda
+                    entera en blanco.
+                    La casilla del RGPD va la última y DENTRO del retardo (misma
+                    corrección que en /empieza-tu-cambio): no se puede aceptar la
+                    política antes de que se vea el texto que la acompaña. */}
                 <InfoBlock orden={0} className="text-6xl mb-4">🎉</InfoBlock>
                 <InfoBlock as="p" orden={1} className="text-[#363C98] text-lg sm:text-2xl leading-relaxed whitespace-pre-line">
                   {step.body}
                 </InfoBlock>
                 {/* La política se acepta UNA sola vez: si ya consta, no se re-pide. */}
                 {!privacyDone && (
-                  <GdprCheckbox checked={gdprAccepted} onChange={setGdprAccepted} id="gdpr-onboarding" className="mt-8" />
+                  <InfoBlock orden={2}>
+                    <GdprCheckbox checked={gdprAccepted} onChange={setGdprAccepted} id="gdpr-onboarding" className="mt-8" />
+                  </InfoBlock>
                 )}
               </div>
             )}

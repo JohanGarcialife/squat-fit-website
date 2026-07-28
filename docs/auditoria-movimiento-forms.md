@@ -62,8 +62,8 @@ Leyenda: **✅** cumple · **⚠️** parcial · **❌** no cumple · **—** no
 | **6** | CTA inferior aparece/desaparece (220 ms), opacidad 0.3 → 1 | ✅ | ✅ | ✅ | `.sf-cta` / `.is-enabled` con `--ms-med`. |
 | **7** | «Continuar»: press físico | ✅ | ✅ | ✅ | `.sf-cta.is-enabled:active` con `--ms-press`, sombra sólida y `--px-lift`. |
 | **8** | Título con efecto mecanográfico (900–1400 ms) | ⚠️ | ❌ | ✅ | A y C usan `<Typewriter>` (JS, ms por carácter, no la animación `steps()` del briefing: así no hay salto de maquetación y el lector de pantalla lee la frase entera). En **A** el título sí se escribe, pero el texto de la pantalla `final` no (es el único bloque de A que aparece entero). En **B no hay mecanográfico en ninguna pantalla**: título y cuerpo aparecen de golpe. Para arreglarlo hay que meter `Typewriter` en B, que además implica encadenar `titleDone`/`bodyDone` como en A y C. No hecho: es un cambio de motor, no un efecto CSS. |
-| **9** | Bloques informativos: entrada por párrafos, 240 ms, 90 ms entre ellos | ✅ | ✅ | ✅ | **Implementado en este PR.** Antes `.sf-info` existía en el CSS y **no la usaba ningún formulario** (CSS muerto). Ahora el componente `<InfoBlock>` (`FormChrome.js`) la enciende con `--ms-info` y 90 ms de `orden`. Dónde: A → párrafo de la pantalla `final`; B → cuerpo de la intro y de «¡Todo listo!»; C → pantalla de «¡Formulario enviado!». |
-| **10** | Pausa de ~500 ms al entrar a pantalla informativa, antes de activar `.is-visible` en el primer bloque | ✅ | ✅ | ✅ | **Implementado en este PR** (`PAUSA_INFO_MS` = 500 ms, `--ms-info-pausa`). No está en **todas** las pantallas de solo lectura, y a propósito: en las intros de A y C el mecanográfico (nº8) ya escalona el revelado y la entrada de pantalla dura 820 ms, así que añadir 500 ms más era retrasar sin que se note. Se aplica donde el texto aparecía entero y de golpe: A `final`, B intro y `done`, C pantalla de enviado. **Fuera:** la pantalla de gracias de A y `WeeklyResultScreen` del Seguimiento semanal, que siguen apareciendo de golpe (mismo patrón, es un `<InfoBlock>` cada bloque cuando se quiera). |
+| **9** | Bloques informativos: entrada por párrafos, 240 ms, 90 ms entre ellos | ✅ | ✅ | ✅ | **Implementado en este PR.** Antes `.sf-info` existía en el CSS y **no la usaba ningún formulario** (CSS muerto). Ahora el componente `<InfoBlock>` (`FormChrome.js`) la enciende con `--ms-info` (320 ms de fundido) y 90 ms de `orden`. Dónde: A → párrafo de la pantalla `final` **+ la casilla del RGPD**; B → cuerpo de la intro, de «¡Todo listo!» **y su casilla del RGPD**; C → pantalla de «¡Formulario enviado!». |
+| **10** | Pausa de ~500 ms al entrar a pantalla informativa, antes de activar `.is-visible` en el primer bloque | ✅ | ✅ | ✅ | **Implementado en este PR.** «Medio segundo» = **hasta que el texto se puede leer**: `--ms-info-pausa` (180 ms de temporizador) + `--ms-info` (320 ms de fundido) = **500 ms**, medido con navegador. Ver más abajo «Qué significa medio segundo». No está en **todas** las pantallas de solo lectura, y a propósito: en las intros de A y C el mecanográfico (nº8) ya escalona el revelado y la entrada de pantalla dura 820 ms, así que añadir medio segundo más era retrasar sin que se note. Se aplica donde el texto aparecía entero y de golpe: A `final`, B intro y `done`, C pantalla de enviado. En C, el emoji y el título van con **`PAUSA_ANCLA_MS` = 0**: son el ancla de esa pantalla (ver abajo). **Fuera:** la pantalla de gracias de A y `WeeklyResultScreen` del Seguimiento semanal, que siguen apareciendo de golpe (mismo patrón, es un `<InfoBlock>` cada bloque cuando se quiera). |
 | **11** | Badges tipo píldora: `scale(0.98) → 1`, 180 ms | ❌ | — | ✅ | **CSS implementado en este PR** (`.sf-badge` + componente `<Badge>`). Usado en **C**, donde la fase («Tu dieta», «Tu descanso»…) ya se pintaba sobre el título y ahora va en píldora. En **A** no hay badge en pantalla: la fase existe (`phaseOf`) pero solo se ve en la columna lateral y en el cajón de móvil — pintarla también sobre la pregunta es una decisión de diseño, no una de movimiento, y no se ha tomado sin poder verla. En **B** no hay ningún concepto de badge (sus fases son una lista de texto en el lateral). |
 | **12** | Grid de opciones: reutilizar la lógica de `.choiceBtn` para las cards | ✅ | ✅ | ✅ | Los tres reutilizan `.sf-choice` para todas las variantes de opción (radio, checkbox, escala 1–5, «Otro: ___»). Ninguno tiene un grid de cards propiamente: van en columna. |
 | **13** | Botón flotante secundario, si existe | — | — | — | Ninguno de los tres tiene botón flotante. El único de la web es `FormularioPendiente.js` («termina tu formulario»), que vive en `(home)/layout.js` y usa `.sf-flotante`… pero **ese layout no importa `form-motion.css`**, así que hoy la clase no hace nada allí y el botón aparece sin animación. Es un bug real de una línea (`import "../form-motion.css"` en `(home)/layout.js`), fuera del alcance de este PR porque toca el layout público entero. Además `.sf-flotante` no tiene el `:active` de press que pide el briefing. |
@@ -98,10 +98,75 @@ Lo que **sigue sin tokenizar**, a conciencia:
   a `--ms-color` (400 ms) haría los hovers de texto notablemente más lentos y no
   parecía una mejora; queda apuntado.
 
+## Qué significa «medio segundo» (corregido el 28-jul con capturas)
+
+La primera versión de este PR decía «pausa de medio segundo» y en realidad eran
+**~930-1.060 ms**: 500 ms de `setTimeout` **más** los 560 ms del fundido
+`--ms-info`. Dos números para la misma cosa, y el que se anunciaba era el que no
+notaba nadie. Corregido así, y esta es la única definición válida:
+
+> **«Medio segundo» = el tiempo desde que entra la pantalla hasta que el texto
+> SE PUEDE LEER** (no hasta que empieza a asomar).
+
+    --ms-info-pausa (180 ms, temporizador de JS)
+  + --ms-info       (320 ms, fundido CSS)
+  = 500 ms
+
+Si se reafina uno, hay que reafinar el otro para que sigan sumando 500. Están
+comentados así en `form-motion.css` y en `FormChrome.js`. Bajar `--ms-info` de
+560 a 320 no toca nada más del sitio: `.sf-info` solo la usa `<InfoBlock>` (antes
+de este PR era CSS muerto).
+
+Números medidos con navegador (Chrome, móvil 375 px), sobre la **opacidad
+efectiva** —la del bloque multiplicada por la de sus ancestros, porque el bloque
+vive dentro del fundido de `.sf-screen-in` y mirar solo su propia opacidad
+miente—. «Legible» = opacidad efectiva > 0,9.
+
+| Bloque | Antes (500 + 560) | Ahora (180 + 320) |
+|---|---|---|
+| C · emoji 🎉 | invisible (0,00) a los 120 ms | **0,45 a los 121 ms** · legible a los 328 ms |
+| C · `<h1>` «¡Formulario enviado!» | legible a los **957 ms** | **0,13 a los 121 ms** · legible a los **344 ms** |
+| C · párrafo | invisible (0,00) a los 120 ms | legible a los **378 ms** |
+| C · botón «Volver a mi panel» | legible a los **1.188 ms** | legible a los **444 ms** |
+| C · pantalla completa a opacidad ≥ 0,99 | ~1.400 ms | **603 ms** |
+| A · párrafo del RGPD | invisible **932 ms** | `.is-visible` a los 180 ms, 0,88 a los 327 ms, 1,00 a los 522 ms |
+| A · casilla del RGPD | pulsable **desde el frame 0**, con el párrafo a 0,00 | pulsable a los 270 ms, con el párrafo ya a **0,72** |
+
+La captura que enseñaba el defecto grave (`pr71-enviado-normal-120ms.png`) era un
+PNG blanco. La misma captura después del arreglo
+(`pr71-ARREGLADO-enviado-normal-120ms.png`) tiene el emoji y el título.
+
+## Dos reglas que salieron de la verificación visual
+
+**1. Ninguna pantalla puede quedarse ENTERA en blanco durante el respiro.** Tiene
+que haber un ancla visible en el milisegundo 0 —un título, un emoji— o el usuario
+no sabe si su clic ha hecho algo. B y A ya la tenían (su `<h1>` no es un bloque
+info: se pinta siempre). **C no**: la pantalla de «¡Formulario enviado!» son solo
+bloques info, así que con el respeto en los cuatro quedaba literalmente vacía casi
+un segundo justo después de pulsar «Enviar mis respuestas». Ahora el emoji y el
+título llevan `pausa={PAUSA_ANCLA_MS}` (0 ms, solo fundido) y el respiro se queda
+donde se gana el sueldo: el párrafo y el botón.
+
+**2. Un control para ACEPTAR algo no puede volverse pulsable antes que el texto
+que explica lo que acepta.** La casilla del RGPD de A estaba fuera del retardo —a
+propósito, porque es lo único que hay que tocar— y el resultado invertía el
+objetivo del punto 10: casilla pintada y **pulsable** con el texto invisible 932 ms.
+Se ha metido dentro, en su propio `<InfoBlock>` un `orden` por detrás del párrafo
+(A) o dos (B, que además tiene emoji). Y `.sf-info` lleva ahora
+`pointer-events: none` mientras no se ve, porque un bloque a `opacity: 0` se puede
+pulsar igual de bien que uno visible; se restaura con `.is-visible` y, sin clase
+ninguna, dentro del `@media reduce`.
+
+Comprobado con un clic de ratón de verdad (no `.click()` sintético, que se salta
+el `pointer-events`): tocando la casilla a los **70 ms**, con el párrafo a
+opacidad 0, la casilla **no se marca** y «Enviar mis respuestas» sigue
+deshabilitado. El mismo toque con la pantalla asentada sí la marca y sí habilita
+el botón.
+
 ## La pausa del nº10 y «reducir animaciones»
 
 El fallo fácil aquí es: el `@media (prefers-reduced-motion: reduce)` mata la
-transición, pero el JavaScript sigue esperando 500 ms para poner `.is-visible`
+transición, pero el JavaScript sigue esperando el respiro para poner `.is-visible`
 → **quien reduce animaciones ve media pantalla en blanco durante medio segundo**,
 que es justo lo contrario de lo que pidió.
 
@@ -112,13 +177,18 @@ Resuelto con tres capas, para que fallando una siga en pie:
    en el DOM desde el primer frame y un lector de pantalla lo lee entero sin
    esperar a ningún temporizador.
 2. **El CSS lo deja visible sin `.is-visible`.** Dentro del `@media reduce`,
-   `.sf-info` y `.sf-badge` llevan `opacity: 1` (sin la clase), además de
-   `transition: none` y `transform: none`. Es decir: aunque el temporizador no
-   salte nunca —o el JS se caiga—, el contenido se ve.
+   `.sf-info` y `.sf-badge` llevan `opacity: 1` (sin la clase) y `.sf-info`
+   además `pointer-events: auto`, aparte de `transition: none` y
+   `transform: none`. Es decir: aunque el temporizador no salte nunca —o el JS
+   se caiga—, el contenido se ve **y la casilla del RGPD se puede marcar**.
 3. **El JS tampoco espera.** `InfoBlock` consulta `prefers-reduced-motion` y, si
    está activo, enciende `.is-visible` en el mismo efecto de montaje, sin
    `setTimeout`. La espera existe para que se lea el fundido; sin fundido serían
-   500 ms de nada a cambio de nada.
+   180 ms de nada a cambio de nada.
+
+Verificado con navegador: con «reducir animaciones» activo el texto está a
+opacidad 1 a los **0-6 ms**, y el CSS lo enseña incluso si se le quita la clase
+`is-visible` a mano.
 
 Queda escrito en el CSS y en el componente que **si algún día se cambia
 `<InfoBlock>` para montar el bloque cuando toque, en vez de solo pintarlo, las

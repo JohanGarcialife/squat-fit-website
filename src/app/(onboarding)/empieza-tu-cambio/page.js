@@ -885,17 +885,27 @@ export default function EmpiezaTuCambioPage() {
             {step.type === 'final' && (
               <div className="mt-2 max-w-md">
                 {/* Punto 10: esta pantalla es de LEER, no de contestar, y se
-                    llega a ella pulsando «Continuar». Medio segundo de respiro
-                    antes de encender el párrafo: si aparece bajo el dedo, se
-                    lee en diagonal y luego el lead no sabe qué ha aceptado.
-                    La casilla del RGPD NO se retrasa: es lo único que hay que
-                    tocar aquí y es la que enciende el botón de enviar. */}
+                    llega a ella pulsando «Continuar». Un respiro antes de
+                    encender el párrafo: si aparece bajo el dedo, se lee en
+                    diagonal y luego el lead no sabe qué ha aceptado.
+
+                    Corrección del 28-jul: la casilla del RGPD también va en un
+                    <InfoBlock>, un `orden` DETRÁS del párrafo. Antes se quedaba
+                    fuera del retardo y el resultado invertía el objetivo del
+                    punto: la casilla estaba pintada y pulsable mientras el
+                    texto de lo que se acepta seguía invisible (medido: 932 ms).
+                    Aceptar algo que todavía no está en pantalla es peor que
+                    leerlo en diagonal. El CSS le quita además los
+                    `pointer-events` mientras no se ve, porque un bloque a
+                    opacidad 0 se puede pulsar igual. */}
                 <InfoBlock as="p" orden={0} className="text-[#363C98] text-lg sm:text-xl leading-relaxed mb-8">
                   Ya casi está, {answers.first_name || ''} 💪. Revisa que todo sea
                   correcto y envíame tus respuestas: te contactaré por WhatsApp
                   para agendar tu llamada.
                 </InfoBlock>
-                <GdprCheckbox checked={gdprAccepted} onChange={setGdprAccepted} id="gdpr-prellamada" />
+                <InfoBlock orden={1}>
+                  <GdprCheckbox checked={gdprAccepted} onChange={setGdprAccepted} id="gdpr-prellamada" />
+                </InfoBlock>
               </div>
             )}
             </>)}

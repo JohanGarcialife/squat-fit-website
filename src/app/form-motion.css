@@ -20,7 +20,13 @@
   --ms-color: 400ms;        /* 333 · color, borde y fondo */
   --ms-settle: 340ms;       /* 291 · asentado del seleccionado */
   --ms-shadow: 250ms;       /* = · sombra del CTA */
-  --ms-info: 560ms;         /* 499 · bloques informativos */
+  --ms-info: 320ms;         /* 560 · el FUNDIDO de un bloque informativo. Bajado
+                               porque el respiro del punto 10 se cuenta hasta que
+                               el texto SE PUEDE LEER, y ese momento es
+                               --ms-info-pausa + --ms-info (ver abajo). Con 560 el
+                               párrafo no era legible hasta 1.060 ms: el doble de
+                               lo que prometía el punto. `.sf-info` solo lo usa
+                               <InfoBlock>, así que bajarlo no toca nada más. */
   --ms-option: 520ms;       /* 340 · entrada de cada casilla */
   --ms-stagger: 320ms;      /* 170 · antes era la MITAD de --ms-option y las
                                casillas se solapaban tanto que parecían aparecer
@@ -32,16 +38,33 @@
   --ms-portada-out: 1200ms; /* la portada apartándose al pulsar «Empezar» */
   --ms-portal: 1200ms;      /* el portal que se traga el logo (−20 % sobre la demo) */
 
-  /* Punto 10 del briefing: al entrar a una pantalla de SOLO LECTURA se espera
-     medio segundo antes de encender el primer bloque, para que dé tiempo a
-     cambiar el foco de la vista y no caiga el texto encima del clic. Y cada
-     bloque siguiente entra 90 ms después del anterior (punto 9).
+  /* Punto 10 del briefing: al entrar a una pantalla de SOLO LECTURA se espera un
+     respiro antes de encender el primer bloque, para que no caiga el texto
+     encima del clic que se acaba de dar. Y cada bloque siguiente entra 90 ms
+     después del anterior (punto 9).
+
+     QUÉ SIGNIFICA «MEDIO SEGUNDO» (definido aquí, y en la auditoría, para que no
+     vuelva a haber dos números): medio segundo es el tiempo hasta que el texto
+     SE PUEDE LEER, no hasta que empieza a asomar. O sea:
+
+         --ms-info-pausa (180) + --ms-info (320) = 500 ms
+
+     La primera versión de este PR ponía 500 ms de temporizador Y ADEMÁS 560 ms
+     de fundido: 1.060 ms hasta poder leer el párrafo, y ~1.190 ms hasta el
+     botón. Medido con navegador, no estimado. Eso ya no es un respiro.
+
      OJO: estos dos los consume JavaScript, no el CSS — `PAUSA_INFO_MS` e
      `INFO_PARRAFO_MS` de FormChrome.js son su espejo. Viven aquí porque el
      briefing los pide en los tokens y para que al reafinar se vea todo junto
      (misma convención que --ms-pausa-espera ↔ PAUSA_MS). */
-  --ms-info-pausa: 500ms;
+  --ms-info-pausa: 180ms;
   --ms-info-parrafo: 90ms;
+  /* Bloques de ANCLA: los que existen para decir «ha pasado algo» (el emoji y el
+     título de «¡Formulario enviado!»). Esos NO esperan nada — solo hacen el
+     fundido — porque en esa pantalla no hay nada más: con el respiro puesto
+     también en ellos, el usuario pulsaba «Enviar mis respuestas» y se quedaba
+     casi un segundo mirando el blanco. Espejo de `PAUSA_ANCLA_MS`. */
+  --ms-info-ancla: 0ms;
 
   /* Recorridos: subidos sobre el briefing para que el movimiento se note */
   --px-sweep: 44px;         /* 34 · barrido lateral al cambiar de pregunta */
@@ -210,8 +233,8 @@
 }
 
 /* 9 + 10) Bloques informativos: entran uno detrás de otro, y en las pantallas
-   de solo lectura tras un respiro de medio segundo (--ms-info-pausa).
-   Quien enciende `.is-visible` es <InfoBlock> (FormChrome.js).
+   de solo lectura tras un respiro (--ms-info-pausa + --ms-info = 500 ms hasta
+   poder leer). Quien enciende `.is-visible` es <InfoBlock> (FormChrome.js).
 
    CONTRATO con «reducir movimiento», que es lo fácil de romper aquí: el bloque
    está SIEMPRE montado y lo único que hace la espera es añadir una clase. Así,
@@ -223,10 +246,18 @@
 .sf-info {
   opacity: 0;
   transform: translateY(var(--px-info));
+  /* Mientras NO se ve, tampoco se toca. Un bloque a `opacity: 0` sigue siendo
+     perfectamente pulsable, y eso convertía la casilla del RGPD de
+     /empieza-tu-cambio en algo que se podía marcar antes de que su texto
+     existiera en pantalla: justo lo contrario de para lo que se puso el
+     respiro. Se restaura con `.is-visible` (y, más abajo, sin clase ninguna
+     cuando se reducen animaciones). */
+  pointer-events: none;
 }
 .sf-info.is-visible {
   opacity: 1;
   transform: translateY(0);
+  pointer-events: auto;
   transition:
     opacity var(--ms-info) var(--ease-ui),
     transform var(--ms-info) var(--ease-ui);
@@ -377,8 +408,11 @@
   /* Sin `.is-visible`: el temporizador de la pausa informativa puede no haber
      saltado todavía (o no saltar nunca, si el JS falla) y nadie debe quedarse
      mirando un hueco en blanco por reducir animaciones. Ver el contrato del
-     punto 9+10, más arriba. */
+     punto 9+10, más arriba. `pointer-events` va en el mismo saco: si el texto
+     se ve desde el primer frame, la casilla que lo acompaña tiene que poder
+     tocarse desde el primer frame. */
   .sf-info,
   .sf-badge { opacity: 1; }
+  .sf-info { pointer-events: auto; }
   .sf-caret { display: none; }
 }

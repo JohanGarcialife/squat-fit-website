@@ -47,12 +47,17 @@ export function sinMovimiento() {
 
 /* ── Bloques informativos (puntos 9 y 10 del briefing) ────────────────────
    Al entrar a una pantalla de SOLO LECTURA no se enciende el texto de golpe:
-   se espera medio segundo y luego entran los bloques de uno en uno, 90 ms
-   entre ellos. El medio segundo es el que separa «he pulsado Continuar» de
-   «esto es lo siguiente que tengo que leer»: sin él el párrafo aparece bajo
-   el dedo y se lee a medias.
+   se espera un respiro y luego entran los bloques de uno en uno, 90 ms entre
+   ellos. Ese respiro es el que separa «he pulsado Continuar» de «esto es lo
+   siguiente que tengo que leer»: sin él el párrafo aparece bajo el dedo y se
+   lee a medias.
 
-   Dos cosas que NO hay que romper aquí:
+   QUÉ ES «MEDIO SEGUNDO» (una sola definición, la misma que en form-motion.css
+   y en la auditoría): el tiempo hasta que el texto SE PUEDE LEER, no hasta que
+   empieza a asomar. Son PAUSA_INFO_MS (180) + --ms-info (320) = 500 ms. Si se
+   toca uno de los dos, hay que tocar el otro para que sigan sumando 500.
+
+   Cuatro cosas que NO hay que romper aquí:
 
    1. El bloque está SIEMPRE montado. La espera solo añade la clase
       `.is-visible`. Es lo que permite que, con «reducir animaciones»
@@ -62,10 +67,23 @@ export function sinMovimiento() {
    2. Con «reducir animaciones» tampoco se espera en el JS: el respiro existe
       para que el fundido se lea, y sin fundido serían 500 ms de pantalla
       vacía a cambio de nada.
+   3. NINGUNA pantalla puede quedarse entera en blanco durante el respiro.
+      Tiene que haber un ancla visible al milisegundo 0 —un título, un emoji—
+      o el usuario no sabe si su clic ha hecho algo. Donde no había ancla
+      (la pantalla de «¡Formulario enviado!», que son solo bloques info) se
+      usa `pausa={PAUSA_ANCLA_MS}` en los dos primeros bloques.
+   4. Un control que sirva para ACEPTAR algo (la casilla del RGPD) no puede
+      volverse pulsable antes que el texto que explica lo que acepta. Va
+      envuelto en su propio <InfoBlock>, un `orden` por detrás del párrafo, y
+      el CSS le quita `pointer-events` mientras no se ve. Un bloque a
+      opacidad 0 sin eso se puede pulsar igual.
 
-   Los milisegundos son el espejo de --ms-info-pausa / --ms-info-parrafo. ── */
-export const PAUSA_INFO_MS = 500;
+   Los milisegundos son el espejo de --ms-info-pausa / --ms-info-parrafo /
+   --ms-info-ancla. ── */
+export const PAUSA_INFO_MS = 180;
 export const INFO_PARRAFO_MS = 90;
+/* Bloque de ANCLA: no espera, solo hace el fundido. Ver el punto 3 de arriba. */
+export const PAUSA_ANCLA_MS = 0;
 
 export function InfoBlock({
   children,

@@ -25,7 +25,7 @@ import Image from 'next/image';
 import LogoEspagueti from './LogoEspagueti';
 import TextareaMeter from './TextareaMeter';
 import Typewriter from './Typewriter';
-import { ExitButton, BackButton, StepCounter, FormAside, StepsDrawer, SoundButton, useMicroFeedback, PausaPantalla, PAUSA_MS, ChildField, InfoBlock, Badge } from './FormChrome';
+import { ExitButton, BackButton, StepCounter, FormAside, StepsDrawer, SoundButton, useMicroFeedback, PausaPantalla, PAUSA_MS, ChildField, InfoBlock, Badge, PAUSA_ANCLA_MS } from './FormChrome';
 import { playSelect, playAdvance, playFinish, playKeypress, unlockAudio } from './formSounds';
 import { moverFocoOpciones, elegirOpcionEnfocada, escribiendoEnCampo, bloquearTeclasDeOpciones } from './formOptionKeys';
 
@@ -259,27 +259,37 @@ export default function FormRunner({ definition, context = {}, onSubmit, exitHre
   if (sent) {
     return (
       <div className="min-h-screen w-full flex flex-col items-center justify-center px-6 text-center bg-white">
-        {/* Punto 10: pantalla de solo lectura → medio segundo de respiro y
-            luego los bloques encendiéndose de uno en uno. Aquí el respiro se
-            gana el sueldo: el usuario acaba de pulsar «Enviar» y la
-            celebración cae mejor un instante después que a la vez que el clic.
-            El botón entra el último, con el resto: dejarlo visible sobre una
-            pantalla todavía vacía quedaba raro. */}
+        {/* Punto 10, con la corrección del 28-jul: esta pantalla NO tiene nada
+            más que estos cuatro bloques, así que si todos esperan el respiro el
+            usuario pulsa «Enviar mis respuestas» y se queda mirando el blanco.
+            Medido: con el respiro en los cuatro, el título no era legible hasta
+            los 957 ms y el botón hasta los 1.188 ms. Eso no es un respiro, es
+            un cuelgue.
+
+            Ahora hay dos tiempos:
+            · ANCLA (emoji + título) — `pausa={PAUSA_ANCLA_MS}`: arrancan en el
+              milisegundo 0 y solo hacen el fundido. Son la señal de «tu clic ha
+              hecho algo».
+            · RESPIRO (párrafo + botón) — la pausa normal: entran detrás, que es
+              lo que da el escalón de lectura que pedía el punto 10.
+            El botón sigue el último a propósito: así no se puede pulsar «Volver
+            a mi panel» antes de haber visto qué se ha enviado. */}
         <div className="sf-screen-in max-w-lg flex flex-col items-center">
-          <InfoBlock orden={0} className="text-6xl mb-4">🎉</InfoBlock>
+          <InfoBlock orden={0} pausa={PAUSA_ANCLA_MS} className="text-6xl mb-4">🎉</InfoBlock>
           <InfoBlock
             as="h1"
             orden={1}
+            pausa={PAUSA_ANCLA_MS}
             className="font-extrabold mb-4"
             style={{ color: BLUE, fontSize: 'clamp(1.9rem, 4vw, 2.6rem)' }}
           >
             ¡Formulario enviado!
           </InfoBlock>
-          <InfoBlock as="p" orden={2} className="text-[#6B6BA8] text-lg leading-relaxed mb-8">
+          <InfoBlock as="p" orden={0} className="text-[#6B6BA8] text-lg leading-relaxed mb-8">
             Hemos guardado tus respuestas de «{formTitle}». Tu coach las tendrá
             en cuenta para ajustar tu plan.
           </InfoBlock>
-          <InfoBlock orden={3} className="w-full max-w-xs">
+          <InfoBlock orden={1} className="w-full max-w-xs">
             <Link
               href={exitHref}
               className="sf-cta is-enabled block w-full rounded-2xl py-4 font-bold text-white text-lg text-center cursor-pointer"
