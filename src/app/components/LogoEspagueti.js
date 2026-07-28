@@ -88,18 +88,34 @@ export default function LogoEspagueti({ tamano = 120, saliendo = false, classNam
     return () => cancelAnimationFrame(rafRef.current);
   }, [saliendo]);
 
-  const lado = tamano * 2.6; // el lienzo del portal, más ancho que el logo
+  // El lienzo del portal es más ancho que el logo, pero NO puede marcar el
+  // tamaño del contenedor: en móvil eso ocupaba 312 px dentro de una columna
+  // más estrecha, el contenedor se encogía y el SVG —que conserva su ancho
+  // fijo— se desbordaba hacia la derecha. Resultado: los hilos salían disparados
+  // al borde de la pantalla en vez de girar detrás del logo.
+  //
+  // Ahora el contenedor mide LO QUE MIDE EL LOGO y el SVG se centra por
+  // transform sobre él. Así el portal queda siempre concéntrico, dé el ancho
+  // que dé el padre, y no empuja la maquetación.
+  const lado = tamano * 2.6;
 
   return (
     <div
       className={`relative grid place-items-center shrink-0 ${className}`}
-      style={{ width: lado, height: lado }}
+      style={{ width: tamano, height: tamano }}
       role="img"
       aria-label="Squad Fit"
     >
       <svg
-        className="absolute pointer-events-none overflow-visible"
-        style={{ width: lado, height: lado }}
+        className="pointer-events-none overflow-visible"
+        style={{
+          position: 'absolute',
+          left: '50%',
+          top: '50%',
+          width: lado,
+          height: lado,
+          transform: 'translate(-50%, -50%)',
+        }}
         viewBox={`${-lado / 2} ${-lado / 2} ${lado} ${lado}`}
         aria-hidden="true"
       >
