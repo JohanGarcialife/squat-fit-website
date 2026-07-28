@@ -60,7 +60,21 @@ const nextConfig = {
         headers: [
           {
             key: 'Content-Security-Policy',
-            value: "default-src 'self'; frame-src 'self' https://iframe.mediadelivery.net https://*.b-cdn.net https://js.stripe.com https://hooks.stripe.com https://tidycal.com https://*.tidycal.com; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://asset-tidycal.b-cdn.net https://www.googletagmanager.com https://invitejs.trustpilot.com; connect-src 'self' https://api.stripe.com https://squatfit-api-cyrc2g3zra-no.a.run.app https://open.er-api.com https://api.frankfurter.app https://storage.googleapis.com https://*.b-cdn.net https://images.pexels.com https://tidycal.com https://*.tidycal.com https://www.googletagmanager.com https://www.google-analytics.com https://*.google-analytics.com https://*.analytics.google.com https://invitejs.trustpilot.com; img-src 'self' data: blob: https://images.unsplash.com https://storage.googleapis.com https://www.google.com https://*.b-cdn.net https://iframe.mediadelivery.net https://images.pexels.com https://tidycal.com https://*.tidycal.com https://www.google-analytics.com https://*.google-analytics.com; style-src 'self' 'unsafe-inline'; font-src 'self' data:;",
+            // OJO al tocar los dominios de Stripe: desde el «pago incrustado»
+            // (checkout-incrustado) el formulario de pago se monta en un iframe
+            // DENTRO de nuestra página, no en checkout.stripe.com como antes.
+            // Esta CSP se escribió para el flujo antiguo (redirección), que no
+            // pasa por la CSP porque es una navegación entera, y solo permitía
+            // js.stripe.com. Resultado: el iframe del pago se quedaba bloqueado
+            // y el carrito giraba para siempre sin llegar a pintar el pago.
+            //
+            // Dominios exigidos por Stripe (docs.stripe.com/security/guide):
+            //   Stripe.js         → frame-src/script-src: js.stripe.com y *.js.stripe.com
+            //   Embedded Checkout → frame-src/script-src/connect-src: checkout.stripe.com
+            //                       img-src: *.stripe.com
+            // El comodín *.js.stripe.com lo pide Stripe explícitamente: arrancan
+            // los iframes en orígenes distintos para ganar rendimiento.
+            value: "default-src 'self'; frame-src 'self' https://iframe.mediadelivery.net https://*.b-cdn.net https://js.stripe.com https://*.js.stripe.com https://checkout.stripe.com https://hooks.stripe.com https://tidycal.com https://*.tidycal.com; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://*.js.stripe.com https://checkout.stripe.com https://asset-tidycal.b-cdn.net https://www.googletagmanager.com https://invitejs.trustpilot.com; connect-src 'self' https://api.stripe.com https://checkout.stripe.com https://squatfit-api-cyrc2g3zra-no.a.run.app https://open.er-api.com https://api.frankfurter.app https://storage.googleapis.com https://*.b-cdn.net https://images.pexels.com https://tidycal.com https://*.tidycal.com https://www.googletagmanager.com https://www.google-analytics.com https://*.google-analytics.com https://*.analytics.google.com https://invitejs.trustpilot.com; img-src 'self' data: blob: https://*.stripe.com https://images.unsplash.com https://storage.googleapis.com https://www.google.com https://*.b-cdn.net https://iframe.mediadelivery.net https://images.pexels.com https://tidycal.com https://*.tidycal.com https://www.google-analytics.com https://*.google-analytics.com; style-src 'self' 'unsafe-inline'; font-src 'self' data:;",
           },
         ],
       },
