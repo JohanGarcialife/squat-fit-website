@@ -1,32 +1,35 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Script from 'next/script';
 import { marketingAllowed, CONSENT_EVENT } from './cookieConsent';
 
 // Trustpilot: script oficial de invitaciones (snippet tal cual lo da
 // Trustpilot, sin tocar). Vive en un componente compartido porque esta app
-// no tiene un único layout raíz: cada grupo de rutas tiene el suyo, y el
-// verificador de Trustpilot exige encontrarlo en cualquier página.
+// no tiene un único layout raíz: cada grupo de rutas tiene el suyo.
 //
-// Va como <script> crudo dentro del <head> del layout: el verificador de
-// dominio de Trustpilot solo lo daba por bueno si aparecía dentro de la
-// cabecera del HTML servido. Con next/script (afterInteractive) el snippet
-// acababa en el <body> y por eso respondía «We weren't able to verify your
-// domain». beforeInteractive tampoco sirve en App Router: no emite el
-// snippet, sino un `self.__next_s.push(...)` con el código escapado en JSON.
+// Solo se carga si el visitante aceptó la categoría "Marketing" en
+// CookieBanner. Se activa al momento tras aceptar (CONSENT_EVENT), sin
+// necesitar recargar.
 //
-// F2 — gestor de consentimiento: ahora solo se inserta si el visitante
-// aceptó la categoría "Marketing" en CookieBanner (antes cargaba siempre,
-// incluso antes de elegir — ver TODO histórico ya resuelto). Se activa al
-// momento tras aceptar (CONSENT_EVENT), sin recargar.
+// POR QUÉ next/script Y NO UN <script> CRUDO (28-jul, corregido tras
+// encontrarlo en producción): históricamente esto era un `<script>` con
+// dangerouslySetInnerHTML porque el verificador de dominio de Trustpilot solo
+// daba por bueno el snippet si aparecía dentro del <head> del HTML SERVIDO —
+// y en aquel momento el componente se renderizaba en el servidor, así que
+// funcionaba. Al condicionarlo al consentimiento pasó a renderizarse en el
+// cliente, y ahí ese `<script>` YA NO SE EJECUTA: React lo mete en el DOM,
+// pero un script insertado así no lo corre el navegador. Resultado: el
+// snippet estaba en la página y aun así `window.tp` no existía y
+// tp.min.js no se pedía nunca — las invitaciones de reseña llevaban
+// desde el despliegue del gestor de cookies sin funcionar, en silencio.
+// next/script sí lo ejecuta (es lo que ya hacía GoogleAnalytics.js al lado).
 //
-// OJO — verificación de dominio de Trustpilot: al condicionarlo, un visitante
-// (o el propio verificador de Trustpilot, que lee el HTML servido sin
-// ejecutar JS ni tener cookies) que llegue SIN haber aceptado marketing ya no
-// verá el snippet en el <head> servido. La verificación de dominio ya se
-// completó (confirmado en producción la noche del 28-jul), pero si Trustpilot
-// alguna vez la revalida, puede hacer falta dejarlo suelto (sin condicionar)
-// un rato para que vuelva a pasar la comprobación.
+// OJO — verificación de dominio de Trustpilot: desde que esto depende del
+// consentimiento, el verificador (que lee el HTML servido sin ejecutar JS ni
+// tener cookies) ya no encuentra el snippet, con este cambio ni con el
+// anterior. La verificación ya está hecha; si algún día la revalidan, habrá
+// que dejar el snippet suelto un rato para volver a pasarla.
 const TRUSTPILOT_SNIPPET = `(function(w,d,s,r,n){w.TrustpilotObject=n;w[n]=w[n]||function(){(w[n].q=w[n].q||[]).push(arguments)};
 a=d.createElement(s);a.async=1;a.src=r;a.type='text/java'+s;f=d.getElementsByTagName(s)[0];
 f.parentNode.insertBefore(a,f)})(window,document,'script','https://invitejs.trustpilot.com/tp.min.js','tp');
@@ -45,9 +48,8 @@ export default function TrustpilotInvitations() {
   if (!allowed) return null;
 
   return (
-    <script
-      id="trustpilot-invitations"
-      dangerouslySetInnerHTML={{ __html: TRUSTPILOT_SNIPPET }}
-    />
+    <Script id="trustpilot-invitations" strategy="afterInteractive">
+      {TRUSTPILOT_SNIPPET}
+    </Script>
   );
 }
