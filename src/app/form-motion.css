@@ -103,6 +103,23 @@
   transform: translateY(3px);
   box-shadow: 0 0 0 rgba(54, 60, 152, 0.12);
 }
+/* 12) Recorrido con teclado: la opción resaltada con ↑/↓ tiene que verse sin
+   confundirse con la ya elegida (que va en naranja). Anillo índigo, el color
+   de «esto es donde estás», no de «esto has respondido». Solo con :focus-visible,
+   así que al hacer clic con el ratón no aparece. */
+.sf-choice:focus-visible {
+  outline: none;
+  box-shadow:
+    0 0 0 3px #fff,
+    0 0 0 5px rgba(54, 60, 152, 0.55),
+    0 3px 0 rgba(54, 60, 152, 0.12);
+}
+.sf-choice.is-selected:focus-visible {
+  box-shadow:
+    0 0 0 3px #fff,
+    0 0 0 5px rgba(255, 105, 11, 0.65),
+    0 2px 0 rgba(255, 105, 11, 0.35);
+}
 .sf-choice.is-selected {
   transform: translateY(1px);
   box-shadow: 0 2px 0 rgba(255, 105, 11, 0.35);
