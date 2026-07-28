@@ -9,6 +9,7 @@ import { useAuthStore } from '@/stores/auth.store';
 import { useCheckoutStore } from '@/stores/checkout.store';
 import CheckoutIncrustado from './CheckoutIncrustado';
 import { ORDER_REF_KEY, saveOrderItems } from './TrustpilotInvitation';
+import { saveOrderAccess } from './accesoComprado';
 import axios from 'axios';
 import { createTierCheckout } from '@/app/components/courseCatalog';
 import { resolveOrigin } from '@/app/components/UTMCapture';
@@ -167,6 +168,11 @@ export default function Payment(props) {
     // montarse, y en el checkout incrustado la vuelta de Stripe recarga la
     // página, así que el carrito ya no existe cuando sale la invitación.
     saveOrderItems(cart);
+
+    // Foto de lo comprado (tipo + destino) para que la pantalla de gracias
+    // lleve al producto de ESTE pedido y no a tarjetas fijas. Se toma aquí por
+    // lo mismo que la de Trustpilot: después del pago el carrito ya está vacío.
+    saveOrderAccess(cart);
 
     let endpoint = '';
     let payload = {};
