@@ -25,7 +25,7 @@ import Image from 'next/image';
 import LogoEspagueti from './LogoEspagueti';
 import TextareaMeter from './TextareaMeter';
 import Typewriter from './Typewriter';
-import { ExitButton, BackButton, StepCounter, FormAside, StepsDrawer, SoundButton, useMicroFeedback, PausaPantalla, PAUSA_MS, ChildField } from './FormChrome';
+import { ExitButton, BackButton, StepCounter, FormAside, StepsDrawer, SoundButton, useMicroFeedback, PausaPantalla, PAUSA_MS, ChildField, InfoBlock, Badge, PAUSA_ANCLA_MS } from './FormChrome';
 import { playSelect, playAdvance, playFinish, playKeypress, unlockAudio } from './formSounds';
 import { moverFocoOpciones, elegirOpcionEnfocada, escribiendoEnCampo, bloquearTeclasDeOpciones } from './formOptionKeys';
 
@@ -259,22 +259,45 @@ export default function FormRunner({ definition, context = {}, onSubmit, exitHre
   if (sent) {
     return (
       <div className="min-h-screen w-full flex flex-col items-center justify-center px-6 text-center bg-white">
+        {/* Punto 10, con la corrección del 28-jul: esta pantalla NO tiene nada
+            más que estos cuatro bloques, así que si todos esperan el respiro el
+            usuario pulsa «Enviar mis respuestas» y se queda mirando el blanco.
+            Medido: con el respiro en los cuatro, el título no era legible hasta
+            los 957 ms y el botón hasta los 1.188 ms. Eso no es un respiro, es
+            un cuelgue.
+
+            Ahora hay dos tiempos:
+            · ANCLA (emoji + título) — `pausa={PAUSA_ANCLA_MS}`: arrancan en el
+              milisegundo 0 y solo hacen el fundido. Son la señal de «tu clic ha
+              hecho algo».
+            · RESPIRO (párrafo + botón) — la pausa normal: entran detrás, que es
+              lo que da el escalón de lectura que pedía el punto 10.
+            El botón sigue el último a propósito: así no se puede pulsar «Volver
+            a mi panel» antes de haber visto qué se ha enviado. */}
         <div className="sf-screen-in max-w-lg flex flex-col items-center">
-          <div className="text-6xl mb-4">🎉</div>
-          <h1 className="font-extrabold mb-4" style={{ color: BLUE, fontSize: 'clamp(1.9rem, 4vw, 2.6rem)' }}>
+          <InfoBlock orden={0} pausa={PAUSA_ANCLA_MS} className="text-6xl mb-4">🎉</InfoBlock>
+          <InfoBlock
+            as="h1"
+            orden={1}
+            pausa={PAUSA_ANCLA_MS}
+            className="font-extrabold mb-4"
+            style={{ color: BLUE, fontSize: 'clamp(1.9rem, 4vw, 2.6rem)' }}
+          >
             ¡Formulario enviado!
-          </h1>
-          <p className="text-[#6B6BA8] text-lg leading-relaxed mb-8">
+          </InfoBlock>
+          <InfoBlock as="p" orden={0} className="text-[#6B6BA8] text-lg leading-relaxed mb-8">
             Hemos guardado tus respuestas de «{formTitle}». Tu coach las tendrá
             en cuenta para ajustar tu plan.
-          </p>
-          <Link
-            href={exitHref}
-            className="sf-cta is-enabled w-full max-w-xs rounded-2xl py-4 font-bold text-white text-lg text-center cursor-pointer"
-            style={{ backgroundColor: ORANGE }}
-          >
-            Volver a mi panel
-          </Link>
+          </InfoBlock>
+          <InfoBlock orden={1} className="w-full max-w-xs">
+            <Link
+              href={exitHref}
+              className="sf-cta is-enabled block w-full rounded-2xl py-4 font-bold text-white text-lg text-center cursor-pointer"
+              style={{ backgroundColor: ORANGE }}
+            >
+              Volver a mi panel
+            </Link>
+          </InfoBlock>
         </div>
       </div>
     );
@@ -340,7 +363,14 @@ export default function FormRunner({ definition, context = {}, onSubmit, exitHre
         </div>
 
         <div key={`${step.key || step.type}-${index}`} className="flex-1 flex flex-col max-w-xl w-full mx-auto sf-screen-in">
-          {step.phase && <p className="text-[#FF690B] font-bold text-sm uppercase tracking-wider mb-2">{step.phase}</p>}
+          {/* Punto 11: la fase va en píldora, no en texto suelto. Dice DÓNDE
+              estás, y en pastilla se lee como una etiqueta en vez de
+              confundirse con un antetítulo de la pregunta. */}
+          {step.phase && (
+            <Badge className="mb-2.5" style={{ backgroundColor: '#FFF1E7', color: ORANGE }}>
+              {step.phase}
+            </Badge>
+          )}
           <Typewriter
             as="h1"
             key={stepId}

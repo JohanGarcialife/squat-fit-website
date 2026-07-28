@@ -20,7 +20,13 @@
   --ms-color: 400ms;        /* 333 · color, borde y fondo */
   --ms-settle: 340ms;       /* 291 · asentado del seleccionado */
   --ms-shadow: 250ms;       /* = · sombra del CTA */
-  --ms-info: 560ms;         /* 499 · bloques informativos */
+  --ms-info: 320ms;         /* 560 · el FUNDIDO de un bloque informativo. Bajado
+                               porque el respiro del punto 10 se cuenta hasta que
+                               el texto SE PUEDE LEER, y ese momento es
+                               --ms-info-pausa + --ms-info (ver abajo). Con 560 el
+                               párrafo no era legible hasta 1.060 ms: el doble de
+                               lo que prometía el punto. `.sf-info` solo lo usa
+                               <InfoBlock>, así que bajarlo no toca nada más. */
   --ms-option: 520ms;       /* 340 · entrada de cada casilla */
   --ms-stagger: 320ms;      /* 170 · antes era la MITAD de --ms-option y las
                                casillas se solapaban tanto que parecían aparecer
@@ -32,10 +38,41 @@
   --ms-portada-out: 1200ms; /* la portada apartándose al pulsar «Empezar» */
   --ms-portal: 1200ms;      /* el portal que se traga el logo (−20 % sobre la demo) */
 
+  /* Punto 10 del briefing: al entrar a una pantalla de SOLO LECTURA se espera un
+     respiro antes de encender el primer bloque, para que no caiga el texto
+     encima del clic que se acaba de dar. Y cada bloque siguiente entra 90 ms
+     después del anterior (punto 9).
+
+     QUÉ SIGNIFICA «MEDIO SEGUNDO» (definido aquí, y en la auditoría, para que no
+     vuelva a haber dos números): medio segundo es el tiempo hasta que el texto
+     SE PUEDE LEER, no hasta que empieza a asomar. O sea:
+
+         --ms-info-pausa (180) + --ms-info (320) = 500 ms
+
+     La primera versión de este PR ponía 500 ms de temporizador Y ADEMÁS 560 ms
+     de fundido: 1.060 ms hasta poder leer el párrafo, y ~1.190 ms hasta el
+     botón. Medido con navegador, no estimado. Eso ya no es un respiro.
+
+     OJO: estos dos los consume JavaScript, no el CSS — `PAUSA_INFO_MS` e
+     `INFO_PARRAFO_MS` de FormChrome.js son su espejo. Viven aquí porque el
+     briefing los pide en los tokens y para que al reafinar se vea todo junto
+     (misma convención que --ms-pausa-espera ↔ PAUSA_MS). */
+  --ms-info-pausa: 180ms;
+  --ms-info-parrafo: 90ms;
+  /* Bloques de ANCLA: los que existen para decir «ha pasado algo» (el emoji y el
+     título de «¡Formulario enviado!»). Esos NO esperan nada — solo hacen el
+     fundido — porque en esa pantalla no hay nada más: con el respiro puesto
+     también en ellos, el usuario pulsaba «Enviar mis respuestas» y se quedaba
+     casi un segundo mirando el blanco. Espejo de `PAUSA_ANCLA_MS`. */
+  --ms-info-ancla: 0ms;
+
   /* Recorridos: subidos sobre el briefing para que el movimiento se note */
   --px-sweep: 44px;         /* 34 · barrido lateral al cambiar de pregunta */
   --px-option: 24px;        /* 14 · recorrido de cada casilla (izq → der) */
   --px-lift: 5px;           /* hundido del botón físico */
+  --px-choice-lift: 3px;    /* sombra sólida bajo la casilla, y lo que baja al pulsarla */
+  --px-info: 8px;           /* recorrido de un bloque informativo (briefing: 8px) */
+  --scale-badge: 0.98;      /* de dónde crece la píldora (briefing: 0.98) */
 }
 
 /* 1) Entrada de pantalla: barrido lateral (entra desde la derecha) + fade.
@@ -80,7 +117,7 @@
 /* 3b) Campo que se despliega colgando de la opción elegida (¿de qué país?): baja
       desde debajo de su opción, sin empujar de golpe. */
 @keyframes sfChildIn {
-  from { opacity: 0; transform: translate3d(0, -8px, 0); }
+  from { opacity: 0; transform: translate3d(0, calc(var(--px-info) * -1), 0); }
   to   { opacity: 1; transform: translate3d(0, 0, 0); }
 }
 .sf-child {
@@ -90,7 +127,7 @@
 /* 4-5) Botones de opción: press físico + estado seleccionado estable */
 .sf-choice {
   will-change: transform, box-shadow, opacity;
-  box-shadow: 0 3px 0 rgba(54, 60, 152, 0.12);
+  box-shadow: 0 var(--px-choice-lift) 0 rgba(54, 60, 152, 0.12);
   transition:
     opacity var(--ms-color) ease,
     transform var(--ms-press) var(--ease-ui),
@@ -100,7 +137,7 @@
     background-color var(--ms-color) ease;
 }
 .sf-choice:active {
-  transform: translateY(3px);
+  transform: translateY(var(--px-choice-lift));
   box-shadow: 0 0 0 rgba(54, 60, 152, 0.12);
 }
 /* 12) Recorrido con teclado: la opción resaltada con ↑/↓ tiene que verse sin
@@ -112,7 +149,7 @@
   box-shadow:
     0 0 0 3px #fff,
     0 0 0 5px rgba(54, 60, 152, 0.55),
-    0 3px 0 rgba(54, 60, 152, 0.12);
+    0 var(--px-choice-lift) 0 rgba(54, 60, 152, 0.12);
 }
 .sf-choice.is-selected:focus-visible {
   box-shadow:
@@ -195,17 +232,65 @@
     sfPausaOut var(--ms-fast) var(--ease-ui) forwards var(--ms-pausa-espera);
 }
 
-/* 9) Bloques informativos con entrada suave */
+/* 9 + 10) Bloques informativos: entran uno detrás de otro, y en las pantallas
+   de solo lectura tras un respiro (--ms-info-pausa + --ms-info = 500 ms hasta
+   poder leer). Quien enciende `.is-visible` es <InfoBlock> (FormChrome.js).
+
+   CONTRATO con «reducir movimiento», que es lo fácil de romper aquí: el bloque
+   está SIEMPRE montado y lo único que hace la espera es añadir una clase. Así,
+   la regla de más abajo (`.sf-info { opacity: 1 }` dentro del @media) deja el
+   texto visible desde el primer frame aunque el temporizador de JavaScript
+   todavía no haya saltado. Si algún día se pasa a montar el bloque cuando toca
+   en vez de solo pintarlo, quien reduce animaciones se quedará medio segundo
+   mirando una pantalla en blanco. */
 .sf-info {
   opacity: 0;
-  transform: translateY(8px);
+  transform: translateY(var(--px-info));
+  /* Mientras NO se ve, tampoco se toca. Un bloque a `opacity: 0` sigue siendo
+     perfectamente pulsable, y eso convertía la casilla del RGPD de
+     /empieza-tu-cambio en algo que se podía marcar antes de que su texto
+     existiera en pantalla: justo lo contrario de para lo que se puso el
+     respiro. Se restaura con `.is-visible` (y, más abajo, sin clase ninguna
+     cuando se reducen animaciones). */
+  pointer-events: none;
 }
 .sf-info.is-visible {
   opacity: 1;
   transform: translateY(0);
+  pointer-events: auto;
   transition:
     opacity var(--ms-info) var(--ease-ui),
     transform var(--ms-info) var(--ease-ui);
+}
+
+/* 11) Badges tipo píldora: no se desplazan, solo crecen un pelo. El briefing
+   les da la duración corta (su --ms-fast), que aquí es --ms-fast igual: la
+   píldora es una etiqueta, no contenido, y no debe robar la atención al
+   título que entra a la vez. */
+.sf-badge {
+  opacity: 0;
+  transform: scale(var(--scale-badge));
+}
+.sf-badge.is-visible {
+  opacity: 1;
+  transform: scale(1);
+  transition:
+    opacity var(--ms-fast) var(--ease-ui),
+    transform var(--ms-fast) var(--ease-ui);
+}
+
+/* 4 + 7 + 13) Press de los botones de chrome (salir, atrás, sonido, contador,
+   flotante). Antes cada uno llevaba el `transition-all` de Tailwind, que son
+   150 ms con OTRO easing: el chrome se movía con un feel distinto al del
+   formulario que rodea. Con esto todos tiran de los mismos tokens. */
+.sf-tap {
+  transition:
+    transform var(--ms-press) var(--ease-ui),
+    box-shadow var(--ms-press) var(--ease-ui),
+    background-color var(--ms-color) ease,
+    border-color var(--ms-color) ease,
+    color var(--ms-color) ease,
+    opacity var(--ms-color) ease;
 }
 
 /* 9b) Salida de la portada al pulsar «Empezar». En vez de un corte seco, la
@@ -275,8 +360,9 @@
   animation: sfFlotanteIn var(--ms-screen-in) var(--ease-ui) both;
 }
 
-/* 10) Panel lateral de pasos en móvil: entra deslizando desde la derecha
-       (mismo gesto que el carrito). */
+/* 9d) Panel lateral de pasos en móvil: entra deslizando desde la derecha
+       (mismo gesto que el carrito). No lleva número del briefing: antes ponía
+       «10)» y se confundía con el punto 10 de verdad (la pausa informativa). */
 @keyframes sfDrawerIn {
   from { transform: translate3d(100%, 0, 0); }
   to   { transform: translate3d(0, 0, 0); }
@@ -311,12 +397,22 @@
   .sf-choice,
   .sf-cta,
   .sf-progress-fill,
-  .sf-info {
+  .sf-info,
+  .sf-badge,
+  .sf-tap {
     transition: none !important;
     transform: none !important;
   }
   .sf-cta { opacity: 0.5; }
   .sf-cta.is-enabled { opacity: 1; }
-  .sf-info { opacity: 1; }
+  /* Sin `.is-visible`: el temporizador de la pausa informativa puede no haber
+     saltado todavía (o no saltar nunca, si el JS falla) y nadie debe quedarse
+     mirando un hueco en blanco por reducir animaciones. Ver el contrato del
+     punto 9+10, más arriba. `pointer-events` va en el mismo saco: si el texto
+     se ve desde el primer frame, la casilla que lo acompaña tiene que poder
+     tocarse desde el primer frame. */
+  .sf-info,
+  .sf-badge { opacity: 1; }
+  .sf-info { pointer-events: auto; }
   .sf-caret { display: none; }
 }
