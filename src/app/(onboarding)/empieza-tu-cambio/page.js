@@ -681,10 +681,17 @@ export default function EmpiezaTuCambioPage() {
     );
   }
 
+  // Mientras hay una pantalla superpuesta (cajón de pasos, pausa o diálogo de
+  // salida), el formulario de debajo se marca `inert`: deja de ser enfocable y
+  // desaparece del árbol de accesibilidad. Sin esto, tapa la vista pero no el
+  // teclado — con el Tab se llega a los botones de detrás y un lector de
+  // pantalla lee la pregunta que el visitante no está viendo.
+  const tapado = pidiendoSalir || stepsOpen || pausa !== null;
+
   return (
     <div className="min-h-[100svh] lg:min-h-screen w-full flex">
       {/* ===== IZQUIERDA: pregunta activa ===== */}
-      <div className="flex-1 flex flex-col px-6 sm:px-12 lg:px-20 pt-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] sm:py-8 relative">
+      <div inert={tapado || undefined} className="flex-1 flex flex-col px-6 sm:px-12 lg:px-20 pt-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] sm:py-8 relative">
         {/* Barra de progreso */}
         <div className="flex items-center gap-4 mb-12 sm:mb-16">
           <div className="flex-1 h-2.5 rounded-full bg-[#DEDCF5] overflow-hidden">
@@ -908,6 +915,7 @@ export default function EmpiezaTuCambioPage() {
 
       {/* ===== DERECHA: logo + fases (escritorio) ===== */}
       <FormAside
+        inert={tapado || undefined}
         title="Aquí empieza tu cambio"
         subtitle={`2 minutos, ${total - 2} preguntas`}
         phases={PHASES}
