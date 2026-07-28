@@ -1,5 +1,13 @@
 import { Inter } from "next/font/google";
 import "../globals.css";
+// <FormularioPendiente> (más abajo) se pinta con la clase `.sf-flotante`, que
+// vive en form-motion.css. Sin este import el botón aparecía de golpe en la
+// web pública, sin subir desde abajo: la hoja solo se cargaba en el layout de
+// (onboarding), que es justo donde ese botón NO se muestra.
+// Se puede importar sin miedo: form-motion.css solo define clases `.sf-*` y
+// variables propias (--ms-*, --px-*, --ease-ui), ninguna usada por globals.css,
+// y de la web pública solo <FormularioPendiente> lleva clases `sf-`.
+import "../form-motion.css";
 import GoogleAnalytics from "@/app/components/GoogleAnalytics";
 import Header from "../components/Header";
 import Footer from "../components/Footer";

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { ChevronDown } from 'lucide-react';
@@ -9,6 +9,7 @@ import { useCheckoutStore } from '@/stores/checkout.store';
 import { useCurrency } from './useCurrency';
 import CurrencySelector from './CurrencySelector';
 import { arancelParaCarrito } from './aranceles';
+import useCerrarAlTocarFuera from '@/hooks/useCerrarAlTocarFuera';
 
 export default function OrderSummary(props) {
     const { isFormValid, isFormDirty, triggerCheckoutFormSubmit } = props;
@@ -21,6 +22,16 @@ export default function OrderSummary(props) {
     // El total y el botón de continuar quedan SIEMPRE a la vista: son lo que
     // el cliente necesita para decidir y avanzar sin desplegar nada.
     const [expanded, setExpanded] = useState(false);
+
+    // Desplegado se come el tercio inferior de la pantalla, y hasta ahora la
+    // única salida era volver a encontrar la barra. Ahora un toque en el resto
+    // de la página (o Escape) lo pliega. La ref va en el contenedor de TODO el
+    // resumen: así el propio botón queda "dentro" y sigue siendo un
+    // interruptor normal, y se pueden tocar los productos, la moneda o
+    // «Continuar» sin que se cierre en la cara.
+    const resumenRef = useRef(null);
+    const plegar = useCallback(() => setExpanded(false), []);
+    useCerrarAlTocarFuera(expanded, plegar, [resumenRef]);
 
     const { currency, setCurrency, symbol, convertPrice, currencies } = useCurrency();
 
@@ -59,7 +70,7 @@ export default function OrderSummary(props) {
         : 'Los siguientes meses';
 
     return (
-    <div className="w-full h-full p-6 lg:p-14 xl:p-20 font-sans flex flex-col justify-start lg:justify-center">
+    <div ref={resumenRef} className="w-full h-full p-6 lg:p-14 xl:p-20 font-sans flex flex-col justify-start lg:justify-center">
 
       {/* Logo (oculto en móvil para compactar) + selector de moneda (siempre
           visible: en móvil se quedaba escondido dentro del bloque del logo). */}
