@@ -204,7 +204,10 @@ export default function FormRunner({ definition, context = {}, onSubmit, exitHre
         if (e.isComposing || escribiendoEnCampo(e.target)) return;
         if (moverFocoOpciones(e.key === 'ArrowDown' ? 1 : -1)) {
           e.preventDefault();
-          playSelect();
+          // Al mantener pulsada la flecha el foco sigue corriendo, pero el
+          // sonido solo suena en la primera: repetido treinta veces por
+          // segundo es un zumbido, no una respuesta.
+          if (!e.repeat) playSelect();
         }
         return;
       }
