@@ -1,17 +1,37 @@
 'use client';
 
-import React, { useEffect } from 'react';
-import { Check, BookOpen, Play, ArrowRight } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { Check, BookOpen, Play, Package, LayoutDashboard, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/stores/auth.store';
 import { useCartStore } from '@/stores/cart.store';
 import TrustpilotInvitation from './TrustpilotInvitation';
+import { readOrderAccess } from './accesoComprado';
+
+// Icono por tipo de producto comprado.
+const ICONO = { curso: Play, biblioteca: BookOpen, libro: Package };
+
+// Qué se le promete al cliente en cada tarjeta. El libro en papel no lleva
+// destino: se envía, no se abre en el panel.
+const PIE = {
+  curso: 'Entra en Mis cursos',
+  biblioteca: 'Entra en tu biblioteca de recetas',
+  libro: 'Te lo enviamos a tu dirección',
+};
 
 export default function PaymentSuccess() {
   const router = useRouter();
   const { user } = useAuthStore();
   const { clearCart } = useCartStore();
+
+  // Lo que acaba de comprar (foto tomada por el paso de pago). Se lee ya
+  // montado: sessionStorage no existe en el render del servidor.
+  const [comprado, setComprado] = useState([]);
+
+  useEffect(() => {
+    setComprado(readOrderAccess());
+  }, []);
 
   // Clear the cart and refresh subscription status (handling webhook delay)
   useEffect(() => {
@@ -67,39 +87,56 @@ export default function PaymentSuccess() {
           ¿A dónde quieres ir ahora?
         </p>
 
+        {/* Una entrada por producto DE ESTE pedido (antes había dos tarjetas
+            fijas: quien no compraba libros o cursos acababa en una pantalla
+            vacía) + el panel, que va siempre. */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full mb-10">
-          {/* Biblioteca Digital */}
-          <Link href="/panel-cocina" className="group">
-            <div className="flex flex-col items-center gap-3 p-6 rounded-2xl border-2 border-indigo-100 bg-indigo-50 hover:border-indigo-500 hover:bg-indigo-100 transition-all cursor-pointer">
+          {comprado.map((entrada) => {
+            const Icono = ICONO[entrada.tipo] || Package;
+
+            // Sin destino real (libro en papel): tarjeta informativa, no enlace.
+            if (!entrada.href) {
+              return (
+                <div
+                  key={`${entrada.tipo}-${entrada.id}`}
+                  className="flex flex-col items-center gap-3 p-6 rounded-2xl border-2 border-indigo-100 bg-indigo-50/60"
+                >
+                  <div className="w-12 h-12 bg-indigo-700 rounded-xl flex items-center justify-center">
+                    <Icono size={24} className="text-white" />
+                  </div>
+                  <span className="font-bold text-indigo-900 text-base">{entrada.titulo}</span>
+                  <span className="text-indigo-600 text-sm">{PIE[entrada.tipo]}</span>
+                </div>
+              );
+            }
+
+            return (
+              <Link key={`${entrada.tipo}-${entrada.id}`} href={entrada.href} className="group">
+                <div className="h-full flex flex-col items-center gap-3 p-6 rounded-2xl border-2 border-orange-100 bg-orange-50 hover:border-orange-500 hover:bg-orange-100 transition-all cursor-pointer">
+                  <div className="w-12 h-12 bg-orange-500 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <Icono size={24} className="text-white" />
+                  </div>
+                  <span className="font-bold text-orange-700 text-base">{entrada.titulo}</span>
+                  <span className="text-orange-500 text-sm">{PIE[entrada.tipo]}</span>
+                  <ArrowRight size={16} className="text-orange-400 group-hover:translate-x-1 transition-transform" />
+                </div>
+              </Link>
+            );
+          })}
+
+          {/* Panel de control: SIEMPRE, y es lo único que se ofrece si no
+              tenemos la foto del pedido (pestaña nueva, sin sessionStorage…). */}
+          <Link href="/panel-control" className="group">
+            <div className="h-full flex flex-col items-center gap-3 p-6 rounded-2xl border-2 border-indigo-100 bg-indigo-50 hover:border-indigo-500 hover:bg-indigo-100 transition-all cursor-pointer">
               <div className="w-12 h-12 bg-indigo-700 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
-                <BookOpen size={24} className="text-white" />
+                <LayoutDashboard size={24} className="text-white" />
               </div>
-              <span className="font-bold text-indigo-900 text-base">Biblioteca Digital</span>
-              <span className="text-indigo-600 text-sm">Tus libros de cocina</span>
+              <span className="font-bold text-indigo-900 text-base">Mi panel</span>
+              <span className="text-indigo-600 text-sm">Todo tu contenido y tus datos</span>
               <ArrowRight size={16} className="text-indigo-400 group-hover:translate-x-1 transition-transform" />
             </div>
           </Link>
-
-          {/* Cursos en Video */}
-          <Link href="/panel-cursos" className="group">
-            <div className="flex flex-col items-center gap-3 p-6 rounded-2xl border-2 border-orange-100 bg-orange-50 hover:border-orange-500 hover:bg-orange-100 transition-all cursor-pointer">
-              <div className="w-12 h-12 bg-orange-500 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
-                <Play size={24} className="text-white" fill="white" />
-              </div>
-              <span className="font-bold text-orange-700 text-base">Cursos en Video</span>
-              <span className="text-orange-500 text-sm">Tus clases de Squad Fit</span>
-              <ArrowRight size={16} className="text-orange-400 group-hover:translate-x-1 transition-transform" />
-            </div>
-          </Link>
         </div>
-
-        {/* --- Link secundario al panel --- */}
-        <p className="text-gray-400 text-sm">
-          También puedes ir a tu{' '}
-          <Link href="/panel-control" className="font-semibold text-indigo-700 hover:text-indigo-900 underline underline-offset-2 transition-colors">
-            Panel de Control
-          </Link>
-        </p>
 
         {/* --- Logotipo Final --- */}
         <div className="flex flex-col items-center mt-12">
