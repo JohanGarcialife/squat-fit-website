@@ -452,7 +452,9 @@ export default function Shop() {
             disabledLabel={hasPermanent ? '✓ Ya lo tienes' : 'Cargando…'}
           />
 
-          {/* 4. Bundle / hero (completa) */}
+          {/* 4. Bundle / hero (completa). Mientras el bundle no exista en el
+              backend el botón no promete una compra que no se puede hacer:
+              se anuncia como «próximamente» y al pulsarlo sale «muy pronto». */}
           <PricingCard
             tag="Impreso + Digital"
             tagColor={C.heroText}
@@ -464,9 +466,9 @@ export default function Shop() {
             per="+ envío"
             save={bundleSave}
             desc="Los dos libros físicos + la biblioteca digital completa y siempre actualizada, para siempre."
-            ctaLabel="Lo quiero todo"
+            ctaLabel={bundle ? 'Lo quiero todo' : 'Muy pronto'}
             ctaColor={C.hero}
-            badge="Mejor valor"
+            badge={bundle ? 'Mejor valor' : 'Próximamente'}
             selected={selectedCard === 'bundle'}
             onSelect={() => setSelectedCard('bundle')}
             onCta={buyBundle}
