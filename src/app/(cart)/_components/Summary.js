@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useCallback, useRef, useState, useEffect } from 'react'
 import { ChevronLeft, ChevronDown, X, RotateCcw } from "lucide-react";
 import Image from "next/image";
 import Link from 'next/link';
@@ -8,6 +8,7 @@ import { useCartStore } from '@/stores/cart.store';
 import { useCheckoutStore } from '@/stores/checkout.store';
 import { arancelParaCarrito } from './aranceles';
 import { TIER_META, groupTierOrder, buildTierCartItem, formatEuros } from '@/app/components/courseCatalog';
+import useCerrarAlTocarFuera from '@/hooks/useCerrarAlTocarFuera';
 
 // Sufijo de cobro por tramo (el trimestral se etiquetaba antes como «pago
 // único» porque el selector usaba un orden fijo de 3 tramos).
@@ -41,6 +42,14 @@ export default function Summary(props) {
     // el bloque plegable lleva `lg:block` y la barra `lg:hidden`, así que en
     // escritorio no cambia nada.
     const [detalleAbierto, setDetalleAbierto] = useState(false);
+
+    // Y una vez desplegado hay que poder salir sin buscar la barra otra vez:
+    // un toque en el resto de la página (o Escape) lo pliega. La ref va en el
+    // bottom sheet completo, así el botón «Ver detalle» sigue siendo un
+    // interruptor y se puede tocar la moneda o «Continuar» sin que se cierre.
+    const hojaRef = useRef(null);
+    const plegarDetalle = useCallback(() => setDetalleAbierto(false), []);
+    useCerrarAlTocarFuera(detalleAbierto, plegarDetalle, [hojaRef]);
 
     // Deshacer: igual que en el pop-up del carrito, también cuando el producto
     // se elimina llegando a 0 con el botón −.
@@ -282,7 +291,7 @@ export default function Summary(props) {
 
         {/* Columna Derecha: Resumen — sticky a la derecha en desktop, sticky
             abajo (bottom sheet) en móvil para tener siempre a la vista el total. */}
-        <div className="w-full lg:w-2/5 xl:w-1/2 lg:min-h-screen bg-orange-50 sticky bottom-0 lg:static z-40 rounded-t-3xl lg:rounded-none shadow-[0_-10px_30px_rgba(0,0,0,0.10)] lg:shadow-none">
+        <div ref={hojaRef} className="w-full lg:w-2/5 xl:w-1/2 lg:min-h-screen bg-orange-50 sticky bottom-0 lg:static z-40 rounded-t-3xl lg:rounded-none shadow-[0_-10px_30px_rgba(0,0,0,0.10)] lg:shadow-none">
           <div className="lg:sticky lg:top-0 lg:h-screen max-h-[70vh] lg:max-h-none overflow-y-auto">
             <div className="py-8 lg:py-14 px-6 lg:px-20 xl:px-32 flex flex-col h-full justify-start lg:justify-center">
               
