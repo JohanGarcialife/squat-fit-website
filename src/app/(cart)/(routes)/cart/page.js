@@ -14,6 +14,7 @@ import FormData from "../../_components/FormData";
 import Payment from "../../_components/Payment";
 import PaymentSuccess from "../../_components/PaymentSuccess";
 import { markLeavingCart } from "@/app/components/CartScrollRestore";
+import { verifyCheckoutSession } from "@/app/components/courseCatalog";
 
 export default function CartPage() {
   const router = useRouter();
@@ -21,6 +22,11 @@ export default function CartPage() {
   const [isClient, setIsClient] = useState(false);
   const [step, setStep] = useState(1);
   const [success, setSuccess] = useState(false);
+  // Auditoría julio, hallazgo #17: mientras se confirma el pago con el
+  // backend (o con Stripe.js), no se pinta ni el carrito ni la pantalla de
+  // gracias — antes `?success=true` bastaba por sí solo para vaciar el
+  // carrito y mostrar «pago completado» sin comprobar nada.
+  const [verifyingPayment, setVerifyingPayment] = useState(false);
 
   // Carrito 3.3: al salir de /cart (atrás o enlaces de volver) se marca la
   // salida para que la página anterior restaure su posición de scroll.
@@ -37,12 +43,52 @@ export default function CartPage() {
   useEffect(() => {
     setIsClient(true);
 
-    // Detect Stripe redirect success
     const params = new URLSearchParams(window.location.search);
-    if (params.get('redirect_status') === 'succeeded' || params.get('success') === 'true') {
+    const sessionId = params.get('session_id');
+    const paymentIntentSecret = params.get('payment_intent_client_secret');
+    const redirectStatus = params.get('redirect_status');
+
+    const finishAsPaid = () => {
       setSuccess(true);
       setStep(3); // Render the success screen
       useCartStore.getState().clearCart();
+    };
+
+    // Vuelta de una Stripe Checkout Session (alojada o incrustada): el
+    // `session_id` (cs_...) viaja siempre en el success_url que construye el
+    // backend. Se confirma con Stripe vía el backend antes de dar nada por
+    // pagado — un `?success=true` suelto en la URL ya no basta.
+    if (sessionId) {
+      setVerifyingPayment(true);
+      verifyCheckoutSession(sessionId).then(({ paid }) => {
+        setVerifyingPayment(false);
+        if (paid) finishAsPaid();
+        // Si no está pagada, se deja el carrito intacto: mejor que el
+        // cliente reintente el pago a que vea una "compra completada" falsa.
+      });
+      return;
+    }
+
+    // Vuelta de un PaymentIntent con redirección obligatoria (Klarna, PayPal,
+    // 3-D Secure…): Stripe añade payment_intent_client_secret y
+    // redirect_status a la return_url. Se confirma con el propio Stripe.js
+    // (stripe.retrievePaymentIntent), que consulta el estado real — nunca el
+    // texto de la URL, que cualquiera puede escribir a mano.
+    if (redirectStatus && paymentIntentSecret) {
+      setVerifyingPayment(true);
+      import('@stripe/stripe-js').then(({ loadStripe }) => {
+        const pk = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
+        if (!pk) {
+          setVerifyingPayment(false);
+          return;
+        }
+        return loadStripe(pk).then((stripe) =>
+          stripe.retrievePaymentIntent(paymentIntentSecret).then(({ paymentIntent }) => {
+            setVerifyingPayment(false);
+            if (paymentIntent?.status === 'succeeded') finishAsPaid();
+          }),
+        );
+      }).catch(() => setVerifyingPayment(false));
       return;
     }
 
@@ -86,6 +132,16 @@ export default function CartPage() {
 
   if (!isClient) {
     return <div className="min-h-screen bg-white"></div>;
+  }
+
+  // Confirmando con Stripe/backend antes de decidir si se vacía el carrito
+  // o se pinta la pantalla de gracias (auditoría julio, hallazgo #17).
+  if (verifyingPayment) {
+    return (
+      <div className="min-h-screen bg-white flex flex-col items-center justify-center text-center px-4">
+        <p className="text-indigo-900 font-medium">Confirmando tu pago…</p>
+      </div>
+    );
   }
 
   if (success) {
