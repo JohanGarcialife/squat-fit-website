@@ -17,8 +17,18 @@
 export const SEL_GRUPO = '[data-opciones]';
 export const SEL_OPCION = '[data-opcion]';
 
+// Mientras hay algo por encima de la pregunta —el diálogo de salida, el cajón
+// de pasos o la pausa a pantalla completa— las opciones siguen montadas debajo,
+// solo que tapadas. Sin esta puerta, las flechas moverían el foco a una opción
+// que no se ve y el siguiente Enter cambiaría la respuesta a ciegas.
+let hayAlgoDelante = false;
+export function bloquearTeclasDeOpciones(bloquear) {
+  hayAlgoDelante = !!bloquear;
+}
+
 // Botones de opción visibles del paso actual.
 function opcionesVisibles() {
+  if (hayAlgoDelante) return [];
   const grupo = document.querySelector(SEL_GRUPO);
   if (!grupo) return [];
   return Array.from(grupo.querySelectorAll(SEL_OPCION)).filter(
@@ -68,6 +78,7 @@ export function moverFocoOpciones(paso) {
  * por la vía nativa, que es lo cómodo en las preguntas de varias respuestas.
  */
 export function elegirOpcionEnfocada(target) {
+  if (hayAlgoDelante) return false;
   const opcion = target?.closest?.(SEL_OPCION);
   if (!opcion || opcion.dataset.elegida === 'true') return false;
   opcion.click();

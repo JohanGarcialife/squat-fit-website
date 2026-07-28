@@ -24,7 +24,7 @@ import { PAISES_EUROPA, PAISES_LATAM } from '@/app/components/paises';
 import LogoEspagueti from '@/app/components/LogoEspagueti';
 import { guardarProgreso, leerProgreso, borrarProgreso } from '@/app/components/formProgress';
 import { useAuthStore } from '@/stores/auth.store';
-import { moverFocoOpciones, elegirOpcionEnfocada, escribiendoEnCampo } from '@/app/components/formOptionKeys';
+import { moverFocoOpciones, elegirOpcionEnfocada, escribiendoEnCampo, bloquearTeclasDeOpciones } from '@/app/components/formOptionKeys';
 
 const BLUE = '#363C98';
 const ORANGE = '#FF690B';
@@ -578,6 +578,10 @@ export default function EmpiezaTuCambioPage() {
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, []);
+
+  // Mientras el diálogo de salida, el cajón de pasos o la pausa tapan la
+  // pregunta, las flechas y el Enter no deben tocar las opciones de debajo.
+  bloquearTeclasDeOpciones(pidiendoSalir || stepsOpen || pausa !== null);
 
   const progress = Math.round((index / (total - 1)) * 100);
 

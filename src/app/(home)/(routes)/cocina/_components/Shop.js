@@ -237,7 +237,11 @@ export default function Shop() {
           // pack desactivado se seguiría anunciando en la landing y la compra
           // moriría con un 400 «Pack not found», porque el backend sí lo
           // excluye al cobrar.
-          const alaVenta = packsData.filter((p) => p.is_active !== false)
+          // `=== true` y no `!== false`: al cobrar, el backend filtra con
+          // `andWhereNot('is_active', false)`, que en SQL descarta también los
+          // NULL. Con `!== false` un pack con is_active NULL se anunciaría aquí
+          // y moriría con un 400 al comprar — justo lo que este filtro evita.
+          const alaVenta = packsData.filter((p) => p.is_active === true)
 
           // Pack impreso: primero por id real y, si ese id ya no existe, el que
           // se llame "Vol 1 y 2" (o "1 y 2" / "1 + 2"). Si NO hay match NO se
