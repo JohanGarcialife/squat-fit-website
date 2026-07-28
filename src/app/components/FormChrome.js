@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { X, Check, ChevronLeft, ListChecks, Volume2, VolumeX } from 'lucide-react';
@@ -11,6 +11,29 @@ const ORANGE = '#FF690B';
 
 // Piezas de chrome compartidas por los formularios (prellamada, onboarding y los
 // del panel): salir, volver, lista de fases y el panel lateral de móvil.
+
+/* ── Devolver el foco al cerrar una pantalla superpuesta ─────────────────────
+   Cuando se abre el cajón de pasos, el diálogo de salida o la pausa, el
+   formulario de debajo queda `inert` y el navegador tira el foco al <body>. Al
+   cerrar hay que devolverlo donde estaba: si no, quien navega con teclado o con
+   lector de pantalla vuelve al principio de la página y tiene que recorrer el
+   formulario entero otra vez para seguir donde iba. ── */
+export function useFocoDevuelto(abierto) {
+  const anterior = useRef(null);
+  useEffect(() => {
+    if (!abierto) return undefined;
+    anterior.current = document.activeElement;
+    return () => {
+      const el = anterior.current;
+      anterior.current = null;
+      // Solo si sigue existiendo y se puede enfocar: al cerrar el diálogo de
+      // salida puede haber cambiado de pantalla y el elemento ya no estar.
+      if (el && el.isConnected && typeof el.focus === 'function') {
+        el.focus({ preventScroll: true });
+      }
+    };
+  }, [abierto]);
+}
 
 /* ── Salir: botón circular, en vez del carácter ✕ suelto ── */
 export function ExitButton({ href, onClick, label = 'Salir' }) {
@@ -75,6 +98,7 @@ export function useMicroFeedback() {
 }
 
 export function PausaPantalla({ texto }) {
+  useFocoDevuelto(!!texto);
   if (!texto) return null;
   return (
     <div
@@ -121,6 +145,7 @@ export function ChildField({ children }) {
       Es la mitad del trato de dejar salir — si no se dice, la persona asume que
       pierde lo hecho y o bien no sale (se frustra) o bien sale y no vuelve. ── */
 export function SalidaDialogo({ abierto, indice, total, onSeguir, onSalir }) {
+  useFocoDevuelto(abierto);
   if (!abierto) return null;
   const hechas = Math.max(0, indice);
   return (
@@ -269,9 +294,9 @@ export function PhasesList({ phases = [], currentPhase, onGoTo, compact = false 
 }
 
 /* ── Columna lateral de escritorio ── */
-export function FormAside({ title, subtitle, phases, currentPhase, onGoTo }) {
+export function FormAside({ title, subtitle, phases, currentPhase, onGoTo, inert }) {
   return (
-    <aside className="hidden lg:flex w-[34%] max-w-md flex-col items-center bg-[#F3F2F9] px-10 py-12">
+    <aside inert={inert} className="hidden lg:flex w-[34%] max-w-md flex-col items-center bg-[#F3F2F9] px-10 py-12">
       <Image src="/LogotipoSquatfit.png" width={88} height={88} alt="Squad Fit" className="mb-10" />
       {title && <p className="text-[#8B87C9] font-bold mb-2 text-center">{title}</p>}
       {subtitle && <p className="text-[#A9A6CE] text-sm font-semibold mb-8 text-center">{subtitle}</p>}
@@ -284,6 +309,7 @@ export function FormAside({ title, subtitle, phases, currentPhase, onGoTo }) {
 
 /* ── Panel lateral de móvil: mismo gesto que el carrito ── */
 export function StepsDrawer({ open, onClose, title, subtitle, phases, currentPhase, index, total, onGoTo }) {
+  useFocoDevuelto(open);
   useEffect(() => {
     if (!open) return undefined;
     const onKey = (e) => { if (e.key === 'Escape') onClose(); };

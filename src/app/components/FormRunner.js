@@ -154,8 +154,12 @@ export default function FormRunner({ definition, context = {}, onSubmit, exitHre
   };
 
   // Mientras el cajón de pasos o la pausa tapan la pregunta, las flechas y el
-  // Enter no deben tocar las opciones de debajo.
-  bloquearTeclasDeOpciones(stepsOpen || pausa !== null);
+  // Enter no deben tocar las opciones de debajo. Y el formulario entero se
+  // marca `inert`: deja de ser enfocable y desaparece del árbol de
+  // accesibilidad, para que el Tab no llegue a lo que hay detrás y un lector de
+  // pantalla no lea la pregunta que no se está viendo.
+  const tapado = stepsOpen || pausa !== null;
+  bloquearTeclasDeOpciones(tapado);
 
   const progress = total > 1 ? Math.round((index / (total - 1)) * 100) : 0;
   const isLast = index === total - 1;
@@ -326,7 +330,7 @@ export default function FormRunner({ definition, context = {}, onSubmit, exitHre
   return (
     <div className="min-h-[100svh] lg:min-h-screen w-full flex">
       {/* ===== IZQUIERDA: pregunta activa ===== */}
-      <div className="flex-1 flex flex-col px-6 sm:px-12 lg:px-20 pt-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] sm:py-8 relative">
+      <div inert={tapado || undefined} className="flex-1 flex flex-col px-6 sm:px-12 lg:px-20 pt-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] sm:py-8 relative">
         <div className="flex items-center gap-4 mb-10 sm:mb-14">
           <div className="flex-1 h-2.5 rounded-full bg-[#DEDCF5] overflow-hidden">
             <div className="h-full rounded-full sf-progress-fill" style={{ width: `${progress}%`, backgroundColor: BLUE }} />
@@ -604,7 +608,7 @@ export default function FormRunner({ definition, context = {}, onSubmit, exitHre
       </div>
 
       {/* ===== DERECHA: logo + fases (escritorio) ===== */}
-      <FormAside title={formTitle} phases={phases} currentPhase={step.phase} onGoTo={goToPhase} />
+      <FormAside inert={tapado || undefined} title={formTitle} phases={phases} currentPhase={step.phase} onGoTo={goToPhase} />
 
       {/* Panel de pasos en móvil (desde el contador) */}
       <StepsDrawer
