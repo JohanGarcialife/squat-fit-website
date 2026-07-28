@@ -24,6 +24,7 @@ import { PAISES_EUROPA, PAISES_LATAM } from '@/app/components/paises';
 import LogoEspagueti from '@/app/components/LogoEspagueti';
 import { guardarProgreso, leerProgreso, borrarProgreso } from '@/app/components/formProgress';
 import { useAuthStore } from '@/stores/auth.store';
+import { moverFocoOpciones, elegirOpcionEnfocada, escribiendoEnCampo } from '@/app/components/formOptionKeys';
 
 const BLUE = '#363C98';
 const ORANGE = '#FF690B';
@@ -535,6 +536,19 @@ export default function EmpiezaTuCambioPage() {
       const escribiendo = e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA');
       // Tecleo discreto mientras el usuario escribe en un campo.
       if (escribiendo && !e.repeat && (e.key.length === 1 || e.key === 'Backspace')) playKeypress();
+
+      // Flechas ↑/↓: mover el resaltado entre las opciones, como un menú.
+      // No se tocan dentro de campos (ahí las flechas ya significan otra cosa)
+      // ni en el <select> de país, que trae su propio recorrido por teclado.
+      if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+        if (e.isComposing || escribiendoEnCampo(e.target)) return;
+        if (moverFocoOpciones(e.key === 'ArrowDown' ? 1 : -1)) {
+          e.preventDefault();
+          playSelect();
+        }
+        return;
+      }
+
       if (e.key !== 'Enter' || e.repeat || e.isComposing) return;
       const t = e.target;
       const enCampo = t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA');
@@ -549,6 +563,12 @@ export default function EmpiezaTuCambioPage() {
 
       if (t && t.tagName === 'TEXTAREA') return; // salto de línea normal
       if (t && t.closest && t.closest('a')) return; // no pisar enlaces (✕ salir)
+
+      // Enter con el foco en una opción: si aún no está elegida la elige y no
+      // avanza; si ya lo está, avanza. Resaltar con flechas → Enter elige →
+      // Enter sigue.
+      if (elegirOpcionEnfocada(t)) { e.preventDefault(); return; }
+
       e.preventDefault();
       enterRef.current?.();
     };
@@ -728,7 +748,7 @@ export default function EmpiezaTuCambioPage() {
             )}
 
             {step.type === 'radio' && (
-              <div className="flex flex-col gap-3 max-w-md">
+              <div className="flex flex-col gap-3 max-w-md" data-opciones role="radiogroup" aria-label={step.title}>
                 {step.options.map((opt, i) => {
                   const active = answers[step.key] === opt;
                   const hijo = step.hijos?.[opt];
@@ -736,6 +756,10 @@ export default function EmpiezaTuCambioPage() {
                     <React.Fragment key={opt}>
                       <button
                         type="button"
+                        data-opcion
+                        data-elegida={active ? 'true' : undefined}
+                        role="radio"
+                        aria-checked={active}
                         onClick={() => {
                           // Al cambiar de opción se limpia la respuesta hija:
                           // si no, quedaría un país de Europa con Latam marcada.
@@ -776,13 +800,16 @@ export default function EmpiezaTuCambioPage() {
             )}
 
             {step.type === 'checkbox' && (
-              <div className="flex flex-col gap-3 max-w-md">
+              <div className="flex flex-col gap-3 max-w-md" data-opciones role="group" aria-label={step.title}>
                 {step.options.map((opt, i) => {
                   const selected = (answers[step.key] || []).includes(opt);
                   return (
                     <button
                       key={opt}
                       type="button"
+                      data-opcion
+                      data-elegida={selected ? 'true' : undefined}
+                      aria-pressed={selected}
                       onClick={() => {
                         const cur = answers[step.key] || [];
                         choose({ [step.key]: selected ? cur.filter((o) => o !== opt) : [...cur, opt] });
