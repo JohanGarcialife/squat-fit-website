@@ -10,7 +10,23 @@ const inter = Inter({
   subsets: ["latin"],
 });
 
+// La web se sirve en squadfit.es y en www.squadfit.es, y hasta ahora las dos
+// devolvían 200 con el MISMO html: dos copias del sitio para Google, que
+// repartía entre ellas la autoridad de los enlaces. El redirect de www al apex
+// ya está puesto en Vercel; esto es el refuerzo desde el propio html.
+//
+// `metadataBase` es lo que permite que la canónica salga como URL absoluta (sin
+// él Next no sabe con qué dominio componerla). De paso deja preparado el día que
+// se añadan imágenes Open Graph: hoy el sitio no tiene ninguna etiqueta og:, así
+// que al compartir un enlace no sale tarjeta de vista previa en ningún sitio.
+//
+// `canonical: './'` se resuelve contra metadataBase y la ruta actual, así que
+// cada página se declara canónica de sí misma SIEMPRE en el apex.
+const SITIO = new URL('https://squadfit.es');
+
 export const metadata = {
+  metadataBase: SITIO,
+  alternates: { canonical: './' },
   title: "Tu recomendación · Squad Fit",
   description:
     "Puntúa qué necesitas ahora mismo y te decimos qué encaja mejor contigo.",
