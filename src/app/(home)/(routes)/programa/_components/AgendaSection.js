@@ -14,7 +14,7 @@ import Link from 'next/link';
 // El calendario no ha desaparecido: vive al final del formulario (`BOOKING_URL`
 // en empieza-tu-cambio), que es donde toca ahora.
 //
-// OJO si alguien vuelve a poner aquí un enlace directo a agenda.squatfit.es:
+// OJO si alguien vuelve a poner aquí un enlace directo a agenda.squadfit.es:
 // estaría reabriendo justo el agujero que esto cierra.
 export default function AgendaSection() {
   return (
