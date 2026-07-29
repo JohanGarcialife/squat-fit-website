@@ -30,9 +30,21 @@ import { moverFocoOpciones, elegirOpcionEnfocada, escribiendoEnCampo, bloquearTe
 const BLUE = '#363C98';
 const ORANGE = '#FF690B';
 
-// Enlace de reserva de la llamada. Hoy apunta a /contacto; cuando exista un
-// calendario (Calendly o similar) basta con cambiar esta constante.
-const BOOKING_URL = 'https://agenda.squatfit.es/sesion-diagnostica';
+// Enlace de reserva de la llamada: la agenda de TidyCal en dominio propio.
+//
+// OJO, esta constante es la boca del embudo del programa: es el único sitio
+// desde el que se puede reservar la llamada (la sección de agenda de /programa
+// ya no lleva calendario a propósito). Si el enlace se rompe, quien termina el
+// formulario no tiene por dónde seguir y no se entera nadie, porque no falla
+// nada: sale un 404 de TidyCal.
+//
+// Nos pasó el 29-jul-2026 al mover la agenda de agenda.squatfit.es a
+// agenda.squadfit.es en TidyCal: el hostname viejo dejó de estar mapeado a la
+// cuenta y esta URL empezó a devolver 404 sin que cambiara ni una línea de
+// código. El mismo enlace vive también en el backend (AGENDA_URL en
+// public-forms.service.ts), dentro del email de confirmación: si se cambia
+// aquí, hay que cambiarlo allí.
+const BOOKING_URL = 'https://agenda.squadfit.es/sesion-diagnostica';
 
 // Endpoint público de forms (lote 4, 20-jul-2026): guarda la solicitud en el
 // backend sin sesión, con rate-limit y honeypot. form_id estable sembrado por
