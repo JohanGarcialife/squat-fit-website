@@ -24,6 +24,7 @@ import { PAISES_EUROPA, PAISES_LATAM } from '@/app/components/paises';
 import LogoEspagueti from '@/app/components/LogoEspagueti';
 import { guardarProgreso, leerProgreso, borrarProgreso } from '@/app/components/formProgress';
 import { useAuthStore } from '@/stores/auth.store';
+import { resolveOrigin } from '@/app/components/UTMCapture';
 import { moverFocoOpciones, elegirOpcionEnfocada, escribiendoEnCampo, bloquearTeclasDeOpciones } from '@/app/components/formOptionKeys';
 
 const BLUE = '#363C98';
@@ -183,6 +184,17 @@ const PORTADA_OUT_MS = 1200;
 
 // Identificador del progreso guardado en el navegador.
 // Traducción de nuestro utm_source al vocabulario de orígenes del back office.
+// De un origen ya resuelto («UTM: google · …», «Orgánico: youtube.com»,
+// «Directo») al vocabulario CERRADO que pinta el back office. Lo que no encaje
+// cae en 'web', que es lo que había antes para todo.
+function fuenteCrmDesdeOrigen(origen) {
+  const o = (origen || '').toLowerCase();
+  if (o.includes('youtube')) return 'youtube';
+  if (o.includes('instagram') || o.includes('ig-')) return 'ig';
+  if (o.includes('mail') || o.includes('correo')) return 'email';
+  return 'web';
+}
+
 const CRM_SOURCE = {
   youtube: 'youtube',
   instagram: 'ig',
@@ -471,9 +483,12 @@ export default function EmpiezaTuCambioPage() {
       first_name: normalizeName(answers.first_name),
       last_name: normalizeName(answers.last_name),
       timestamp: new Date().toISOString(),
-      origen: origenLead?.via
-        ? `web ${origenLead.via}`
-        : (typeof window !== 'undefined' ? `web ${window.location.pathname}` : 'web'),
+      // Si el enlace traía ?via= manda esa atribución (identifica al vendedor
+      // concreto). Si no, se usa la MISMA que ya usa el carrito: UTM si la hay,
+      // «Orgánico: <dominio>» si vino de fuera, y «Directo» si no. Antes aquí
+      // se guardaba `web /empieza-tu-cambio` para todo el mundo, así que una
+      // búsqueda de Google y un anuncio pagado eran indistinguibles.
+      origen: origenLead?.via ? `web ${origenLead.via}` : (resolveOrigin() || 'Directo'),
       ...(origenLead || {}),
     };
     try {
@@ -495,7 +510,7 @@ export default function EmpiezaTuCambioPage() {
           // mandara el detalle en `source`, el CRM enseñaría la etiqueta vacía.
           // OJO: TikTok no tiene hueco en ese vocabulario y cae en «otro» hasta
           // que se le añada uno en el dashboard.
-          source: CRM_SOURCE[origenLead?.utm_source] || 'web',
+          source: CRM_SOURCE[origenLead?.utm_source] || fuenteCrmDesdeOrigen(submission.origen),
           // El detalle fino viajaba en `submission` pero NO en el POST: `via`
           // está en META_KEYS, así que se excluye de `answers`, y nadie lo
           // volvía a añadir arriba. Se perdía entero: en el CRM «ig-bio-maria»
