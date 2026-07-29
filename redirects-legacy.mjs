@@ -96,7 +96,9 @@ const MAP = [
   ['/transformar-tu-cuerpo-con-guia', '/programa'],
   ['/producto-completo-para-tu-mejor-version', '/programa'],
   ['/evaluando-tu-progreso', '/programa'],
-  ['/sorteo-programa-tu-mejor-version', '/programa'],
+  // El sorteo va al FORMULARIO con su propio origen (ver form-links.mjs), no a
+  // la landing: quien llega por aquí venía a apuntarse a algo.
+  ['/sorteo-programa-tu-mejor-version', '/sorteo-programa-tu-mejor-version'],
 
   // --- Pretty Links --------------------------------------------------------
   // Enlaces cortos que servía el plugin Pretty Links (307) desde WordPress.

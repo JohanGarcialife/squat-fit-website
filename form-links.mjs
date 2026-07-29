@@ -31,6 +31,11 @@ export const FORM_LINKS = [
   // De los dos
   { slug: 'eform',   via: 'email',         source: 'email',     medium: 'newsletter',  content: 'ambos'  },
   { slug: 'guia',    via: 'guia',          source: 'guia',      medium: 'lead-magnet', content: 'ambos'  },
+  // Landing del sorteo del WordPress viejo. No es un enlace corto de bio: es una
+  // URL que la gente ya tiene guardada y que se siguió compartiendo. En vez de
+  // dejarla morir en la home, entra al formulario con su propio origen, así se
+  // puede medir cuánta cola trae el sorteo después de cerrarse.
+  { slug: 'sorteo-programa-tu-mejor-version', via: 'sorteo', source: 'sorteo', medium: 'landing', content: 'ambos' },
 ];
 
 /** La URL completa a la que lleva un enlace corto, con su atribución. */
