@@ -5,6 +5,7 @@ import TrustpilotInvitations from "@/app/components/TrustpilotInvitations";
 import "../form-motion.css";
 import ToasterProvider from "@/components/ToasterProvider";
 import CookieBanner from "@/app/components/CookieBanner";
+import UTMCapture from "@/app/components/UTMCapture";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -28,6 +29,10 @@ export default function OnboardingLayout({ children }) {
       <body className={`${inter.variable} antialiased`}>
         <ToasterProvider />
         {children}
+        {/* Atribución: sin esto, quien aterriza DIRECTO en este grupo de rutas
+            (un anuncio, un enlace de YouTube, una búsqueda de Google) no deja
+            rastro de por dónde vino, y el lead se guarda como «web» a secas. */}
+        <UTMCapture />
         <CookieBanner />
         <GoogleAnalytics />
       </body>
