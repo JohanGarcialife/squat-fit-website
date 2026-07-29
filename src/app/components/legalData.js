@@ -192,7 +192,7 @@ Como usuario, puede ejercitar los siguientes derechos:
 
 - **Derecho a la limitación del tratamiento**: Tiene derecho a solicitarnos que suspendamos el tratamiento de sus datos cuando: impugne la exactitud de los datos, mientras Squat Fit, S.L.U. verifica dicha exactitud; haya ejercido el derecho de oposición al tratamiento de sus datos, mientras que se verifica si los motivos legítimos de Squat Fit, S.L.U. prevalecen sobre los suyos como interesado.
 
-En cualquier momento, podrá ejercitar estos Derechos, mediante un escrito y acreditando su personalidad dirigido al responsable del tratamiento a la dirección señalada anteriormente, o a través de la dirección de correo electrónico: hola@squatfit.es
+En cualquier momento, podrá ejercitar estos Derechos, mediante un escrito y acreditando su personalidad dirigido al responsable del tratamiento a la dirección señalada anteriormente, o a través de la dirección de correo electrónico: hola@squadfit.es
 
 Además, podrá presentar una reclamación ante la autoridad de control, en este caso, la Agencia Española de Protección de Datos, si considera que el tratamiento de datos personales infringe la legislación aplicable.
 
@@ -204,7 +204,7 @@ Mantendremos los datos durante el tiempo estrictamente necesario para la prestac
 
 No se prevén cesiones de datos salvo en aquellos casos en que exista una obligación legal o comunicación necesaria para poder prestarle el servicio solicitado adecuadamente. No hay previsión de transferencias de datos internacionales.
 
-Cuando finalizas un pedido, comunicamos tu nombre, tu dirección de correo electrónico y la referencia y los productos de ese pedido a Trustpilot A/S (Pilestræde 58, 1112 Copenhague, Dinamarca), encargado del tratamiento, con la única finalidad de invitarte a valorar tu compra. Trustpilot está en la Unión Europea, por lo que esta comunicación no supone una transferencia internacional de datos. Puedes consultar sus condiciones en https://es.legal.trustpilot.com y oponerte a recibir estas invitaciones escribiéndonos a hola@squatfit.es.`,
+Cuando finalizas un pedido, comunicamos tu nombre, tu dirección de correo electrónico y la referencia y los productos de ese pedido a Trustpilot A/S (Pilestræde 58, 1112 Copenhague, Dinamarca), encargado del tratamiento, con la única finalidad de invitarte a valorar tu compra. Trustpilot está en la Unión Europea, por lo que esta comunicación no supone una transferencia internacional de datos. Puedes consultar sus condiciones en https://es.legal.trustpilot.com y oponerte a recibir estas invitaciones escribiéndonos a hola@squadfit.es.`,
   cookies: `## ¿QUÉ ES UNA COOKIE?
 
 Este sitio web utiliza cookies y/o tecnologías similares que almacenan y recuperan información cuando navegas. En general, estas tecnologías pueden servir para finalidades muy diversas, como, por ejemplo, reconocerte como usuario, obtener información sobre tus hábitos de navegación o personalizar la forma en la que se muestra el contenido. Los usos concretos que hacemos de estas tecnologías se describen a continuación.
@@ -266,7 +266,7 @@ Además, podrás presentar una reclamación ante la autoridad de control, en est
 
 De conformidad con los artículos 102 y siguientes del TRLGDCU, el cliente que tenga la condición de consumidor dispone de catorce (14) días naturales para desistir de la contratación, sin necesidad de justificación ni penalización. En los productos físicos, el plazo comenzará desde su recepción.
 
-La solicitud deberá enviarse a **hola@squatfit.es**, indicando el nombre completo, el correo electrónico utilizado en la compra y el producto contratado.
+La solicitud deberá enviarse a **hola@squadfit.es**, indicando el nombre completo, el correo electrónico utilizado en la compra y el producto contratado.
 
 Cuando proceda, el reembolso se realizará conforme al apartado 7 y dentro del plazo legal máximo de catorce (14) días naturales, sin perjuicio de las excepciones previstas en el artículo 103 del TRLGDCU.
 

@@ -176,7 +176,7 @@ const ContenidoContacto = () => (
         NUESTROS datos para escribirnos, no campos a rellenar). El número no
         recibe llamadas: se ofrece como WhatsApp, no como teléfono. */}
     <div className="mt-8 grid sm:grid-cols-2 gap-4">
-      <a href="mailto:hola@squatfit.es" className="group flex items-center gap-4 rounded-2xl border-2 border-[#363C98]/15 p-5 hover:border-[#363C98] hover:shadow-md transition-all">
+      <a href="mailto:hola@squadfit.es" className="group flex items-center gap-4 rounded-2xl border-2 border-[#363C98]/15 p-5 hover:border-[#363C98] hover:shadow-md transition-all">
         <span className="flex-shrink-0 w-12 h-12 rounded-2xl bg-[#363C98] flex items-center justify-center">
           <svg className="w-6 h-6 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
             <rect x="3" y="5" width="18" height="14" rx="3" /><path d="m3 7 9 6 9-6" />
@@ -184,7 +184,7 @@ const ContenidoContacto = () => (
         </span>
         <span className="flex-1">
           <span className="block text-gray-800 font-bold">Escríbenos un email</span>
-          <span className="block text-[#363C98] text-sm font-medium mt-0.5">hola@squatfit.es</span>
+          <span className="block text-[#363C98] text-sm font-medium mt-0.5">hola@squadfit.es</span>
         </span>
         <span className="text-slate-300 group-hover:text-[#363C98] group-hover:translate-x-0.5 transition-all" aria-hidden="true">→</span>
       </a>

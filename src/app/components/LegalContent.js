@@ -16,7 +16,7 @@ const COMPANY = [
   ['C. Postal', '03003'],
   ['Ciudad', 'Alicante, España'],
   ['Teléfono', '+34 623 020 494'],
-  ['Correo', 'hola@squatfit.es'],
+  ['Correo', 'hola@squadfit.es'],
 ];
 
 // Callout destacado con los datos de empresa (imita el bloque resaltado de squatfit.es).

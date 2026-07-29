@@ -36,7 +36,7 @@ const faqs = [
   {
     question: "¿Y si no me convence? Devoluciones y garantía",
     answer:
-      "Compra tranquilo: con el libro impreso tienes 30 días naturales desde que lo recibes para devolverlo, siempre que esté en las mismas condiciones en las que llegó (solo los gastos del envío de vuelta van por tu cuenta). Escríbenos a hola@squatfit.es con tu nombre y los datos de la compra y te reembolsamos por el mismo método de pago en un máximo de 14 días. Condiciones completas en nuestra política de devoluciones.",
+      "Compra tranquilo: con el libro impreso tienes 30 días naturales desde que lo recibes para devolverlo, siempre que esté en las mismas condiciones en las que llegó (solo los gastos del envío de vuelta van por tu cuenta). Escríbenos a hola@squadfit.es con tu nombre y los datos de la compra y te reembolsamos por el mismo método de pago en un máximo de 14 días. Condiciones completas en nuestra política de devoluciones.",
   },
   {
     question: "Estoy a dieta para perder grasa, ¿me sirve?",
