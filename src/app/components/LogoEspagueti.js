@@ -25,8 +25,10 @@ const HILOS = 40;
 /** Duración total de la salida. Tiene que cuadrar con PORTADA_OUT_MS. */
 export const PORTAL_MS = 1200;
 
-/** Espiral logarítmica como path de Bézier: curva de verdad, no arcos. */
-function espiral(i) {
+/** Espiral logarítmica como path de Bézier: curva de verdad, no arcos.
+ *  Se dibuja alrededor de (cx, cy) en unidades del viewBox, NO alrededor del
+ *  (0,0) de usuario: ver la nota sobre `transform-origin` más abajo. */
+function espiral(i, cx, cy) {
   const a0 = (i * 2.399) % (Math.PI * 2); // ángulo áureo: reparto sin repetir
   const r0 = RADIO * (0.55 + ((i * 37) % 75) / 100);
   const vueltas = 1.1 + ((i * 53) % 90) / 100;
@@ -35,7 +37,7 @@ function espiral(i) {
     const t = s / 22;
     const ang = a0 + t * vueltas * Math.PI * 2;
     const r = r0 * (1 - t) ** 1.25;
-    pts.push([Math.cos(ang) * r, Math.sin(ang) * r * 0.92]);
+    pts.push([cx + Math.cos(ang) * r, cy + Math.sin(ang) * r * 0.92]);
   }
   let d = `M${pts[0][0].toFixed(1)},${pts[0][1].toFixed(1)}`;
   for (let j = 1; j < pts.length - 1; j += 1) {
@@ -50,16 +52,40 @@ export default function LogoEspagueti({ tamano = 120, saliendo = false, classNam
   const logoRef = useRef(null);
   const rafRef = useRef(0);
 
+  // El lienzo del portal es más ancho que el logo, pero NO puede marcar el
+  // tamaño del contenedor: en móvil eso ocupaba 312 px dentro de una columna
+  // más estrecha, el contenedor se encogía y el SVG —que conserva su ancho
+  // fijo— se desbordaba hacia la derecha. Resultado: los hilos salían disparados
+  // al borde de la pantalla en vez de girar detrás del logo.
+  //
+  // Ahora el contenedor mide LO QUE MIDE EL LOGO y el SVG se centra por
+  // transform sobre él. Así el portal queda siempre concéntrico, dé el ancho
+  // que dé el padre, y no empuja la maquetación.
+  const lado = tamano * 2.6;
+  // El viewBox arranca en 0,0 y las espirales se dibujan alrededor de su centro.
+  //
+  // Antes el viewBox era `-lado/2 -lado/2 lado lado` y las espirales giraban en
+  // torno al (0,0) de usuario. Parece equivalente, pero NO lo es: los hilos
+  // llevan `transform-origin: center`, que con `transform-box: view-box` se
+  // resuelve a «la mitad del lado del viewBox» —156px, 156px— contados desde su
+  // esquina. Con el viewBox en negativo esos 156px caían en una ESQUINA del
+  // dibujo, así que cada hilo giraba y encogía alrededor de un punto que no era
+  // el centro y el portal entero aparecía desplazado (medido: +25 px a la
+  // derecha y −37 px arriba a mitad de la animación). Con el viewBox empezando
+  // en 0,0 el centro que calcula el navegador y el centro del dibujo son el
+  // mismo punto, y deja de depender de cómo interprete cada navegador el origen.
+  const centro = lado / 2;
+
   const hilos = useMemo(
     () =>
       Array.from({ length: HILOS }, (_, i) => ({
-        d: espiral(i),
+        d: espiral(i, centro, centro),
         color: COLORES[i % COLORES.length],
         ancho: (1.2 + ((i * 29) % 26) / 10).toFixed(1),
         giro: 160 + ((i * 43) % 120),
         retardo: i * 16,
       })),
-    [],
+    [centro],
   );
 
   // La máscara no se puede animar por CSS (no interpola gradientes), así que
@@ -88,17 +114,6 @@ export default function LogoEspagueti({ tamano = 120, saliendo = false, classNam
     return () => cancelAnimationFrame(rafRef.current);
   }, [saliendo]);
 
-  // El lienzo del portal es más ancho que el logo, pero NO puede marcar el
-  // tamaño del contenedor: en móvil eso ocupaba 312 px dentro de una columna
-  // más estrecha, el contenedor se encogía y el SVG —que conserva su ancho
-  // fijo— se desbordaba hacia la derecha. Resultado: los hilos salían disparados
-  // al borde de la pantalla en vez de girar detrás del logo.
-  //
-  // Ahora el contenedor mide LO QUE MIDE EL LOGO y el SVG se centra por
-  // transform sobre él. Así el portal queda siempre concéntrico, dé el ancho
-  // que dé el padre, y no empuja la maquetación.
-  const lado = tamano * 2.6;
-
   return (
     <div
       className={`relative grid place-items-center shrink-0 ${className}`}
@@ -116,7 +131,7 @@ export default function LogoEspagueti({ tamano = 120, saliendo = false, classNam
           height: lado,
           transform: 'translate(-50%, -50%)',
         }}
-        viewBox={`${-lado / 2} ${-lado / 2} ${lado} ${lado}`}
+        viewBox={`0 0 ${lado} ${lado}`}
         aria-hidden="true"
       >
         {hilos.map((h, i) => (
