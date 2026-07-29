@@ -337,7 +337,7 @@ export default function Payment(props) {
             <p className="text-gray-500 max-w-md leading-relaxed mb-8">
                 Estamos terminando de conectar el pago de los cursos. Mientras tanto,
                 escríbenos y te lo activamos al momento:{' '}
-                <a href="mailto:hola@squatfit.es" className="text-orange-500 font-bold underline">hola@squatfit.es</a>
+                <a href="mailto:hola@squadfit.es" className="text-orange-500 font-bold underline">hola@squadfit.es</a>
             </p>
             <button onClick={() => props.setStep(1)} className="text-secondary font-bold underline cursor-pointer">Volver al carrito</button>
         </div>

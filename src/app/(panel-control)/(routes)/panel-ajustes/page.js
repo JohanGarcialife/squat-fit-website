@@ -233,7 +233,7 @@ export default function AjustesPage() {
       setDeleted(true);
       logout();
     } catch (e) {
-      toast.error('No se pudo eliminar la cuenta. Escríbenos a hola@squatfit.es');
+      toast.error('No se pudo eliminar la cuenta. Escríbenos a hola@squadfit.es');
       closeDeleteModal();
     } finally {
       setDeleting(false);
