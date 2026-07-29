@@ -644,29 +644,33 @@ export default function EmpiezaTuCambioPage() {
       setSaliendoPortada(true);
       setTimeout(() => setStarted(true), PORTADA_OUT_MS);
     };
+    // La portada ya no explica de qué va el formulario: el título y el botón lo
+    // dicen de sobra y el párrafo solo retrasaba el primer clic. Solo queda
+    // texto cuando aporta algo que el usuario no puede saber: que hay respuestas
+    // guardadas, o que vamos a saltarnos lo que ya sabemos de su cuenta.
+    const avisoCuenta = !guardado && delPerfil && primeraPantallaPendiente(answers) > 1;
+    const hayTexto = !!guardado || !!avisoCuenta;
     return (
       <div className="min-h-[100svh] w-full flex flex-col items-center justify-center px-6 text-center bg-white">
         <div className={`max-w-lg flex flex-col items-center ${saliendoPortada ? 'sf-portada-out' : 'sf-screen-in'}`}>
           <LogoEspagueti tamano={120} saliendo={saliendoPortada} className="mb-8" />
           <div className="sf-portada-texto flex flex-col items-center">
-            <h1 className="font-extrabold mb-4" style={{ color: BLUE, fontSize: 'clamp(1.9rem, 4vw, 2.6rem)' }}>
+            <h1 className={`font-extrabold ${hayTexto ? 'mb-4' : 'mb-9'}`} style={{ color: BLUE, fontSize: 'clamp(1.9rem, 4vw, 2.6rem)' }}>
               {guardado ? '¿Seguimos donde lo dejaste?' : 'Vamos a conocerte'}
             </h1>
-            <p className="text-[#6B6BA8] text-lg leading-relaxed mb-9">
-              {guardado
-                ? `Tenías ${guardado.indice} respuestas guardadas en este navegador. Puedes continuar por donde ibas o empezar de nuevo.`
-                : 'Son unas preguntas rápidas sobre ti y tu objetivo. Tómate tu tiempo: cuanto mejor te conozca, mejor podré ayudarte en la llamada.'}
-              {!guardado && delPerfil && primeraPantallaPendiente(answers) > 1 && (
-                <>
-                  <br />
-                  <span className="text-base text-[#8B87C9]">
-                    {delPerfil.first_name
-                      ? `Como ya has entrado con tu cuenta, ${delPerfil.first_name}, me salto lo que ya sé de ti.`
-                      : 'Como ya has entrado con tu cuenta, me salto lo que ya sé de ti.'}
-                  </span>
-                </>
-              )}
-            </p>
+            {hayTexto && (
+              <p className="text-[#6B6BA8] text-lg leading-relaxed mb-9">
+                {guardado
+                  ? `Tenías ${guardado.indice} respuestas guardadas en este navegador. Puedes continuar por donde ibas o empezar de nuevo.`
+                  : (
+                    <span className="text-base text-[#8B87C9]">
+                      {delPerfil.first_name
+                        ? `Como ya has entrado con tu cuenta, ${delPerfil.first_name}, me salto lo que ya sé de ti.`
+                        : 'Como ya has entrado con tu cuenta, me salto lo que ya sé de ti.'}
+                    </span>
+                  )}
+              </p>
+            )}
             <button
               type="button"
               onClick={() => arrancar(!!guardado)}
