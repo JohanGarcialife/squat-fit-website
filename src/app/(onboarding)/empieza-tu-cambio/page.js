@@ -189,6 +189,10 @@ const CRM_SOURCE = {
   email: 'email',
   tiktok: 'otro',
   guia: 'web',
+  // La landing del sorteo del WordPress viejo va aparte de «web» porque lo que
+  // interesa medir es justo eso: cuánta gente sigue entrando por ahí meses
+  // después de haberse cerrado.
+  sorteo: 'sorteo',
 };
 
 const FORM_ID = 'prellamada';
@@ -492,6 +496,11 @@ export default function EmpiezaTuCambioPage() {
           // OJO: TikTok no tiene hueco en ese vocabulario y cae en «otro» hasta
           // que se le añada uno en el dashboard.
           source: CRM_SOURCE[origenLead?.utm_source] || 'web',
+          // El detalle fino viajaba en `submission` pero NO en el POST: `via`
+          // está en META_KEYS, así que se excluye de `answers`, y nadie lo
+          // volvía a añadir arriba. Se perdía entero: en el CRM «ig-bio-maria»
+          // era indistinguible de «ig-story-hamlet».
+          ...(origenLead?.via ? { via: origenLead.via } : {}),
           website: '',
         };
         const res = await fetch(SUBMIT_ENDPOINT, {
