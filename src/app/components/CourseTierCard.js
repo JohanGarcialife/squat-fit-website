@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { toast } from 'react-hot-toast';
 import { useCartStore } from '@/stores/cart.store';
 import { useUiStore } from '@/stores/ui.store';
+import SequraSimulador from './SequraSimulador';
 import {
   TIER_META,
   buildTierCartItem,
@@ -84,6 +85,16 @@ export default function CourseTierCard({ group, defaultTier = 'anual', subtitle,
           <span className="text-[#8B87C9] font-bold">{meta.priceSuffix}</span>
         </div>
         <p className="text-slate-500 text-sm font-semibold mt-1.5">{meta.note}</p>
+
+        {/* Simulador de cuotas de seQura. Solo en los tramos de PAGO ÚNICO:
+            «anual» y «permanente». En mensual y trimestral no, porque seQura
+            fracciona un importe cerrado y una suscripción no lo es — anunciar
+            cuotas ahí sería prometer algo que el checkout no puede cumplir. */}
+        <SequraSimulador
+          importeEur={tier.price}
+          pagoUnico={tierKey !== 'mensual' && tierKey !== 'trimestral'}
+          className="mt-2"
+        />
 
         <button
           type="button"
