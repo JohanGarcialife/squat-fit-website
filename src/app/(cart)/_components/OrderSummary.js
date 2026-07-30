@@ -5,6 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { ChevronDown } from 'lucide-react';
 import { useCartStore } from '@/stores/cart.store';
+import SequraSimulador from '@/app/components/SequraSimulador';
 import { useCheckoutStore } from '@/stores/checkout.store';
 import { useCurrency } from './useCurrency';
 import CurrencySelector from './CurrencySelector';
@@ -203,6 +204,23 @@ export default function OrderSummary(props) {
                     {convertPrice(total)} {symbol}
                 </span>
             </div>
+
+            {/* Simulador de cuotas de seQura, debajo del total. Solo aparece si
+                de verdad se puede fraccionar ESTE carrito: nada de enseñar un
+                «divídelo en plazos» permanente que luego el pago no cumple.
+                - `!hasRecurring`: con una suscripción dentro no se puede, porque
+                  seQura financia un importe cerrado y una suscripción no lo es.
+                - `divisa`: solo en euros; el comercio es ES/EUR y con el selector
+                  en otra moneda el importe mostrado no sería el que se cobra.
+                - Por debajo de 50 € el propio widget no pinta nada.
+                Se pasa `total` (lo que se paga hoy), no el subtotal: es la cifra
+                que el cliente está mirando cuando duda. */}
+            <SequraSimulador
+              importeEur={total}
+              pagoUnico={!hasRecurring}
+              divisa={currency}
+              className="pt-1"
+            />
 
             {hasRecurring && (
                 <div className="flex justify-between items-center text-indigo-900 font-bold text-sm sm:text-base lg:text-lg pt-2 border-t border-indigo-100/50">
