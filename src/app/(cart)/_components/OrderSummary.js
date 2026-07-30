@@ -9,6 +9,7 @@ import { useCheckoutStore } from '@/stores/checkout.store';
 import { useCurrency } from './useCurrency';
 import CurrencySelector from './CurrencySelector';
 import { arancelParaCarrito } from './aranceles';
+import { useShippingQuote } from './useShippingQuote';
 import useCerrarAlTocarFuera from '@/hooks/useCerrarAlTocarFuera';
 
 export default function OrderSummary(props) {
@@ -39,14 +40,19 @@ export default function OrderSummary(props) {
     const subtotal = cart.reduce((acc, item) => acc + item.price * item.quantity, 0);
     // Only apply shipping if the cart contains physical products (non-direct checkouts)
     const hasPhysicalItems = cart.some(item => !item.isDirectCheckout);
-    const shippingCost = hasPhysicalItems ? 4.99 : 0; 
-    const freeShippingThreshold = 90.00; // in EUR
-    
-    const finalShipping = subtotal >= freeShippingThreshold ? 0 : shippingCost;
 
     // Aranceles de importación (solo envíos a EE. UU. con productos físicos).
     // Se muestran como línea aparte del envío; el cobro real llega en Fase 16.
     const { formData } = useCheckoutStore();
+
+    // Envío real por zona (12.2). El backend es quien manda: aquí solo se
+    // pinta lo mismo que se va a cobrar.
+    const { shippingCost: finalShipping, sinDestino } = useShippingQuote(
+      subtotal,
+      formData?.country,
+      formData?.postalCode,
+      hasPhysicalItems,
+    );
     const arancel = arancelParaCarrito(cart, formData?.country);
 
     const total = subtotal + finalShipping + arancel;
@@ -183,9 +189,11 @@ export default function OrderSummary(props) {
                         <div className="flex justify-between items-center text-indigo-900/70 text-sm sm:text-base">
                             <span>Envío</span>
                             <span>
-                                {finalShipping > 0
-                                    ? `${convertPrice(finalShipping)} ${symbol}`
-                                    : 'Gratis'}
+                                {sinDestino
+                                    ? 'Según destino'
+                                    : finalShipping > 0
+                                        ? `${convertPrice(finalShipping)} ${symbol}`
+                                        : 'Gratis'}
                             </span>
                         </div>
                     )}

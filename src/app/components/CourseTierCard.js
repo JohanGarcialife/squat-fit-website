@@ -41,13 +41,16 @@ export default function CourseTierCard({ group, defaultTier = 'anual', subtitle,
   return (
     <div className="flex flex-col bg-white border-2 border-slate-100 rounded-[24px] overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 w-full max-w-md">
       {/* Portada */}
-      <div className="relative w-full aspect-[16/9] bg-gradient-to-br from-[#363C98]/10 to-[#FF690B]/10">
+      {/* Cuadrada, no 16/9: las portadas son verticales y en apaisado se les
+          cortaba la cabeza y el pie. `contain` sobre el degradado de marca las
+          enseña enteras en vez de recortarlas. */}
+      <div className="relative w-full aspect-square bg-gradient-to-br from-[#363C98]/10 to-[#FF690B]/10">
         <Image
           src={coverForCourse(group.baseName)}
           alt={group.baseName}
           fill
           sizes="(max-width: 768px) 100vw, 400px"
-          className="object-cover"
+          className="object-contain"
         />
       </div>
 
