@@ -6,6 +6,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCartStore } from "@/stores/cart.store";
 import { useAuthStore } from "@/stores/auth.store";
+import { useCheckoutStore } from "@/stores/checkout.store";
+import { useShippingQuote } from "../../_components/useShippingQuote";
 import toast from "react-hot-toast";
 
 import Summary from "../../_components/Summary";
@@ -114,6 +116,7 @@ export default function CartPage() {
   };
 
   const { cart, addToCart, decrementQuantity, removeFromCart, updateQuantity, lastRemoved, undoRemove } = useCartStore();
+  const { formData } = useCheckoutStore();
 
   const totalItems = cart.reduce((acc, item) => acc + item.quantity, 0);
   const subtotal = cart.reduce(
@@ -122,13 +125,24 @@ export default function CartPage() {
   );
   // El envío solo aplica a productos físicos (los digitales van con isDirectCheckout)
   const hasPhysicalItems = cart.some((item) => !item.isDirectCheckout);
-  const shipping = hasPhysicalItems ? 4.99 : 0;
-  const total = subtotal + shipping;
-  const freeShippingThreshold = 90.0;
-  const remainingForFreeShipping = Math.max(
-    0,
-    freeShippingThreshold - subtotal
+
+  // Tarifa real de la zona (12.2). En este paso puede que aún no haya
+  // dirección: entonces `sinDestino` es true y el resumen lo dice en vez de
+  // inventarse un importe.
+  const {
+    shippingCost: shipping,
+    missingForFree,
+    freeThreshold,
+    sinDestino,
+  } = useShippingQuote(
+    subtotal,
+    formData?.country,
+    formData?.postalCode,
+    hasPhysicalItems,
   );
+  const total = subtotal + shipping;
+  const freeShippingThreshold = freeThreshold ?? 0;
+  const remainingForFreeShipping = missingForFree ?? 0;
 
   if (!isClient) {
     return <div className="min-h-screen bg-white"></div>;
@@ -192,6 +206,7 @@ export default function CartPage() {
       totalItems={totalItems}
       subtotal={subtotal}
       shipping={shipping}
+      sinDestino={sinDestino}
       total={total}
       freeShippingThreshold={freeShippingThreshold}
       remainingForFreeShipping={remainingForFreeShipping}

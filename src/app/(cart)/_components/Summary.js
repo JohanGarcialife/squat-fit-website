@@ -26,6 +26,7 @@ export default function Summary(props) {
         shipping,
         total,
         freeShippingThreshold,
+        sinDestino,
         remainingForFreeShipping,
         addToCart,
         decrementQuantity,
@@ -360,9 +361,12 @@ export default function Summary(props) {
                   <div className="flex justify-between items-center text-indigo-900/80 text-sm sm:text-lg lg:text-xl">
                     <span>Envío</span>
                     <span>
-                      {subtotal >= freeShippingThreshold
-                        ? "0,00"
-                        : convertPrice(shipping)} {symbol}
+                      {/* `shipping` ya viene con la tarifa de la zona y el
+                          umbral de gratis aplicados (12.2); aquí no se
+                          recalcula nada. */}
+                      {sinDestino
+                        ? 'Según destino'
+                        : `${shipping > 0 ? convertPrice(shipping) : '0,00'} ${symbol}`}
                     </span>
                   </div>
                   {arancel > 0 && (
@@ -379,9 +383,7 @@ export default function Summary(props) {
                   <span>Total</span>
                   <span>
                     {convertPrice(
-                      subtotal +
-                      (subtotal >= freeShippingThreshold ? 0 : shipping) +
-                      arancel
+                      subtotal + shipping + arancel
                     )} {symbol}
                   </span>
                 </div>

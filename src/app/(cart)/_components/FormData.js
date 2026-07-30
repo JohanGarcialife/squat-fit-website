@@ -3,6 +3,8 @@ import React, { useRef, useState, useCallback } from 'react';
 import CheckoutForm from "./CheckoutForm";
 import OrderSummary from "./OrderSummary";
 import { useCartStore } from "@/stores/cart.store";
+import { useCheckoutStore } from "@/stores/checkout.store";
+import { useShippingQuote } from "./useShippingQuote";
 
 export default function FormData(props) {
   const { setStep } = props;
@@ -19,10 +21,17 @@ export default function FormData(props) {
 
   const subtotal = cart.reduce((acc, item) => acc + item.price * (item.quantity || 1), 0);
   // El envío solo aplica a productos físicos (los digitales van con isDirectCheckout)
-  const shippingCost = cart.some((item) => !item.isDirectCheckout) ? 4.99 : 0;
-  const freeShippingThreshold = 90.00;
+  const hasPhysicalItems = cart.some((item) => !item.isDirectCheckout);
 
-  const finalShipping = subtotal >= freeShippingThreshold ? 0 : shippingCost;
+  // Tarifa real de la zona de destino (12.2), no un 4,99 fijo para todo el
+  // mundo. La calcula el backend, que es también quien la cobra.
+  const { formData } = useCheckoutStore();
+  const { shippingCost: finalShipping } = useShippingQuote(
+    subtotal,
+    formData?.country,
+    formData?.postalCode,
+    hasPhysicalItems,
+  );
   const total = subtotal + finalShipping;
 
   const triggerCheckoutFormSubmit = async () => {
