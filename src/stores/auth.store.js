@@ -17,7 +17,17 @@ export const useAuthStore = create(
       setToken: (token) => {
         try {
           const decoded = jwtDecode(token);
-          // Verificar si tiene suscripción activa en el token decoded
+          // OJO al usar isSubscribed fuera de "Mi cocina": este flag solo
+          // refleja digital_library_subscriptions en el backend, es decir
+          // la Biblioteca Digital (cocina/recetas) — NO refleja los cursos
+          // que el usuario haya comprado sueltos o le hayan concedido
+          // (esos viven en user_has_course / GET /course/by-user). Usarlo
+          // para "tiene acceso a los cursos" es un fallo de categoría de
+          // producto que panel-cursos arrastró durante semanas (ver rama
+          // fix/acceso-cursos-no-detectado). panel-cursos ya lo soluciona
+          // sumando course/by-user, detrás de un interruptor de negocio
+          // (DIGITAL_LIBRARY_UNLOCKS_COURSES en panel-cursos/page.js)
+          // pendiente de decisión de Hamlet: no lo "limpies" sin mirar ahí.
           const isSubscribed = !!(
             decoded.isSubscribed ||
             decoded.is_subscribed ||
