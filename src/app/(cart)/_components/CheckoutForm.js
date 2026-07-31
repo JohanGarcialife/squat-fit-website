@@ -11,6 +11,7 @@ import 'react-phone-input-2/lib/style.css';
 import esPhone from 'react-phone-input-2/lang/es.json';
 import { getData as getCountryData } from 'country-list';
 import { useCartStore } from '@/stores/cart.store';
+import SaveCardCheckbox from './SaveCardCheckbox';
 
 
 // El DNI/CIF es obligatorio en pedidos de más de 400 € (requisito fiscal, Doc 0)
@@ -65,7 +66,7 @@ const buildValidationSchema = (dniRequired, isCompany) => Yup.object({
   shippingNotes: Yup.string(),
 });
 
-export default function CheckoutForm({ setStep, onValidationChange, submitRef }) {
+export default function CheckoutForm({ setStep, onValidationChange, submitRef, saveCard, onSaveCardChange }) {
   const { formData, updateFormData } = useCheckoutStore();
   const { user } = useAuthStore();
   const { cart } = useCartStore();
@@ -244,6 +245,16 @@ export default function CheckoutForm({ setStep, onValidationChange, submitRef })
                     <Field as="textarea" id="shippingNotes" name="shippingNotes" rows={3} placeholder="Escribe aquí..." className="w-full border border-orange-300 rounded-2xl px-5 py-3 placeholder-orange-200 text-gray-700 outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all resize-none" />
                   </div>
                 </section>
+
+                {/* ── Sección 3: guardar tarjeta (save_card) — fuera de Formik
+                    a propósito, no es un campo de envío y no debe bloquear el
+                    envío del formulario. Independiente y NUNCA premarcada. */}
+                {onSaveCardChange && (
+                  <section className="space-y-4">
+                    <SectionHeading n={3} title="Método de pago" />
+                    <SaveCardCheckbox checked={saveCard} onChange={onSaveCardChange} />
+                  </section>
+                )}
               </Form>
             );
           }}

@@ -24,6 +24,11 @@ export default function CartPage() {
   const [isClient, setIsClient] = useState(false);
   const [step, setStep] = useState(1);
   const [success, setSuccess] = useState(false);
+  // Casilla «guardar tarjeta» del paso 2 (save_card del checkout de
+  // catálogo). Vive aquí, no en el store persistido de envío: así arranca
+  // SIEMPRE desmarcada en cada visita a /cart, nunca heredada de una compra
+  // anterior en el mismo navegador.
+  const [saveCard, setSaveCard] = useState(false);
   // Auditoría julio, hallazgo #17: mientras se confirma el pago con el
   // backend (o con Stripe.js), no se pinta ni el carrito ni la pantalla de
   // gracias — antes `?success=true` bastaba por sí solo para vaciar el
@@ -216,8 +221,10 @@ export default function CartPage() {
       updateQuantity={updateQuantity}
       setStep={handleSetStep}
     />}
-    {step === 2 && <FormData setStep={handleSetStep} />}
-    {step === 3 && <Payment setStep={handleSetStep} setSuccess={setSuccess} />}
+    {step === 2 && (
+      <FormData setStep={handleSetStep} saveCard={saveCard} onSaveCardChange={setSaveCard} />
+    )}
+    {step === 3 && <Payment setStep={handleSetStep} setSuccess={setSuccess} saveCard={saveCard} />}
      </>
   );
 }

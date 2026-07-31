@@ -11,6 +11,7 @@ import { useCartStore } from "@/stores/cart.store";
 import { useUiStore } from "@/stores/ui.store";
 import ConfirmationModal from "@/app/components/ConfirmationModal";
 import usePreloadImages from "@/hooks/usePreloadImages";
+import useWindowSize from "@/hooks/UseWindowSize";
 
 const Slider = dynamic(() => import("react-slick"), { ssr: false });
 
@@ -52,12 +53,15 @@ function coverFor(course) {
 // and progress tracking are implemented (GET /api/v1/course/by-user)
 
 // Flechas de marca visibles (antes las flechas de slick quedaban escondidas).
+// Ocultas por debajo de `sm` (640px): en el hueco de una sola tarjeta no caben
+// sin montarse encima del contenido; en móvil la navegación es swipe + los
+// puntos de paginación (dots, ya activos). De 640px en adelante no cambia nada.
 const ArrowBtn = ({ onClick, dir }) => (
   <button
     type="button"
     onClick={onClick}
     aria-label={dir === 'next' ? 'Siguiente' : 'Anterior'}
-    className={`absolute top-1/2 z-20 -translate-y-1/2 ${dir === 'next' ? 'right-0' : 'left-0'} flex h-11 w-11 items-center justify-center rounded-full bg-white text-[#FF690B] shadow-md ring-1 ring-black/5 transition-transform hover:scale-110 active:scale-95`}
+    className={`absolute top-1/2 z-20 -translate-y-1/2 ${dir === 'next' ? 'right-0' : 'left-0'} hidden sm:flex h-11 w-11 items-center justify-center rounded-full bg-white text-[#FF690B] shadow-md ring-1 ring-black/5 transition-transform hover:scale-110 active:scale-95`}
   >
     <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
       {dir === 'next' ? <path d="m9 18 6-6-6-6" /> : <path d="m15 18-6-6 6-6" />}
@@ -66,12 +70,26 @@ const ArrowBtn = ({ onClick, dir }) => (
 );
 
 const CarouselSection = ({ title, items, variant = 'default', onItemClick }) => {
+  // OJO con el prop `responsive` de react-slick: por dentro usa
+  // `matchMedia(query).addListener(...)`, que SOLO dispara en un cambio de
+  // media query — nunca comprueba el estado inicial al montar. Si la página
+  // carga YA en móvil (lo normal: nadie llega hace un resize desde
+  // escritorio), el breakpoint no se aplica nunca y se queda con los ajustes
+  // base (3 columnas), que es justo lo que partía el título letra a letra y
+  // sacaba las flechas encima del contenido. Se calcula el ancho a mano con
+  // useWindowSize (si funcionó al cargar directo en 375px, es por esto).
+  const { width } = useWindowSize();
+  // Mobile-first: mientras no se conoce el ancho (primer render, antes del
+  // efecto), se asume móvil — mismo criterio que Header.js con el menú.
+  const columnasMax = width >= 1024 ? 3 : width >= 640 ? 2 : 1;
+
   // slidesToShow adaptativo: si hay menos items que columnas, no dejar hueco
   // a un lado (era lo que hacía que se viera "ladeado").
-  const perView = Math.min(3, Math.max(1, items.length));
-  // Solo tiene sentido centrar (y hacer loop) cuando hay más items que columnas.
-  // Con centerMode, el slide activo/seleccionado queda CENTRADO (como el resto de
-  // carruseles); antes, sin él, `focusOnSelect` mandaba el elegido al lateral.
+  const perView = Math.min(columnasMax, Math.max(1, items.length));
+  // Solo tiene sentido centrar (y hacer loop) cuando hay más items que
+  // columnas, y solo con 2+ columnas: en móvil una tarjeta ocupa todo el
+  // ancho SIN dejar asomar a las vecinas (con "peek" el título se quedaba
+  // sin sitio y se partía en vertical).
   const canScroll = items.length > perView;
   const settings = {
     dots: true,
@@ -80,15 +98,14 @@ const CarouselSection = ({ title, items, variant = 'default', onItemClick }) => 
     slidesToShow: perView,
     slidesToScroll: 1,
     focusOnSelect: true,
-    centerMode: canScroll,
+    centerMode: canScroll && columnasMax > 1,
     centerPadding: '0px',
-    arrows: items.length > 1,
+    // En móvil (una tarjeta a la vez) no hay hueco para flechas sin
+    // montarse encima del contenido: ahí la navegación es swipe + los
+    // puntos de paginación (dots, ya activos arriba).
+    arrows: columnasMax > 1 && items.length > 1,
     nextArrow: <ArrowBtn dir="next" />,
     prevArrow: <ArrowBtn dir="prev" />,
-    responsive: [
-      { breakpoint: 1024, settings: { slidesToShow: Math.min(2, items.length), centerMode: items.length > Math.min(2, items.length), centerPadding: '0px' } },
-      { breakpoint: 640, settings: { slidesToShow: 1, arrows: false, centerMode: items.length > 1, centerPadding: '32px' } },
-    ],
   };
 
   return (
