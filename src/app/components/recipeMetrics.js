@@ -163,13 +163,47 @@ export function flushRecipeMetrics() {
   }
 }
 
-// Red de seguridad global: si por lo que sea nadie llamó a flushRecipeMetrics
-// al desmontar (navegación fuera de la SPA, cerrar pestaña…), esto vacía la
-// cola de todas formas. No sustituye al flush explícito del lector — el de
-// aquí solo se dispara al ocultarse/cerrarse TODA la pestaña, no al salir de
-// una receta para ir a otra pantalla del panel.
+// ─── Lectura activa (para cuando se cierra la pestaña sin "salir" de la
+// receta por la SPA) ─────────────────────────────────────────────────────
+//
+// El read_time normal lo manda el propio lector al desmontarse (navegar a
+// otra pantalla del panel). Pero si el cliente cierra la pestaña o la
+// ventana entera mientras lee, React no desmonta nada — el runtime se
+// destruye sin más — así que ese read_time nunca se generaría. Por eso el
+// lector "registra" su cronómetro aquí; si `pagehide` salta con una lectura
+// activa, se calcula su duración EN ESE MOMENTO y se encola antes de vaciar,
+// para no perder la medición de una sesión cerrada de golpe.
+let activeReading = null; // { book_id, version_id, is_free_sample, timer }
+
+/** Llamar al abrir una receta (una vez que hay ReadingTimer en marcha). */
+export function registerActiveReading(context, timer) {
+  activeReading = { ...context, timer };
+}
+
+/** Llamar al desmontar el lector (ya se manda el read_time real aparte). */
+export function unregisterActiveReading(timer) {
+  if (activeReading && activeReading.timer === timer) activeReading = null;
+}
+
+function finalizeActiveReadingIfAny() {
+  if (!activeReading) return;
+  const { timer, ...context } = activeReading;
+  trackRecipeEvent('read_time', { ...context, duration_ms: timer.elapsedMs() });
+}
+
+// Red de seguridad global:
+//  - `pagehide` (cerrar/recargar la pestaña): si hay una lectura activa que
+//    nadie ha podido cerrar de forma ordenada, se finaliza aquí; luego se
+//    vacía la cola entera con sendBeacon.
+//  - `visibilitychange` a "hidden": SOLO vacía lo que ya estuviera en cola.
+//    No finaliza la lectura activa — cambiar de pestaña no es "salir" de la
+//    receta (el propio ReadingTimer ya pausa su conteo mientras tanto); si
+//    finalizáramos aquí, cada cambio de pestaña duplicaría el evento.
 if (typeof window !== 'undefined') {
-  window.addEventListener('pagehide', () => flushRecipeMetrics());
+  window.addEventListener('pagehide', () => {
+    finalizeActiveReadingIfAny();
+    flushRecipeMetrics();
+  });
   document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'hidden') flushRecipeMetrics();
   });

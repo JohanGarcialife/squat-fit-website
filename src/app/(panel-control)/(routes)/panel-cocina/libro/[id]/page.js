@@ -8,7 +8,7 @@ import { BookIndexSidebar } from "@/app/(panel-control)/(routes)/panel-control/_
 import { useAuthStore } from "@/stores/auth.store";
 import AccessNotice from "@/app/components/AccessNotice";
 import { handleApiError } from "@/app/components/handleApiError";
-import { trackRecipeEvent, flushRecipeMetrics, ReadingTimer } from "@/app/components/recipeMetrics";
+import { trackRecipeEvent, flushRecipeMetrics, ReadingTimer, registerActiveReading, unregisterActiveReading } from "@/app/components/recipeMetrics";
 import FreeSampleBadge from "@/app/components/FreeSampleBadge";
 import axios from "axios";
 
@@ -162,13 +162,22 @@ export default function BookReaderPage({ params, searchParams }) {
   // sendBeacon si se puede) en vez de esperar al temporizador de agrupado
   // normal, porque al salir de la receta ya no hay garantía de que la
   // pestaña siga viva para que el temporizador llegue a disparar.
+  //
+  // `registerActiveReading` es la red de seguridad para cuando el cliente
+  // cierra la pestaña entera en vez de navegar dentro de la app: ahí React
+  // no desmonta nada, así que este mismo cleanup no llegaría a ejecutarse;
+  // recipeMetrics.js detecta ese caso por su cuenta (pagehide) y manda el
+  // tiempo acumulado hasta ese instante.
   useEffect(() => {
     if (!pdfFile) return undefined;
     const timer = new ReadingTimer();
-    trackRecipeEvent('open', { book_id: bookId, version_id: versionId, is_free_sample: isFreeSample });
+    const contexto = { book_id: bookId, version_id: versionId, is_free_sample: isFreeSample };
+    registerActiveReading(contexto, timer);
+    trackRecipeEvent('open', contexto);
     return () => {
+      unregisterActiveReading(timer);
       const duration_ms = timer.stop();
-      trackRecipeEvent('read_time', { book_id: bookId, version_id: versionId, is_free_sample: isFreeSample, duration_ms });
+      trackRecipeEvent('read_time', { ...contexto, duration_ms });
       flushRecipeMetrics();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
