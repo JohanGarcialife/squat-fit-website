@@ -73,6 +73,14 @@ const PlayIcon = () => (
   </svg>
 );
 
+// Clase cerrada (sin comprar y sin marcar como muestra gratis)
+const LockIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+    <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+  </svg>
+);
+
 // ─── Video Player Component ───────────────────────────────────────────────────
 function VideoPlayer({ videoUrl, videoTitle }) {
   const src = addBunnyParams(videoUrl);
@@ -112,6 +120,14 @@ function CursosPageContent() {
   //    si el detalle no responde, el curso queda en "En progreso" sin barra.
   const [progressMap, setProgressMap] = useState({});
   const [statusTab, setStatusTab] = useState('progress');
+
+  // ── Muestras gratuitas (sin suscripción): qué curso tiene, en su currícula
+  //    pública, al menos una clase marcada video_is_free_sample=true. Se
+  //    calcula ANTES de decidir qué pantalla mostrar: si nadie tiene ninguna
+  //    marca (el caso real de hoy, backend sin desplegar), la sección se
+  //    comporta exactamente igual que antes de este cambio.
+  const [sampleMap, setSampleMap] = useState({});
+  const [catalogHasFreeSamples, setCatalogHasFreeSamples] = useState(false);
 
   // ── Player state ─────────────────────────────────────────────────────────────
   const [activeCourse, setActiveCourse] = useState(null);
@@ -194,18 +210,42 @@ function CursosPageContent() {
       if (Array.isArray(videos) && videos.length > 0) {
         const modulesArray = buildModulesFromVideos(videos);
         setModules(modulesArray);
-        if (modulesArray.length > 0) setExpandedModules({ [modulesArray[0].id]: true });
 
-        // Cargar la URL del primer video
-        const firstVideo = videos[0];
-        const firstId = firstVideo.video_id || firstVideo.id;
-        const firstTitle = firstVideo.video_title || firstVideo.title;
-        setSelectedVideo({ id: firstId, title: firstTitle, url: null, loading: true });
-        setVideoLoading(true);
-        const url = await getVideoUrl(firstId, headers, API);
-        // Sin URL real → estado de error (con reintento), nunca vídeo de prueba.
-        setSelectedVideo({ id: firstId, title: firstTitle, url, loading: false, error: !url });
-        setVideoLoading(false);
+        // Qué clase se abre automáticamente:
+        // - Con suscripción/curso comprado: la primera del temario, EXACTO
+        //   como siempre (sin cambios para quien ya tiene acceso).
+        // - Sin suscripción: NUNCA por posición. Solo la clase que el
+        //   backend marcó video_is_free_sample=true puede reproducirse; si
+        //   ninguna lo está, no se selecciona nada (candado, igual que hoy).
+        const videoToOpen = isSubscribed
+          ? videos[0]
+          : videos.find((v) => v.video_is_free_sample === true) || null;
+
+        if (modulesArray.length > 0) {
+          const ownerModule = videoToOpen
+            ? modulesArray.find((m) =>
+                m.videos.some((v) => (v.video_id || v.id) === (videoToOpen.video_id || videoToOpen.id))
+              )
+            : null;
+          setExpandedModules({ [(ownerModule || modulesArray[0]).id]: true });
+        }
+
+        if (videoToOpen) {
+          const firstId = videoToOpen.video_id || videoToOpen.id;
+          const firstTitle = videoToOpen.video_title || videoToOpen.title;
+          setSelectedVideo({ id: firstId, title: firstTitle, url: null, loading: true });
+          setVideoLoading(true);
+          const url = await getVideoUrl(firstId, headers, API);
+          // Sin URL real → estado de error (con reintento), nunca vídeo de prueba.
+          setSelectedVideo({ id: firstId, title: firstTitle, url, loading: false, error: !url });
+          setVideoLoading(false);
+        } else {
+          // Sin suscripción y sin ninguna clase de muestra en este curso:
+          // no hay nada que reproducir. No se llama a watch-video porque no
+          // hay ninguna clase gratuita que pedir.
+          setSelectedVideo(null);
+          setVideoLoading(false);
+        }
       } else {
         // Curso sin videos todavía: estado honesto "contenido próximamente",
         // sin reproducir un vídeo de prueba.
@@ -252,12 +292,32 @@ function CursosPageContent() {
     setStatusTab(counts.progress > 0 ? 'progress' : counts.pending > 0 ? 'pending' : counts.done > 0 ? 'done' : 'progress');
   };
 
+  // Para cada curso, ¿tiene alguna clase marcada como muestra gratis en su
+  // currícula pública? Detalle no disponible → se trata como "sin muestra"
+  // (fallback seguro: nunca se inventa acceso).
+  const fetchFreeSampleInfoFor = async (list, headers, API) => {
+    const entries = await Promise.all(
+      list.map(async (course) => {
+        try {
+          const res = await axios.get(`${API}/api/v1/course/detail/${course.id}`, { headers });
+          const videos = res.data?.videos || res.data?.curriculum || res.data?.lessons || [];
+          const hasSample = Array.isArray(videos) && videos.some((v) => v.video_is_free_sample === true);
+          return [course.id, hasSample];
+        } catch {
+          return [course.id, false];
+        }
+      })
+    );
+    return Object.fromEntries(entries);
+  };
+
   const fetchCourseList = async () => {
     try {
       const headers = { Authorization: `Bearer ${token}` };
       const API = process.env.NEXT_PUBLIC_API_URL;
 
-      // Obtener cursos directamente de /course/all
+      // Obtener cursos directamente de /course/all (endpoint público: no
+      // depende de tener suscripción, así que se pide siempre).
       const allRes = await axios.get(`${API}/api/v1/course/all`, { headers });
       const list = allRes.data;
 
@@ -265,14 +325,29 @@ function CursosPageContent() {
         setCourseList(list);
         setNoAccess(false);
 
-        // Si viene ?id= en la URL, ir directamente al player de ese curso
-        if (courseIdParam) {
-          const target = list.find((c) => c.id === courseIdParam) || list[0];
-          openCourse(target);
-        }
+        if (isSubscribed) {
+          // ── Con acceso: comportamiento EXACTO de siempre ────────────────
+          if (courseIdParam) {
+            const target = list.find((c) => c.id === courseIdParam) || list[0];
+            openCourse(target);
+          }
+          // Progreso real de cada curso (vídeos vistos en su detalle).
+          fetchProgressFor(list, headers, API);
+        } else {
+          // ── Sin acceso: hay que saber ANTES de pintar nada si existe al
+          //    menos una muestra gratis en TODO el catálogo. Si no existe
+          //    ninguna (hoy, sin el campo desplegado), la sección se
+          //    comporta exactamente igual que antes de este cambio.
+          const map = await fetchFreeSampleInfoFor(list, headers, API);
+          setSampleMap(map);
+          const anySample = Object.values(map).some(Boolean);
+          setCatalogHasFreeSamples(anySample);
 
-        // Progreso real de cada curso (vídeos vistos en su detalle).
-        fetchProgressFor(list, headers, API);
+          if (anySample && courseIdParam) {
+            const target = list.find((c) => c.id === courseIdParam) || list[0];
+            if (target) openCourse(target);
+          }
+        }
       } else {
         setCourseList([]);
         setNoAccess(true);
@@ -289,15 +364,12 @@ function CursosPageContent() {
   };
 
   // ── Carga inicial: lista de cursos ────────────────────────────────────────────
+  // Se pide siempre que haya token: /course/all y /course/detail/:id son
+  // públicos, así que un usuario sin compras también puede ver el catálogo
+  // (con sus muestras gratis, si las hay).
   useEffect(() => {
     if (token) {
-      if (isSubscribed) {
-        fetchCourseList();
-      } else {
-        setCourseList([]);
-        setNoAccess(true);
-        setLoading(false);
-      }
+      fetchCourseList();
     } else {
       setLoading(false);
     }
@@ -321,6 +393,14 @@ function CursosPageContent() {
   const handleVideoSelect = async (video) => {
     const videoId = video.video_id || video.id;
     const videoTitle = video.video_title || video.title;
+
+    // Nunca se abre desde el front una clase que el usuario no tiene: sin
+    // suscripción/compra, solo se puede reproducir la clase que el backend
+    // marcó video_is_free_sample=true. El resto ni siquiera llega a pedir
+    // watch-video (aunque lo pidiera, el backend respondería 403).
+    if (!isSubscribed && video.video_is_free_sample !== true) {
+      return;
+    }
 
     if (video.video_url && video.video_url !== TEST_VIDEO_URL) {
       setSelectedVideo({ id: videoId, title: videoTitle, url: video.video_url, loading: false });
@@ -370,7 +450,12 @@ function CursosPageContent() {
     );
   }
 
-  if (!isSubscribed || noAccess) {
+  // Pantalla de venta pura (sin cambios respecto a como era): solo cuando
+  // falló la carga de verdad, o cuando no hay NINGUNA muestra gratis en todo
+  // el catálogo (hoy, sin el campo video_is_free_sample desplegado, es
+  // siempre este caso — no-regresión más importante de este cambio).
+  const showPaywallScreen = noAccess || (!isSubscribed && !catalogHasFreeSamples);
+  if (showPaywallScreen) {
     return (
       <div className="flex-1 w-full max-w-7xl mx-auto p-6 md:p-12 min-h-screen">
         <h1 className="text-[#3932C0] text-5xl font-bold mb-16">Mis cursos</h1>
@@ -399,6 +484,78 @@ function CursosPageContent() {
             <RefreshCw size={14} />
             ¿Acabas de comprar y no ves tu acceso? Actualizar
           </button>
+        </div>
+      </div>
+    );
+  }
+
+  // ── Vista: Catálogo de cursos (sin suscripción, pero con muestras) ───────────
+  // Solo se llega aquí cuando catalogHasFreeSamples es true (si no, ya se
+  // devolvió la pantalla de venta de arriba). No hay pestañas de progreso:
+  // sin haber comprado nada, "en progreso/pendiente/completado" no aplica.
+  if (view === 'catalog' && !isSubscribed) {
+    return (
+      <div className="w-full max-w-6xl mx-auto p-6 md:p-12 min-h-screen">
+        <h1 className="text-[#3932C0] text-5xl font-bold mb-4">Mis cursos</h1>
+        <p className="text-gray-400 text-lg mb-10">
+          Prueba gratis la clase de muestra de cada curso, o consigue el acceso completo.
+        </p>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          {courseList.map((course) => {
+            const hasSample = !!sampleMap[course.id];
+            return (
+              <button
+                key={course.id}
+                onClick={() => openCourse(course)}
+                className="group text-left bg-white border-2 border-gray-100 rounded-[24px] overflow-hidden shadow-sm hover:shadow-xl hover:border-[#FF690B]/30 transition-all duration-300 cursor-pointer"
+              >
+                <div className="relative w-full aspect-video bg-gradient-to-br from-[#3932C0]/10 to-[#FF690B]/10 overflow-hidden">
+                  {course.image ? (
+                    <img
+                      src={course.image}
+                      alt={course.title}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <span className="text-6xl">🎓</span>
+                    </div>
+                  )}
+                  {hasSample && (
+                    <span className="absolute top-3 left-3 rounded-full bg-[#22C55E] text-white text-xs font-bold px-3 py-1 shadow">
+                      Clase de muestra gratis
+                    </span>
+                  )}
+                </div>
+
+                <div className="p-6">
+                  <p className="text-[#FF690B] text-xs font-bold uppercase tracking-widest mb-2">Curso</p>
+                  <h2 className="text-[#3932C0] text-xl font-bold mb-2 group-hover:text-[#FF690B] transition-colors line-clamp-2">
+                    {course.title || "Curso sin título"}
+                  </h2>
+                  {course.subtitle && (
+                    <p className="text-gray-400 text-sm mb-4 line-clamp-2">{course.subtitle}</p>
+                  )}
+                  <p
+                    className="text-sm font-semibold mt-3"
+                    style={{ color: hasSample ? '#22C55E' : '#9CA3AF' }}
+                  >
+                    {hasSample ? 'Ver clase gratis' : 'Consíguelo para ver el temario'}
+                  </p>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+
+        <div className="w-full flex justify-center mt-14">
+          <Link
+            href="/cursos"
+            className="inline-flex items-center gap-2 text-[#FF690B] font-bold hover:underline"
+          >
+            Ver todos los cursos <ArrowRight className="w-4 h-4" />
+          </Link>
         </div>
       </div>
     );
@@ -554,6 +711,23 @@ function CursosPageContent() {
         <>
           {/* Video Player */}
           <div ref={playerRef}>
+            {!selectedVideo && !isSubscribed ? (
+              // Sin suscripción y sin ninguna clase de muestra en este curso:
+              // igual que hoy, no hay nada que reproducir hasta comprarlo.
+              <div className="w-full aspect-video rounded-[20px] bg-gray-100 flex flex-col items-center justify-center mb-8 shadow-lg gap-3 px-6 text-center">
+                <p className="text-[#363C98] font-semibold text-lg">Todavía no tienes acceso a este curso</p>
+                <p className="text-[#6B6BA8] text-sm max-w-md">
+                  Este curso todavía no tiene ninguna clase de muestra gratuita. Consigue el acceso para ver el temario completo.
+                </p>
+                <Link
+                  href="/cursos"
+                  className="mt-1 rounded-xl px-5 py-2.5 font-bold text-white text-sm inline-block"
+                  style={{ backgroundColor: '#FF690B' }}
+                >
+                  Ver opciones de acceso
+                </Link>
+              </div>
+            ) : null}
             {selectedVideo && (
               selectedVideo.loading || videoLoading ? (
                 <div className="w-full aspect-video rounded-[20px] bg-gray-100 flex flex-col items-center justify-center mb-8 shadow-lg gap-3">
@@ -615,20 +789,39 @@ function CursosPageContent() {
             <TestQuiz test={activeTest} token={token} onClose={() => setActiveTest(null)} />
           )}
 
-          {/* Progress Card */}
-          <div className="bg-white border-2 border-gray-100 rounded-[20px] p-6 mb-12 shadow-sm">
-            <div className="flex flex-col md:flex-row md:items-center space-y-2 md:space-y-0 md:space-x-4">
-              <span className="text-[#FF690B] font-bold text-lg whitespace-nowrap">
-                {progressPercent}% completado
-              </span>
-              <div className="w-full bg-[#FFF6F0] rounded-full h-4">
-                <div
-                  className="bg-[#FF690B] h-4 rounded-full transition-all duration-500"
-                  style={{ width: `${progressPercent}%` }}
-                />
+          {/* Progress Card: solo tiene sentido con acceso al curso */}
+          {isSubscribed && (
+            <div className="bg-white border-2 border-gray-100 rounded-[20px] p-6 mb-12 shadow-sm">
+              <div className="flex flex-col md:flex-row md:items-center space-y-2 md:space-y-0 md:space-x-4">
+                <span className="text-[#FF690B] font-bold text-lg whitespace-nowrap">
+                  {progressPercent}% completado
+                </span>
+                <div className="w-full bg-[#FFF6F0] rounded-full h-4">
+                  <div
+                    className="bg-[#FF690B] h-4 rounded-full transition-all duration-500"
+                    style={{ width: `${progressPercent}%` }}
+                  />
+                </div>
               </div>
             </div>
-          </div>
+          )}
+
+          {/* CTA de compra: sin suscripción, el resto del temario está cerrado */}
+          {!isSubscribed && (
+            <div className="mb-12 rounded-2xl border-2 border-[#FF690B]/30 bg-[#FFF6F0] px-6 py-5 flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div>
+                <p className="text-[#3932C0] font-bold text-lg">¿Te está gustando?</p>
+                <p className="text-gray-500 text-sm">Consigue el acceso completo para ver todas las clases del curso.</p>
+              </div>
+              <Link
+                href="/cursos"
+                className="shrink-0 rounded-xl px-5 py-2.5 font-bold text-white text-sm text-center whitespace-nowrap"
+                style={{ backgroundColor: '#FF690B' }}
+              >
+                Ver opciones de acceso
+              </Link>
+            </div>
+          )}
 
           {/* Modules / Content */}
           <h2 className="text-[#3932C0] text-2xl font-bold mb-6">Contenido del curso</h2>
@@ -658,24 +851,40 @@ function CursosPageContent() {
                         {mod.videos.map((video, vIdx) => {
                           const isVideoComplete = video.views?.is_viewed;
                           const isActive = selectedVideo?.id === (video.video_id || video.id);
+                          // Sin suscripción, solo la clase marcada por el backend se
+                          // puede abrir; el resto queda cerrada (candado, sin onClick).
+                          const isFreeSample = video.video_is_free_sample === true;
+                          // El placeholder de "contenido próximamente" no es una
+                          // clase real: no se bloquea con el candado de compra.
+                          const isLocked = !isSubscribed && !isFreeSample && video.video_id !== "placeholder";
                           return (
                             <div
                               key={video.video_id || vIdx}
-                              onClick={() => handleVideoSelect(video)}
-                              className={`flex flex-col sm:flex-row sm:items-center justify-between py-3 px-4 rounded-xl cursor-pointer transition-all border-2 ${
-                                isActive ? "border-[#FF690B] bg-[#FFF6F0]" : "border-transparent hover:bg-orange-50/60"
+                              onClick={isLocked ? undefined : () => handleVideoSelect(video)}
+                              aria-disabled={isLocked}
+                              className={`flex flex-col sm:flex-row sm:items-center justify-between py-3 px-4 rounded-xl transition-all border-2 ${
+                                isLocked
+                                  ? "cursor-not-allowed opacity-60 border-transparent"
+                                  : `cursor-pointer ${isActive ? "border-[#FF690B] bg-[#FFF6F0]" : "border-transparent hover:bg-orange-50/60"}`
                               }`}
                             >
                               <div className="flex items-center space-x-3 mb-2 sm:mb-0">
                                 <span className="text-[#FF690B] flex-shrink-0 w-4">
-                                  {isActive ? <PlayIcon /> : null}
+                                  {isLocked ? <LockIcon /> : isActive ? <PlayIcon /> : null}
                                 </span>
-                                <span className={`font-medium text-base ${isActive ? "text-[#3932C0]" : "text-[#FF690B]"}`}>
+                                <span className={`font-medium text-base ${isLocked ? "text-gray-400" : isActive ? "text-[#3932C0]" : "text-[#FF690B]"}`}>
                                   {video.video_title || video.title}
                                 </span>
+                                {!isSubscribed && isFreeSample && (
+                                  <span className="rounded-full bg-[#22C55E]/10 text-[#22C55E] text-xs font-bold px-2 py-0.5 whitespace-nowrap">
+                                    Muestra gratis
+                                  </span>
+                                )}
                               </div>
                               <div className="flex items-center space-x-2 self-start sm:self-auto">
-                                {isVideoComplete ? (
+                                {isLocked ? (
+                                  <span className="text-gray-400 text-sm font-medium">Comprar para ver</span>
+                                ) : isVideoComplete ? (
                                   <><span className="text-[#22C55E] text-sm font-medium">Completo</span><CheckCircleIcon /></>
                                 ) : (
                                   <><span className="text-gray-300 text-sm font-medium">Siguiente</span><CircleIcon /></>
