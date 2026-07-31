@@ -866,21 +866,25 @@ export default function ProfilePage() {
                     </p>
                   )}
 
-                  {purchases && purchases.length > 0 && (
-                    <button
-                      type="button"
-                      onClick={() => setIsPurchasesModalOpen(true)}
-                      className="w-full border border-[#FF690B] text-[#FF690B] font-bold py-2.5 rounded-xl hover:bg-[#FF690B]/5 active:scale-95 transition-all text-sm text-center cursor-pointer"
-                    >
-                      Ver historial
-                    </button>
-                  )}
+                  {/* Antes solo se pintaba con purchases.length > 0: con 0 compras
+                      no había forma de abrir el modal y el texto vacío de ahí
+                      dentro no se veía nunca. Ahora el botón siempre está, y el
+                      modal es quien decide qué mostrar (lista o «aún no tienes
+                      compras»). */}
+                  <button
+                    type="button"
+                    onClick={() => setIsPurchasesModalOpen(true)}
+                    className="w-full border border-[#FF690B] text-[#FF690B] font-bold py-2.5 rounded-xl hover:bg-[#FF690B]/5 active:scale-95 transition-all text-sm text-center cursor-pointer"
+                  >
+                    Ver historial
+                  </button>
                 </div>
               </div>
             )}
 
-            {/* Historial suelto si no hay plan activo pero sí compras */}
-            {(!advice || (!advice.suscription_name && !advice.title)) && purchases && purchases.length > 0 && (
+            {/* Historial de compras si no hay plan activo (con o sin compras:
+                el propio modal enseña el estado vacío honesto). */}
+            {(!advice || (!advice.suscription_name && !advice.title)) && (
               <button
                 type="button"
                 onClick={() => setIsPurchasesModalOpen(true)}

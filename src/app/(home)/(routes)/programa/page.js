@@ -13,6 +13,28 @@ import AgendaSection from './_components/AgendaSection';
 import GuaranteeSection from './_components/GuaranteeSection';
 import FinalCTA from './_components/FinalCTA';
 
+// Open Graph / Twitter específicos: reutiliza el titular y el subtítulo reales
+// del hero de esta página (HeroPlanes.js). La imagen la hereda del layout de
+// (home) — no hay ninguna pensada para compartir en public/, así que de
+// momento usa la plantilla genérica del logo (ver PR: pendiente de diseño).
+export const metadata = {
+  openGraph: {
+    title: 'Squad Fit — Tu cambio, esta vez de verdad',
+    description:
+      'Un programa de nutrición y entreno para lograr tu objetivo y mantener resultados.',
+    url: './',
+    siteName: 'Squad Fit',
+    locale: 'es_ES',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Squad Fit — Tu cambio, esta vez de verdad',
+    description:
+      'Un programa de nutrición y entreno para lograr tu objetivo y mantener resultados.',
+  },
+};
+
 export default function page() {
   return (
     <div className="min-h-screen bg-white">

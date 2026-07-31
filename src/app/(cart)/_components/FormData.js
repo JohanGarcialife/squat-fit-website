@@ -7,7 +7,7 @@ import { useCheckoutStore } from "@/stores/checkout.store";
 import { useShippingQuote } from "./useShippingQuote";
 
 export default function FormData(props) {
-  const { setStep } = props;
+  const { setStep, saveCard, onSaveCardChange } = props;
   const { cart } = useCartStore();
 
   const [isFormValid, setIsFormValid] = useState(false);
@@ -59,10 +59,12 @@ export default function FormData(props) {
       
       {/* Columna Izquierda: Formulario (aprox 60%) */}
       <div className="w-full lg:w-3/5 xl:w-1/2 p-6 lg:p-14 lg:pl-40 min-h-screen bg-white">
-        <CheckoutForm 
-            setStep={setStep} 
+        <CheckoutForm
+            setStep={setStep}
             onValidationChange={handleValidationChange}
             submitRef={checkoutFormRef}
+            saveCard={saveCard}
+            onSaveCardChange={onSaveCardChange}
         />
       </div>
       

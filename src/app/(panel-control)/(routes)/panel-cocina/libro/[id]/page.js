@@ -376,25 +376,20 @@ export default function BookReaderPage({ params, searchParams }) {
           </button>
         </div>
 
-        {/* PDF Viewer */}
+        {/* PDF Viewer — a este punto `pdfFile` siempre tiene valor: toda rama de
+            loadBook() que no consigue una URL de PDF llama a setError(...) y
+            corta el render con la pantalla de error de arriba (nunca llega
+            aquí sin PDF). Antes había un texto de repuesto para "sin PDF" en
+            este mismo sitio que, por eso, no se podía ver nunca. */}
         <div className="relative bg-white shadow-xl mt-4 flex flex-col items-center justify-center min-h-[600px] overflow-hidden rounded-md w-full">
-          {pdfFile ? (
-            <>
-              <PdfViewer 
-                file={pdfFile}
-                pageNumber={pageNumber}
-                onDocumentLoadSuccess={onDocumentLoadSuccess}
-              />
-              <p className="absolute bottom-4 right-4 text-sm text-gray-400 bg-white/80 px-2 py-1 rounded">
-                Página {pageNumber} de {numPages || '--'}
-              </p>
-            </>
-          ) : (
-            <div className="flex flex-col items-center gap-3 text-center p-8">
-              <span className="text-4xl">📄</span>
-              <p className="text-gray-400 font-medium">El PDF de este libro aún no está disponible.</p>
-            </div>
-          )}
+          <PdfViewer
+            file={pdfFile}
+            pageNumber={pageNumber}
+            onDocumentLoadSuccess={onDocumentLoadSuccess}
+          />
+          <p className="absolute bottom-4 right-4 text-sm text-gray-400 bg-white/80 px-2 py-1 rounded">
+            Página {pageNumber} de {numPages || '--'}
+          </p>
         </div>
 
         {/* Pagination Controls */}
