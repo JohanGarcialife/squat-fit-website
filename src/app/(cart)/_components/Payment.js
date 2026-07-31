@@ -135,6 +135,10 @@ export default function Payment(props) {
   const router = useRouter();
   const { cart } = useCartStore();
   const { token } = useAuthStore();
+  // Casilla del paso 2 (save_card). Si no se marcó, es `undefined`/`false` y
+  // createTierCheckout manda exactamente el mismo payload que antes de este
+  // cambio (su propio default es `false`).
+  const { saveCard } = props;
   const [clientSecret, setClientSecret] = useState('');
   // Secreto de una Checkout Session (cs_…): el pago se monta incrustado.
   const [embeddedSecret, setEmbeddedSecret] = useState(null);
@@ -186,7 +190,7 @@ export default function Payment(props) {
     // clientSecret se monta el Payment Element; si el endpoint aún no está
     // desplegado (404), se mantiene el aviso honesto de «muy pronto».
     if (directItem && (directItem.tierGroup || directItem.tier)) {
-       createTierCheckout(directItem, { token })
+       createTierCheckout(directItem, { token, saveCard })
          .then((result) => {
            if (result.status === 'embedded') {
              // Lo normal desde ahora: el pago se pinta AQUÍ, sin salir de la web.
@@ -319,7 +323,7 @@ export default function Payment(props) {
     };
 
     fetchPaymentIntent();
-  }, [cart, token]);
+  }, [cart, token, saveCard]);
 
   if (loading) {
     return (

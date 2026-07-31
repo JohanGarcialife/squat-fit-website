@@ -258,7 +258,7 @@ export function buildTierCartItem(group, tierKey) {
 // misma app servida desde Vercel.
 export const CHECKOUT_KNOWN_ORIGIN = 'https://squadfit.es';
 
-export async function createTierCheckout(item, { token } = {}) {
+export async function createTierCheckout(item, { token, saveCard = false } = {}) {
   const origin = resolveOrigin();
 
   const attempt = async (base) => {
@@ -275,6 +275,11 @@ export async function createTierCheckout(item, { token } = {}) {
       success_url: `${base}/cart?success=true`,
       cancel_url: `${base}/cart`,
       origin,
+      // PR #44 del backend (27-jul, ya en prod): `save_card` en el DTO del
+      // checkout de catálogo, con `false` por defecto ahí también. Solo viaja
+      // `true` si el cliente marcó la casilla del paso 2; si no la toca, el
+      // payload es EXACTAMENTE el de antes de este cambio.
+      save_card: Boolean(saveCard),
     };
 
     for (const endpoint of TIER_CHECKOUT_ENDPOINTS) {
