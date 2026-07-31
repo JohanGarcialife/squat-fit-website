@@ -1,16 +1,42 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import dynamic from "next/dynamic";
-import { ChevronLeft, ChevronRight, Link as LinkIcon, Menu } from "lucide-react";
+import { ChevronLeft, ChevronRight, Link as LinkIcon, Menu, Search } from "lucide-react";
 import { BookIndexSidebar } from "@/app/(panel-control)/(routes)/panel-control/_components/Sidebar";
 import { useAuthStore } from "@/stores/auth.store";
 import AccessNotice from "@/app/components/AccessNotice";
 import { handleApiError } from "@/app/components/handleApiError";
+import { useSystemRecipes } from "@/app/components/useSystemRecipes";
+import { trackRecipeEvent } from "@/app/components/recipeMetrics";
+import FreeSampleBadge from "@/app/components/FreeSampleBadge";
 import axios from "axios";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://squatfit-api-cyrc2g3zra-no.a.run.app';
+
+// Sin imagen real, mismo criterio que el resto de Mi cocina.
+function getValidImageUrl(url) {
+  if (!url) return '/group32.png';
+  if (url.startsWith('http')) return url;
+  return url.startsWith('/') ? url : `/${url}`;
+}
+
+// Relación libro↔receta: TODAVÍA NO EXISTE en el backend (confirmado,
+// 31-jul — la tabla `recipe` no tiene ninguna columna que la referencie;
+// `getSystemRecipes` comprueba el acceso a un libro fijo, no por
+// libro/versión concreto). Se comprueban aquí varios nombres de campo
+// plausibles por si el backend la añade sin más aviso que el propio dato;
+// mientras NINGUNO de ellos llegue, esto siempre devuelve un array vacío —
+// así que TODOS los libros siguen enseñando el PDF de siempre. Es el
+// comportamiento pedido, no un fallo de esta función.
+function recipesForBook(recipes, bookId, versionId) {
+  if (!Array.isArray(recipes)) return [];
+  return recipes.filter(
+    (r) => r.book_id === bookId || r.version_id === versionId || r.book_version_id === versionId,
+  );
+}
 
 // Book index config — fallback mock index in case backend has no content
 const fallbackBookIndex = [
@@ -37,7 +63,17 @@ export default function BookReaderPage({ params, searchParams }) {
   const versionId = resolvedSearch?.v || null;
 
   const { token } = useAuthStore();
-  
+
+  // Recetas nativas de este libro (si las hay). Se piden en paralelo con el
+  // libro/PDF de siempre — mientras no exista relación libro↔receta en el
+  // backend, `nativas` queda vacío y este hook no cambia nada de lo de abajo.
+  const { checked: recipesChecked, recipes } = useSystemRecipes();
+  const nativas = useMemo(
+    () => recipesForBook(recipes, bookId, versionId),
+    [recipes, bookId, versionId],
+  );
+  const [busquedaNativa, setBusquedaNativa] = useState('');
+
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [numPages, setNumPages] = useState(null);
   const [pageNumber, setPageNumber] = useState(1);
@@ -176,18 +212,94 @@ export default function BookReaderPage({ params, searchParams }) {
     }
   }
 
+  // Buscador de la lista nativa: un evento "search" por pausa de escritura
+  // (debounce), no uno por tecla.
+  useEffect(() => {
+    const q = busquedaNativa.trim();
+    if (!q) return undefined;
+    const t = setTimeout(() => {
+      trackRecipeEvent('search', { searchTerm: q });
+    }, 500);
+    return () => clearTimeout(t);
+  }, [busquedaNativa]);
+
   // Sin sesión: aviso de acceso (como el resto del panel), no un lector vacío.
   if (!token) {
     const back = `/panel-cocina/libro/${bookId}${versionId ? `?v=${versionId}` : ''}`;
     return <AccessNotice redirect={back} />;
   }
 
-  if (loading) {
+  // Se espera a los dos: el libro/PDF de siempre Y la comprobación de
+  // recetas nativas, para no enseñar el PDF un instante y luego cambiar a
+  // la lista nativa (o al revés) delante del cliente.
+  if (loading || !recipesChecked) {
     return (
       <div className="w-full min-h-screen bg-transparent flex items-center justify-center pt-8 pl-8 pr-12 pb-12">
         <div className="flex flex-col items-center gap-4">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#3932C0]"></div>
           <p className="text-[#3932C0] font-semibold text-lg">Cargando lector...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // ── Vista nativa: este libro SÍ tiene recetas nativas asociadas ──────────
+  // Reemplaza al PDF por completo. No depende de si el PDF cargó o dio
+  // error (`error`/`pdfFile` de abajo): si hay recetas nativas, son ellas
+  // las que se enseñan, punto.
+  if (nativas.length > 0) {
+    const q = busquedaNativa.trim().toLowerCase();
+    const visibles = q ? nativas.filter((r) => (r.name || '').toLowerCase().includes(q)) : nativas;
+    return (
+      <div className="w-full min-h-screen bg-[#F8F9FC] flex flex-col p-6 md:p-10 pb-16 animate-in fade-in duration-300">
+        <div className="w-full max-w-5xl mx-auto">
+          <Link href="/panel-cocina" className="flex items-center gap-3 text-[#3932C0] hover:opacity-80 transition-opacity cursor-pointer mb-6">
+            <ChevronLeft className="w-8 h-8" strokeWidth={2.5} />
+            <h1 className="text-3xl font-bold">
+              {bookTitle}
+              {versionTitle ? <span className="font-normal text-2xl"> ( {versionTitle} )</span> : null}
+            </h1>
+          </Link>
+
+          <div className="relative max-w-sm mb-8">
+            <Search className="w-4 h-4 text-slate-300 absolute left-4 top-1/2 -translate-y-1/2" />
+            <input
+              type="text"
+              value={busquedaNativa}
+              onChange={(e) => setBusquedaNativa(e.target.value)}
+              placeholder="Buscar receta…"
+              className="w-full rounded-2xl border border-slate-200 bg-white pl-10 pr-4 py-2.5 text-sm text-[#363C98] placeholder:text-slate-300 focus:outline-none focus:border-[#FF690B] transition-colors"
+            />
+          </div>
+
+          {visibles.length === 0 ? (
+            <p className="text-slate-400">Nada con «{busquedaNativa.trim()}».</p>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {visibles.map((r) => (
+                <Link
+                  key={r.id}
+                  href={`/panel-cocina/receta/${r.id}?from=${bookId}${versionId ? `&v=${versionId}` : ''}`}
+                  onClick={() => trackRecipeEvent('click', { recipeId: r.id })}
+                  className="bg-white rounded-3xl border border-slate-100 shadow-sm hover:shadow-md transition-all overflow-hidden group"
+                >
+                  <div className="relative w-full aspect-square bg-[#FFF6F0]">
+                    <Image
+                      src={getValidImageUrl(r.image)}
+                      alt={r.name || 'Receta'}
+                      fill
+                      sizes="(max-width: 640px) 100vw, 33vw"
+                      className="object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
+                    {r.is_free_sample && <FreeSampleBadge className="absolute top-3 left-3" />}
+                  </div>
+                  <div className="p-4">
+                    <p className="text-[#363C98] font-bold leading-snug line-clamp-2">{r.name}</p>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     );
