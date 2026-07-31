@@ -257,9 +257,9 @@ function RecetaPageContent({ params }) {
               <h2 className="text-[#363C98] font-extrabold text-xl mb-4">Macros</h2>
               <div className="grid grid-cols-3 gap-3">
                 {macroRows.map(([label, value]) => (
-                  <div key={label} className="bg-[#F8F9FC] rounded-2xl p-3 text-center">
+                  <div key={label} className="bg-[#F8F9FC] rounded-2xl p-3 text-center min-w-0">
                     <p className="text-[#363C98] font-extrabold text-lg leading-none">{value}</p>
-                    <p className="text-slate-400 text-[11px] font-semibold mt-1 uppercase tracking-wide">{label}</p>
+                    <p className="text-slate-400 text-[10px] font-semibold mt-1 uppercase break-words">{label}</p>
                   </div>
                 ))}
               </div>
