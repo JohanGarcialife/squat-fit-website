@@ -11,6 +11,30 @@ import ComparisionCocina from './_components/ComparisionCocina'
 import Description from './_components/Description'
 import Temario from './_components/Temario'
 import Extras from './_components/Extras'
+
+// Open Graph / Twitter específicos: reutiliza el titular y el copy reales del
+// hero de esta página (HeroSection.js). La imagen la hereda del layout de
+// (home) — cocinaHero.png existe pero es 1200x1200 y pensada para el hero,
+// no para compartir; de momento usa la plantilla genérica del logo (ver PR:
+// pendiente de diseño).
+export const metadata = {
+  openGraph: {
+    title: 'La Cocina Squad Fit',
+    description:
+      'Recetas fit con sabor real: más de 155 recetas fáciles, saciantes y deliciosas para comer sano sin restricciones.',
+    url: './',
+    siteName: 'Squad Fit',
+    locale: 'es_ES',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'La Cocina Squad Fit',
+    description:
+      'Recetas fit con sabor real: más de 155 recetas fáciles, saciantes y deliciosas para comer sano sin restricciones.',
+  },
+};
+
 export default function page() {
 
   // beforeGrayscale: intensidad del B/N del lado "antes", afinada foto a foto

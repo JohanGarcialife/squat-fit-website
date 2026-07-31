@@ -45,6 +45,29 @@ export const metadata = {
   alternates: { canonical: './' },
   title: "Squad Fit",
   description: "Squad Fit Website",
+  // Bloque Open Graph / Twitter: hasta ahora ninguna página emitía og: ni
+  // twitter:, así que un enlace de squadfit.es pegado en WhatsApp, Instagram,
+  // Facebook o Telegram salía pelado (sin título, sin imagen, sin
+  // descripción). Este es el genérico de todo el grupo (home): cada página
+  // pública lo hereda salvo que declare el suyo propio (programa, cocina,
+  // cursos ya lo hacen). La imagen sale de `opengraph-image.jpg` /
+  // `twitter-image.jpg` en esta misma carpeta (convención de fichero de
+  // Next), que se resuelve sola a URL absoluta gracias a `metadataBase`.
+  openGraph: {
+    title: "Squad Fit — Logra tu mejor versión",
+    description:
+      "El programa de dieta, entreno y mentalidad para un cambio físico real y duradero.",
+    url: "./",
+    siteName: "Squad Fit",
+    locale: "es_ES",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Squad Fit — Logra tu mejor versión",
+    description:
+      "El programa de dieta, entreno y mentalidad para un cambio físico real y duradero.",
+  },
 };
 
 export default function RootLayout({ children }) {
