@@ -62,7 +62,10 @@ export default function Page() {
   if (!token) return <AccessNotice redirect="/panel-control" />
 
   return (
-    <div className='py-16 pl-20 w-full'>
+    // pl-20 (80px) sin responsive dejaba casi sin sitio al carrusel en
+    // 375px (el texto de las tarjetas se partía en vertical). En móvil,
+    // padding simétrico y contenido; en lg+ se congela el valor original.
+    <div className='pl-4 pr-4 py-8 lg:pl-20 lg:pr-0 lg:py-16 w-full'>
       <TopVentas courses={courses} userCourses={userCourses} />
     </div>
   )

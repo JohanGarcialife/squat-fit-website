@@ -8,6 +8,7 @@ import { useAuthStore } from '../../stores/auth.store';
 import { useCartStore } from '@/stores/cart.store';
 import { useUiStore } from '@/stores/ui.store';
 import ConfirmationModal from './ConfirmationModal';
+import HomeIcon from './icons/HomeIcon';
 
 export default function BurgerMenu() {
   const [show, setShow] = useState(false)
@@ -79,8 +80,8 @@ export default function BurgerMenu() {
           (tarjeta crema flotante, cierre naranja, textos azules).
           Se desliza y desvanece a la vez para una salida limpia. */}
       <div
-        className={`pointer-events-auto absolute top-[20px] right-[20px] h-[calc(100dvh-40px)] w-[300px] bg-[#FFF6F0] rounded-[40px] shadow-2xl flex flex-col py-8 px-6 transition-[transform,opacity] duration-300 ease-in-out overflow-y-auto ${
-          show ? 'translate-x-0 opacity-100' : 'translate-x-[calc(100%+20px)] opacity-0'
+        className={`pointer-events-auto absolute top-[20px] left-[20px] h-[calc(100dvh-40px)] w-[300px] bg-[#FFF6F0] rounded-[40px] shadow-2xl flex flex-col py-8 px-6 transition-[transform,opacity] duration-300 ease-in-out overflow-y-auto ${
+          show ? 'translate-x-0 opacity-100' : '-translate-x-[calc(100%+20px)] opacity-0'
         }`}
         aria-hidden={!show}
       >
@@ -132,33 +133,37 @@ export default function BurgerMenu() {
           })}
         </nav>
 
-        {/* Zona de cuenta, anclada abajo */}
+        {/* Zona de cuenta, anclada abajo. Botones en fila (antes apilados a
+            todo ancho con text-xl): texto y padding más contenidos, pero
+            min-h-[44px] mantiene el área táctil aunque se vean más pequeños. */}
         <div className='mt-auto pt-8 flex flex-col gap-3'>
           {isClient && isAuth ? (
             <>
-              <p className='text-[#3932C0]/80 text-lg font-medium text-center'>Hola, {user?.firstName || user?.username}</p>
-              <Link href="/panel-control" onClick={() => setShow(false)} className='w-full'>
-                <div className='flex justify-center bg-secondary py-3 px-4 rounded-[20px] shadow-md cursor-pointer active:scale-95 transition-transform'>
-                  <p className='text-xl font-bold text-white'>Mi panel</p>
+              <p className='text-[#3932C0]/80 text-sm font-medium text-center'>Hola, {user?.firstName || user?.username}</p>
+              <div className='flex gap-3 w-full'>
+                <Link href="/panel-control" onClick={() => setShow(false)} className='flex-1'>
+                  <div className='flex items-center justify-center min-h-[44px] bg-secondary py-2 px-3 rounded-[20px] shadow-md cursor-pointer active:scale-95 transition-transform'>
+                    <p className='text-sm font-bold text-white'>Mi panel</p>
+                  </div>
+                </Link>
+                <div onClick={() => setIsModalOpen(true)} className='flex-1 flex items-center justify-center min-h-[44px] py-2 px-3 border-2 border-primary rounded-[20px] cursor-pointer active:scale-95 transition-transform'>
+                  <p className='text-sm font-bold text-primary'>Cerrar sesión</p>
                 </div>
-              </Link>
-              <div onClick={() => setIsModalOpen(true)} className='flex justify-center py-3 px-4 border-2 border-primary rounded-[20px] cursor-pointer active:scale-95 transition-transform w-full'>
-                <p className='text-xl font-bold text-primary'>Cerrar sesión</p>
               </div>
             </>
           ) : !isAuthPage && (
-            <>
-              <Link href="/login" onClick={() => setShow(false)} className='w-full'>
-                <div className='flex justify-center py-3 px-4 border-2 border-primary rounded-[20px] cursor-pointer active:scale-95 transition-transform'>
-                  <p className='text-xl font-bold text-primary'>Acceder</p>
+            <div className='flex gap-3 w-full'>
+              <Link href="/login" onClick={() => setShow(false)} className='flex-1'>
+                <div className='flex items-center justify-center min-h-[44px] py-2 px-3 border-2 border-primary rounded-[20px] cursor-pointer active:scale-95 transition-transform'>
+                  <p className='text-sm font-bold text-primary'>Acceder</p>
                 </div>
               </Link>
-              <Link href="/register" onClick={() => setShow(false)} className='w-full'>
-                <div className='flex justify-center py-3 px-4 bg-primary rounded-[20px] shadow-md cursor-pointer active:scale-95 transition-transform'>
-                  <p className='text-xl font-bold text-white'>Registro</p>
+              <Link href="/register" onClick={() => setShow(false)} className='flex-1'>
+                <div className='flex items-center justify-center min-h-[44px] py-2 px-3 bg-primary rounded-[20px] shadow-md cursor-pointer active:scale-95 transition-transform'>
+                  <p className='text-sm font-bold text-white'>Registro</p>
                 </div>
               </Link>
-            </>
+            </div>
           )}
         </div>
       </div>
@@ -174,11 +179,15 @@ export default function BurgerMenu() {
 
   return (
     <div className='flex flex-row items-center justify-between px-5 py-2.5'>
-      {/* Menú a la IZQUIERDA del logo: azul en reposo, naranja al abrirse */}
-      <div className='flex items-center gap-3'>
+      {/* Menú a la IZQUIERDA del logo: azul en reposo, naranja al abrirse.
+          Todo el grupo (botón + logo) se oculta al abrir: el cajón sale
+          por este mismo lado y quedaría debajo tapándolo a medias durante
+          la transición (antes pasaba lo mismo con el carrito, cuando el
+          cajón salía por la derecha). */}
+      <div className={`${show ? 'invisible' : 'flex'} items-center gap-3`}>
         <button
-          className={`p-1 active:scale-90 transition-all cursor-pointer ${show ? 'invisible' : ''}`}
-          style={{ color: show ? '#FF690B' : '#363C98' }}
+          className='p-1 active:scale-90 transition-all cursor-pointer'
+          style={{ color: '#363C98' }}
           onClick={() => setShow(true)}
           aria-label='Abrir menú'
           aria-expanded={show}
@@ -200,9 +209,22 @@ export default function BurgerMenu() {
         </Link>
       </div>
 
-      {/* Carrito a la derecha. Se oculta con el drawer abierto: queda debajo
-          del overlay y se vería atenuado en vez de desaparecer. */}
-      <div className={`${show ? 'invisible' : 'flex'} items-center gap-4`}>
+      {/* Casa (con sesión) + carrito a la derecha. Se ocultan con el drawer
+          abierto por el mismo motivo que el grupo de la izquierda. */}
+      <div className={`${show ? 'invisible' : 'flex'} items-center gap-2`}>
+        {/* Casa: atajo a "Mi panel" desde la tienda. Solo con sesión iniciada
+            (en escritorio ya existe el botón "Mi panel" de MenuHeader, así
+            que este icono es exclusivo del menú móvil). p-[11px] alrededor
+            del icono de 22px deja exactamente 44px de área táctil. */}
+        {isClient && isAuth && (
+          <Link
+            href="/panel-control"
+            aria-label='Ir a mi panel'
+            className='flex items-center justify-center p-[11px] text-secondary hover:text-primary active:scale-90 transition cursor-pointer'
+          >
+            <HomeIcon width={22} height={22} />
+          </Link>
+        )}
         {/* Carrito: abre el pop-up. Siempre visible, aunque esté vacío; el badge
             solo sale si hay unidades. El pop-up ya tiene su estado vacío. */}
         {isClient && (
