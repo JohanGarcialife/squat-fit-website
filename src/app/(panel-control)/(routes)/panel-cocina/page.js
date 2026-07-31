@@ -11,6 +11,12 @@ import AccessNotice from "@/app/components/AccessNotice";
 import { handleApiError } from "@/app/components/handleApiError";
 import { useProgramAccess } from "@/app/components/useProgramAccess";
 import { SectionCard, EmptyState } from "@/app/components/ProgramSections";
+// El clic "ver mi libro" / "probar gratis" mandaba trackRecipeEvent con
+// book_id/version_id — retirado (ver panel-cocina/libro/[id]/page.js): esa
+// medición no cabe en el contrato real (content_id = recipe.id) sin
+// ensuciar el ranking de recetas, y el libro entero no dice qué RECETA es
+// popular, que es lo único que decide una muestra gratis.
+import FreeSampleBadge from "@/app/components/FreeSampleBadge";
 
 export default function CocinaPage() {
   const { token, isSubscribed } = useAuthStore();
@@ -52,13 +58,15 @@ export default function CocinaPage() {
   };
 
   useEffect(() => {
+    // Antes esto solo se pedía con isSubscribed=true. Ahora se pide siempre
+    // que haya sesión: el backend es quien decide qué devuelve (biblioteca
+    // completa si hay suscripción, y si no, las recetas que vengan marcadas
+    // como muestra gratuita — `is_free_sample`). Mientras el backend no
+    // mande ese flag a nadie, el resultado para quien no está suscrito sigue
+    // siendo "nada", igual que hoy. `isSubscribed` se queda como dependencia
+    // para volver a pedir tras el botón "Actualizar" de la tienda.
     if (token) {
-      if (isSubscribed) {
-        fetchBooks();
-      } else {
-        setBooks([]);
-        setLoading(false);
-      }
+      fetchBooks();
     } else {
       setLoading(false);
     }
@@ -84,6 +92,26 @@ export default function CocinaPage() {
         buttonText: `Ver mi libro`
       }];
     }
+  });
+
+  // Recetas de muestra gratuita: el flag lo trae (o no) el backend en cada
+  // versión — `is_free_sample`, a nivel de versión o, si no, a nivel de
+  // libro entero. Si el campo nunca llega (backend aún no desplegado), este
+  // array queda vacío y todo se comporta exactamente como hoy: la pantalla
+  // de "sin suscripción" se enseña sola, sin ninguna sección nueva encima.
+  // Ojo: esto NO decide acceso por su cuenta — solo pinta lo que el backend
+  // ya haya decidido devolver en /book/all.
+  const freeSampleVersions = books.flatMap(book => {
+    const versions = book.versions && book.versions.length > 0 ? book.versions : [book];
+    return versions
+      .filter((version) => version.is_free_sample === true || book.is_free_sample === true)
+      .map((version) => ({
+        bookId: book.id,
+        bookTitle: book.title || book.name || 'Muestra gratis',
+        versionId: version.version_id || version.id || book.id,
+        versionTitle: version.version_title || version.title || book.title,
+        versionImage: version.version_image || book.image || '/group32.png',
+      }));
   });
 
   // Sin sesión: aviso de acceso (como el resto del panel), no la tienda.
@@ -145,7 +173,9 @@ export default function CocinaPage() {
                     {item.versionTitle}
                  </p>
 
-                 <Link href={`/panel-cocina/libro/${item.bookId}?v=${item.versionId}`}>
+                 <Link
+                   href={`/panel-cocina/libro/${item.bookId}?v=${item.versionId}`}
+                 >
                    <button className="bg-[#3932C0] text-white font-bold py-3 px-12 rounded-xl text-lg hover:bg-[#3932C0]/90 transition-colors shadow-lg cursor-pointer">
                       {item.buttonText || 'Ver mi libro'}
                    </button>
@@ -155,8 +185,49 @@ export default function CocinaPage() {
 
         </div>
       ) : (
-        /* --- Pantalla de Sin Suscripción Activa (Tarjetas Enriquecidas) --- */
+        /* --- Sin suscripción: primero las muestras gratuitas (si las hay),
+            luego la tienda de siempre --- */
         <div className="py-12">
+          {freeSampleVersions.length > 0 && (
+            <div className="mb-20">
+              <h2 className="text-[#3932C0] text-3xl font-bold mb-2 text-center">Prueba gratis</h2>
+              <p className="text-gray-500 text-lg max-w-xl mx-auto text-center mb-10">
+                Estas recetas están abiertas para que las pruebes antes de suscribirte.
+              </p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-24">
+                {freeSampleVersions.map((item, index) => (
+                  <div key={item.versionId || index} className="flex flex-col items-center">
+                    <FreeSampleBadge className="mb-3" />
+                    <h2 className="text-[#FF690B] text-3xl font-bold mb-6 text-center">{item.bookTitle}</h2>
+
+                    <div className="relative mb-6">
+                      <div className="absolute top-4 left-[-10px] w-full h-full bg-[#FFF6F0] rounded-[24px] -z-10 transform scale-105"></div>
+                      <Image
+                        src={getValidImageUrl(item.versionImage)}
+                        width={300}
+                        height={300}
+                        alt={`${item.bookTitle} - ${item.versionTitle}`}
+                        className="object-cover rounded-[24px]"
+                      />
+                    </div>
+
+                    <p className="text-[#FF690B] text-3xl mb-8 text-center font-normal">
+                      {item.versionTitle}
+                    </p>
+
+                    <Link
+                      href={`/panel-cocina/libro/${item.bookId}?v=${item.versionId}`}
+                    >
+                      <button className="bg-[#FF690B] text-white font-bold py-3 px-12 rounded-xl text-lg hover:bg-[#e05b08] transition-colors shadow-lg cursor-pointer">
+                        Probar gratis
+                      </button>
+                    </Link>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           <div className="text-center mb-12">
             <h2 className="text-[#3932C0] text-3xl font-bold mb-4">
               Aún no tienes acceso a la biblioteca

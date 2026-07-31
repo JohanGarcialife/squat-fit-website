@@ -85,6 +85,9 @@ export default function BookReaderPage({ params, searchParams }) {
   const [versionTitle, setVersionTitle] = useState('');
   const [pdfFile, setPdfFile] = useState(null);
   const [indexes, setIndexes] = useState([]);
+  // Muestra gratuita: el flag lo trae (o no) /book/by-id, a nivel de versión
+  // o de libro. Si nunca llega, se queda en `false` — no cambia nada más.
+  const [isFreeSample, setIsFreeSample] = useState(false);
 
   useEffect(() => {
     async function loadBook() {
@@ -125,6 +128,7 @@ export default function BookReaderPage({ params, searchParams }) {
 
         if (version) {
           setVersionTitle(version.version_title || version.title || '');
+          setIsFreeSample(version.is_free_sample === true || bookData.is_free_sample === true);
 
           // Extraer URL del PDF — probar varios campos posibles
           const isUrlImage = version.version_url?.includes('pexels.com') || 
@@ -184,6 +188,20 @@ export default function BookReaderPage({ params, searchParams }) {
     loadBook();
   }, [bookId, versionId, token]);
 
+  // ── Medición: apertura + tiempo de lectura del PDF — RETIRADA ────────────
+  // Esta rama (#91) sustituyó recipeMetrics.js por el contrato real del
+  // backend, que solo sabe hablar de una receta (`content_id` = recipe.id).
+  // La medición de apertura/lectura del PDF que traía #90 usaba
+  // book_id + version_id — dos identificadores que no caben en un único
+  // content_id, y encima el PDF agrupa MUCHAS recetas en un solo libro: ni
+  // siquiera con acceso al dato serviría para decidir qué RECETA promover a
+  // muestra gratis, que es el objetivo declarado de toda esta medición
+  // (commit 283dc19). Forzar el libro/versión dentro de content_type:
+  // 'recipe' además ensuciaría el ranking real (un id de libro no es un id
+  // de receta). Se retira en vez de adaptarse: el lector nativo (arriba,
+  // trackRecipeEvent('open', { recipeId }) en receta/[id]/page.js) ya mide
+  // lo que de verdad hace falta, y el PDF es el respaldo temporal mientras
+  // se completa la migración a recetas nativas.
   function onDocumentLoadSuccess({ numPages }) {
     setNumPages(numPages);
     setPageNumber(1);
@@ -331,7 +349,8 @@ export default function BookReaderPage({ params, searchParams }) {
     <div className="w-full min-h-screen bg-transparent flex flex-col pt-8 pl-8 pr-12 pb-12 animate-in fade-in duration-300">
       
       {/* Header outside the box */}
-      <div className="w-full flex items-center mb-6">
+      <div className="w-full flex flex-col gap-2 mb-6">
+        {isFreeSample && <FreeSampleBadge className="self-start" />}
         <Link href="/panel-cocina" className="flex items-center gap-3 text-[#3932C0] hover:opacity-80 transition-opacity cursor-pointer">
           <ChevronLeft className="w-8 h-8" strokeWidth={2.5} />
           <h1 className="text-3xl font-bold">

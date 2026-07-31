@@ -4,6 +4,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useProgramAccess } from '@/app/components/useProgramAccess'
+import { trackRecipeEvent } from '@/app/components/recipeMetrics'
 
 // --- Icon Components ---
 const TelegramIcon = () => (
@@ -362,6 +363,40 @@ export function BookIndexSidebar({ isOpen, onClose, items = [], activePage, onIt
     return flattenIndexTree(items);
   }, [items]);
 
+  // Filtro de texto sobre el índice de este libro. No es un buscador de
+  // biblioteca (no existe esa función hoy): busca dentro de los títulos ya
+  // cargados en este índice.
+  const [query, setQuery] = useState('');
+  const filteredItems = React.useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return flatItems;
+    return flatItems.filter((item) => (item.title || '').toLowerCase().includes(q));
+  }, [flatItems, query]);
+
+  // Un evento de "search" por pausa de escritura (debounce de 500ms), no uno
+  // por tecla — recipeMetrics además agrupa antes de mandar nada a red.
+  // Antes etiquetaba el evento con book_id/version_id/results_count — ninguno
+  // de los tres existe en el contrato real (content_type/content_id/
+  // event_type/duration_seconds/search_term). "search" es el único tipo de
+  // evento que NO necesita content_id, así que se adapta en vez de
+  // retirarse: mismo patrón que ya usa el buscador de recetas nativas más
+  // abajo (panel-cocina/libro/[id]/page.js), solo con searchTerm.
+  useEffect(() => {
+    const q = query.trim();
+    if (!q) return undefined;
+    const t = setTimeout(() => {
+      trackRecipeEvent('search', { searchTerm: q });
+    }, 500);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [query]);
+
+  // Al cerrar el índice, vacía el filtro: la próxima vez que se abra no
+  // debe arrastrar una búsqueda vieja.
+  useEffect(() => {
+    if (!isOpen) setQuery('');
+  }, [isOpen]);
+
   return (
     <>
       {/* Backdrop */}
@@ -390,10 +425,24 @@ export function BookIndexSidebar({ isOpen, onClose, items = [], activePage, onIt
           </button>
         </div>
 
+        {/* Buscador dentro del índice de este libro */}
+        {flatItems.length > 0 && (
+          <input
+            type="text"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Buscar en este libro…"
+            aria-label="Buscar en el índice de este libro"
+            className="mb-4 w-full rounded-xl border border-[#3932C0]/15 bg-white px-3 py-2 text-sm text-[#3932C0] placeholder:text-[#3932C0]/40 focus:outline-none focus:border-[#FF690B] transition-colors"
+          />
+        )}
+
         {/* Conteo de secciones */}
         {flatItems.length > 0 && (
           <p className="text-[10px] text-[#3932C0]/40 mb-6">
-            {flatItems.length} {flatItems.length === 1 ? 'sección' : 'secciones'}
+            {query.trim()
+              ? `${filteredItems.length} de ${flatItems.length} ${flatItems.length === 1 ? 'sección' : 'secciones'}`
+              : `${flatItems.length} ${flatItems.length === 1 ? 'sección' : 'secciones'}`}
           </p>
         )}
 
@@ -406,10 +455,18 @@ export function BookIndexSidebar({ isOpen, onClose, items = [], activePage, onIt
               Este libro no tiene<br />índice disponible.
             </p>
           </div>
+        ) : filteredItems.length === 0 ? (
+          /* Búsqueda sin resultados */
+          <div className="flex flex-col items-center justify-center flex-1 gap-3 text-center py-8">
+            <span className="text-4xl">🔍</span>
+            <p className="text-[#3932C0]/50 text-sm font-medium leading-relaxed">
+              Nada con «{query.trim()}».
+            </p>
+          </div>
         ) : (
           /* Lista de items con indentación jerárquica */
           <div className="flex flex-col space-y-2">
-            {flatItems.map((item, index) => {
+            {filteredItems.map((item, index) => {
               const isActive = activePage === item.page;
               const indentStyle = { paddingLeft: `${item.level * 14}px` };
               const fontSizeClass = item.level === 0
