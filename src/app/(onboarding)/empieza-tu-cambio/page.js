@@ -20,7 +20,7 @@ import TextareaMeter from '@/app/components/TextareaMeter';
 import Typewriter from '@/app/components/Typewriter';
 import { ExitButton, BackButton, StepCounter, FormAside, StepsDrawer, SoundButton, useMicroFeedback, PausaPantalla, PAUSA_MS, ChildField, SalidaDialogo, InfoBlock } from '@/app/components/FormChrome';
 import { playSelect, playAdvance, playFinish, playKeypress, unlockAudio } from '@/app/components/formSounds';
-import { PAISES_EUROPA, PAISES_LATAM } from '@/app/components/paises';
+import { PAISES, esIsoConocido } from '@/app/components/paises';
 import LogoEspagueti from '@/app/components/LogoEspagueti';
 import { guardarProgreso, leerProgreso, borrarProgreso } from '@/app/components/formProgress';
 import { useAuthStore } from '@/stores/auth.store';
@@ -61,7 +61,7 @@ const PHASES = [
 
 // A qué fase pertenece cada pantalla (por su clave o su tipo).
 const PHASE_BY_KEY = {
-  nombre: 'Sobre ti', edad: 'Sobre ti', region_vives: 'Sobre ti',
+  nombre: 'Sobre ti', edad: 'Sobre ti', pais_iso: 'Sobre ti',
   objetivo_principal: 'Tu objetivo',
   impide_lograr: 'Qué te frena', intentos: 'Qué te frena',
   prioridad_para_ti: 'Tu prioridad', empuja_a_cambiar: 'Tu prioridad',
@@ -83,14 +83,12 @@ const STEPS = [
   { type: 'nombre', title: 'Dime tu nombre y apellidos' },
   { type: 'number', key: 'edad', title: '¿Qué edad tienes?', min: 14, max: 99 },
   {
-    type: 'radio', key: 'region_vives', title: '¿Dónde vives actualmente?',
-    options: ['Europa', 'Estados Unidos', 'Latinoamérica'],
-    // Al elegir una opción con hijo se despliega debajo, colgando de ella, el
-    // selector del país concreto. Hasta que no se elija país, no se avanza.
-    hijos: {
-      Europa: { key: 'pais_vives', etiqueta: '¿De qué país?', opciones: PAISES_EUROPA },
-      Latinoamérica: { key: 'pais_vives', etiqueta: '¿De qué país?', opciones: PAISES_LATAM },
-    },
+    // Antes eran DOS preguntas: región y, colgando de ella, el país. La región
+    // se preguntaba solo porque en WordPress no se podía saber el país; aquí sí
+    // (cabecera de Vercel, /api/geo), así que el país viene preseleccionado y
+    // la región la deduce el backend para la hoja del equipo. Una pregunta
+    // menos en un formulario de 15.
+    type: 'pais', key: 'pais_iso', title: '¿En qué país vives?',
   },
   {
     type: 'radio', key: 'objetivo_principal',
@@ -271,7 +269,7 @@ function primeraPantallaPendiente(datos) {
 export default function EmpiezaTuCambioPage() {
   const [index, setIndex] = useState(0);
   const [answers, setAnswers] = useState({
-    first_name: '', last_name: '', edad: '', region_vives: '', pais_vives: '',
+    first_name: '', last_name: '', edad: '', pais_iso: '', pais_vives: '',
     objetivo_principal: '', impide_lograr: [], intentos: '',
     prioridad_para_ti: '', empuja_a_cambiar: '', tiempo_y_esfuerzo: '',
     inversion: '', obstaculo_importante: '', coach_squat_fit: '',
@@ -317,6 +315,37 @@ export default function EmpiezaTuCambioPage() {
   // Elegir una opción: mismo `set` pero con su sonido.
   const choose = (patch) => { playSelect(); set(patch); };
 
+  // ¿Le hemos rellenado el país nosotros? Solo entonces se le dice; si la IP no
+  // dijo nada, anunciar «lo hemos rellenado por ti» sobre un desplegable vacío
+  // deja al lead buscando algo que no está.
+  const [paisPreseleccionado, setPaisPreseleccionado] = useState(false);
+
+  /**
+   * Preselecciona el país con el de la IP (cabecera de Vercel vía /api/geo).
+   *
+   * Solo rellena si está VACÍO: si la persona ya eligió —o si viene de un
+   * progreso guardado— no se le pisa la respuesta, que es justo lo que haría
+   * que un lead con VPN acabara con el país equivocado sin enterarse. Y falla
+   * en silencio a propósito: quedarse sin preselección es un inconveniente,
+   * romper el formulario por no poder adivinar un país sería absurdo.
+   */
+  useEffect(() => {
+    let vivo = true;
+    fetch('/api/geo')
+      .then((r) => (r.ok ? r.json() : null))
+      .then((geo) => {
+        if (!vivo || !geo?.iso || !esIsoConocido(geo.iso)) return;
+        setAnswers((a) => {
+          if (a.pais_iso) return a;
+          const pais = PAISES.find((p) => p.iso === geo.iso);
+          setPaisPreseleccionado(true);
+          return { ...a, pais_iso: pais.iso, pais_vives: pais.nombre };
+        });
+      })
+      .catch(() => {});
+    return () => { vivo = false; };
+  }, []);
+
 
   const isValid = useMemo(() => {
     if (!step) return false;
@@ -335,6 +364,8 @@ export default function EmpiezaTuCambioPage() {
         const hijo = step.hijos?.[elegido];
         return hijo ? !!answers[hijo.key] : true;
       }
+      case 'pais':
+        return !!answers.pais_iso;
       case 'checkbox':
         return (answers[step.key] || []).length > 0;
       case 'text':
@@ -850,6 +881,46 @@ export default function EmpiezaTuCambioPage() {
                     </React.Fragment>
                   );
                 })}
+              </div>
+            )}
+
+            {step.type === 'pais' && (
+              <div className="flex flex-col gap-2 max-w-md">
+                {/* <select> nativo a propósito, igual que el país de antes: en
+                    móvil abre la rueda del sistema y en escritorio ya trae el
+                    salto por teclado (pulsar «M» lleva a México). */}
+                <select
+                  autoFocus
+                  aria-label={step.title}
+                  value={answers.pais_iso || ''}
+                  onChange={(e) => {
+                    const elegido = PAISES.find((p) => p.iso === e.target.value);
+                    choose({
+                      pais_iso: elegido?.iso || '',
+                      // El nombre viaja solo para que la respuesta guardada se
+                      // lea sin descifrar el ISO; el que manda es `pais_iso`.
+                      pais_vives: elegido?.nombre || '',
+                    });
+                  }}
+                  className="w-full rounded-2xl border-2 px-5 py-3.5 font-bold text-[17px] sm:text-lg outline-none cursor-pointer bg-white appearance-none"
+                  style={{
+                    borderColor: answers.pais_iso ? ORANGE : '#E7E6F5',
+                    color: answers.pais_iso ? ORANGE : '#8B87C9',
+                    backgroundColor: answers.pais_iso ? '#FFF6F0' : '#fff',
+                  }}
+                >
+                  <option value="" disabled>Elige tu país</option>
+                  {PAISES.map((p) => (
+                    <option key={p.iso} value={p.iso} style={{ color: BLUE }}>
+                      {p.etiqueta}
+                    </option>
+                  ))}
+                </select>
+                {paisPreseleccionado && (
+                  <p className="text-sm" style={{ color: '#8B87C9' }}>
+                    Lo hemos rellenado por ti. Cámbialo si no es correcto.
+                  </p>
+                )}
               </div>
             )}
 
