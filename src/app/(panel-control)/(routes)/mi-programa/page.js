@@ -31,15 +31,18 @@ import {
 } from 'lucide-react';
 
 // Formularios del programa (motor tipo onboarding en /formulario/<slug>).
-// Son lo único de "Mi plan" que YA tiene backend real.
+// Son lo único de "Pautas" que YA tiene backend real.
 const PROGRAM_FORMS = [
   { slug: 'evaluacion-inicial', label: 'Evaluación inicial', desc: 'Para adaptar el proceso a ti', Icon: ClipboardList },
   { slug: 'seguimiento-semanal', label: 'Seguimiento semanal', desc: 'Ajustamos tu semana', Icon: CalendarCheck },
   { slug: 'revision-mensual', label: 'Revisión mensual', desc: 'Evaluamos tu progreso', Icon: CalendarRange },
 ];
 
+// El id interno 'plan' se conserva (no es texto visible, solo la clave de la
+// pestaña activa); solo cambia la etiqueta que ve el cliente: «Pautas», no
+// «Mi plan» — para no confundirla con «Mi dieta» ni «Mi entreno».
 const TABS = [
-  { id: 'plan', label: 'Mi plan' },
+  { id: 'plan', label: 'Pautas' },
   { id: 'progreso', label: 'Mi progreso' },
   { id: 'recursos', label: 'Recursos' },
 ];
@@ -162,7 +165,7 @@ export default function MiProgramaPage() {
 
         <BrandTabs tabs={TABS} active={tab} onChange={setTab} />
 
-        {/* ════════ MI PLAN ════════ */}
+        {/* ════════ PAUTAS ════════ */}
         {tab === 'plan' && (
           <div className="space-y-6 animate-fadeIn">
             <SectionCard Icon={ListTodo} title="Hoy">

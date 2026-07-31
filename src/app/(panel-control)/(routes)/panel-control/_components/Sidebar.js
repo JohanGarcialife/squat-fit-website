@@ -180,6 +180,17 @@ export default function Sidebar() {
   //   - «Mi programa» se oculta a quien SOLO tiene el curso Entrena en casa
   //     (sin programa); con programa —o sin datos aún— se muestra como hasta
   //     ahora (incluida la pantalla de contratar para quien no tiene nada).
+  //
+  // OJO si a alguien le tienta quitar el filtro de «Mi entreno»: es a
+  // propósito, no un descuido (commit af791d7, "Sidebar con visibilidad por
+  // acceso"). /mi-entreno en sí NO está bloqueada — quien entra por URL
+  // directa sin programa ni curso ve el mismo tipo de pantalla de "contratar"
+  // que Mi programa/Mi cocina/Mis cursos (mi-entreno/page.js:42-71) — pero en
+  // el menú se oculta para no anunciar una sección que, además, hoy tiene
+  // contenido vacío incluso para quien SÍ paga: la "Técnica de ejercicios" es
+  // un EmptyState sin condición de acceso (mi-entreno/page.js:124-126). Antes
+  // de enseñarla en el menú a quien no tiene acceso, esa biblioteca necesita
+  // contenido real.
   const { checked, hasProgram, hasEntrenaCourse } = useProgramAccess()
   const menuItems = MENU_ITEMS.filter((item) => {
     if (item.label === 'Mi entreno') return checked && (hasProgram || hasEntrenaCourse)
