@@ -31,8 +31,15 @@ const SITIO = new URL('https://squadfit.es');
 export const metadata = {
   metadataBase: SITIO,
   alternates: { canonical: './' },
-  title: "Squad Fit",
-  description: "Squad Fit Website",
+  // Mismo criterio que en (home): título propio por página vía plantilla.
+  // /login y /register están en el sitemap, así que también necesitan uno
+  // distinto cada una — lo ponen sus layouts de ruta.
+  title: {
+    default: "Squad Fit",
+    template: "%s · Squad Fit",
+  },
+  description:
+    "Accede a tu cuenta de Squad Fit para entrar a tu programa, tus cursos y tu recetario.",
 };
 
 export default function RootLayout({ children }) {

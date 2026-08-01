@@ -18,6 +18,9 @@ import Extras from './_components/Extras'
 // no para compartir; de momento usa la plantilla genérica del logo (ver PR:
 // pendiente de diseño).
 export const metadata = {
+  title: 'Recetas fit fáciles y saciantes',
+  description:
+    'Más de 155 recetas fit con sabor real: fáciles, saciantes y pensadas para comer sano sin restricciones.',
   openGraph: {
     title: 'La Cocina Squad Fit',
     description:
