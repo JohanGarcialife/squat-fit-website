@@ -202,6 +202,14 @@ const Testimonials = () => {
                         
                         }
 
+                        {/* Degradado a blanco en los bordes: difumina las reseñas de fondo
+                            para que la vista caiga en la central. Va por DEBAJO de las flechas
+                            (z-10 contra z-20) y con pointer-events-none, o taparía el clic de
+                            avanzar. El blanco es el mismo del fondo de la sección: si algún día
+                            cambia, hay que cambiarlo aquí también. */}
+                        <div aria-hidden="true" className="pointer-events-none absolute inset-y-0 left-0 z-10 w-10 sm:w-16 lg:w-24 bg-gradient-to-r from-white via-white/70 to-transparent" />
+                        <div aria-hidden="true" className="pointer-events-none absolute inset-y-0 right-0 z-10 w-10 sm:w-16 lg:w-24 bg-gradient-to-l from-white via-white/70 to-transparent" />
+
                         {/* Flechas circulares laterales: fondo naranja suave, icono naranja principal */}
                         <button
                             onClick={prev}
