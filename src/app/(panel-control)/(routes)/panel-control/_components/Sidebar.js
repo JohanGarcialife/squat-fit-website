@@ -297,11 +297,7 @@ function flattenIndexTree(nodes, inheritedLevel = 0) {
 //   items         – VersionIndexTreeNode[] del backend o array plano del fallback
 //   activePage    – número de página actual del PDF
 //   onItemClick   – callback(page) al hacer clic en un ítem
-// `bookId`/`versionId` son opcionales: solo sirven para etiquetar el evento
-// de búsqueda de medición (recipeMetrics.js). Si no se pasan, la búsqueda
-// sigue funcionando igual, solo que el evento (si el interruptor de medición
-// está encendido) llega sin esos dos campos.
-export function BookIndexSidebar({ isOpen, onClose, items = [], activePage, onItemClick, bookId, versionId }) {
+export function BookIndexSidebar({ isOpen, onClose, items = [], activePage, onItemClick }) {
   const flatItems = React.useMemo(() => {
     return flattenIndexTree(items);
   }, [items]);
@@ -318,20 +314,21 @@ export function BookIndexSidebar({ isOpen, onClose, items = [], activePage, onIt
 
   // Un evento de "search" por pausa de escritura (debounce de 500ms), no uno
   // por tecla — recipeMetrics además agrupa antes de mandar nada a red.
+  // Antes etiquetaba el evento con book_id/version_id/results_count — ninguno
+  // de los tres existe en el contrato real (content_type/content_id/
+  // event_type/duration_seconds/search_term). "search" es el único tipo de
+  // evento que NO necesita content_id, así que se adapta en vez de
+  // retirarse: mismo patrón que ya usa el buscador de recetas nativas más
+  // abajo (panel-cocina/libro/[id]/page.js), solo con searchTerm.
   useEffect(() => {
     const q = query.trim();
     if (!q) return undefined;
     const t = setTimeout(() => {
-      trackRecipeEvent('search', {
-        book_id: bookId,
-        version_id: versionId,
-        query: q.slice(0, 120),
-        results_count: filteredItems.length,
-      });
+      trackRecipeEvent('search', { searchTerm: q });
     }, 500);
     return () => clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [query, bookId, versionId]);
+  }, [query]);
 
   // Al cerrar el índice, vacía el filtro: la próxima vez que se abra no
   // debe arrastrar una búsqueda vieja.

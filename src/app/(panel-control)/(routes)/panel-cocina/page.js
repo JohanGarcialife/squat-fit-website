@@ -11,7 +11,11 @@ import AccessNotice from "@/app/components/AccessNotice";
 import { handleApiError } from "@/app/components/handleApiError";
 import { useProgramAccess } from "@/app/components/useProgramAccess";
 import { SectionCard, EmptyState } from "@/app/components/ProgramSections";
-import { trackRecipeEvent } from "@/app/components/recipeMetrics";
+// El clic "ver mi libro" / "probar gratis" mandaba trackRecipeEvent con
+// book_id/version_id — retirado (ver panel-cocina/libro/[id]/page.js): esa
+// medición no cabe en el contrato real (content_id = recipe.id) sin
+// ensuciar el ranking de recetas, y el libro entero no dice qué RECETA es
+// popular, que es lo único que decide una muestra gratis.
 import FreeSampleBadge from "@/app/components/FreeSampleBadge";
 
 export default function CocinaPage() {
@@ -171,7 +175,6 @@ export default function CocinaPage() {
 
                  <Link
                    href={`/panel-cocina/libro/${item.bookId}?v=${item.versionId}`}
-                   onClick={() => trackRecipeEvent('click', { book_id: item.bookId, version_id: item.versionId, is_free_sample: false })}
                  >
                    <button className="bg-[#3932C0] text-white font-bold py-3 px-12 rounded-xl text-lg hover:bg-[#3932C0]/90 transition-colors shadow-lg cursor-pointer">
                       {item.buttonText || 'Ver mi libro'}
@@ -214,7 +217,6 @@ export default function CocinaPage() {
 
                     <Link
                       href={`/panel-cocina/libro/${item.bookId}?v=${item.versionId}`}
-                      onClick={() => trackRecipeEvent('click', { book_id: item.bookId, version_id: item.versionId, is_free_sample: true })}
                     >
                       <button className="bg-[#FF690B] text-white font-bold py-3 px-12 rounded-xl text-lg hover:bg-[#e05b08] transition-colors shadow-lg cursor-pointer">
                         Probar gratis

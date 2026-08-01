@@ -4,10 +4,12 @@ import React from 'react';
 import { Gift } from 'lucide-react';
 
 // Insignia de "muestra gratuita", compartida entre la biblioteca de Mi cocina
-// (panel-cocina/page.js) y el lector (panel-cocina/libro/[id]/page.js).
-// Mismo idioma visual que el resto del panel: píldora redondeada, mayúsculas
-// pequeñas — el mismo patrón que el "En preparación" de ProgramSections.js,
-// en el naranja de marca en vez de gris (aquí SÍ hay algo que mostrar).
+// en PDF (panel-cocina/page.js + el lector panel-cocina/libro/[id]/page.js,
+// contra book_id/version_id) y las recetas nativas (recipe.is_free_sample,
+// rama feat/muestras-gratis-y-ranking-recetas del backend). Mismo idioma
+// visual que el resto del panel: píldora redondeada, mayúsculas pequeñas —
+// el mismo patrón que el "En preparación" de ProgramSections.js, en el
+// naranja de marca en vez de gris (aquí SÍ hay algo que mostrar).
 export default function FreeSampleBadge({ className = '' }) {
   return (
     <span

@@ -1,31 +1,35 @@
 'use client';
 
-// Medición propia de uso de recetas (Mi cocina) — TODO va a nuestro backend,
-// nunca a un tercero (nada de Google Analytics ni píxeles aquí). Sirve para
-// construir el ranking de qué recetas se usan de verdad y así decidir, con
-// datos, cuáles pasar a muestra gratuita (encargo de Hamlet, 31-jul).
+// Medición propia de uso de recetas — TODO va a nuestro backend, nunca a un
+// tercero (nada de Google Analytics ni píxeles aquí). Sirve para construir
+// el ranking de qué recetas se usan de verdad y decidir, con datos, cuáles
+// pasar a muestra gratuita.
 //
-// El endpoint de ingesta lo está construyendo otro carril EN PARALELO y no
-// estaba desplegado al escribir esto. Forma acordada a falta de que el
-// backend confirme lo contrario:
+// Contrato CONFIRMADO contra el backend real (commit f292202, rama
+// feat/muestras-gratis-y-ranking-recetas del repo SquatFit — ya construido,
+// pendiente de desplegar):
 //
-//   POST {NEXT_PUBLIC_API_URL}/api/v1/recipe-metrics/events
-//   Authorization: Bearer <token>  (si hay sesión)
+//   POST {NEXT_PUBLIC_API_URL}/api/v1/content-events
+//   Authorization: Bearer <token>   (opcional: el endpoint es público; si
+//     hay un token válido, el evento queda atribuido al usuario, pero la
+//     falta de sesión nunca hace que se rechace)
 //   Content-Type: application/json
 //   { "events": [
 //       {
-//         "type": "click" | "open" | "read_time" | "search",
-//         "session_id": "uuid por pestaña",
-//         "ts": "2026-07-31T21:00:00.000Z",   // reloj del cliente
-//         "path": "/panel-cocina",             // window.location.pathname
-//         // click / open / read_time:
-//         "book_id": "...", "version_id": "...", "is_free_sample": true|false,
-//         "duration_ms": 12345,                // solo en read_time
-//         // search:
-//         "book_id": "...", "version_id": "...",
-//         "query": "pollo", "results_count": 3
+//         "content_type": "recipe",          // fijo: este módulo solo mide recetas
+//         "content_id": "<uuid de recipe.id>", // obligatorio salvo en "search"
+//         "event_type": "click" | "open" | "read_time" | "search",
+//         "duration_seconds": 123,             // SOLO "read_time" (0–86400; el
+//                                                servidor lo recorta a 900s = 15 min)
+//         "search_term": "pollo",              // SOLO "search" (máx. 200 caracteres)
+//         "session_id": "uuid-por-pestaña"      // opcional, máx. 64 caracteres
 //       }
-//   ] }
+//   ] }                                        // máximo 20 eventos por lote
+//
+// Respuesta 201: { accepted, rejected }. Un evento con forma correcta pero
+// sin sentido (p.ej. "open" sin content_id) se descarta EN EL SERVIDOR sin
+// tirar el resto del lote — por eso este módulo ni se molesta en mandar un
+// "click"/"open"/"read_time" sin id de receta: el servidor lo tiraría igual.
 //
 // Nada de esto debe poder romper la interfaz ni bloquear un clic: todas las
 // funciones son "fire and forget", envueltas en try/catch, y no hacen NADA
@@ -35,24 +39,26 @@ import { analyticsAllowed } from './cookieConsent';
 import { useAuthStore } from '@/stores/auth.store';
 
 // ─── Interruptor ─────────────────────────────────────────────────────────────
-// Apagado a propósito: el endpoint de ingesta aún no está desplegado. Encender
-// a `true` cuando el otro carril confirme que /recipe-metrics/events responde
-// en producción (mismo patrón que REDIRECTS_API_READY en src/app/r/[slug]/route.js).
+// Apagado a propósito: el endpoint de ingesta (rama feat/muestras-gratis-y-
+// ranking-recetas del backend) aún no está desplegado. Encender a `true`
+// cuando esa rama llegue a producción — mismo patrón que REDIRECTS_API_READY
+// en src/app/r/[slug]/route.js.
 export const RECIPE_METRICS_READY = false;
 
 const API = process.env.NEXT_PUBLIC_API_URL || 'https://squatfit-api-cyrc2g3zra-no.a.run.app';
-const ENDPOINT = `${API}/api/v1/recipe-metrics/events`;
+const ENDPOINT = `${API}/api/v1/content-events`;
 
 // Agrupar en vez de una petición por micro-evento: se manda cuando se junten
-// MAX_BATCH eventos, o FLUSH_DEBOUNCE_MS después del último si no se llega,
-// y siempre al abandonar la página (pagehide / pestaña oculta).
+// MAX_BATCH eventos (tope real del backend: un lote mayor se rechaza entero
+// con 400), o FLUSH_DEBOUNCE_MS después del último si no se llega, y siempre
+// al abandonar la página (pagehide / pestaña oculta).
 const MAX_BATCH = 20;
 const FLUSH_DEBOUNCE_MS = 3000;
 
-// Techo de cordura para el tiempo de lectura: nunca por encima de esto,
-// aunque `performance.now()` o el reloj hagan algo raro. No es lo que evita
-// contar una pestaña olvidada (eso lo hace el corte por visibilitychange de
-// ReadingTimer) — es solo un segundo cinturón.
+// Techo de cordura propio para el tiempo de lectura, en milisegundos (se
+// manda en segundos). El servidor YA recorta a 900s por su cuenta —esto es
+// solo un segundo cinturón, no lo que evita contar una pestaña olvidada: eso
+// lo hace el corte por visibilitychange de ReadingTimer, más abajo.
 export const MAX_READ_MS = 2 * 60 * 60 * 1000; // 2 horas
 
 let queue = [];
@@ -125,23 +131,39 @@ function scheduleFlush() {
 }
 
 /**
- * Encola un evento de uso de recetas. No hace nada (ni siquiera gasta
- * memoria) si RECIPE_METRICS_READY está apagado, y no hace nada si el
- * visitante no aceptó la categoría "Analítica" del banner de cookies — misma
- * regla que ya se aplica a Google Analytics (cookieConsent.js): es medición
- * de comportamiento, no algo "necessary".
+ * Encola un evento de uso de UNA receta.
+ *
+ * @param {'click'|'open'|'read_time'|'search'} eventType
+ * @param {{ recipeId?: string, durationSeconds?: number, searchTerm?: string }} opts
+ *   `recipeId` es obligatorio salvo para "search" (el backend lo descarta
+ *   igual sin él, así que ni se manda). `durationSeconds` solo cuenta en
+ *   "read_time"; `searchTerm` solo en "search".
+ *
+ * No hace nada (ni encola, ni gasta memoria) si RECIPE_METRICS_READY está
+ * apagado, ni si el visitante no aceptó la categoría "Analítica" del banner
+ * de cookies — misma regla que ya se aplica a Google Analytics
+ * (cookieConsent.js): es medición de comportamiento, no algo "necessary".
  */
-export function trackRecipeEvent(type, payload = {}) {
+export function trackRecipeEvent(eventType, { recipeId, durationSeconds, searchTerm } = {}) {
   if (!RECIPE_METRICS_READY) return;
   try {
     if (!analyticsAllowed()) return;
-    queue.push({
-      type,
+    if (eventType !== 'search' && !recipeId) return; // el backend lo tiraría igual
+
+    const event = {
+      content_type: 'recipe',
+      event_type: eventType,
       session_id: getSessionId(),
-      ts: new Date().toISOString(),
-      path: typeof window !== 'undefined' ? window.location.pathname : undefined,
-      ...payload,
-    });
+    };
+    if (recipeId) event.content_id = recipeId;
+    if (eventType === 'read_time' && durationSeconds != null) {
+      event.duration_seconds = Math.max(0, Math.round(durationSeconds));
+    }
+    if (eventType === 'search' && searchTerm) {
+      event.search_term = searchTerm.slice(0, 200);
+    }
+
+    queue.push(event);
     if (queue.length >= MAX_BATCH) flushNow(false);
     else scheduleFlush();
   } catch {
@@ -166,29 +188,29 @@ export function flushRecipeMetrics() {
 // ─── Lectura activa (para cuando se cierra la pestaña sin "salir" de la
 // receta por la SPA) ─────────────────────────────────────────────────────
 //
-// El read_time normal lo manda el propio lector al desmontarse (navegar a
+// El read_time normal lo manda la ficha de receta al desmontarse (navegar a
 // otra pantalla del panel). Pero si el cliente cierra la pestaña o la
 // ventana entera mientras lee, React no desmonta nada — el runtime se
-// destruye sin más — así que ese read_time nunca se generaría. Por eso el
-// lector "registra" su cronómetro aquí; si `pagehide` salta con una lectura
-// activa, se calcula su duración EN ESE MOMENTO y se encola antes de vaciar,
-// para no perder la medición de una sesión cerrada de golpe.
-let activeReading = null; // { book_id, version_id, is_free_sample, timer }
+// destruye sin más — así que ese read_time nunca se generaría. Por eso la
+// ficha "registra" su cronómetro aquí; si `pagehide` salta con una lectura
+// todavía registrada, se calcula su duración EN ESE MOMENTO y se encola
+// antes de vaciar, para no perder la medición de una sesión cerrada de golpe.
+let activeReading = null; // { recipeId, timer }
 
 /** Llamar al abrir una receta (una vez que hay ReadingTimer en marcha). */
-export function registerActiveReading(context, timer) {
-  activeReading = { ...context, timer };
+export function registerActiveReading(recipeId, timer) {
+  activeReading = { recipeId, timer };
 }
 
-/** Llamar al desmontar el lector (ya se manda el read_time real aparte). */
+/** Llamar al desmontar la ficha (ya se manda el read_time real aparte). */
 export function unregisterActiveReading(timer) {
   if (activeReading && activeReading.timer === timer) activeReading = null;
 }
 
 function finalizeActiveReadingIfAny() {
   if (!activeReading) return;
-  const { timer, ...context } = activeReading;
-  trackRecipeEvent('read_time', { ...context, duration_ms: timer.elapsedMs() });
+  const { recipeId, timer } = activeReading;
+  trackRecipeEvent('read_time', { recipeId, durationSeconds: timer.elapsedMs() / 1000 });
 }
 
 // Red de seguridad global:
