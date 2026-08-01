@@ -8,6 +8,8 @@ import { BookIndexSidebar } from "@/app/(panel-control)/(routes)/panel-control/_
 import { useAuthStore } from "@/stores/auth.store";
 import AccessNotice from "@/app/components/AccessNotice";
 import { handleApiError } from "@/app/components/handleApiError";
+import { trackRecipeEvent, flushRecipeMetrics, ReadingTimer, registerActiveReading, unregisterActiveReading } from "@/app/components/recipeMetrics";
+import FreeSampleBadge from "@/app/components/FreeSampleBadge";
 import axios from "axios";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://squatfit-api-cyrc2g3zra-no.a.run.app';
@@ -49,6 +51,9 @@ export default function BookReaderPage({ params, searchParams }) {
   const [versionTitle, setVersionTitle] = useState('');
   const [pdfFile, setPdfFile] = useState(null);
   const [indexes, setIndexes] = useState([]);
+  // Muestra gratuita: el flag lo trae (o no) /book/by-id, a nivel de versión
+  // o de libro. Si nunca llega, se queda en `false` — no cambia nada más.
+  const [isFreeSample, setIsFreeSample] = useState(false);
 
   useEffect(() => {
     async function loadBook() {
@@ -89,6 +94,7 @@ export default function BookReaderPage({ params, searchParams }) {
 
         if (version) {
           setVersionTitle(version.version_title || version.title || '');
+          setIsFreeSample(version.is_free_sample === true || bookData.is_free_sample === true);
 
           // Extraer URL del PDF — probar varios campos posibles
           const isUrlImage = version.version_url?.includes('pexels.com') || 
@@ -147,6 +153,35 @@ export default function BookReaderPage({ params, searchParams }) {
 
     loadBook();
   }, [bookId, versionId, token]);
+
+  // ── Medición: apertura + tiempo de lectura ───────────────────────────────
+  // Arranca al confirmarse un PDF real (nunca antes: no contamos "abierto"
+  // si el libro no tiene contenido) y se cierra al salir de esta receta —ya
+  // sea porque se navega a otra o porque se desmonta el lector— mandando el
+  // tiempo activo acumulado. `flushRecipeMetrics()` lo envía enseguida (con
+  // sendBeacon si se puede) en vez de esperar al temporizador de agrupado
+  // normal, porque al salir de la receta ya no hay garantía de que la
+  // pestaña siga viva para que el temporizador llegue a disparar.
+  //
+  // `registerActiveReading` es la red de seguridad para cuando el cliente
+  // cierra la pestaña entera en vez de navegar dentro de la app: ahí React
+  // no desmonta nada, así que este mismo cleanup no llegaría a ejecutarse;
+  // recipeMetrics.js detecta ese caso por su cuenta (pagehide) y manda el
+  // tiempo acumulado hasta ese instante.
+  useEffect(() => {
+    if (!pdfFile) return undefined;
+    const timer = new ReadingTimer();
+    const contexto = { book_id: bookId, version_id: versionId, is_free_sample: isFreeSample };
+    registerActiveReading(contexto, timer);
+    trackRecipeEvent('open', contexto);
+    return () => {
+      unregisterActiveReading(timer);
+      const duration_ms = timer.stop();
+      trackRecipeEvent('read_time', { ...contexto, duration_ms });
+      flushRecipeMetrics();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pdfFile]);
 
   function onDocumentLoadSuccess({ numPages }) {
     setNumPages(numPages);
@@ -219,7 +254,8 @@ export default function BookReaderPage({ params, searchParams }) {
     <div className="w-full min-h-screen bg-transparent flex flex-col pt-8 pl-8 pr-12 pb-12 animate-in fade-in duration-300">
       
       {/* Header outside the box */}
-      <div className="w-full flex items-center mb-6">
+      <div className="w-full flex flex-col gap-2 mb-6">
+        {isFreeSample && <FreeSampleBadge className="self-start" />}
         <Link href="/panel-cocina" className="flex items-center gap-3 text-[#3932C0] hover:opacity-80 transition-opacity cursor-pointer">
           <ChevronLeft className="w-8 h-8" strokeWidth={2.5} />
           <h1 className="text-3xl font-bold">
@@ -289,6 +325,8 @@ export default function BookReaderPage({ params, searchParams }) {
         items={indexes}
         activePage={pageNumber}
         onItemClick={goToPage}
+        bookId={bookId}
+        versionId={versionId}
       />
 
       <style jsx global>{`

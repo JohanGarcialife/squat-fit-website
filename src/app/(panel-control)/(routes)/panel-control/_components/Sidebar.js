@@ -10,6 +10,7 @@ import BarbellIcon from '@/app/components/icons/BarbellIcon'
 import AppleIcon from '@/app/components/icons/AppleIcon'
 import SchoolIcon from '@/app/components/icons/SchoolIcon'
 import SettingsIcon from '@/app/components/icons/SettingsIcon'
+import { trackRecipeEvent } from '@/app/components/recipeMetrics'
 
 // --- Icon Components ---
 const TelegramIcon = () => (
@@ -296,10 +297,47 @@ function flattenIndexTree(nodes, inheritedLevel = 0) {
 //   items         – VersionIndexTreeNode[] del backend o array plano del fallback
 //   activePage    – número de página actual del PDF
 //   onItemClick   – callback(page) al hacer clic en un ítem
-export function BookIndexSidebar({ isOpen, onClose, items = [], activePage, onItemClick }) {
+// `bookId`/`versionId` son opcionales: solo sirven para etiquetar el evento
+// de búsqueda de medición (recipeMetrics.js). Si no se pasan, la búsqueda
+// sigue funcionando igual, solo que el evento (si el interruptor de medición
+// está encendido) llega sin esos dos campos.
+export function BookIndexSidebar({ isOpen, onClose, items = [], activePage, onItemClick, bookId, versionId }) {
   const flatItems = React.useMemo(() => {
     return flattenIndexTree(items);
   }, [items]);
+
+  // Filtro de texto sobre el índice de este libro. No es un buscador de
+  // biblioteca (no existe esa función hoy): busca dentro de los títulos ya
+  // cargados en este índice.
+  const [query, setQuery] = useState('');
+  const filteredItems = React.useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return flatItems;
+    return flatItems.filter((item) => (item.title || '').toLowerCase().includes(q));
+  }, [flatItems, query]);
+
+  // Un evento de "search" por pausa de escritura (debounce de 500ms), no uno
+  // por tecla — recipeMetrics además agrupa antes de mandar nada a red.
+  useEffect(() => {
+    const q = query.trim();
+    if (!q) return undefined;
+    const t = setTimeout(() => {
+      trackRecipeEvent('search', {
+        book_id: bookId,
+        version_id: versionId,
+        query: q.slice(0, 120),
+        results_count: filteredItems.length,
+      });
+    }, 500);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [query, bookId, versionId]);
+
+  // Al cerrar el índice, vacía el filtro: la próxima vez que se abra no
+  // debe arrastrar una búsqueda vieja.
+  useEffect(() => {
+    if (!isOpen) setQuery('');
+  }, [isOpen]);
 
   return (
     <>
@@ -329,10 +367,24 @@ export function BookIndexSidebar({ isOpen, onClose, items = [], activePage, onIt
           </button>
         </div>
 
+        {/* Buscador dentro del índice de este libro */}
+        {flatItems.length > 0 && (
+          <input
+            type="text"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Buscar en este libro…"
+            aria-label="Buscar en el índice de este libro"
+            className="mb-4 w-full rounded-xl border border-[#3932C0]/15 bg-white px-3 py-2 text-sm text-[#3932C0] placeholder:text-[#3932C0]/40 focus:outline-none focus:border-[#FF690B] transition-colors"
+          />
+        )}
+
         {/* Conteo de secciones */}
         {flatItems.length > 0 && (
           <p className="text-[10px] text-[#3932C0]/40 mb-6">
-            {flatItems.length} {flatItems.length === 1 ? 'sección' : 'secciones'}
+            {query.trim()
+              ? `${filteredItems.length} de ${flatItems.length} ${flatItems.length === 1 ? 'sección' : 'secciones'}`
+              : `${flatItems.length} ${flatItems.length === 1 ? 'sección' : 'secciones'}`}
           </p>
         )}
 
@@ -345,10 +397,18 @@ export function BookIndexSidebar({ isOpen, onClose, items = [], activePage, onIt
               Este libro no tiene<br />índice disponible.
             </p>
           </div>
+        ) : filteredItems.length === 0 ? (
+          /* Búsqueda sin resultados */
+          <div className="flex flex-col items-center justify-center flex-1 gap-3 text-center py-8">
+            <span className="text-4xl">🔍</span>
+            <p className="text-[#3932C0]/50 text-sm font-medium leading-relaxed">
+              Nada con «{query.trim()}».
+            </p>
+          </div>
         ) : (
           /* Lista de items con indentación jerárquica */
           <div className="flex flex-col space-y-2">
-            {flatItems.map((item, index) => {
+            {filteredItems.map((item, index) => {
               const isActive = activePage === item.page;
               const indentStyle = { paddingLeft: `${item.level * 14}px` };
               const fontSizeClass = item.level === 0

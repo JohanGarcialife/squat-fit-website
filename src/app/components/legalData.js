@@ -168,6 +168,10 @@ A través de nuestra página web podemos recabar datos personales para diferente
 
   Cualquier dato que se haya facilitado al publicar el correspondiente comentario.
 
+- **Medición del uso de los contenidos de su área privada**
+
+  Cuando accede a los contenidos de su cuenta registramos qué contenido abre, las búsquedas que realiza dentro de él y el tiempo que permanece en su lectura, asociados a su cuenta de usuario. La finalidad es exclusivamente conocer qué contenidos resultan más útiles para decidir cuáles ampliamos, mejoramos u ofrecemos de forma gratuita. Esta medición la realizamos con medios propios, sin ceder los datos a terceros ni utilizarlos para elaborar perfiles publicitarios, y no captamos su dirección IP ni los datos de su navegador para esta finalidad. Solo se realiza si usted ha aceptado la categoría de analítica en el aviso de cookies, y puede retirar ese consentimiento en cualquier momento. Si ejerce su derecho de supresión, estos registros dejan de estar asociados a su cuenta y se conservan únicamente de forma agregada y anónima.
+
 Dependiendo de la finalidad para la que se aportan los datos, serán requeridos los datos estrictamente necesarios.
 
 Es importante que el usuario sea consciente de los datos que aporta y la finalidad para la que lo hace porque en el momento que los facilita, está aceptando que recopilemos, almacenemos y usemos dichos datos para la finalidad requerida, pudiendo en cualquier momento retirar el consentimiento prestado por los cauces oportunos siendo el consentimiento del interesado la base legal y legitimación para el tratamiento de sus datos personales.
