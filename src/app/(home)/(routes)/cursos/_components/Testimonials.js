@@ -87,6 +87,12 @@ const Testimonials = () => {
    // Configuración por ancho real (móvil primero): el motor "responsive" de
    // slick no aplicaba en móvil y salían varias tarjetas con avatares aplastados.
    const w = width || 0;
+   // OJO con el ancho de la tarjeta de dentro (`lg:w-[420px] mx-auto`): el
+   // `mx-auto` no es decorativo. La diapositiva de slick mide ~800 px y la
+   // tarjeta se fija a 420 en escritorio; sin centrarla se pegaba al borde
+   // izquierdo de su hueco y la reseña principal salía ~160 px descolocada,
+   // con una sola lateral asomando. La diapositiva SÍ estaba centrada, por eso
+   // engañaba: el desajuste estaba dentro de ella.
    const settings = {
      // Una reseña principal centrada y las laterales asomando encogidas, igual
      // que el comparador antes/después. Antes, en escritorio se apagaba el
@@ -94,7 +100,13 @@ const Testimonials = () => {
      className: 'center cursos-testimonials',
      centerMode: true,
      infinite: true,
-     centerPadding: w >= 1280 ? '18%' : w >= 640 ? '12%' : '38px',
+     // El relleno decide cuánto asoman las laterales, y tiene que ir en
+    // relación al ancho de la TARJETA (420 px), no al del carrusel. Con el 18 %
+    // anterior la diapositiva medía ~800 px para una tarjeta de 420: sobraban
+    // 190 px de aire a cada lado y las laterales quedaban tan lejos que solo se
+    // veía un filo. Con el 30 % la diapositiva baja a ~500 px y asoman de
+    // verdad, que es el efecto que persigue el CSS de .cursos-testimonials.
+    centerPadding: w >= 1280 ? '30%' : w >= 640 ? '20%' : '38px',
      slidesToShow: 1,
      speed,
      beforeChange: onBeforeChange,
@@ -122,7 +134,7 @@ const Testimonials = () => {
                                     className="cursor-pointer px-3 py-5 "
                                     onClick={() => sliderRef.current && sliderRef.current.slickGoTo(index)}
                                 >
-                                    <div className="bg-[#3932C01A] h-full w-full lg:w-[420px] p-8 rounded-3xl shadow-lg border border-[#3932C0]/15 hover:shadow-xl transition-shadow duration-300  flex flex-col items-center text-center">
+                                    <div className="bg-[#3932C01A] h-full w-full lg:w-[420px] mx-auto p-8 rounded-3xl shadow-lg border border-[#3932C0]/15 hover:shadow-xl transition-shadow duration-300  flex flex-col items-center text-center">
                                         <div className="relative  mb-6">
                                             <Image
                                                 src={testimonial.image}
@@ -156,7 +168,7 @@ const Testimonials = () => {
                                     onClick={() => sliderRef.current && sliderRef.current.slickGoTo(index)}
                                 >
                                     {/* min-h para que las dos tarjetas visibles queden a la misma altura */}
-                                    <div className="bg-[#3932C01A] h-full w-full lg:w-[420px] min-h-[240px] p-8 rounded-3xl shadow-lg border border-[#3932C0]/15 hover:shadow-xl transition-shadow duration-300  flex flex-col items-center text-center">
+                                    <div className="bg-[#3932C01A] h-full w-full lg:w-[420px] mx-auto min-h-[240px] p-8 rounded-3xl shadow-lg border border-[#3932C0]/15 hover:shadow-xl transition-shadow duration-300  flex flex-col items-center text-center">
                                       <div className='flex gap-5 flex-row items-center '>
 
                                         <div className="relative  mb-6">
