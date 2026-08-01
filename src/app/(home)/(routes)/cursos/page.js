@@ -15,6 +15,9 @@ import FAQ from './_components/FAQ'
 // (home) — no hay ninguna pensada para compartir en public/, así que de
 // momento usa la plantilla genérica del logo (ver PR: pendiente de diseño).
 export const metadata = {
+  title: 'Cursos de fuerza y definición',
+  description:
+    'Cursos para transformar tu cuerpo y aprender a mantener el resultado de por vida, no solo a llegar a él.',
   openGraph: {
     title: 'Squad Fit — Fuerte y definid@',
     description:

@@ -18,6 +18,11 @@ import FinalCTA from './_components/FinalCTA';
 // (home) — no hay ninguna pensada para compartir en public/, así que de
 // momento usa la plantilla genérica del logo (ver PR: pendiente de diseño).
 export const metadata = {
+  // Sale como "Programa de nutrición y entreno · Squad Fit" (la marca la pone
+  // la plantilla del layout de (home)).
+  title: 'Programa de nutrición y entreno',
+  description:
+    'Un programa de nutrición y entreno para lograr tu objetivo y, sobre todo, mantener los resultados en el tiempo.',
   openGraph: {
     title: 'Squad Fit — Tu cambio, esta vez de verdad',
     description:

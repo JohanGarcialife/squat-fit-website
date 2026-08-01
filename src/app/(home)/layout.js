@@ -43,8 +43,20 @@ const SITIO = new URL('https://squadfit.es');
 export const metadata = {
   metadataBase: SITIO,
   alternates: { canonical: './' },
-  title: "Squad Fit",
-  description: "Squad Fit Website",
+  // `title` y `description` de primer nivel son lo que Google enseña en los
+  // resultados; `openGraph.title` (más abajo) NO los sustituye: alimenta a
+  // WhatsApp y redes, y son cosas distintas. Hasta ahora las nueve URLs del
+  // sitemap heredaban el "Squad Fit" / "Squad Fit Website" del andamiaje, así
+  // que para un buscador eran nueve páginas con el mismo título — el motivo
+  // exacto por el que Search Console las marca «Duplicada sin canónica».
+  // La plantilla añade la marca al final, así que cada página declara solo su
+  // parte y nunca repite "Squad Fit" dos veces en el mismo título.
+  title: {
+    default: "Squad Fit — Logra tu mejor versión",
+    template: "%s · Squad Fit",
+  },
+  description:
+    "El programa de dieta, entreno y mentalidad para un cambio físico real y duradero.",
   // Bloque Open Graph / Twitter: hasta ahora ninguna página emitía og: ni
   // twitter:, así que un enlace de squadfit.es pegado en WhatsApp, Instagram,
   // Facebook o Telegram salía pelado (sin título, sin imagen, sin
