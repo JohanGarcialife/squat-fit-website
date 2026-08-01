@@ -68,14 +68,22 @@ export default function BurgerMenu() {
     <>
       {/* Fondo oscurecido: se desvanece con la MISMA transición que el drawer
           (antes se desmontaba de golpe y el menú quedaba flotando al salir) */}
+      {/* z-[100] y no z-[60]: los dos avisos flotantes de abajo (CookieBanner y
+          FormularioPendiente) están a z-[90] y se pintaban POR ENCIMA del menú
+          abierto. No era solo estético — el de cookies mide 199px de alto y en
+          móvil tapaba «Acceder» y «Registro» por completo (44 de 44 píxeles
+          robados, medido con elementFromPoint), así que un visitante primerizo
+          que abría el menú no podía entrar ni registrarse. El de formulario
+          pendiente se comía 20 de los 44 y desviaba el toque al cuestionario.
+          Un menú modal va por delante de todo mientras está abierto. */}
       <div
-        className={`fixed inset-0 bg-black/25 z-[60] transition-opacity duration-300 ${show ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+        className={`fixed inset-0 bg-black/25 z-[100] transition-opacity duration-300 ${show ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
         onClick={() => setShow(false)}
         aria-hidden={!show}
       />
 
       {/* Capa que recorta el drawer cuando está aparcado fuera de pantalla */}
-      <div className='fixed inset-0 z-[60] overflow-hidden pointer-events-none'>
+      <div className='fixed inset-0 z-[100] overflow-hidden pointer-events-none'>
       {/* Drawer lateral: mismo concepto que el índice del panel
           (tarjeta crema flotante, cierre naranja, textos azules).
           Se desliza y desvanece a la vez para una salida limpia. */}
