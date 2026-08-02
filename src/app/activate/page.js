@@ -1,21 +1,36 @@
 'use client';
 
 import React, { useState, useEffect, Suspense } from 'react';
-import { useSearchParams, useRouter } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import axios from 'axios';
 import Link from 'next/link';
-import { Loader2, CheckCircle, XCircle, Sparkles } from 'lucide-react';
+import { Loader2, CheckCircle, XCircle, Sparkles, MailCheck } from 'lucide-react';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://squatfit-api-cyrc2g3zra-no.a.run.app';
 
+// La API responde en inglés. Esta pantalla la ve un cliente que acaba de pagar,
+// así que no se le enseña el mensaje crudo del servidor.
+function mensajeEnCastellano(bruto) {
+  const t = typeof bruto === 'string' ? bruto.toLowerCase() : '';
+  if (t.includes('already') && t.includes('activ')) return 'Esta cuenta ya estaba activada. Puedes entrar directamente.';
+  if (t.includes('not found')) return 'No encontramos ninguna cuenta para este enlace.';
+  if (t.includes('expired') || t.includes('invalid')) return 'Este enlace ya no sirve: o ha caducado o ya se usó una vez.';
+  return 'Este enlace de activación no ha funcionado.';
+}
+
 function ActivateContent() {
   const searchParams = useSearchParams();
-  const router = useRouter();
   const token = searchParams.get('token');
 
   const [status, setStatus] = useState('loading'); // 'loading' | 'success' | 'error'
   const [message, setMessage] = useState('');
-  const [countdown, setCountdown] = useState(3);
+  // Reenvío del enlace desde la propia pantalla de error: si el enlace caducó,
+  // la cuenta sigue SIN activar, y sin activar el login rechaza por `status`
+  // antes incluso de mirar la contraseña. Mandar a «recuperar contraseña» no
+  // les desbloquearía; lo único que sirve es un enlace de activación nuevo.
+  const [emailReenvio, setEmailReenvio] = useState('');
+  const [reenvio, setReenvio] = useState('idle'); // 'idle' | 'enviando' | 'enviado' | 'error'
+  const [errorReenvio, setErrorReenvio] = useState('');
 
   useEffect(() => {
     async function activateAccount() {
@@ -37,33 +52,37 @@ function ActivateContent() {
       } catch (error) {
         console.error("Error al activar cuenta:", error.response ? error.response.data : error.message);
         setStatus('error');
-        if (error.response && error.response.data && error.response.data.message) {
-          const apiMessage = error.response.data.message;
-          setMessage(typeof apiMessage === 'string' ? apiMessage : 'El enlace de activación es inválido o ha expirado.');
-        } else {
-          setMessage('El token de activación es inválido, ha expirado o ya fue utilizado.');
-        }
+        setMessage(mensajeEnCastellano(error?.response?.data?.message));
       }
     }
 
     activateAccount();
   }, [token]);
 
-  // Manejar cuenta regresiva para redirección automática tras éxito
-  useEffect(() => {
-    if (status !== 'success') return;
-
-    if (countdown === 0) {
-      router.push('/login');
-      return;
+  const reenviarEnlace = async (e) => {
+    e.preventDefault();
+    const email = (emailReenvio || '').trim().toLowerCase();
+    if (!email) return;
+    setReenvio('enviando');
+    setErrorReenvio('');
+    try {
+      await axios.post(`${API_BASE}/api/v1/user/resend-activation`, { email });
+      setReenvio('enviado');
+    } catch (error) {
+      const status = error?.response?.status;
+      if (status === 400) {
+        // La cuenta ya estaba activa: no es un fallo, es una buena noticia.
+        setReenvio('error');
+        setErrorReenvio('Esta cuenta ya está activada. Entra con tu contraseña, o créala si aún no tienes.');
+      } else if (status === 404) {
+        setReenvio('error');
+        setErrorReenvio('No hay ninguna cuenta con ese correo. Revisa si lo escribiste igual que al comprar.');
+      } else {
+        setReenvio('error');
+        setErrorReenvio('No hemos podido enviarlo. Inténtalo en un momento.');
+      }
     }
-
-    const timer = setTimeout(() => {
-      setCountdown((prev) => prev - 1);
-    }, 1000);
-
-    return () => clearTimeout(timer);
-  }, [status, countdown, router]);
+  };
 
   return (
     <div className="w-full max-w-lg bg-white rounded-[40px] shadow-2xl p-10 md:p-16 text-black flex flex-col items-center text-center gap-8 border border-white/20 animate-in fade-in zoom-in-95 duration-500">
@@ -92,23 +111,28 @@ function ActivateContent() {
             <Sparkles className="absolute -top-2 -right-2 w-8 h-8 text-[#FF690B] animate-bounce" />
           </div>
           <div className="flex flex-col gap-3">
-            <h2 className="text-4xl font-bold text-green-600">¡Cuenta Activada!</h2>
+            <h2 className="text-4xl font-bold text-green-600">¡Cuenta activada!</h2>
             <p className="text-gray-600 text-lg font-medium">{message}</p>
-            <p className="text-gray-400 text-sm mt-2">
-              Ya tienes acceso completo a la plataforma Squad Fit.
-            </p>
           </div>
-          <div className="w-full mt-4 flex flex-col items-center gap-4">
-            {/* Cuenta atrás protagonista: 3, 2, 1… */}
-            <div className="flex flex-col items-center gap-1 bg-[#F8F9FC] w-full py-4 px-6 rounded-2xl border border-slate-100">
-              <span key={countdown} className="text-5xl font-extrabold text-[#FF690B] tabular-nums animate-in zoom-in-50 duration-300">
-                {countdown > 0 ? countdown : '¡Vamos!'}
-              </span>
-              <span className="text-sm text-gray-500 font-semibold">Te llevamos al inicio de sesión…</span>
-            </div>
-            <Link href="/login" className="w-full cursor-pointer bg-[#3932C0] text-white rounded-3xl p-5 text-lg font-bold hover:bg-[#3932C0]/90 transition duration-300">
-              Ir a iniciar sesión ahora
+          {/*
+            Antes esto hacía una cuenta atrás de 3 segundos y empujaba a /login.
+            Para quien compró como invitado eso era un callejón sin salida: el
+            correo que le trae aquí se titula «Crea tu contraseña», pero su
+            cuenta se creó SIN ninguna, así que llegaba a un formulario de
+            acceso que no podía rellenar. Ahora no se le empuja a ningún sitio:
+            elige él, y la opción de crear contraseña está a la vista.
+          */}
+          <div className="w-full mt-2 flex flex-col gap-3">
+            <Link href="/login" className="w-full cursor-pointer bg-[#3932C0] text-white rounded-3xl p-5 text-lg font-bold hover:bg-[#3932C0]/90 transition duration-300 block">
+              Ya tengo contraseña · Entrar
             </Link>
+            <Link href="/forgot-password" className="w-full cursor-pointer bg-[#FF690B] text-white rounded-3xl p-5 text-lg font-bold hover:bg-[#FF690B]/90 transition duration-300 block">
+              Aún no tengo contraseña · Crearla
+            </Link>
+            <p className="text-gray-400 text-sm mt-1">
+              Si compraste sin registrarte antes, tu cuenta se creó sin contraseña:
+              elige la segunda opción y la creas en un minuto.
+            </p>
           </div>
         </>
       )}
@@ -120,18 +144,58 @@ function ActivateContent() {
             <XCircle className="w-24 h-24 text-red-500 animate-in shake duration-500" strokeWidth={1.5} />
           </div>
           <div className="flex flex-col gap-3">
-            <h2 className="text-3xl font-bold text-red-600">Activación Fallida</h2>
+            <h2 className="text-3xl font-bold text-red-600">Este enlace ya no vale</h2>
             <p className="text-gray-600 text-lg font-medium">{message}</p>
             <p className="text-gray-400 text-sm">
-              El enlace puede ser inválido o haber expirado (tienen 24 horas de validez).
+              Los enlaces de activación duran 24 horas y solo se pueden usar una vez.
+              No pasa nada: te mandamos otro ahora mismo.
             </p>
           </div>
-          <div className="w-full mt-4 flex flex-col gap-3">
-            <Link href="/register" className="w-full cursor-pointer bg-[#3932C0] text-white rounded-3xl p-5 text-lg font-bold hover:bg-[#3932C0]/90 transition duration-300 block">
-              Registrar cuenta nueva
-            </Link>
-            <Link href="/login" className="w-full cursor-pointer bg-gray-100 text-gray-700 rounded-3xl p-5 text-lg font-semibold hover:bg-gray-200 transition duration-300 block">
-              Volver al inicio de sesión
+
+          {/*
+            Antes aquí había dos botones que no llevaban a ninguna parte:
+            «Registrar cuenta nueva» fallaba con *Email already in use* (la
+            cuenta YA existe, solo que sin activar) y «Volver al inicio de
+            sesión» tampoco servía, porque el login rechaza por `status` antes
+            de mirar la contraseña. Lo único que desatasca es un enlace nuevo,
+            y `POST /user/resend-activation` ya existía sin usarse.
+          */}
+          {reenvio === 'enviado' ? (
+            <div className="w-full flex flex-col items-center gap-3 bg-green-50 border border-green-200 rounded-3xl p-6">
+              <MailCheck className="w-12 h-12 text-green-600" strokeWidth={1.5} />
+              <p className="text-green-800 font-semibold text-lg">Enlace enviado</p>
+              <p className="text-green-700 text-sm">
+                Búscalo en tu correo (mira también en spam) y ábrelo antes de 24 horas.
+              </p>
+            </div>
+          ) : (
+            <form onSubmit={reenviarEnlace} className="w-full flex flex-col gap-3">
+              <label htmlFor="email-reenvio" className="text-left text-sm font-semibold text-gray-600">
+                Tu correo, el mismo con el que compraste
+              </label>
+              <input
+                id="email-reenvio"
+                type="email"
+                required
+                value={emailReenvio}
+                onChange={(e) => setEmailReenvio(e.target.value)}
+                placeholder="tucorreo@ejemplo.com"
+                className="w-full rounded-2xl border border-gray-200 p-4 text-base text-gray-800 outline-hidden focus:border-[#3932C0]"
+              />
+              {errorReenvio && <p className="text-left text-sm text-red-600">{errorReenvio}</p>}
+              <button
+                type="submit"
+                disabled={reenvio === 'enviando'}
+                className="w-full cursor-pointer bg-[#3932C0] text-white rounded-3xl p-5 text-lg font-bold hover:bg-[#3932C0]/90 transition duration-300 disabled:opacity-60"
+              >
+                {reenvio === 'enviando' ? 'Enviando…' : 'Enviarme un enlace nuevo'}
+              </button>
+            </form>
+          )}
+
+          <div className="w-full flex flex-col gap-3">
+            <Link href="/forgot-password" className="w-full cursor-pointer bg-gray-100 text-gray-700 rounded-3xl p-4 text-base font-semibold hover:bg-gray-200 transition duration-300 block">
+              Mi cuenta ya estaba activada · Crear o recuperar contraseña
             </Link>
           </div>
         </>
