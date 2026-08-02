@@ -68,12 +68,39 @@ export default function CountUp({
     };
   }, [value, duration, startDelay, startFraction, step, popSteps, popStepMs]);
 
+  // ── Anchura reservada de antemano ──────────────────────────────────────────
+  // El número cambia de anchura mientras cuenta (+1.26M ocupa más que +1.8M, y
+  // 70% menos que 100%), y en el hero de la home eso movía la columna entera:
+  // los tres números están en una fila `justify-between` que manda en el ancho
+  // del bloque de texto, así que la foto de la derecha subía y bajaba sola
+  // durante toda la cuenta.
+  //
+  // La caja se dimensiona con una COPIA INVISIBLE del valor FINAL, apilada en
+  // la misma celda de rejilla que el número vivo. Así la anchura es la
+  // definitiva desde el primer fotograma y ya no se mueve nada. `tabular-nums`
+  // remata el detalle fino: hace que todas las cifras midan igual, para que
+  // cambiar un 1 por un 8 tampoco desplace nada.
+  //
+  // Se hace aquí, en el componente, y no en cada sitio que lo usa, para que
+  // ningún contador futuro vuelva a traerse el salto de vuelta.
+  const reserva = format(value);
+  const cajaFija = { display: 'inline-grid', fontVariantNumeric: 'tabular-nums' };
+  const celda = { gridArea: '1 / 1' };
+
   if (popSteps) {
     return (
-      <span key={popKey} className={`inline-block animate-[count-pop_0.5s_ease-out] ${className || ''}`}>
-        {display}
+      <span className={className} style={cajaFija}>
+        <span style={{ ...celda, visibility: 'hidden' }} aria-hidden="true">{reserva}</span>
+        <span key={popKey} style={celda} className="animate-[count-pop_0.5s_ease-out]">
+          {display}
+        </span>
       </span>
     );
   }
-  return <span className={className}>{display}</span>;
+  return (
+    <span className={className} style={cajaFija}>
+      <span style={{ ...celda, visibility: 'hidden' }} aria-hidden="true">{reserva}</span>
+      <span style={celda}>{display}</span>
+    </span>
+  );
 }
