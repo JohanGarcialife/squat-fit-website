@@ -64,12 +64,16 @@ export default function CartPage() {
     // recarga de la pantalla de gracias cuente la venta dos veces. Se lee el
     // carrito ANTES de vaciarlo, que es lo único que queda del pedido en el
     // navegador al volver de Stripe.
-    const finishAsPaid = (transactionId) => {
+    const finishAsPaid = (transactionId, importeReal = null, moneda = null) => {
       const comprado = useCartStore.getState().cart;
+      // El importe bueno es el que confirma Stripe (`amount_total`): trae el
+      // envío y los cupones dentro. El subtotal del carrito queda de respaldo
+      // por si esa respuesta no lo trajera, y entonces declara de menos.
       enviarPurchase({
         transactionId,
         items: itemsDesdeCarrito(comprado),
-        value: valorDesdeCarrito(comprado),
+        value: importeReal ?? valorDesdeCarrito(comprado),
+        currency: moneda || 'EUR',
       });
       setSuccess(true);
       setStep(3); // Render the success screen
@@ -82,9 +86,9 @@ export default function CartPage() {
     // pagado — un `?success=true` suelto en la URL ya no basta.
     if (sessionId) {
       setVerifyingPayment(true);
-      verifyCheckoutSession(sessionId).then(({ paid }) => {
+      verifyCheckoutSession(sessionId).then(({ paid, amountTotal, currency }) => {
         setVerifyingPayment(false);
-        if (paid) finishAsPaid(sessionId);
+        if (paid) finishAsPaid(sessionId, amountTotal, currency);
         // Si no está pagada, se deja el carrito intacto: mejor que el
         // cliente reintente el pago a que vea una "compra completada" falsa.
       });

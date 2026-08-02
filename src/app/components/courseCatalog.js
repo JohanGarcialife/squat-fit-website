@@ -350,14 +350,23 @@ export async function createTierCheckout(item, { token, saveCard = false } = {})
 export const SESSION_STATUS_ENDPOINT = `${API_BASE}/api/v1/catalog/checkout/session-status`;
 
 export async function verifyCheckoutSession(sessionId) {
-  if (!sessionId) return { paid: false };
+  if (!sessionId) return { paid: false, amountTotal: null, currency: null };
   try {
     const res = await fetch(`${SESSION_STATUS_ENDPOINT}?session_id=${encodeURIComponent(sessionId)}`);
-    if (!res.ok) return { paid: false };
+    if (!res.ok) return { paid: false, amountTotal: null, currency: null };
     const data = await res.json();
-    return { paid: Boolean(data?.paid) };
+    // `amount_total` y `currency` los añadió el backend el 2-ago (PR #101 de
+    // SquatFit): es el importe REAL cobrado por Stripe, ya en euros, con el
+    // envío y los cupones dentro. La medición de GA4 lo prefiere al subtotal
+    // del carrito, que se queda corto. Si el backend aún no los mandara
+    // —revisión antigua—, llegan como null y quien llama usa su respaldo.
+    return {
+      paid: Boolean(data?.paid),
+      amountTotal: typeof data?.amount_total === 'number' ? data.amount_total : null,
+      currency: typeof data?.currency === 'string' ? data.currency : null,
+    };
   } catch {
     // Red caída: no se puede confirmar, así que NO se trata como pagado.
-    return { paid: false };
+    return { paid: false, amountTotal: null, currency: null };
   }
 }
