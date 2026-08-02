@@ -1,6 +1,7 @@
 'use client'
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+import { enviarAddToCart } from '@/app/components/ga4Ecommerce'
 
 export const useCartStore = create(
   persist(
@@ -35,12 +36,20 @@ export const useCartStore = create(
         } else {
           set({ cart: [...currentCart, { ...product, quantity: 1 }] })
         }
+
+        // Medición GA4: se emite aquí, en el store, y no en cada botón, porque
+        // por aquí pasan TODOS los caminos que meten algo en el carrito. Si no
+        // hay consentimiento de analítica, `enviarAddToCart` no hace nada.
+        enviarAddToCart(product)
       },
 
       // Opción de Compra Directa (Bypass de carrito para Suscripciones)
       // Limpia el carrito y añade solo este item con sus instrucciones de checkout exactas
       setDirectCheckoutItem: (product) => {
         set({ cart: [{ ...product, quantity: 1, isDirectCheckout: true }] })
+        // La compra directa (suscripciones) salta el carrito visible, pero
+        // para el embudo es exactamente lo mismo: el cliente eligió producto.
+        enviarAddToCart(product)
       },
 
       // Elimina un producto del carrito por su ID.

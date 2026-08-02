@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -19,6 +19,7 @@ import { markLeavingCart } from "@/app/components/CartScrollRestore";
 import { verifyCheckoutSession } from "@/app/components/courseCatalog";
 import {
   enviarPurchase,
+  enviarBeginCheckout,
   itemsDesdeCarrito,
   valorDesdeCarrito,
 } from "@/app/components/ga4Ecommerce";
@@ -39,6 +40,16 @@ export default function CartPage() {
   // gracias — antes `?success=true` bastaba por sí solo para vaciar el
   // carrito y mostrar «pago completado» sin comprobar nada.
   const [verifyingPayment, setVerifyingPayment] = useState(false);
+
+  // `begin_checkout` se emite UNA vez por visita: al carrito se puede volver
+  // (botón «Volver» del paso 2), y cada ida y vuelta no es un checkout nuevo.
+  const beginCheckoutEmitido = useRef(false);
+  const emitirBeginCheckout = () => {
+    if (beginCheckoutEmitido.current) return;
+    if (enviarBeginCheckout(useCartStore.getState().cart)) {
+      beginCheckoutEmitido.current = true;
+    }
+  };
 
   // Carrito 3.3: al salir de /cart (atrás o enlaces de volver) se marca la
   // salida para que la página anterior restaure su posición de scroll.
@@ -123,6 +134,7 @@ export default function CartPage() {
     // abajo devuelve al paso 1 si no hay sesión.
     if (params.get('step') === '2') {
       setStep(2);
+      emitirBeginCheckout();
     }
   }, []);
 
@@ -135,6 +147,7 @@ export default function CartPage() {
       setNeedsAccess(true);
       return;
     }
+    if (nextStep === 2) emitirBeginCheckout();
     setNeedsAccess(false);
     setStep(nextStep);
   };
