@@ -73,8 +73,20 @@ const MAP = [
   ['/contacto-hamlet', '/contacto'],
 
   // --- Funnel "tu mejor versión" -------------------------------------------
-  // Todas estas landings se consolidan en /programa, que es el nuevo embudo.
-  ['/formulario', '/programa'],
+  // /formulario NO es una landing: es la URL del formulario que iba escrita en
+  // los correos (…/formulario/?utmsource=Emails). Quien la abre viene a
+  // rellenarlo, no a leer la oferta, así que entra directo al formulario nuevo
+  // en vez de a /programa. 307 y no 301 por lo mismo que los enlaces cortos de
+  // form-links.mjs: es un enlace de marketing y su destino se moverá; un 301 se
+  // queda cacheado en el navegador de la gente y ya no hay forma de recolocarlo.
+  //
+  // El destino NO lleva ni un utm_*, a propósito: los correos ya traen el suyo y
+  // Next encadena la query entrante ANTES que la del destino, así que un
+  // utm_source nuestro aquí saldría duplicado en la URL final. Solo se añade
+  // `via`, que es la clave de atribución fina y no choca con ningún utm: sin
+  // ella, un clic desde un correo viejo sin UTM llegaría sin origen ninguno.
+  ['/formulario', '/empieza-tu-cambio?via=formulario', { statusCode: 307 }],
+  // Todas estas landings sí se consolidan en /programa, que es el nuevo embudo.
   ['/mis-asesorias', '/programa'],
   ['/calorias', '/programa'],
   ['/calorias-h', '/programa'],
@@ -138,13 +150,15 @@ const HOSTS = ['squatfit.es', 'www.squatfit.es'];
 // igual, pero 301 es lo que entiende cualquier rastreador antiguo y lo que espera
 // el "Cambio de dirección" de Search Console en una migración de dominio.
 const legacyRedirects = HOSTS.flatMap((host) =>
-  MAP.map(([source, target]) => ({
+  MAP.map(([source, target, opts]) => ({
     source,
     has: [{ type: 'host', value: host }],
     // Los enlaces de afiliación ya traen su destino absoluto: anteponerles
     // nuestro dominio los rompería.
     destination: /^https?:\/\//.test(target) ? target : `${NEW}${target}`,
-    statusCode: 301,
+    // 301 salvo que la regla pida otra cosa (tercer elemento del par). Lo pide
+    // /formulario, que es un enlace de marketing y no una URL de SEO.
+    statusCode: opts?.statusCode ?? 301,
   })),
 );
 
