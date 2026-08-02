@@ -5,9 +5,9 @@
 // el ranking de qué recetas se usan de verdad y decidir, con datos, cuáles
 // pasar a muestra gratuita.
 //
-// Contrato CONFIRMADO contra el backend real (commit f292202, rama
-// feat/muestras-gratis-y-ranking-recetas del repo SquatFit — ya construido,
-// pendiente de desplegar):
+// Contrato CONFIRMADO contra el backend real (rama feat/muestras-gratis-y-
+// ranking-recetas del repo SquatFit, mergeada en el PR #90 y YA DESPLEGADA;
+// reverificado contra producción el 3-ago, ver el interruptor más abajo):
 //
 //   POST {NEXT_PUBLIC_API_URL}/api/v1/content-events
 //   Authorization: Bearer <token>   (opcional: el endpoint es público; si
@@ -39,11 +39,17 @@ import { analyticsAllowed } from './cookieConsent';
 import { useAuthStore } from '@/stores/auth.store';
 
 // ─── Interruptor ─────────────────────────────────────────────────────────────
-// Apagado a propósito: el endpoint de ingesta (rama feat/muestras-gratis-y-
-// ranking-recetas del backend) aún no está desplegado. Encender a `true`
-// cuando esa rama llegue a producción — mismo patrón que REDIRECTS_API_READY
-// en src/app/r/[slug]/route.js.
-export const RECIPE_METRICS_READY = false;
+// ENCENDIDO el 3-ago: la rama del backend (feat/muestras-gratis-y-ranking-
+// recetas) se mergeó en el PR #90 y está desplegada. Comprobado contra
+// producción antes de encender, sin escribir ni una fila:
+//   · POST /api/v1/content-events con `{}`            → 400 (existe y valida)
+//   · un evento de forma válida pero sin sentido
+//     ("open" sin content_id)                          → 201 {accepted:0,rejected:1}
+//   · un event_type inexistente                        → 400 (validación de forma dura)
+// Es decir: la respuesta {accepted, rejected} y el 400 de forma son
+// exactamente los que documenta la cabecera de este fichero.
+// Mismo patrón que REDIRECTS_API_READY en src/app/r/[slug]/route.js.
+export const RECIPE_METRICS_READY = true;
 
 const API = process.env.NEXT_PUBLIC_API_URL || 'https://squatfit-api-cyrc2g3zra-no.a.run.app';
 const ENDPOINT = `${API}/api/v1/content-events`;
