@@ -4,7 +4,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import dynamic from "next/dynamic";
-import { ChevronLeft, ChevronRight, Link as LinkIcon, Menu, Search } from "lucide-react";
+import { ChevronLeft, ChevronRight, Clock, Flame, Link as LinkIcon, Menu, Search, Users } from "lucide-react";
 import { BookIndexSidebar } from "@/app/(panel-control)/(routes)/panel-control/_components/Sidebar";
 import { useAuthStore } from "@/stores/auth.store";
 import AccessNotice from "@/app/components/AccessNotice";
@@ -63,6 +63,27 @@ const fallbackBookIndex = [
   { title: 'Zona tropical',       icon: '🌴', page: 11 },
   { title: 'Cierre',              icon: '🤍', page: 12 },
 ];
+
+// Las calorías llegan del backend como número pelado ("210"), porque hoy
+// `recipe/system` mapea `recipe.description as kcal` (ver recipe.repository.ts).
+// Mismo criterio que la ficha de receta: si es solo dígitos, se le pone la
+// unidad; si ya viene con texto, se respeta tal cual.
+function formatKcal(kcal) {
+  if (kcal === null || kcal === undefined) return null;
+  const text = String(kcal).trim();
+  if (!text) return null;
+  return /^\d+$/.test(text) ? `${text} kcal` : text;
+}
+
+// Tiempo total de la receta. 19 de las 149 del recetario no traen ninguno de
+// los dos (así vienen del origen), y en esas no se pinta el reloj en vez de
+// enseñar un «0 min» que no significa nada.
+function totalMinutos(r) {
+  const prep = Number(r?.time_to_prepare) || 0;
+  const coccion = Number(r?.time_to_cook) || 0;
+  const total = prep + coccion;
+  return total > 0 ? `${total} min` : null;
+}
 
 // Dynamically import the PdfViewer so it doesn't run on the server
 const PdfViewer = dynamic(() => import("./_components/PdfViewer"), { ssr: false });
@@ -323,6 +344,35 @@ export default function BookReaderPage({ params, searchParams }) {
                   </div>
                   <div className="p-4">
                     <p className="text-[#363C98] font-bold leading-snug line-clamp-2">{r.name}</p>
+                    {/* Calorías, tiempo y raciones. Ya venían en la respuesta de
+                        `recipe/system` y la tarjeta las tiraba: quien abre un
+                        libro de 79 recetas solo veía nombres, y para saber si
+                        una receta le encaja tenía que entrar en cada una. */}
+                    {(() => {
+                      const kcal = formatKcal(r.kcal);
+                      const tiempo = totalMinutos(r);
+                      const raciones = Number(r.racion) > 0 ? Number(r.racion) : null;
+                      if (!kcal && !tiempo && !raciones) return null;
+                      return (
+                        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-2 text-xs font-bold">
+                          {kcal && (
+                            <span className="inline-flex items-center gap-1 text-[#FF690B]">
+                              <Flame className="w-3.5 h-3.5" /> {kcal}
+                            </span>
+                          )}
+                          {tiempo && (
+                            <span className="inline-flex items-center gap-1 text-slate-400">
+                              <Clock className="w-3.5 h-3.5" /> {tiempo}
+                            </span>
+                          )}
+                          {raciones && (
+                            <span className="inline-flex items-center gap-1 text-slate-400">
+                              <Users className="w-3.5 h-3.5" /> {raciones}
+                            </span>
+                          )}
+                        </div>
+                      );
+                    })()}
                   </div>
                 </Link>
               ))}
