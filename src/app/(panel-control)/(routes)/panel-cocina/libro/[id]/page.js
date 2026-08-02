@@ -23,14 +23,24 @@ function getValidImageUrl(url) {
   return url.startsWith('/') ? url : `/${url}`;
 }
 
-// Relación libro↔receta: TODAVÍA NO EXISTE en el backend (confirmado,
-// 31-jul — la tabla `recipe` no tiene ninguna columna que la referencie;
-// `getSystemRecipes` comprueba el acceso a un libro fijo, no por
-// libro/versión concreto). Se comprueban aquí varios nombres de campo
-// plausibles por si el backend la añade sin más aviso que el propio dato;
-// mientras NINGUNO de ellos llegue, esto siempre devuelve un array vacío —
-// así que TODOS los libros siguen enseñando el PDF de siempre. Es el
-// comportamiento pedido, no un fallo de esta función.
+// Relación libro↔receta: YA EXISTE y este lector ya está en uso (2-ago-2026).
+//
+// El comentario anterior decía que la relación «TODAVÍA NO EXISTE» y que por
+// eso esto «siempre devuelve un array vacío». Las dos cosas eran ciertas el
+// 31-jul y dejaron de serlo en dos pasos: la migración
+// `20260731210000_add_book_id_to_recipe` creó la columna, y
+// `20260802090000_seed_recipe_book_id` la sembró con 149 recetas (70 del
+// Volumen 1 y 79 del Volumen 2). `recipe/system` devuelve ya el `book_id`
+// relleno, así que este filtro casa y el `if (nativas.length > 0)` de más
+// abajo enseña la vista moderna en vez del PDF.
+//
+// Verificado en producción el 2-ago abriendo «Libro de cocina 2» con una
+// cuenta SIN biblioteca: salen sus 5 recetas de muestra en tarjetas, y ni
+// rastro del PDF.
+//
+// Se dejan los tres nombres de campo (`book_id`, `version_id`,
+// `book_version_id`) a propósito: el que funciona hoy es el primero, y los
+// otros dos cuestan nada y cubren que algún día se enlace por versión.
 function recipesForBook(recipes, bookId, versionId) {
   if (!Array.isArray(recipes)) return [];
   return recipes.filter(
