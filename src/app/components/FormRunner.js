@@ -132,10 +132,27 @@ export default function FormRunner({ definition, context = {}, onSubmit, exitHre
   };
   const goBack = () => { setOtherDraft(''); setIndex((i) => Math.max(0, i - 1)); };
 
-  // Volver a una fase ya completada desde el mapa de navegación.
+  // Paso más lejano al que se ha llegado. Es lo que permite volver hacia
+  // ADELANTE: quien retrocede a repasar una respuesta puede regresar de un clic
+  // a la pregunta que estaba rellenando, en vez de rehacer el camino entero.
+  // Solo sube: retroceder no lo baja.
+  const [maxIndex, setMaxIndex] = useState(0);
+  useEffect(() => { setMaxIndex((m) => Math.max(m, index)); }, [index]);
+  const maxPhase = useMemo(() => {
+    const st = steps[Math.min(maxIndex, steps.length - 1)];
+    return st ? phases.indexOf(st.phase) : -1;
+  }, [steps, phases, maxIndex]);
+
+  // Ir a una fase desde el mapa de navegación, hacia atrás o hacia adelante.
   const goToPhase = (fase) => {
     const destino = steps.findIndex((st) => st.phase === fase);
-    if (destino > -1 && destino < index) { setOtherDraft(''); setIndex(destino); }
+    if (destino < 0 || destino > maxIndex) return; // aún no se ha llegado ahí
+    setOtherDraft('');
+    // Si la fase es la más lejana alcanzada, se vuelve al paso EXACTO donde se
+    // dejó, no al primero de la fase: es lo que se espera al pulsar «seguir
+    // donde lo dejaste». Hacia atrás sí se entra por el principio de la fase.
+    const ultimoDeLaFase = steps[maxIndex]?.phase === fase;
+    setIndex(ultimoDeLaFase ? Math.max(destino, maxIndex) : destino);
   };
 
   const handleFinish = async () => {
@@ -638,7 +655,7 @@ export default function FormRunner({ definition, context = {}, onSubmit, exitHre
       </div>
 
       {/* ===== DERECHA: logo + fases (escritorio) ===== */}
-      <FormAside inert={tapado || undefined} title={formTitle} phases={phases} currentPhase={step.phase} onGoTo={goToPhase} />
+      <FormAside inert={tapado || undefined} title={formTitle} phases={phases} currentPhase={step.phase} onGoTo={goToPhase} maxPhase={maxPhase} />
 
       {/* Panel de pasos en móvil (desde el contador) */}
       <StepsDrawer
@@ -650,6 +667,7 @@ export default function FormRunner({ definition, context = {}, onSubmit, exitHre
         index={index}
         total={total}
         onGoTo={goToPhase}
+        maxPhase={maxPhase}
       />
 
       <PausaPantalla texto={pausa} />

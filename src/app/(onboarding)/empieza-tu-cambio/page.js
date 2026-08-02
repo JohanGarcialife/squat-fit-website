@@ -510,10 +510,25 @@ export default function EmpiezaTuCambioPage() {
   };
   const goBack = () => setIndex((i) => Math.max(0, i - 1));
 
-  // Volver a una sección ya completada desde el mapa de navegación.
+  // Pregunta más lejana a la que se ha llegado. Es lo que permite volver hacia
+  // ADELANTE: quien retrocede a repasar una respuesta puede regresar de un clic
+  // a la pregunta que estaba rellenando, en vez de rehacer el camino entero.
+  // Solo sube, nunca baja al retroceder. Arranca en el indice restaurado del
+  // progreso guardado, para que quien retoma el formulario pueda moverse por
+  // todo lo que ya habia contestado y volver al final de un clic.
+  const [maxIndex, setMaxIndex] = useState(0);
+  useEffect(() => { setMaxIndex((m) => Math.max(m, index)); }, [index]);
+  const maxPhase = useMemo(() => PHASES.indexOf(phaseOf(STEPS[Math.min(maxIndex, STEPS.length - 1)])), [maxIndex]);
+
+  // Ir a una seccion desde el mapa de navegacion, hacia atras o hacia adelante.
   const goToPhase = (fase) => {
     const destino = STEPS.findIndex((st) => phaseOf(st) === fase);
-    if (destino > -1 && destino < index) setIndex(destino);
+    if (destino < 0 || destino > maxIndex) return; // aun no se ha llegado ahi
+    // Si es la seccion mas lejana alcanzada, se vuelve a la pregunta EXACTA
+    // donde se dejo, no a la primera de la seccion: es lo que se espera al
+    // pulsar «seguir donde lo dejaste». Hacia atras si se entra por el principio.
+    const esLaMasLejana = phaseOf(STEPS[maxIndex]) === fase;
+    setIndex(esLaMasLejana ? Math.max(destino, maxIndex) : destino);
   };
 
   const handleSubmit = async () => {
@@ -1048,6 +1063,7 @@ export default function EmpiezaTuCambioPage() {
         phases={PHASES}
         currentPhase={phaseOf(step)}
         onGoTo={goToPhase}
+        maxPhase={maxPhase}
       />
 
       {/* Panel de pasos en móvil (desde el contador) */}
@@ -1060,6 +1076,7 @@ export default function EmpiezaTuCambioPage() {
         index={index}
         total={total}
         onGoTo={goToPhase}
+        maxPhase={maxPhase}
       />
 
       <PausaPantalla texto={pausa} />

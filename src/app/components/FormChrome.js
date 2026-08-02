@@ -330,24 +330,40 @@ export function StepCounter({ index, total, onOpen }) {
   );
 }
 
-/* ── Lista de fases con hitos: hecha / actual / pendiente.
-      Las ya visitadas son clicables para volver a repasarlas. ── */
-export function PhasesList({ phases = [], currentPhase, onGoTo, compact = false }) {
+/* ── Lista de fases con hitos: hecha / actual / alcanzada / pendiente.
+      Se puede volver a cualquier fase ya visitada Y también volver hacia
+      ADELANTE hasta donde se había llegado: quien retrocede a repasar algo no
+      tiene que rehacer el camino pregunta a pregunta para regresar a donde
+      estaba. `maxPhase` es la fase más lejana alcanzada; nada por delante de
+      ella es clicable, porque llevaría a preguntas que aún no se han visto.
+      Si no se pasa `maxPhase` se comporta como antes (solo hacia atrás). ── */
+export function PhasesList({ phases = [], currentPhase, onGoTo, compact = false, maxPhase }) {
   const actual = phases.indexOf(currentPhase);
+  const tope = Number.isInteger(maxPhase) ? Math.max(maxPhase, actual) : actual;
   if (!phases.length) return null;
   return (
     <ol className={`flex flex-col ${compact ? 'gap-1' : 'gap-1.5'} w-full`}>
       {phases.map((p, i) => {
         const hecha = actual > -1 && i < actual;
         const activa = i === actual;
-        const navegable = hecha && typeof onGoTo === 'function';
+        // Visitada pero por delante de donde estamos ahora: se llegó hasta
+        // aquí y luego se retrocedió.
+        const adelante = actual > -1 && i > actual && i <= tope;
+        const navegable = (hecha || adelante) && typeof onGoTo === 'function';
         const Fila = navegable ? 'button' : 'div';
         return (
           <li key={p}>
           <Fila
             type={navegable ? 'button' : undefined}
             onClick={navegable ? () => onGoTo(p) : undefined}
-            title={navegable ? `Volver a «${p}»` : undefined}
+            // Solo la MÁS lejana devuelve a la pregunta exacta donde se dejó;
+            // a una intermedia se entra por su primera pregunta, y el texto
+            // tiene que decir lo que de verdad va a pasar.
+            title={
+              hecha ? `Volver a «${p}»`
+                : adelante ? (i === tope ? `Seguir en «${p}», donde lo dejaste` : `Ir a «${p}»`)
+                : undefined
+            }
             className={`w-full flex items-center gap-3 rounded-xl px-2 -mx-2 text-left transition-colors ${
               navegable ? 'cursor-pointer hover:bg-[#E7E5F4]' : ''
             }`}
@@ -359,6 +375,10 @@ export function PhasesList({ phases = [], currentPhase, onGoTo, compact = false 
                 height: activa ? 22 : 18,
                 backgroundColor: hecha ? BLUE : activa ? ORANGE : '#DEDCF5',
                 color: '#fff',
+                // La alcanzada-pero-por-delante no lleva check (no está dada por
+                // terminada) pero tampoco puede parecer una pregunta que no se
+                // ha visto nunca: se marca con un aro del color de las hechas.
+                boxShadow: adelante ? `inset 0 0 0 2px ${BLUE}` : undefined,
               }}
             >
               {hecha && <Check className="w-3 h-3" strokeWidth={3.5} />}
@@ -367,7 +387,7 @@ export function PhasesList({ phases = [], currentPhase, onGoTo, compact = false 
             <span
               className={`py-1.5 transition-colors ${activa ? 'font-extrabold' : 'font-semibold'}`}
               style={{
-                color: activa ? BLUE : hecha ? '#6B6BA8' : '#A9A6CE',
+                color: activa ? BLUE : hecha || adelante ? '#6B6BA8' : '#A9A6CE',
                 fontSize: activa ? 16 : 15,
               }}
             >
@@ -382,21 +402,21 @@ export function PhasesList({ phases = [], currentPhase, onGoTo, compact = false 
 }
 
 /* ── Columna lateral de escritorio ── */
-export function FormAside({ title, subtitle, phases, currentPhase, onGoTo, inert }) {
+export function FormAside({ title, subtitle, phases, currentPhase, onGoTo, inert, maxPhase }) {
   return (
     <aside inert={inert} className="hidden lg:flex w-[34%] max-w-md flex-col items-center bg-[#F3F2F9] px-10 py-12">
       <Image src="/LogotipoSquatfit.png" width={88} height={88} alt="Squad Fit" className="mb-10" />
       {title && <p className="text-[#8B87C9] font-bold mb-2 text-center">{title}</p>}
       {subtitle && <p className="text-[#A9A6CE] text-sm font-semibold mb-8 text-center">{subtitle}</p>}
       <div className="w-full max-w-[240px] mt-2">
-        <PhasesList phases={phases} currentPhase={currentPhase} onGoTo={onGoTo} />
+        <PhasesList phases={phases} currentPhase={currentPhase} onGoTo={onGoTo} maxPhase={maxPhase} />
       </div>
     </aside>
   );
 }
 
 /* ── Panel lateral de móvil: mismo gesto que el carrito ── */
-export function StepsDrawer({ open, onClose, title, subtitle, phases, currentPhase, index, total, onGoTo }) {
+export function StepsDrawer({ open, onClose, title, subtitle, phases, currentPhase, index, total, onGoTo, maxPhase }) {
   useFocoDevuelto(open);
   useEffect(() => {
     if (!open) return undefined;
@@ -430,10 +450,12 @@ export function StepsDrawer({ open, onClose, title, subtitle, phases, currentPha
             phases={phases}
             currentPhase={currentPhase}
             onGoTo={onGoTo ? (p) => { onGoTo(p); onClose(); } : undefined}
+            maxPhase={maxPhase}
           />
           {typeof onGoTo === 'function' && (
             <p className="text-[#B4B1D6] text-xs font-semibold mt-6">
-              Toca una sección ya completada para volver a ella.
+              Toca cualquier sección por la que ya hayas pasado. También las de
+              más abajo: te devuelven a la pregunta en la que lo dejaste.
             </p>
           )}
         </div>
