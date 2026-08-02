@@ -55,8 +55,19 @@ export const metadata = {
     default: "Squad Fit — Logra tu mejor versión",
     template: "%s · Squad Fit",
   },
+  // Medido en Search Console el 2-ago (ventana 21-31 jul): de 167 impresiones,
+  // **76 son gente buscando «maria squat fit» y sus variantes** —«maria squad
+  // fit», «maría squat fit», «mariasquatfit», «maria casas entrenadora»— y
+  // **ninguna de esas 76 hizo clic**. Casi la mitad de lo que Google enseña de
+  // este sitio se lo lleva alguien que busca a María por su nombre, y el
+  // resultado que ve no la nombra en ninguna parte: ni el título ni la
+  // descripción decían «María Casas».
+  //
+  // No puedo separar cuánto es posición y cuánto es el fragmento —Search
+  // Console no me dio la posición por consulta—, así que esto ataca lo que sí
+  // controlo. Y es honesto: /nosotros habla de ella de arriba abajo.
   description:
-    "El programa de dieta, entreno y mentalidad para un cambio físico real y duradero.",
+    "El programa de dieta, entreno y mentalidad de María Casas para un cambio físico real y duradero.",
   // Bloque Open Graph / Twitter: hasta ahora ninguna página emitía og: ni
   // twitter:, así que un enlace de squadfit.es pegado en WhatsApp, Instagram,
   // Facebook o Telegram salía pelado (sin título, sin imagen, sin
