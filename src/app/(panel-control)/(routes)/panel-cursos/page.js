@@ -26,15 +26,27 @@ import { RefreshCw, ArrowRight, AlertCircle } from "lucide-react";
 // GET /api/v1/course/by-user (ver hasCourseAccess más abajo) se SUMA
 // siempre, esté esto encendido o apagado.
 //
-// Hamlet ha aprobado apagarlo (que Biblioteca Digital deje de abrir cursos)
-// pero PENDIENTE de dos números que aún no existen: cuánta gente lo usa hoy
-// (consultas a producción ya pedidas). Hasta tenerlos, se despliega en
-// `true` para que NADIE pierda acceso el día de este PR.
+// Hamlet aprobó apagarlo (que Biblioteca Digital deje de abrir cursos)
+// condicionado a dos números: cuánta gente lo usa hoy. **Medidos en
+// producción el 2-ago-2026**, y la respuesta es que no lo usa nadie:
 //
-//   true  (por defecto, así se despliega hoy):
+//   · Suscripciones a Biblioteca Digital: 3 filas en toda la historia de la
+//     tabla, las TRES `expired`, y las tres de la MISMA cuenta
+//     (johan.garcia165@gmail.com). **Cero activas.**
+//   · `isSubscribed` del JWT sale exclusivamente de esa tabla, exigiendo
+//     `status='active'` y fin en el futuro (`checkActiveDigitalLibrarySubscription`
+//     en user.repository.ts). Con cero filas que cumplan, hoy es `false` para
+//     todo el mundo.
+//
+// O sea que este interruptor estaba **inerte**: `digitalLibraryGrantsAllCourses`
+// es `isSubscribed && ESTA_CONSTANTE`, así que ya valía false para todos.
+// Apagarlo no le quita el acceso a nadie hoy y evita que el próximo cliente
+// que compre la suscripción de recetas se lleve gratis los 18 cursos de pago.
+//
+//   true  (como se desplegó del 31-jul al 2-ago):
 //     Biblioteca Digital sigue abriendo todos los cursos, exactamente igual
 //     que antes de esta rama. Cero cambios de comportamiento para nadie.
-//   false (el estado correcto de negocio, en pausa hasta los dos números):
+//   false (ACTIVO desde el 2-ago, con los dos números ya medidos):
 //     Biblioteca Digital deja de abrir cursos. El acceso a "Mis cursos"
 //     depende EXCLUSIVAMENTE de lo que el cliente compró o le concedieron
 //     (course/by-user). Biblioteca Digital sigue intacta en "Mi cocina"
@@ -43,7 +55,7 @@ import { RefreshCw, ArrowRight, AlertCircle } from "lucide-react";
 //
 // Para encender: cambiar aquí y desplegar en Vercel (front-only, no
 // necesita coordinarse con un despliegue de Cloud Run).
-const DIGITAL_LIBRARY_UNLOCKS_COURSES = true;
+const DIGITAL_LIBRARY_UNLOCKS_COURSES = false;
 
 // ─── TEST VIDEO (Bunny.net iframe) ───────────────────────────────────────────
 // Remove this constant once the backend is returning real video_url fields
