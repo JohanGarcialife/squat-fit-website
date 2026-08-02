@@ -17,6 +17,11 @@ import Payment from "../../_components/Payment";
 import PaymentSuccess from "../../_components/PaymentSuccess";
 import { markLeavingCart } from "@/app/components/CartScrollRestore";
 import { verifyCheckoutSession } from "@/app/components/courseCatalog";
+import {
+  enviarPurchase,
+  itemsDesdeCarrito,
+  valorDesdeCarrito,
+} from "@/app/components/ga4Ecommerce";
 
 export default function CartPage() {
   const router = useRouter();
@@ -55,7 +60,17 @@ export default function CartPage() {
     const paymentIntentSecret = params.get('payment_intent_client_secret');
     const redirectStatus = params.get('redirect_status');
 
-    const finishAsPaid = () => {
+    // `transactionId` es obligatorio para medir: es lo que evita que una
+    // recarga de la pantalla de gracias cuente la venta dos veces. Se lee el
+    // carrito ANTES de vaciarlo, que es lo único que queda del pedido en el
+    // navegador al volver de Stripe.
+    const finishAsPaid = (transactionId) => {
+      const comprado = useCartStore.getState().cart;
+      enviarPurchase({
+        transactionId,
+        items: itemsDesdeCarrito(comprado),
+        value: valorDesdeCarrito(comprado),
+      });
       setSuccess(true);
       setStep(3); // Render the success screen
       useCartStore.getState().clearCart();
@@ -69,7 +84,7 @@ export default function CartPage() {
       setVerifyingPayment(true);
       verifyCheckoutSession(sessionId).then(({ paid }) => {
         setVerifyingPayment(false);
-        if (paid) finishAsPaid();
+        if (paid) finishAsPaid(sessionId);
         // Si no está pagada, se deja el carrito intacto: mejor que el
         // cliente reintente el pago a que vea una "compra completada" falsa.
       });
@@ -92,7 +107,7 @@ export default function CartPage() {
         return loadStripe(pk).then((stripe) =>
           stripe.retrievePaymentIntent(paymentIntentSecret).then(({ paymentIntent }) => {
             setVerifyingPayment(false);
-            if (paymentIntent?.status === 'succeeded') finishAsPaid();
+            if (paymentIntent?.status === 'succeeded') finishAsPaid(paymentIntent.id);
           }),
         );
       }).catch(() => setVerifyingPayment(false));
