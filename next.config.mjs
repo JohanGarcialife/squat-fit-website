@@ -51,6 +51,16 @@ const nextConfig = {
       ...legacyRedirects,
       // Enlaces cortos al formulario, uno por origen (los antiguos Pretty Links).
       ...formLinkRedirects,
+      // /formulario en el dominio NUEVO. Hasta ahora daba 404: la regla de
+      // redirects-legacy.mjs lleva condición de host y solo dispara en
+      // squatfit.es, así que quien copiaba el enlace del correo y le cambiaba
+      // el dominio a mano —o quien lo tenga guardado ya reescrito— se estrellaba.
+      // Mismo destino y mismo 307 que la del dominio viejo.
+      {
+        source: '/formulario',
+        destination: '/empieza-tu-cambio?via=formulario',
+        permanent: false,
+      },
     ];
   },
   async headers() {
