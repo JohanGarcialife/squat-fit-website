@@ -19,14 +19,17 @@ const API =
  * detalle completo. Este hook no decide nada por su cuenta — solo pinta lo
  * que ya llegó filtrado.
  *
- * OJO — hueco conocido y ya avisado al carril de backend (31-jul): hoy
- * `getSystemRecipes` comprueba el acceso a UN libro fijo (`books[0]`), no al
- * libro/versión concreto que se esté mirando; y la tabla `recipe` no tiene
- * ninguna columna que la relacione con un libro. Hasta que esas dos cosas
- * lleguen, cualquier intento de "recetas de ESTE libro" (ver
- * `recipesForBook` en libro/[id]/page.js) da un array vacío para todos los
- * libros — así que el lector sigue enseñando el PDF de siempre. Es lo
- * esperado, no un fallo de este hook.
+ * CORREGIDO el 3-ago: la mitad de este aviso ya no es verdad y decía lo
+ * contrario de lo que pasa, que es el mismo fallo que arregló el PR #107.
+ * La tabla `recipe` SÍ tiene columna de libro desde la migración
+ * `20260731210000_add_book_id_to_recipe`, y está sembrada con 149 recetas
+ * (70 del Volumen 1 y 79 del Volumen 2), así que `recipesForBook` en
+ * libro/[id]/page.js casa y el lector enseña la lista nativa, no el PDF.
+ *
+ * Lo que SÍ sigue abierto del aviso original: `getSystemRecipes` comprueba el
+ * acceso contra UN libro fijo (`books[0]`), no contra el libro/versión que se
+ * esté mirando. Con dos libros de cocina eso no se nota, pero se notará al
+ * añadir el tercero.
  *
  * Misma caché por token a nivel de módulo que useProgramAccess.js, para no
  * repetir la llamada si el lector y la ficha de receta se visitan seguidos.

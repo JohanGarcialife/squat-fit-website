@@ -258,7 +258,14 @@ function RecetaPageContent({ params }) {
               <div className="grid grid-cols-3 gap-3">
                 {macroRows.map(([label, value]) => (
                   <div key={label} className="bg-[#F8F9FC] rounded-2xl p-3 text-center min-w-0">
-                    <p className="text-[#363C98] font-extrabold text-lg leading-none">{value}</p>
+                    {/* Con la unidad. Los tres valores llegan del backend como
+                        número pelado ("33", "11.3"), así que la tarjeta ponía
+                        «33 / CARBOHIDRATOS» y no decía si eran gramos, por
+                        ración o por 100 g. Si el dato ya trae letra (alguna
+                        receta escribe «33 g»), se respeta y no se duplica. */}
+                    <p className="text-[#363C98] font-extrabold text-lg leading-none">
+                      {/^[\d.,]+$/.test(String(value).trim()) ? `${String(value).trim()} g` : value}
+                    </p>
                     <p className="text-slate-400 text-[10px] font-semibold mt-1 uppercase break-words">{label}</p>
                   </div>
                 ))}
