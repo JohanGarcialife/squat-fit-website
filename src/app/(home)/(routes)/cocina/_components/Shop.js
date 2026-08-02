@@ -464,9 +464,19 @@ export default function Shop() {
             disabledLabel={hasPermanent ? '✓ Ya lo tienes' : 'Cargando…'}
           />
 
-          {/* 4. Bundle / hero (completa). Mientras el bundle no exista en el
-              backend el botón no promete una compra que no se puede hacer:
-              se anuncia como «próximamente» y al pulsarlo sale «muy pronto». */}
+          {/* 4. Bundle / hero (completa).
+              Decisión de María (3-ago): la tarjeta se anuncia como «Mejor
+              valor» / «Lo quiero todo» aunque el producto todavía no exista en
+              el backend. Se le advirtió de la consecuencia y la aceptó: hasta
+              que el pack exista, pulsar el botón NO completa la compra, saca el
+              aviso de «disponible muy pronto» que hay en `buyBundle`.
+              Esto es un estado TRANSITORIO. Lo que falta para que sea real:
+                · crear el pack (2 libros impresos + biblioteca de por vida) a
+                  169 € — el 159 de aquí abajo es un literal de respaldo, nunca
+                  fue un precio de verdad;
+                · y que el backend sepa concederlo: hoy `pack_items` lleva un
+                  CHECK que obliga a que cada línea sea O un libro O un curso, y
+                  la biblioteca digital no es ninguna de las dos. */}
           <PricingCard
             tag="Impreso + Digital"
             tagColor={C.heroText}
@@ -478,9 +488,9 @@ export default function Shop() {
             per="+ envío"
             save={bundleSave}
             desc="Los dos libros físicos + la biblioteca digital completa y siempre actualizada, para siempre."
-            ctaLabel={bundle ? 'Lo quiero todo' : 'Muy pronto'}
+            ctaLabel="Lo quiero todo"
             ctaColor={C.hero}
-            badge={bundle ? 'Mejor valor' : 'Próximamente'}
+            badge="Mejor valor"
             selected={selectedCard === 'bundle'}
             onSelect={() => setSelectedCard('bundle')}
             onCta={buyBundle}
