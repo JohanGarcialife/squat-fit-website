@@ -5,11 +5,12 @@ import Image from "next/image";
 import Link from "next/link";
 import axios from "axios";
 import { useAuthStore } from "@/stores/auth.store";
-import { BookOpen, Lock, ArrowRight, UtensilsCrossed, Replace } from "lucide-react";
+import { BookOpen, Lock, ArrowRight, UtensilsCrossed, Replace, Flame, Clock } from "lucide-react";
 import RichProductCards from "@/app/components/RichProductCards";
 import AccessNotice from "@/app/components/AccessNotice";
 import { handleApiError } from "@/app/components/handleApiError";
 import { useProgramAccess } from "@/app/components/useProgramAccess";
+import { useSystemRecipes } from "@/app/components/useSystemRecipes";
 import { SectionCard, EmptyState } from "@/app/components/ProgramSections";
 // El clic "ver mi libro" / "probar gratis" mandaba trackRecipeEvent con
 // book_id/version_id — retirado (ver panel-cocina/libro/[id]/page.js): esa
@@ -23,6 +24,11 @@ export default function CocinaPage() {
   // Mi pauta: los menús del programa viven aquí (todo lo de comida junto).
   // Solo se enseña si el usuario tiene programa activo (advice/by-user).
   const { hasProgram } = useProgramAccess();
+  // Muestras gratuitas: el backend ya decide qué devuelve según el acceso
+  // (`RecipeService.getSystemRecipes`) — con biblioteca, todas las recetas
+  // activas; sin ella, SOLO las marcadas `is_free_sample`. Mismo hook que usan
+  // el lector del libro y la ficha de receta, así se pide una sola vez.
+  const { recipes: systemRecipes } = useSystemRecipes();
   const [books, setBooks] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -94,25 +100,23 @@ export default function CocinaPage() {
     }
   });
 
-  // Recetas de muestra gratuita: el flag lo trae (o no) el backend en cada
-  // versión — `is_free_sample`, a nivel de versión o, si no, a nivel de
-  // libro entero. Si el campo nunca llega (backend aún no desplegado), este
-  // array queda vacío y todo se comporta exactamente como hoy: la pantalla
-  // de "sin suscripción" se enseña sola, sin ninguna sección nueva encima.
-  // Ojo: esto NO decide acceso por su cuenta — solo pinta lo que el backend
-  // ya haya decidido devolver en /book/all.
-  const freeSampleVersions = books.flatMap(book => {
-    const versions = book.versions && book.versions.length > 0 ? book.versions : [book];
-    return versions
-      .filter((version) => version.is_free_sample === true || book.is_free_sample === true)
-      .map((version) => ({
-        bookId: book.id,
-        bookTitle: book.title || book.name || 'Muestra gratis',
-        versionId: version.version_id || version.id || book.id,
-        versionTitle: version.version_title || version.title || book.title,
-        versionImage: version.version_image || book.image || '/group32.png',
-      }));
-  });
+  // Recetas de muestra gratuita.
+  //
+  // Antes esto salía de `/book/all`, filtrando `is_free_sample` a nivel de
+  // versión o de libro. **Ese filtro no podía dar nada nunca**: comprobado
+  // contra el esquema, la columna `is_free_sample` existe SOLO en `recipe` y
+  // en `videos` — ni `books` ni `versions` la tienen. Como el array salía
+  // siempre vacío, `ownedVersions` se quedaba a cero y la página caía al
+  // «Aún no tienes acceso a la biblioteca», con las 8 muestras marcadas en la
+  // base de datos sin llegar jamás a la pantalla.
+  //
+  // La marca vive en la receta, así que se lee de donde vive. El backend ya
+  // devuelve solo las muestras a quien no tiene biblioteca, y se filtra
+  // igualmente por `is_free_sample` para no pintar la sección «Prueba gratis»
+  // a quien recibe el recetario entero.
+  const freeSampleRecipes = (systemRecipes || []).filter(
+    (r) => r?.is_free_sample === true,
+  );
 
   // Sin sesión: aviso de acceso (como el resto del panel), no la tienda.
   if (!token) return <AccessNotice redirect="/panel-cocina" />;
@@ -188,41 +192,54 @@ export default function CocinaPage() {
         /* --- Sin suscripción: primero las muestras gratuitas (si las hay),
             luego la tienda de siempre --- */
         <div className="py-12">
-          {freeSampleVersions.length > 0 && (
+          {freeSampleRecipes.length > 0 && (
             <div className="mb-20">
               <h2 className="text-[#3932C0] text-3xl font-bold mb-2 text-center">Prueba gratis</h2>
               <p className="text-gray-500 text-lg max-w-xl mx-auto text-center mb-10">
-                Estas recetas están abiertas para que las pruebes antes de suscribirte.
+                Estas {freeSampleRecipes.length} recetas están abiertas para que las pruebes antes de suscribirte.
               </p>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-24">
-                {freeSampleVersions.map((item, index) => (
-                  <div key={item.versionId || index} className="flex flex-col items-center">
-                    <FreeSampleBadge className="mb-3" />
-                    <h2 className="text-[#FF690B] text-3xl font-bold mb-6 text-center">{item.bookTitle}</h2>
-
-                    <div className="relative mb-6">
-                      <div className="absolute top-4 left-[-10px] w-full h-full bg-[#FFF6F0] rounded-[24px] -z-10 transform scale-105"></div>
+              {/* Rejilla de RECETAS, no de libros: son fichas pequeñas y son
+                  varias, así que caben de tres en tres en escritorio. */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                {freeSampleRecipes.map((receta, index) => (
+                  <Link
+                    key={receta.id || index}
+                    href={`/panel-cocina/receta/${receta.id}`}
+                    className="group flex flex-col rounded-[24px] overflow-hidden bg-white border border-slate-100 shadow-sm hover:shadow-lg transition-shadow"
+                  >
+                    <div className="relative aspect-4/3 overflow-hidden bg-[#FFF6F0]">
                       <Image
-                        src={getValidImageUrl(item.versionImage)}
-                        width={300}
-                        height={300}
-                        alt={`${item.bookTitle} - ${item.versionTitle}`}
-                        className="object-cover rounded-[24px]"
+                        src={getValidImageUrl(receta.image)}
+                        alt={receta.name || 'Receta de muestra'}
+                        fill
+                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                        className="object-cover group-hover:scale-105 transition-transform duration-300"
                       />
+                      <FreeSampleBadge className="absolute top-3 left-3" />
                     </div>
-
-                    <p className="text-[#FF690B] text-3xl mb-8 text-center font-normal">
-                      {item.versionTitle}
-                    </p>
-
-                    <Link
-                      href={`/panel-cocina/libro/${item.bookId}?v=${item.versionId}`}
-                    >
-                      <button className="bg-[#FF690B] text-white font-bold py-3 px-12 rounded-xl text-lg hover:bg-[#e05b08] transition-colors shadow-lg cursor-pointer">
-                        Probar gratis
-                      </button>
-                    </Link>
-                  </div>
+                    <div className="flex flex-col gap-2 p-5">
+                      {/* El endpoint devuelve `name`; `title` viene siempre a
+                          null en estas recetas, así que no se usa. */}
+                      <h3 className="text-[#3932C0] text-xl font-bold leading-snug">
+                        {receta.name || 'Receta'}
+                      </h3>
+                      <div className="flex items-center gap-4 text-sm text-gray-500">
+                        {receta.kcal && (
+                          <span className="inline-flex items-center gap-1">
+                            <Flame className="w-4 h-4 text-[#FF690B]" /> {receta.kcal} kcal
+                          </span>
+                        )}
+                        {receta.time_to_prepare && (
+                          <span className="inline-flex items-center gap-1">
+                            <Clock className="w-4 h-4 text-[#FF690B]" /> {receta.time_to_prepare} min
+                          </span>
+                        )}
+                      </div>
+                      <span className="mt-2 text-[#FF690B] font-bold group-hover:underline">
+                        Ver la receta →
+                      </span>
+                    </div>
+                  </Link>
                 ))}
               </div>
             </div>
