@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import {
   getCookieConsent,
@@ -51,6 +51,52 @@ export default function CookieBanner() {
     return () => window.removeEventListener(OPEN_PREFS_EVENT, reopen);
   }, []);
 
+  // El banner va por encima del contenido A PROPÓSITO: es una puerta de
+  // consentimiento, así que subir el z-index de lo que tapa sería el arreglo
+  // equivocado. El problema es que, siendo `fixed`, roba los píxeles de lo que
+  // haya debajo. A 375x812 eso dejaba **inpulsables** «Registrarme» (0 de 52
+  // px útiles), «Política de Privacidad» y «¿Ya tienes cuenta?» en /register,
+  // y «Empezar de nuevo» en /empieza-tu-cambio (2 de 24) — esta última sin
+  // rescate posible, porque esa pantalla mide justo el alto del viewport y no
+  // hace scroll. Antes ya se había cobrado «Acceder» y «Registro» del menú
+  // móvil (PR #95), que se arregló a mano; esto mata la familia entera.
+  //
+  // Arreglo: mientras el banner esté visible, reservarle su altura REAL al
+  // final del body. Real y no una constante porque el banner cambia mucho de
+  // tamaño: plegado ocupa ~199 px, y con «preferencias» abierto ~707 px de los
+  // 812 de un móvil.
+  //
+  // Se recalcula por DOS vías a propósito. `showPrefs` en las dependencias es
+  // la que manda: es cambio de estado de React, así que el hueco se ajusta de
+  // forma determinista justo después de repintar. El ResizeObserver es solo
+  // refuerzo para lo que React no sabe (girar el móvil, una fuente que carga
+  // tarde y recoloca el texto). No se puede depender solo de él: solo entrega
+  // en oportunidades de render, así que en una pestaña en segundo plano no
+  // dispara ni una vez.
+  const bannerRef = useRef(null);
+  useEffect(() => {
+    if (!visible) return;
+    const el = bannerRef.current;
+    if (!el) return;
+
+    const previous = document.body.style.paddingBottom;
+    const apply = () => {
+      const actual = bannerRef.current;
+      if (actual) document.body.style.paddingBottom = `${actual.offsetHeight}px`;
+    };
+    apply();
+
+    let ro;
+    if (typeof ResizeObserver !== 'undefined') {
+      ro = new ResizeObserver(apply);
+      ro.observe(el);
+    }
+    return () => {
+      ro?.disconnect();
+      document.body.style.paddingBottom = previous;
+    };
+  }, [visible, showPrefs]);
+
   const save = (choice, analyticsOn, marketingOn) => {
     saveCookieConsent({ analytics: analyticsOn, marketing: marketingOn, choice });
     setVisible(false);
@@ -60,7 +106,7 @@ export default function CookieBanner() {
   if (!visible) return null;
 
   return (
-    <div className="fixed bottom-0 inset-x-0 z-[90] p-3 sm:p-4 pointer-events-none">
+    <div ref={bannerRef} className="fixed bottom-0 inset-x-0 z-[90] p-3 sm:p-4 pointer-events-none">
       <div className="pointer-events-auto mx-auto max-w-3xl rounded-[20px] bg-white shadow-2xl ring-1 ring-[#363C98]/10 p-4 sm:p-5">
         <div className="flex flex-col gap-3">
           <p className="text-sm text-[#363C98] leading-relaxed">
