@@ -85,6 +85,48 @@ export function valorDesdeCarrito(cart) {
   return Number(total.toFixed(2));
 }
 
+/** Emisión genérica, con la misma puerta de consentimiento que `purchase`. */
+function emitir(nombre, datos) {
+  if (typeof window === 'undefined') return false;
+  if (typeof window.gtag !== 'function') return false; // sin consentimiento
+  window.gtag('event', nombre, datos);
+  return true;
+}
+
+/**
+ * `add_to_cart` — un producto entra en el carrito.
+ *
+ * No se deduplica a propósito: añadir dos veces el mismo producto son dos
+ * intenciones distintas y GA4 espera verlas. Lo que sí importa es no inventarse
+ * el importe, así que si el producto no trae precio se manda 0 y no se estima.
+ */
+export function enviarAddToCart(producto, cantidad = 1) {
+  if (!producto) return false;
+  const precio = Number(producto.price) || 0;
+  return emitir('add_to_cart', {
+    currency: 'EUR',
+    value: Number((precio * cantidad).toFixed(2)),
+    items: itemsDesdeCarrito([{ ...producto, quantity: cantidad }]),
+  });
+}
+
+/**
+ * `begin_checkout` — el cliente pasa del carrito a los datos de envío.
+ *
+ * Es el paso que faltaba para poder leer el embudo: hasta ahora solo se veía
+ * el final (`purchase`), así que un abandono en el paso de pago era
+ * indistinguible de una visita que nunca quiso comprar.
+ */
+export function enviarBeginCheckout(cart) {
+  const items = itemsDesdeCarrito(cart);
+  if (items.length === 0) return false;
+  return emitir('begin_checkout', {
+    currency: 'EUR',
+    value: valorDesdeCarrito(cart),
+    items,
+  });
+}
+
 /**
  * Emite `purchase`. Devuelve true solo si el evento ha salido de verdad, para
  * que quien llame pueda distinguir «no había consentimiento» de «ya estaba
