@@ -4,52 +4,66 @@ import { useState } from 'react';
 import { PlusIcon, MinusIcon } from '@heroicons/react/24/solid';
 
 // 1. Datos de las preguntas
-// Puedes mover esto a un archivo JSON o pasarlo como prop
+//
+// ORDEN pensado para convertir, no para documentar: primero «¿esto es para
+// mí?», que es lo que decide la compra; después qué se aprende y qué nivel
+// hace falta; y al final la logística (dónde se ven, desde dónde, qué pasa si
+// tengo dudas), que ya solo la lee quien está decidido.
+//
+// CORREGIDAS DOS RESPUESTAS QUE PROMETÍAN LO QUE NO HAY (3-ago-2026).
+// Decían «guías en PDF, plantillas de seguimiento y una comunidad de apoyo» y
+// «grupo privado (Discord/Telegram) y sesiones de Q&A en vivo». Comprobado:
+// no existe ningún Discord en el proyecto; el módulo de Telegram del backend
+// es un puente de SOPORTE con clasificación de mensajes, no una comunidad de
+// alumnos; y las sesiones en vivo son del programa Premium, grupales, no de
+// los cursos. Vender eso en una FAQ es fabricar una devolución. Se sustituye
+// por lo que el curso sí trae: clases en vídeo y test después de cada clase y
+// de cada módulo.
 const faqs = [
-  {
-    question: "¿Es presencial u online?",
-    answer:
-      "Todos mis cursos son 100% online por lo que cualquier persona con internet podrá acceder a ellos.",
-  },
   {
     question: "¿Este curso es para mí?",
     answer:
-      "Este curso es para ti si buscas mejorar tu salud, aprender a entrenar de forma eficiente y quieres ver resultados duraderos.",
+      "Si quieres entender por qué haces lo que haces —y dejar de saltar de dieta en dieta y de rutina en rutina— sí. Está pensado para quien busca mejorar su salud, aprender a entrenar de forma eficiente y sostener el resultado, no para quien busca un atajo de seis semanas.",
   },
   {
-    question: "¿Es apto para mujeres? No quiero ponerme como un hombre...",
+    question: "¿Qué nivel necesito? Nunca he entrenado en serio",
     answer:
-      "¡Totalmente! Este entrenamiento está diseñado para tonificar y fortalecer, no para hipertrofiar de forma masculina. Lograrás una figura estilizada y fuerte.",
+      "Ninguno. El curso va de menos a más y cada ejercicio trae su progresión y su regresión, así que sirve tanto si empiezas de cero como si llevas años entrenando y quieres ordenar lo que ya sabes.",
   },
   {
-    question: "¿Qué aprenderé en el curso?",
+    question: "¿Es apto para mujeres? No quiero ponerme enorme",
     answer:
-      "Aprenderás las técnicas correctas de cada ejercicio, cómo estructurar tus rutinas, principios de nutrición y a crear hábitos sostenibles.",
+      "Sí, y es la duda que más nos llega. Ponerse «enorme» no pasa por entrenar fuerza: pasa por años de trabajo específico y una alimentación dirigida a eso. Lo que consigues aquí es fuerza, tono y una figura más definida.",
   },
   {
-    question: "¿Qué nivel tiene el curso?",
+    question: "¿Qué voy a aprender exactamente?",
     answer:
-      "El curso es apto para todos los niveles, desde principiante hasta avanzado, con progresiones y regresiones para cada ejercicio.",
+      "La técnica correcta de cada ejercicio, cómo montar y progresar tus propias rutinas, los principios de nutrición que de verdad mueven la aguja y cómo construir hábitos que aguanten cuando se complica la semana.",
   },
   {
-    question: "¿Hay material de apoyo?",
+    question: "¿Qué incluye el curso?",
     answer:
-      "Sí, además de los videos, tendrás acceso a guías en PDF, plantillas de seguimiento y una comunidad de apoyo.",
+      "Las clases en vídeo, organizadas en módulos, y un test después de cada clase y al terminar cada módulo para que compruebes que lo has asimilado en vez de acumular vídeos vistos. Todo queda registrado en tu cuenta, así que sabes siempre por dónde ibas.",
   },
   {
-    question: "¿Dónde puedo ver los videos?",
+    question: "¿Es presencial u online?",
     answer:
-      "Todos los videos están alojados en nuestra plataforma privada. Podrás acceder desde tu computadora, tablet o móvil 24/7.",
+      "100 % online. Solo necesitas conexión a internet, y vas a tu ritmo: ni horarios ni clases a las que llegar tarde.",
   },
   {
-    question: "¿Qué pasa si tengo dudas?",
+    question: "¿Dónde veo los vídeos y hasta cuándo?",
     answer:
-      "Tendrás acceso a un grupo privado (Discord/Telegram) y sesiones de Q&A en vivo para resolver todas tus preguntas.",
+      "En tu cuenta de Squad Fit, desde el ordenador, la tablet o el móvil, cuando quieras. No hay que descargar nada ni instalar ninguna aplicación.",
   },
   {
-    question: "¿Puedo hacerlo si soy de fuera de España?",
+    question: "¿Puedo hacerlo si vivo fuera de España?",
     answer:
-      "¡Por supuesto! Al ser 100% online, puedes acceder desde cualquier parte del mundo con una conexión a internet.",
+      "Sí. Al ser online se accede desde cualquier país, y el contenido no depende de dónde vivas.",
+  },
+  {
+    question: "¿Y si me surge una duda por el camino?",
+    answer:
+      "Escríbenos a hola@squadfit.es y te contestamos. Si lo que buscas es que alguien revise tu caso y te lleve de la mano —pauta propia, rutina propia y seguimiento—, eso es el programa, no el curso: lo tienes en la sección Programa.",
   },
 ];
 
@@ -70,7 +84,7 @@ export default function FAQ() {
   return (
     <div className="w-full  mx-auto py-12 px-4 md:px-32">
       {/* Título */}
-      <h2 className="text-5xl lg:text-7xl font-bold text-center text-orange-500 mb-10">
+      <h2 className="text-5xl lg:text-5xl font-bold text-center text-orange-500 mb-10">
         Preguntas frecuentes
       </h2>
 
@@ -88,7 +102,7 @@ export default function FAQ() {
               aria-expanded={openIndex === index}
               aria-controls={`faq-answer-${index}`}
             >
-              <span className="text-3xl md:text-4xl font-bold text-blue-800 cursor-pointer">
+              <span className="text-3xl md:text-2xl font-bold text-blue-800 cursor-pointer">
                 {faq.question}
               </span>
               <span className="text-blue-800 cursor-pointer font-bold">
@@ -109,7 +123,7 @@ export default function FAQ() {
                   : 'max-h-0 opacity-0'
               }`}
             >
-              <p className="pt-0 pb-4 text-gray-700 text-3xl">{faq.answer}</p>
+              <p className="pt-0 pb-4 text-gray-700 text-3xl md:text-lg">{faq.answer}</p>
             </div>
           </div>
         ))}

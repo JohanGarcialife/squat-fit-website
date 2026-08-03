@@ -1,6 +1,8 @@
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
+import Link from 'next/link';
+import { handleApiError } from '@/app/components/handleApiError';
 import { ChevronLeft } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import OrderSummary from './OrderSummary';
@@ -146,6 +148,18 @@ export default function Payment(props) {
   // Cursos con tramos (15.1) sin endpoint de cobro todavía (TIER_CHECKOUT_ENDPOINT
   // en null): aviso honesto en lugar de un error críptico de Stripe.
   const [pendingBackend, setPendingBackend] = useState(false);
+  // Motivo por el que no se pudo montar el pago, TAL COMO lo explica el
+  // backend. Existía ya como `toast.error(...)`, pero un toast dura unos
+  // segundos: lo útil se esfumaba y lo que quedaba en pantalla era
+  // «No se pudo inicializar el pago seguro», que suena a web rota.
+  //
+  // El caso que lo destapó (2-ago, recorriendo la compra en navegador real):
+  // quien ya tiene un libro recibe un 400 con «Ya tienes «Libro de cocina 1»
+  // en tu biblioteca, no hace falta que lo compres otra vez». Ese mensaje
+  // está escrito a mano, en castellano y con el nombre del libro dentro
+  // —ver el comentario de book.service.ts, que da por hecho que el comprador
+  // lo lee «tal cual»—, y el cliente se quedaba sin verlo.
+  const [motivoDelFallo, setMotivoDelFallo] = useState(null);
 
   const appearance = useMemo(() => ({
     theme: 'stripe',
@@ -310,12 +324,27 @@ export default function Payment(props) {
       } catch (error) {
         console.error("Error creating payment intent", error);
         console.error("Payload sent:", JSON.stringify(payload));
+        // Sesión caducada: no es un problema del pedido, así que no se le
+        // enseña al cliente un «jwt expired» en la pantalla de pago. Se
+        // resuelve como en el resto del panel: volver a entrar y regresar
+        // aquí. (Salió probando: mi token de prueba caducó a mitad y la
+        // pantalla nueva pintaba el mensaje crudo del servidor.)
+        if (error.response?.status === 401) {
+          if (handleApiError(error, '/cart?step=2')) return;
+        }
         if (error.response?.data) {
            console.error("Server validation errors:", JSON.stringify(error.response.data));
            const serverSms = error.response.data.message || error.response.data.error;
-           toast.error(typeof serverSms === 'string' ? serverSms : JSON.stringify(serverSms));
+           const texto = typeof serverSms === 'string' ? serverSms : JSON.stringify(serverSms);
+           toast.error(texto);
+           // Solo se deja en pantalla lo que el backend escribió PARA el
+           // comprador, que es lo que manda con un 400 de regla de negocio.
+           // Un 500 trae mensajes de servidor («Internal server error»,
+           // trazas) que no le dicen nada a nadie: ahí se queda el genérico.
+           setMotivoDelFallo(error.response.status === 400 ? texto : null);
         } else {
            toast.error("Error al iniciar el pago");
+           setMotivoDelFallo(null);
         }
       } finally {
         setLoading(false);
@@ -384,10 +413,34 @@ export default function Payment(props) {
   }
 
   if (!clientSecret) {
+    // Cuando el backend explica POR QUÉ, manda su explicación: casi siempre no
+    // es un fallo técnico sino una condición del pedido («ya tienes este
+    // libro»), y decir «no se pudo inicializar el pago seguro» ahí hace pensar
+    // que la tienda está rota. Solo se cae al mensaje genérico cuando de
+    // verdad no hay explicación (red caída, 500 sin cuerpo).
     return (
-        <div className="min-h-screen bg-white flex flex-col items-center justify-center">
-            <p className="text-red-500 font-bold mb-4">No se pudo inicializar el pago seguro.</p>
-            <button onClick={() => props.setStep(2)} className="text-secondary font-bold underline">Volver</button>
+        <div className="min-h-screen bg-white flex flex-col items-center justify-center px-6 text-center">
+            {motivoDelFallo ? (
+              <>
+                <p className="text-[#3932C0] text-xl font-bold mb-2 max-w-md">{motivoDelFallo}</p>
+                <p className="text-gray-500 mb-6 max-w-md">
+                  Puedes quitarlo del carrito y seguir con el resto, o revisar lo que ya tienes en tu panel.
+                </p>
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <button onClick={() => props.setStep(1)} className="bg-[#3932C0] text-white rounded-3xl px-8 py-3 font-bold cursor-pointer hover:bg-[#3932C0]/90">
+                    Volver al carrito
+                  </button>
+                  <Link href="/panel-cocina" className="bg-gray-100 text-gray-700 rounded-3xl px-8 py-3 font-semibold hover:bg-gray-200">
+                    Ver lo que ya tengo
+                  </Link>
+                </div>
+              </>
+            ) : (
+              <>
+                <p className="text-red-500 font-bold mb-4">No se pudo inicializar el pago seguro.</p>
+                <button onClick={() => props.setStep(2)} className="text-secondary font-bold underline cursor-pointer">Volver</button>
+              </>
+            )}
         </div>
     );
   }

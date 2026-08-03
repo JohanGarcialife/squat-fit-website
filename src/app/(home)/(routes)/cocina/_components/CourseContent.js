@@ -20,7 +20,7 @@ export default function CourseContent() {
         />
 
         <div className="absolute inset-0 z-10 grid grid-cols-3 p-20 w-full gap-14">
-          <h2 className="text-6xl font-bold text-black pr-24">
+          <h2 className="text-5xl font-bold text-black pr-24">
             Qué incluye el libro
           </h2>
           <div className="flex flex-col justify-between">

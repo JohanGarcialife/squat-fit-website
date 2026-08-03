@@ -1,15 +1,61 @@
 "use client";
 
-import React, { useState, useEffect, useRef, Suspense } from "react";
+import React, { useState, useEffect, useRef, useMemo, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import axios from "axios";
 import { useAuthStore } from "@/stores/auth.store";
+import { useProgramAccess } from "@/app/components/useProgramAccess";
 import { handleApiError } from "@/app/components/handleApiError";
 import CourseTierShop from "@/app/components/CourseTierShop";
 import BrandTabs from "@/app/components/BrandTabs";
 import TestQuiz from "./_components/TestQuiz";
 import { RefreshCw, ArrowRight, AlertCircle } from "lucide-react";
+
+// ─── Interruptor de negocio: ¿Biblioteca Digital abre TODOS los cursos? ─────
+// HOY (comportamiento heredado, y con el que se DESPLIEGA esta rama): SÍ,
+// isSubscribed (JWT) — que en realidad solo significa suscripción a la
+// Biblioteca Digital, el producto de cocina/recetas — da acceso a TODOS los
+// cursos, aunque el cliente no haya comprado ninguno. Es un fallo de
+// categoría de producto (dos cosas distintas comparten un único booleano),
+// no una preferencia de diseño.
+//
+// rama fix/acceso-cursos-no-detectado: el fallo REPORTADO (un curso
+// concedido individualmente que la pantalla no reconoce) se arregla en los
+// DOS estados de este interruptor — el acceso por curso vía
+// GET /api/v1/course/by-user (ver hasCourseAccess más abajo) se SUMA
+// siempre, esté esto encendido o apagado.
+//
+// Hamlet aprobó apagarlo (que Biblioteca Digital deje de abrir cursos)
+// condicionado a dos números: cuánta gente lo usa hoy. **Medidos en
+// producción el 2-ago-2026**, y la respuesta es que no lo usa nadie:
+//
+//   · Suscripciones a Biblioteca Digital: 3 filas en toda la historia de la
+//     tabla, las TRES `expired`, y las tres de la MISMA cuenta
+//     (johan.garcia165@gmail.com). **Cero activas.**
+//   · `isSubscribed` del JWT sale exclusivamente de esa tabla, exigiendo
+//     `status='active'` y fin en el futuro (`checkActiveDigitalLibrarySubscription`
+//     en user.repository.ts). Con cero filas que cumplan, hoy es `false` para
+//     todo el mundo.
+//
+// O sea que este interruptor estaba **inerte**: `digitalLibraryGrantsAllCourses`
+// es `isSubscribed && ESTA_CONSTANTE`, así que ya valía false para todos.
+// Apagarlo no le quita el acceso a nadie hoy y evita que el próximo cliente
+// que compre la suscripción de recetas se lleve gratis los 18 cursos de pago.
+//
+//   true  (como se desplegó del 31-jul al 2-ago):
+//     Biblioteca Digital sigue abriendo todos los cursos, exactamente igual
+//     que antes de esta rama. Cero cambios de comportamiento para nadie.
+//   false (ACTIVO desde el 2-ago, con los dos números ya medidos):
+//     Biblioteca Digital deja de abrir cursos. El acceso a "Mis cursos"
+//     depende EXCLUSIVAMENTE de lo que el cliente compró o le concedieron
+//     (course/by-user). Biblioteca Digital sigue intacta en "Mi cocina"
+//     (panel-cocina/page.js): ese uso es el correcto y este interruptor NO
+//     lo toca.
+//
+// Para encender: cambiar aquí y desplegar en Vercel (front-only, no
+// necesita coordinarse con un despliegue de Cloud Run).
+const DIGITAL_LIBRARY_UNLOCKS_COURSES = false;
 
 // ─── TEST VIDEO (Bunny.net iframe) ───────────────────────────────────────────
 // Remove this constant once the backend is returning real video_url fields
@@ -110,6 +156,28 @@ function CursosPageContent() {
   const courseIdParam = searchParams.get("id");
 
   const { token, isSubscribed } = useAuthStore();
+
+  // ── Cursos que este usuario posee de verdad (compra individual, IAP o
+  //    concesión manual del back office) — GET /api/v1/course/by-user vía
+  //    el MISMO hook que ya usan el Sidebar y Mi programa/Mi entreno/Mi
+  //    cocina (useProgramAccess.js). No se monta una llamada nueva: se
+  //    reutiliza (y su caché por token) para no duplicar la petición.
+  const { courses: ownedCourses, checked: ownedCoursesChecked } = useProgramAccess();
+  const ownedCourseIds = useMemo(
+    () => new Set((ownedCourses || []).map((c) => c.id)),
+    [ownedCourses]
+  );
+
+  // ¿Biblioteca Digital abre TODOS los cursos en esta sesión? Ver el
+  // interruptor DIGITAL_LIBRARY_UNLOCKS_COURSES arriba: hoy siempre true,
+  // así que esto equivale exactamente a `isSubscribed` como era antes.
+  const digitalLibraryGrantsAllCourses = isSubscribed && DIGITAL_LIBRARY_UNLOCKS_COURSES;
+
+  // ¿Tiene el usuario acceso a ESTE curso en concreto? Suma dos fuentes
+  // independientes — nunca resta: si CUALQUIERA de las dos dice que sí, hay
+  // acceso.
+  const hasCourseAccess = (courseId) =>
+    digitalLibraryGrantsAllCourses || (!!courseId && ownedCourseIds.has(courseId));
 
   // ── Vista: 'catalog' o 'player' ─────────────────────────────────────────────
   const [view, setView] = useState('catalog');
@@ -212,12 +280,15 @@ function CursosPageContent() {
         setModules(modulesArray);
 
         // Qué clase se abre automáticamente:
-        // - Con suscripción/curso comprado: la primera del temario, EXACTO
-        //   como siempre (sin cambios para quien ya tiene acceso).
-        // - Sin suscripción: NUNCA por posición. Solo la clase que el
-        //   backend marcó video_is_free_sample=true puede reproducirse; si
-        //   ninguna lo está, no se selecciona nada (candado, igual que hoy).
-        const videoToOpen = isSubscribed
+        // - Con acceso a ESTE curso (Biblioteca Digital si el interruptor
+        //   la deja abrir cursos, O course/by-user): la primera del
+        //   temario, EXACTO como siempre para quien ya tenía acceso.
+        // - Sin acceso a este curso: NUNCA por posición. Solo la clase que
+        //   el backend marcó video_is_free_sample=true puede reproducirse;
+        //   si ninguna lo está, no se selecciona nada (candado, igual que
+        //   hoy).
+        const courseAccess = hasCourseAccess(course.id);
+        const videoToOpen = courseAccess
           ? videos[0]
           : videos.find((v) => v.video_is_free_sample === true) || null;
 
@@ -295,7 +366,27 @@ function CursosPageContent() {
   // Para cada curso, ¿tiene alguna clase marcada como muestra gratis en su
   // currícula pública? Detalle no disponible → se trata como "sin muestra"
   // (fallback seguro: nunca se inventa acceso).
+  //
+  // Desde el 3-ago `GET course/all` devuelve `free_sample_count`, así que la
+  // respuesta ya viene en la lista y esto no cuesta ni una petición. Antes se
+  // pedía `course/detail/:id` UNA VEZ POR CURSO —hoy 6— en cada carga de «Mis
+  // cursos», y encima en la pantalla que ve justo quien todavía no ha comprado:
+  // la primera impresión del producto era la más lenta.
+  //
+  // Se mantiene el camino viejo como respaldo por si esta instancia habla con
+  // un backend anterior: si UN solo curso no trae el recuento, se pregunta por
+  // todos como antes. Mezclar los dos daría un mapa a medias, y aquí un dato a
+  // medias significa esconderle a alguien una clase que sí podía ver.
   const fetchFreeSampleInfoFor = async (list, headers, API) => {
+    const todosTraenRecuento =
+      Array.isArray(list) &&
+      list.length > 0 &&
+      list.every((c) => typeof c?.free_sample_count === 'number');
+
+    if (todosTraenRecuento) {
+      return Object.fromEntries(list.map((c) => [c.id, c.free_sample_count > 0]));
+    }
+
     const entries = await Promise.all(
       list.map(async (course) => {
         try {
@@ -325,8 +416,10 @@ function CursosPageContent() {
         setCourseList(list);
         setNoAccess(false);
 
-        if (isSubscribed) {
-          // ── Con acceso: comportamiento EXACTO de siempre ────────────────
+        if (digitalLibraryGrantsAllCourses) {
+          // ── Biblioteca Digital abre todo: comportamiento EXACTO de
+          //    siempre (mismo código que antes de esta rama, solo cambia
+          //    el nombre de la condición) ─────────────────────────────
           if (courseIdParam) {
             const target = list.find((c) => c.id === courseIdParam) || list[0];
             openCourse(target);
@@ -334,16 +427,24 @@ function CursosPageContent() {
           // Progreso real de cada curso (vídeos vistos en su detalle).
           fetchProgressFor(list, headers, API);
         } else {
-          // ── Sin acceso: hay que saber ANTES de pintar nada si existe al
-          //    menos una muestra gratis en TODO el catálogo. Si no existe
-          //    ninguna (hoy, sin el campo desplegado), la sección se
-          //    comporta exactamente igual que antes de este cambio.
+          // ── Sin acceso global: hay que saber ANTES de pintar nada si
+          //    existe al menos una muestra gratis en TODO el catálogo (si
+          //    no existe ninguna, hoy sin el campo desplegado, esta rama se
+          //    comporta igual que antes) Y, NUEVO, qué cursos posee el
+          //    usuario de verdad (course/by-user) — puramente aditivo: si
+          //    no posee ninguno, `owned` queda vacío y nada cambia.
+          const owned = list.filter((c) => ownedCourseIds.has(c.id));
+          if (owned.length > 0) {
+            // Progreso SOLO de los cursos que sí son suyos.
+            fetchProgressFor(owned, headers, API);
+          }
+
           const map = await fetchFreeSampleInfoFor(list, headers, API);
           setSampleMap(map);
           const anySample = Object.values(map).some(Boolean);
           setCatalogHasFreeSamples(anySample);
 
-          if (anySample && courseIdParam) {
+          if (courseIdParam && (anySample || owned.length > 0)) {
             const target = list.find((c) => c.id === courseIdParam) || list[0];
             if (target) openCourse(target);
           }
@@ -367,14 +468,24 @@ function CursosPageContent() {
   // Se pide siempre que haya token: /course/all y /course/detail/:id son
   // públicos, así que un usuario sin compras también puede ver el catálogo
   // (con sus muestras gratis, si las hay).
+  //
+  // Espera a `ownedCoursesChecked` (course/by-user, vía useProgramAccess)
+  // antes de decidir catálogo/tienda: sin esto, un cliente con un curso
+  // suelto vería un parpadeo de "sin acceso" mientras esa llamada aparte
+  // todavía está en vuelo, y se corregiría sola medio segundo después. Con
+  // Biblioteca Digital (digitalLibraryGrantsAllCourses=true, el caso de
+  // hoy) el resultado no depende de course/by-user, pero esperar tampoco
+  // cambia nada para ese caso: solo añade el mismo medio segundo de spinner
+  // que ya tarda advice/by-user en el Sidebar.
   useEffect(() => {
-    if (token) {
-      fetchCourseList();
-    } else {
+    if (!token) {
       setLoading(false);
+      return;
     }
+    if (!ownedCoursesChecked) return;
+    fetchCourseList();
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [token, isSubscribed]);
+  }, [token, isSubscribed, ownedCoursesChecked]);
 
   // ── Cuando cambia ?id= mientras ya hay cursos cargados ───────────────────────
   useEffect(() => {
@@ -395,10 +506,11 @@ function CursosPageContent() {
     const videoTitle = video.video_title || video.title;
 
     // Nunca se abre desde el front una clase que el usuario no tiene: sin
-    // suscripción/compra, solo se puede reproducir la clase que el backend
-    // marcó video_is_free_sample=true. El resto ni siquiera llega a pedir
+    // acceso a ESTE curso (ni Biblioteca Digital-si-aplica ni course/by-user),
+    // solo se puede reproducir la clase que el backend marcó
+    // video_is_free_sample=true. El resto ni siquiera llega a pedir
     // watch-video (aunque lo pidiera, el backend respondería 403).
-    if (!isSubscribed && video.video_is_free_sample !== true) {
+    if (!hasCourseAccess(activeCourse?.id) && video.video_is_free_sample !== true) {
       return;
     }
 
@@ -432,6 +544,14 @@ function CursosPageContent() {
     setVideoLoading(false);
   };
 
+  // ¿Tiene acceso al curso que está viendo AHORA en el player? Gobierna el
+  // candado por vídeo, la apertura automática y los CTA de compra dentro
+  // del reproductor. Con activeCourse aún sin fijar (instante inicial),
+  // usa el mismo valor por defecto que el resto de la pantalla.
+  const activeCourseAccess = activeCourse
+    ? hasCourseAccess(activeCourse.id)
+    : digitalLibraryGrantsAllCourses;
+
   // ── Métricas de progreso ──────────────────────────────────────────────────────
   let totalVideos = 0, completedVideos = 0;
   modules.forEach((mod) => mod.videos.forEach((v) => {
@@ -450,11 +570,15 @@ function CursosPageContent() {
     );
   }
 
-  // Pantalla de venta pura (sin cambios respecto a como era): solo cuando
-  // falló la carga de verdad, o cuando no hay NINGUNA muestra gratis en todo
-  // el catálogo (hoy, sin el campo video_is_free_sample desplegado, es
-  // siempre este caso — no-regresión más importante de este cambio).
-  const showPaywallScreen = noAccess || (!isSubscribed && !catalogHasFreeSamples);
+  // Pantalla de venta pura: solo cuando falló la carga de verdad, o cuando
+  // no hay NINGUNA muestra gratis en todo el catálogo Y el usuario no posee
+  // ni un solo curso (ni por Biblioteca Digital si el interruptor la deja
+  // abrir cursos, ni por course/by-user). El añadido de ownedCourseIds es
+  // la mitad "aditiva" de la rama fix/acceso-cursos-no-detectado: antes,
+  // alguien con un curso comprado suelto y sin Biblioteca Digital caía
+  // siempre aquí, viera lo que viera /course/all.
+  const showPaywallScreen =
+    noAccess || (!digitalLibraryGrantsAllCourses && !catalogHasFreeSamples && ownedCourseIds.size === 0);
   if (showPaywallScreen) {
     return (
       <div className="flex-1 w-full max-w-7xl mx-auto p-6 md:p-12 min-h-screen">
@@ -489,21 +613,36 @@ function CursosPageContent() {
     );
   }
 
-  // ── Vista: Catálogo de cursos (sin suscripción, pero con muestras) ───────────
-  // Solo se llega aquí cuando catalogHasFreeSamples es true (si no, ya se
-  // devolvió la pantalla de venta de arriba). No hay pestañas de progreso:
-  // sin haber comprado nada, "en progreso/pendiente/completado" no aplica.
-  if (view === 'catalog' && !isSubscribed) {
+  // ── Vista: Catálogo SIN acceso global (Biblioteca Digital no abre todo,
+  //    o no está suscrito) ──────────────────────────────────────────────────
+  // Se llega aquí en dos casos, en la MISMA pantalla, pieza a pieza por
+  // curso (estado mixto):
+  //   - catalogHasFreeSamples y ownedCourseIds vacío: el caso de siempre,
+  //     sin ningún cambio (todas las tarjetas se comportan igual que antes
+  //     de esta rama: candado o "clase de muestra").
+  //   - ownedCourseIds NO vacío (NUEVO): además de lo anterior, los cursos
+  //     que el usuario sí posee (course/by-user) se pintan abiertos, con su
+  //     progreso si ya se calculó. Antes de esta rama este caso ni existía:
+  //     todo el mundo sin Biblioteca Digital caía en la pantalla de venta.
+  // No hay pestañas de progreso globales: con acceso parcial, "en
+  // progreso/pendiente/completado" del catálogo entero no tiene sentido
+  // (esas pestañas siguen siendo solo de la vista con acceso completo, más
+  // abajo, intacta).
+  if (view === 'catalog' && !digitalLibraryGrantsAllCourses) {
     return (
       <div className="w-full max-w-6xl mx-auto p-6 md:p-12 min-h-screen">
         <h1 className="text-[#3932C0] text-5xl font-bold mb-4">Mis cursos</h1>
         <p className="text-gray-400 text-lg mb-10">
-          Prueba gratis la clase de muestra de cada curso, o consigue el acceso completo.
+          {ownedCourseIds.size > 0
+            ? 'Aquí tienes tus cursos. Prueba gratis la clase de muestra de los demás, o consigue el acceso completo.'
+            : 'Prueba gratis la clase de muestra de cada curso, o consigue el acceso completo.'}
         </p>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {courseList.map((course) => {
-            const hasSample = !!sampleMap[course.id];
+            const owned = hasCourseAccess(course.id);
+            const hasSample = !owned && !!sampleMap[course.id];
+            const progress = owned ? progressMap[course.id] : null;
             return (
               <button
                 key={course.id}
@@ -522,11 +661,15 @@ function CursosPageContent() {
                       <span className="text-6xl">🎓</span>
                     </div>
                   )}
-                  {hasSample && (
+                  {owned ? (
+                    <span className="absolute top-3 left-3 rounded-full bg-[#3932C0] text-white text-xs font-bold px-3 py-1 shadow">
+                      Tu curso
+                    </span>
+                  ) : hasSample ? (
                     <span className="absolute top-3 left-3 rounded-full bg-[#22C55E] text-white text-xs font-bold px-3 py-1 shadow">
                       Clase de muestra gratis
                     </span>
-                  )}
+                  ) : null}
                 </div>
 
                 <div className="p-6">
@@ -537,11 +680,22 @@ function CursosPageContent() {
                   {course.subtitle && (
                     <p className="text-gray-400 text-sm mb-4 line-clamp-2">{course.subtitle}</p>
                   )}
+                  {owned && progress != null && (
+                    <div className="flex items-center gap-3 mt-3">
+                      <div className="flex-1 bg-[#FFF6F0] rounded-full h-2.5">
+                        <div
+                          className="bg-[#FF690B] h-2.5 rounded-full transition-all duration-500"
+                          style={{ width: `${progress}%` }}
+                        />
+                      </div>
+                      <span className="text-[#FF690B] font-bold text-xs whitespace-nowrap">{progress}%</span>
+                    </div>
+                  )}
                   <p
                     className="text-sm font-semibold mt-3"
-                    style={{ color: hasSample ? '#22C55E' : '#9CA3AF' }}
+                    style={{ color: owned ? '#3932C0' : hasSample ? '#22C55E' : '#9CA3AF' }}
                   >
-                    {hasSample ? 'Ver clase gratis' : 'Consíguelo para ver el temario'}
+                    {owned ? 'Continuar curso' : hasSample ? 'Ver clase gratis' : 'Consíguelo para ver el temario'}
                   </p>
                 </div>
               </button>
@@ -711,8 +865,8 @@ function CursosPageContent() {
         <>
           {/* Video Player */}
           <div ref={playerRef}>
-            {!selectedVideo && !isSubscribed ? (
-              // Sin suscripción y sin ninguna clase de muestra en este curso:
+            {!selectedVideo && !activeCourseAccess ? (
+              // Sin acceso a ESTE curso y sin ninguna clase de muestra en él:
               // igual que hoy, no hay nada que reproducir hasta comprarlo.
               <div className="w-full aspect-video rounded-[20px] bg-gray-100 flex flex-col items-center justify-center mb-8 shadow-lg gap-3 px-6 text-center">
                 <p className="text-[#363C98] font-semibold text-lg">Todavía no tienes acceso a este curso</p>
@@ -790,7 +944,7 @@ function CursosPageContent() {
           )}
 
           {/* Progress Card: solo tiene sentido con acceso al curso */}
-          {isSubscribed && (
+          {activeCourseAccess && (
             <div className="bg-white border-2 border-gray-100 rounded-[20px] p-6 mb-12 shadow-sm">
               <div className="flex flex-col md:flex-row md:items-center space-y-2 md:space-y-0 md:space-x-4">
                 <span className="text-[#FF690B] font-bold text-lg whitespace-nowrap">
@@ -806,8 +960,8 @@ function CursosPageContent() {
             </div>
           )}
 
-          {/* CTA de compra: sin suscripción, el resto del temario está cerrado */}
-          {!isSubscribed && (
+          {/* CTA de compra: sin acceso a este curso, el resto del temario está cerrado */}
+          {!activeCourseAccess && (
             <div className="mb-12 rounded-2xl border-2 border-[#FF690B]/30 bg-[#FFF6F0] px-6 py-5 flex flex-col sm:flex-row items-center justify-between gap-4">
               <div>
                 <p className="text-[#3932C0] font-bold text-lg">¿Te está gustando?</p>
@@ -851,12 +1005,13 @@ function CursosPageContent() {
                         {mod.videos.map((video, vIdx) => {
                           const isVideoComplete = video.views?.is_viewed;
                           const isActive = selectedVideo?.id === (video.video_id || video.id);
-                          // Sin suscripción, solo la clase marcada por el backend se
-                          // puede abrir; el resto queda cerrada (candado, sin onClick).
+                          // Sin acceso a ESTE curso, solo la clase marcada por el
+                          // backend se puede abrir; el resto queda cerrada (candado,
+                          // sin onClick).
                           const isFreeSample = video.video_is_free_sample === true;
                           // El placeholder de "contenido próximamente" no es una
                           // clase real: no se bloquea con el candado de compra.
-                          const isLocked = !isSubscribed && !isFreeSample && video.video_id !== "placeholder";
+                          const isLocked = !activeCourseAccess && !isFreeSample && video.video_id !== "placeholder";
                           return (
                             <div
                               key={video.video_id || vIdx}
@@ -875,7 +1030,7 @@ function CursosPageContent() {
                                 <span className={`font-medium text-base ${isLocked ? "text-gray-400" : isActive ? "text-[#3932C0]" : "text-[#FF690B]"}`}>
                                   {video.video_title || video.title}
                                 </span>
-                                {!isSubscribed && isFreeSample && (
+                                {!activeCourseAccess && isFreeSample && (
                                   <span className="rounded-full bg-[#22C55E]/10 text-[#22C55E] text-xs font-bold px-2 py-0.5 whitespace-nowrap">
                                     Muestra gratis
                                   </span>

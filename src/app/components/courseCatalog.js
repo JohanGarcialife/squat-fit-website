@@ -100,6 +100,34 @@ export const LOCAL_CATALOG = [
 
 const SUFFIX_RE = /\s*\((mensual|trimestral|anual|permanente)\)\s*$/i;
 
+/**
+ * ¿Está este curso entre los que ya tiene el usuario?
+ *
+ * `courses` es lo que devuelve `GET /course/by-user` (lo trae useProgramAccess).
+ * El título de allí puede venir con el tramo pegado —«Fuerte y Definid@
+ * (anual)»— así que se le quita el sufijo antes de comparar.
+ *
+ * DELIBERADAMENTE ESTRICTO: igualdad exacta del nombre base normalizado, nada
+ * de «incluye». Un falso positivo aquí le dice a alguien que ya tiene algo que
+ * no tiene, y eso frena una venta; un falso negativo solo deja las cosas como
+ * están hoy. Ante la duda, que no avise.
+ */
+const normalizaNombre = (s) =>
+  String(s || '')
+    .replace(SUFFIX_RE, '')
+    .trim()
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '');
+
+export function usuarioYaTiene(courses, baseName) {
+  const buscado = normalizaNombre(baseName);
+  if (!buscado) return false;
+  return (courses || []).some(
+    (c) => normalizaNombre(c?.title || c?.name) === buscado,
+  );
+}
+
 // Agrupa el catálogo por producto base. Acepta DOS shapes:
 //  · el REAL del backend desplegado (verificado 21-jul-2026): filas ya
 //    agrupadas {base, area, tiers: [{id, name, tier, price, billing_period,
@@ -350,14 +378,23 @@ export async function createTierCheckout(item, { token, saveCard = false } = {})
 export const SESSION_STATUS_ENDPOINT = `${API_BASE}/api/v1/catalog/checkout/session-status`;
 
 export async function verifyCheckoutSession(sessionId) {
-  if (!sessionId) return { paid: false };
+  if (!sessionId) return { paid: false, amountTotal: null, currency: null };
   try {
     const res = await fetch(`${SESSION_STATUS_ENDPOINT}?session_id=${encodeURIComponent(sessionId)}`);
-    if (!res.ok) return { paid: false };
+    if (!res.ok) return { paid: false, amountTotal: null, currency: null };
     const data = await res.json();
-    return { paid: Boolean(data?.paid) };
+    // `amount_total` y `currency` los añadió el backend el 2-ago (PR #101 de
+    // SquatFit): es el importe REAL cobrado por Stripe, ya en euros, con el
+    // envío y los cupones dentro. La medición de GA4 lo prefiere al subtotal
+    // del carrito, que se queda corto. Si el backend aún no los mandara
+    // —revisión antigua—, llegan como null y quien llama usa su respaldo.
+    return {
+      paid: Boolean(data?.paid),
+      amountTotal: typeof data?.amount_total === 'number' ? data.amount_total : null,
+      currency: typeof data?.currency === 'string' ? data.currency : null,
+    };
   } catch {
     // Red caída: no se puede confirmar, así que NO se trata como pagado.
-    return { paid: false };
+    return { paid: false, amountTotal: null, currency: null };
   }
 }

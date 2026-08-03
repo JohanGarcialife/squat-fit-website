@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -17,6 +17,12 @@ import Payment from "../../_components/Payment";
 import PaymentSuccess from "../../_components/PaymentSuccess";
 import { markLeavingCart } from "@/app/components/CartScrollRestore";
 import { verifyCheckoutSession } from "@/app/components/courseCatalog";
+import {
+  enviarPurchase,
+  enviarBeginCheckout,
+  itemsDesdeCarrito,
+  valorDesdeCarrito,
+} from "@/app/components/ga4Ecommerce";
 
 export default function CartPage() {
   const router = useRouter();
@@ -34,6 +40,16 @@ export default function CartPage() {
   // gracias — antes `?success=true` bastaba por sí solo para vaciar el
   // carrito y mostrar «pago completado» sin comprobar nada.
   const [verifyingPayment, setVerifyingPayment] = useState(false);
+
+  // `begin_checkout` se emite UNA vez por visita: al carrito se puede volver
+  // (botón «Volver» del paso 2), y cada ida y vuelta no es un checkout nuevo.
+  const beginCheckoutEmitido = useRef(false);
+  const emitirBeginCheckout = () => {
+    if (beginCheckoutEmitido.current) return;
+    if (enviarBeginCheckout(useCartStore.getState().cart)) {
+      beginCheckoutEmitido.current = true;
+    }
+  };
 
   // Carrito 3.3: al salir de /cart (atrás o enlaces de volver) se marca la
   // salida para que la página anterior restaure su posición de scroll.
@@ -55,7 +71,21 @@ export default function CartPage() {
     const paymentIntentSecret = params.get('payment_intent_client_secret');
     const redirectStatus = params.get('redirect_status');
 
-    const finishAsPaid = () => {
+    // `transactionId` es obligatorio para medir: es lo que evita que una
+    // recarga de la pantalla de gracias cuente la venta dos veces. Se lee el
+    // carrito ANTES de vaciarlo, que es lo único que queda del pedido en el
+    // navegador al volver de Stripe.
+    const finishAsPaid = (transactionId, importeReal = null, moneda = null) => {
+      const comprado = useCartStore.getState().cart;
+      // El importe bueno es el que confirma Stripe (`amount_total`): trae el
+      // envío y los cupones dentro. El subtotal del carrito queda de respaldo
+      // por si esa respuesta no lo trajera, y entonces declara de menos.
+      enviarPurchase({
+        transactionId,
+        items: itemsDesdeCarrito(comprado),
+        value: importeReal ?? valorDesdeCarrito(comprado),
+        currency: moneda || 'EUR',
+      });
       setSuccess(true);
       setStep(3); // Render the success screen
       useCartStore.getState().clearCart();
@@ -67,9 +97,9 @@ export default function CartPage() {
     // pagado — un `?success=true` suelto en la URL ya no basta.
     if (sessionId) {
       setVerifyingPayment(true);
-      verifyCheckoutSession(sessionId).then(({ paid }) => {
+      verifyCheckoutSession(sessionId).then(({ paid, amountTotal, currency }) => {
         setVerifyingPayment(false);
-        if (paid) finishAsPaid();
+        if (paid) finishAsPaid(sessionId, amountTotal, currency);
         // Si no está pagada, se deja el carrito intacto: mejor que el
         // cliente reintente el pago a que vea una "compra completada" falsa.
       });
@@ -92,7 +122,7 @@ export default function CartPage() {
         return loadStripe(pk).then((stripe) =>
           stripe.retrievePaymentIntent(paymentIntentSecret).then(({ paymentIntent }) => {
             setVerifyingPayment(false);
-            if (paymentIntent?.status === 'succeeded') finishAsPaid();
+            if (paymentIntent?.status === 'succeeded') finishAsPaid(paymentIntent.id);
           }),
         );
       }).catch(() => setVerifyingPayment(false));
@@ -104,6 +134,7 @@ export default function CartPage() {
     // abajo devuelve al paso 1 si no hay sesión.
     if (params.get('step') === '2') {
       setStep(2);
+      emitirBeginCheckout();
     }
   }, []);
 
@@ -116,6 +147,7 @@ export default function CartPage() {
       setNeedsAccess(true);
       return;
     }
+    if (nextStep === 2) emitirBeginCheckout();
     setNeedsAccess(false);
     setStep(nextStep);
   };

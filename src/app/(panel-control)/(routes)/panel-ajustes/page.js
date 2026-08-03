@@ -403,9 +403,17 @@ export default function AjustesPage() {
                             {Number(s.amount).toFixed(2)} {s.currency ? s.currency.toUpperCase() : '€'}
                           </span>
                         )}
-                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase ${STATUS_STYLE[s.status] || 'bg-slate-100 text-slate-500'}`}>
-                          {s.status}
-                        </span>
+                        {/* Sin estado, sin badge. El backend devuelve `null`
+                            cuando no puede resolverlo, y aquí no se pinta nada:
+                            antes salía la palabra «DESCONOCIDA» en mayúsculas
+                            junto a una suscripción de pago, que es peor que no
+                            decir nada. El resto de la tarjeta —nombre, tipo y
+                            fecha de renovación— sigue siendo bueno y se ve. */}
+                        {s.status && (
+                          <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase ${STATUS_STYLE[s.status] || 'bg-slate-100 text-slate-500'}`}>
+                            {s.status}
+                          </span>
+                        )}
                       </div>
                     </div>
                     {(s.status === 'activa' || s.status === 'en pausa') && (

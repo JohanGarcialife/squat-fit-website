@@ -31,7 +31,11 @@ export default function HeroSection() {
   <p className='text-secondary  lg:text-lg'>Vidas cambiadas</p>
 </div>
 <div className='flex flex-col items-center justify-center text-center'>
-  <CountUp value={1800000} step={10000} format={(v) => { const n = Math.round(v); return n >= 1e6 ? `+${parseFloat((n/1e6).toFixed(2))}M` : n >= 1000 ? `+${Math.round(n/1000)}K` : `+${n}`; }} className='text-3xl lg:text-5xl font-bold text-secondary' />
+  {/* Un decimal SIEMPRE, y sin parseFloat. Con dos decimales la cuenta pasaba
+      por «+1.26M» (6 caracteres) y terminaba en «+1.8M» (5): era el único de
+      los tres que cambiaba de anchura a mitad de la animación, y el que movía
+      la foto. Ahora va de «+1.3M» a «+1.8M», siempre 5. */}
+  <CountUp value={1800000} step={10000} format={(v) => { const n = Math.round(v); return n >= 1e6 ? `+${(n/1e6).toFixed(1)}M` : n >= 1000 ? `+${Math.round(n/1000)}K` : `+${n}`; }} className='text-3xl lg:text-5xl font-bold text-secondary' />
   <p className='text-secondary  lg:text-lg'>Seguidores en redes</p>
 </div>
 <div className='flex flex-col items-center justify-center text-center'>

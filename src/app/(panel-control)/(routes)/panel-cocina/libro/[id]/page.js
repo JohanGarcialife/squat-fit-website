@@ -1,16 +1,52 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import dynamic from "next/dynamic";
-import { ChevronLeft, ChevronRight, Link as LinkIcon, Menu } from "lucide-react";
+import { ChevronLeft, ChevronRight, Clock, Flame, Link as LinkIcon, Menu, Search, Users } from "lucide-react";
 import { BookIndexSidebar } from "@/app/(panel-control)/(routes)/panel-control/_components/Sidebar";
 import { useAuthStore } from "@/stores/auth.store";
 import AccessNotice from "@/app/components/AccessNotice";
 import { handleApiError } from "@/app/components/handleApiError";
+import { useSystemRecipes } from "@/app/components/useSystemRecipes";
+import { trackRecipeEvent } from "@/app/components/recipeMetrics";
+import FreeSampleBadge from "@/app/components/FreeSampleBadge";
 import axios from "axios";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://squatfit-api-cyrc2g3zra-no.a.run.app';
+
+// Sin imagen real, mismo criterio que el resto de Mi cocina.
+function getValidImageUrl(url) {
+  if (!url) return '/group32.png';
+  if (url.startsWith('http')) return url;
+  return url.startsWith('/') ? url : `/${url}`;
+}
+
+// Relación libro↔receta: YA EXISTE y este lector ya está en uso (2-ago-2026).
+//
+// El comentario anterior decía que la relación «TODAVÍA NO EXISTE» y que por
+// eso esto «siempre devuelve un array vacío». Las dos cosas eran ciertas el
+// 31-jul y dejaron de serlo en dos pasos: la migración
+// `20260731210000_add_book_id_to_recipe` creó la columna, y
+// `20260802090000_seed_recipe_book_id` la sembró con 149 recetas (70 del
+// Volumen 1 y 79 del Volumen 2). `recipe/system` devuelve ya el `book_id`
+// relleno, así que este filtro casa y el `if (nativas.length > 0)` de más
+// abajo enseña la vista moderna en vez del PDF.
+//
+// Verificado en producción el 2-ago abriendo «Libro de cocina 2» con una
+// cuenta SIN biblioteca: salen sus 5 recetas de muestra en tarjetas, y ni
+// rastro del PDF.
+//
+// Se dejan los tres nombres de campo (`book_id`, `version_id`,
+// `book_version_id`) a propósito: el que funciona hoy es el primero, y los
+// otros dos cuestan nada y cubren que algún día se enlace por versión.
+function recipesForBook(recipes, bookId, versionId) {
+  if (!Array.isArray(recipes)) return [];
+  return recipes.filter(
+    (r) => r.book_id === bookId || r.version_id === versionId || r.book_version_id === versionId,
+  );
+}
 
 // Book index config — fallback mock index in case backend has no content
 const fallbackBookIndex = [
@@ -28,6 +64,27 @@ const fallbackBookIndex = [
   { title: 'Cierre',              icon: '🤍', page: 12 },
 ];
 
+// Las calorías llegan del backend como número pelado ("210"), porque hoy
+// `recipe/system` mapea `recipe.description as kcal` (ver recipe.repository.ts).
+// Mismo criterio que la ficha de receta: si es solo dígitos, se le pone la
+// unidad; si ya viene con texto, se respeta tal cual.
+function formatKcal(kcal) {
+  if (kcal === null || kcal === undefined) return null;
+  const text = String(kcal).trim();
+  if (!text) return null;
+  return /^\d+$/.test(text) ? `${text} kcal` : text;
+}
+
+// Tiempo total de la receta. 19 de las 149 del recetario no traen ninguno de
+// los dos (así vienen del origen), y en esas no se pinta el reloj en vez de
+// enseñar un «0 min» que no significa nada.
+function totalMinutos(r) {
+  const prep = Number(r?.time_to_prepare) || 0;
+  const coccion = Number(r?.time_to_cook) || 0;
+  const total = prep + coccion;
+  return total > 0 ? `${total} min` : null;
+}
+
 // Dynamically import the PdfViewer so it doesn't run on the server
 const PdfViewer = dynamic(() => import("./_components/PdfViewer"), { ssr: false });
 
@@ -37,7 +94,17 @@ export default function BookReaderPage({ params, searchParams }) {
   const versionId = resolvedSearch?.v || null;
 
   const { token } = useAuthStore();
-  
+
+  // Recetas nativas de este libro (si las hay). Se piden en paralelo con el
+  // libro/PDF de siempre — mientras no exista relación libro↔receta en el
+  // backend, `nativas` queda vacío y este hook no cambia nada de lo de abajo.
+  const { checked: recipesChecked, recipes } = useSystemRecipes();
+  const nativas = useMemo(
+    () => recipesForBook(recipes, bookId, versionId),
+    [recipes, bookId, versionId],
+  );
+  const [busquedaNativa, setBusquedaNativa] = useState('');
+
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [numPages, setNumPages] = useState(null);
   const [pageNumber, setPageNumber] = useState(1);
@@ -49,6 +116,9 @@ export default function BookReaderPage({ params, searchParams }) {
   const [versionTitle, setVersionTitle] = useState('');
   const [pdfFile, setPdfFile] = useState(null);
   const [indexes, setIndexes] = useState([]);
+  // Muestra gratuita: el flag lo trae (o no) /book/by-id, a nivel de versión
+  // o de libro. Si nunca llega, se queda en `false` — no cambia nada más.
+  const [isFreeSample, setIsFreeSample] = useState(false);
 
   useEffect(() => {
     async function loadBook() {
@@ -89,6 +159,7 @@ export default function BookReaderPage({ params, searchParams }) {
 
         if (version) {
           setVersionTitle(version.version_title || version.title || '');
+          setIsFreeSample(version.is_free_sample === true || bookData.is_free_sample === true);
 
           // Extraer URL del PDF — probar varios campos posibles
           const isUrlImage = version.version_url?.includes('pexels.com') || 
@@ -148,6 +219,20 @@ export default function BookReaderPage({ params, searchParams }) {
     loadBook();
   }, [bookId, versionId, token]);
 
+  // ── Medición: apertura + tiempo de lectura del PDF — RETIRADA ────────────
+  // Esta rama (#91) sustituyó recipeMetrics.js por el contrato real del
+  // backend, que solo sabe hablar de una receta (`content_id` = recipe.id).
+  // La medición de apertura/lectura del PDF que traía #90 usaba
+  // book_id + version_id — dos identificadores que no caben en un único
+  // content_id, y encima el PDF agrupa MUCHAS recetas en un solo libro: ni
+  // siquiera con acceso al dato serviría para decidir qué RECETA promover a
+  // muestra gratis, que es el objetivo declarado de toda esta medición
+  // (commit 283dc19). Forzar el libro/versión dentro de content_type:
+  // 'recipe' además ensuciaría el ranking real (un id de libro no es un id
+  // de receta). Se retira en vez de adaptarse: el lector nativo (arriba,
+  // trackRecipeEvent('open', { recipeId }) en receta/[id]/page.js) ya mide
+  // lo que de verdad hace falta, y el PDF es el respaldo temporal mientras
+  // se completa la migración a recetas nativas.
   function onDocumentLoadSuccess({ numPages }) {
     setNumPages(numPages);
     setPageNumber(1);
@@ -176,18 +261,123 @@ export default function BookReaderPage({ params, searchParams }) {
     }
   }
 
+  // Buscador de la lista nativa: un evento "search" por pausa de escritura
+  // (debounce), no uno por tecla.
+  useEffect(() => {
+    const q = busquedaNativa.trim();
+    if (!q) return undefined;
+    const t = setTimeout(() => {
+      trackRecipeEvent('search', { searchTerm: q });
+    }, 500);
+    return () => clearTimeout(t);
+  }, [busquedaNativa]);
+
   // Sin sesión: aviso de acceso (como el resto del panel), no un lector vacío.
   if (!token) {
     const back = `/panel-cocina/libro/${bookId}${versionId ? `?v=${versionId}` : ''}`;
     return <AccessNotice redirect={back} />;
   }
 
-  if (loading) {
+  // Se espera a los dos: el libro/PDF de siempre Y la comprobación de
+  // recetas nativas, para no enseñar el PDF un instante y luego cambiar a
+  // la lista nativa (o al revés) delante del cliente.
+  if (loading || !recipesChecked) {
     return (
       <div className="w-full min-h-screen bg-transparent flex items-center justify-center pt-8 pl-8 pr-12 pb-12">
         <div className="flex flex-col items-center gap-4">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#3932C0]"></div>
           <p className="text-[#3932C0] font-semibold text-lg">Cargando lector...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // ── Vista nativa: este libro SÍ tiene recetas nativas asociadas ──────────
+  // Reemplaza al PDF por completo. No depende de si el PDF cargó o dio
+  // error (`error`/`pdfFile` de abajo): si hay recetas nativas, son ellas
+  // las que se enseñan, punto.
+  if (nativas.length > 0) {
+    const q = busquedaNativa.trim().toLowerCase();
+    const visibles = q ? nativas.filter((r) => (r.name || '').toLowerCase().includes(q)) : nativas;
+    return (
+      <div className="w-full min-h-screen bg-[#F8F9FC] flex flex-col p-6 md:p-10 pb-16 animate-in fade-in duration-300">
+        <div className="w-full max-w-5xl mx-auto">
+          <Link href="/panel-cocina" className="flex items-center gap-3 text-[#3932C0] hover:opacity-80 transition-opacity cursor-pointer mb-6">
+            <ChevronLeft className="w-8 h-8" strokeWidth={2.5} />
+            <h1 className="text-3xl font-bold">
+              {bookTitle}
+              {versionTitle ? <span className="font-normal text-2xl"> ( {versionTitle} )</span> : null}
+            </h1>
+          </Link>
+
+          <div className="relative max-w-sm mb-8">
+            <Search className="w-4 h-4 text-slate-300 absolute left-4 top-1/2 -translate-y-1/2" />
+            <input
+              type="text"
+              value={busquedaNativa}
+              onChange={(e) => setBusquedaNativa(e.target.value)}
+              placeholder="Buscar receta…"
+              className="w-full rounded-2xl border border-slate-200 bg-white pl-10 pr-4 py-2.5 text-sm text-[#363C98] placeholder:text-slate-300 focus:outline-none focus:border-[#FF690B] transition-colors"
+            />
+          </div>
+
+          {visibles.length === 0 ? (
+            <p className="text-slate-400">Nada con «{busquedaNativa.trim()}».</p>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {visibles.map((r) => (
+                <Link
+                  key={r.id}
+                  href={`/panel-cocina/receta/${r.id}?from=${bookId}${versionId ? `&v=${versionId}` : ''}`}
+                  onClick={() => trackRecipeEvent('click', { recipeId: r.id })}
+                  className="bg-white rounded-3xl border border-slate-100 shadow-sm hover:shadow-md transition-all overflow-hidden group"
+                >
+                  <div className="relative w-full aspect-square bg-[#FFF6F0]">
+                    <Image
+                      src={getValidImageUrl(r.image)}
+                      alt={r.name || 'Receta'}
+                      fill
+                      sizes="(max-width: 640px) 100vw, 33vw"
+                      className="object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
+                    {r.is_free_sample && <FreeSampleBadge className="absolute top-3 left-3" />}
+                  </div>
+                  <div className="p-4">
+                    <p className="text-[#363C98] font-bold leading-snug line-clamp-2">{r.name}</p>
+                    {/* Calorías, tiempo y raciones. Ya venían en la respuesta de
+                        `recipe/system` y la tarjeta las tiraba: quien abre un
+                        libro de 79 recetas solo veía nombres, y para saber si
+                        una receta le encaja tenía que entrar en cada una. */}
+                    {(() => {
+                      const kcal = formatKcal(r.kcal);
+                      const tiempo = totalMinutos(r);
+                      const raciones = Number(r.racion) > 0 ? Number(r.racion) : null;
+                      if (!kcal && !tiempo && !raciones) return null;
+                      return (
+                        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-2 text-xs font-bold">
+                          {kcal && (
+                            <span className="inline-flex items-center gap-1 text-[#FF690B]">
+                              <Flame className="w-3.5 h-3.5" /> {kcal}
+                            </span>
+                          )}
+                          {tiempo && (
+                            <span className="inline-flex items-center gap-1 text-slate-400">
+                              <Clock className="w-3.5 h-3.5" /> {tiempo}
+                            </span>
+                          )}
+                          {raciones && (
+                            <span className="inline-flex items-center gap-1 text-slate-400">
+                              <Users className="w-3.5 h-3.5" /> {raciones}
+                            </span>
+                          )}
+                        </div>
+                      );
+                    })()}
+                  </div>
+                </Link>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     );
@@ -219,7 +409,8 @@ export default function BookReaderPage({ params, searchParams }) {
     <div className="w-full min-h-screen bg-transparent flex flex-col pt-8 pl-8 pr-12 pb-12 animate-in fade-in duration-300">
       
       {/* Header outside the box */}
-      <div className="w-full flex items-center mb-6">
+      <div className="w-full flex flex-col gap-2 mb-6">
+        {isFreeSample && <FreeSampleBadge className="self-start" />}
         <Link href="/panel-cocina" className="flex items-center gap-3 text-[#3932C0] hover:opacity-80 transition-opacity cursor-pointer">
           <ChevronLeft className="w-8 h-8" strokeWidth={2.5} />
           <h1 className="text-3xl font-bold">

@@ -12,12 +12,18 @@ import ProgramPricing from './_components/ProgramPricing';
 import AgendaSection from './_components/AgendaSection';
 import GuaranteeSection from './_components/GuaranteeSection';
 import FinalCTA from './_components/FinalCTA';
+import FAQPrograma from './_components/FAQPrograma';
 
 // Open Graph / Twitter específicos: reutiliza el titular y el subtítulo reales
 // del hero de esta página (HeroPlanes.js). La imagen la hereda del layout de
 // (home) — no hay ninguna pensada para compartir en public/, así que de
 // momento usa la plantilla genérica del logo (ver PR: pendiente de diseño).
 export const metadata = {
+  // Sale como "Programa de nutrición y entreno · Squad Fit" (la marca la pone
+  // la plantilla del layout de (home)).
+  title: 'Programa de nutrición y entreno',
+  description:
+    'Un programa de nutrición y entreno para lograr tu objetivo y, sobre todo, mantener los resultados en el tiempo.',
   openGraph: {
     title: 'Squad Fit — Tu cambio, esta vez de verdad',
     description:
@@ -49,6 +55,10 @@ export default function page() {
       <Reveal><ProgramPricing /></Reveal>
       <Reveal><AgendaSection /></Reveal>
       <Reveal><GuaranteeSection /></Reveal>
+      {/* Las FAQ van ANTES del cierre a propósito: resuelven la última
+          objeción y dejan el botón como el paso siguiente natural. Si van
+          después, el cierre deja de ser el cierre. */}
+      <Reveal><FAQPrograma /></Reveal>
       <Reveal><FinalCTA /></Reveal>
     </div>
   );

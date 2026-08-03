@@ -137,6 +137,11 @@ export default function SequraSimulador({ importeEur, pagoUnico = true, divisa =
       data-amount={Math.round(importeEur * 100)}
       data-product={PRODUCTO}
       data-type="text"
+      // Sin esto seQura sirve una versión antigua del widget. Nos lo dijo su
+      // equipo de integración el 1-ago al revisar nuestra vista previa: el
+      // atributo no aparece en la documentación de componentes promocionales,
+      // así que no hay forma de deducirlo leyendo.
+      data-version="v2"
     />
   );
 }
