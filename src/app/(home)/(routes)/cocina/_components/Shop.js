@@ -8,7 +8,6 @@ import {
   TIER_META,
   buildTierCartItem,
   fetchTieredGroup,
-  groupTierOrder,
 } from '@/app/components/courseCatalog'
 
 // Sección de precios de Cocina Squad Fit: 4 tarjetas
@@ -16,8 +15,8 @@ import {
 // "Lo quiero todo"). Diseño portado de la página Divi de WordPress; la compra
 // va por el carrito/Stripe del proyecto, no por enlaces de WooCommerce.
 // La tarjeta digital usa el grupo «Biblioteca digital» del catálogo real
-// (Fase 13): selector mensual / trimestral / anual / de por vida, cobro por
-// el checkout de tramos de la Fase 9/12.
+// (Fase 13) y vende SOLO el tramo de por vida, con el mismo checkout de tramos
+// de la Fase 9/12 (ver el porqué junto a `BIB_TIER`).
 
 // Identificadores reales de los productos físicos en producción (28-jul-2026).
 // El emparejamiento va PRIMERO por id y solo después por nombre: los títulos que
@@ -142,10 +141,19 @@ export default function Shop() {
 
   const [selectedCard, setSelectedCard] = useState('bundle')
 
-  // Grupo «Biblioteca digital» del catálogo real (4 tramos: mensual /
-  // trimestral / anual / de por vida) y tramo elegido en la tarjeta digital.
+  // Grupo «Biblioteca digital» del catálogo real. El grupo tiene cuatro tramos
+  // (mensual / trimestral / anual / de por vida), pero esta página SOLO vende
+  // el de por vida.
+  //
+  // Por qué (decisión de María, 3-ago): las cuatro tarjetas de /cocina son una
+  // escalera de precio —Volumen 1, Volumen 1+2, biblioteca de por vida y el
+  // pack completo—, y un selector de plazos en medio la rompe: la misma tarjeta
+  // pasaba a valer 9,99 € o 159 € según qué pestaña estuviera pulsada, así que
+  // el escalón dejaba de leerse. Los otros tres tramos siguen existiendo en el
+  // catálogo y quien ya los tenga contratados no se entera de esto; lo que
+  // desaparece es la forma de contratarlos NUEVOS desde la web.
   const [bibGroup, setBibGroup] = useState(null)
-  const [bibTier, setBibTier] = useState('permanente')
+  const BIB_TIER = 'permanente'
 
   // Productos físicos reales desde la API (volumen suelto y pack)
   const [vol1, setVol1] = useState(null)
@@ -307,7 +315,7 @@ export default function Shop() {
   // Compra de la biblioteca con el tramo elegido: item de compra directa del
   // catálogo (mismo flujo que los cursos con tramos → checkout de la Fase 9/12).
   const buyBiblioteca = () => {
-    if (!bibGroup || !bibGroup.tiers[bibTier]) return
+    if (!bibGroup || !bibGroup.tiers[BIB_TIER]) return
     if (hasPermanent) {
       toast.error('Ya tienes el acceso de por vida activo.')
       return
@@ -315,8 +323,8 @@ export default function Shop() {
     if (cart.length > 0 && !cart.some((item) => item.isDirectCheckout)) {
       toast.error('Tus productos físicos fueron removidos por seguridad (no se pueden mezclar suscripciones y productos).', { duration: 5000 })
     }
-    setDirectCheckoutItem(buildTierCartItem(bibGroup, bibTier))
-    toast.success(`Biblioteca digital (${TIER_META[bibTier].label.toLowerCase()}) añadida al carrito`)
+    setDirectCheckoutItem(buildTierCartItem(bibGroup, BIB_TIER))
+    toast.success(`Biblioteca digital (${TIER_META[BIB_TIER].label.toLowerCase()}) añadida al carrito`)
     peekCart()
   }
 
@@ -328,66 +336,27 @@ export default function Shop() {
     }
   }
 
-  const bibTierData = bibGroup?.tiers?.[bibTier]
-  const bibPer =
-    bibTier === 'mensual' ? '/mes'
-    : bibTier === 'trimestral' ? '/trimestre'
-    : bibTier === 'anual' ? 'pago único · 12 meses'
-    : 'pago único'
+  const bibTierData = bibGroup?.tiers?.[BIB_TIER]
 
-  // Selector de tramo 2×2 dentro de la tarjeta digital.
-  //
-  // Las CUATRO opciones llevan caja, no solo la activa. Antes la seleccionada
-  // era la única con fondo blanco, así que en una rejilla 2×2 quedaba una
-  // pastilla suelta en una esquina y el bloque entero parecía descuadrado: se
-  // leía como una fila rota, no como cuatro botones.
-  //
-  // Y son cuatro y no tres porque la biblioteca tiene tramo trimestral. Medido:
-  // en la tarjeta hay 202 px útiles y la etiqueta más larga («De por vida»)
-  // ocupa 78; con columnas iguales, cuatro en una fila pedirían ~330 px. No
-  // caben, así que el 2×2 no es un capricho — lo que había que arreglar era que
-  // pareciera intencionado.
-  const bibSelector = bibGroup ? (
-    <div className="grid grid-cols-2 gap-1.5 bg-[#F3F2F9] rounded-2xl p-1.5 mb-4" role="tablist" aria-label="Modalidad de acceso a la biblioteca">
-      {groupTierOrder(bibGroup).map((key) => {
-        const active = key === bibTier
-        return (
-          <button
-            key={key}
-            type="button"
-            role="tab"
-            aria-selected={active}
-            onClick={(e) => { e.stopPropagation(); setBibTier(key); setSelectedCard('digital') }}
-            className="rounded-xl py-1.5 text-[13px] font-bold transition-all cursor-pointer"
-            style={{
-              // El fondo va en el `style` y no en clases para que no dependa
-              // del orden en que Tailwind emita `bg-white` y `bg-white/55`:
-              // son la misma propiedad y gana la última de la hoja, no la
-              // última del atributo class.
-              backgroundColor: active ? '#FFFFFF' : 'rgba(255,255,255,0.55)',
-              color: active ? C.digital : '#8B87C9',
-              // La elegida se marca con un aro, no por ser la única con fondo,
-              // que es lo que rompía la cuadrícula.
-              boxShadow: active
-                ? `inset 0 0 0 1.5px ${C.digital}, 0 1px 2px rgba(0,0,0,.05)`
-                : undefined,
-            }}
-          >
-            {TIER_META[key].label}
-          </button>
-        )
-      })}
-    </div>
-  ) : null
+  // Precio del pack completo. Mientras no exista en el backend se anuncia el
+  // acordado —169 €—, y en cuanto exista manda el suyo. Antes aquí había un
+  // «159» de respaldo que NUNCA fue un precio: hacía que el pack completo
+  // valiera lo mismo que la biblioteca digital sola, así que por los dos libros
+  // impresos no se pagaba nada y la escalera de precio se caía en el último
+  // escalón.
+  const BUNDLE_PRECIO_ANUNCIADO = 169
+  const bundlePrice = bundle ? bundle.price : BUNDLE_PRECIO_ANUNCIADO
 
-  // El «antes» del bundle = pack impreso + biblioteca de por vida, con los
-  // precios vivos cuando los hay (si falta alguno, el estático de siempre).
-  const bundleBefore = pack && bundle && bibGroup?.tiers?.permanente
+  // El «antes» = pack impreso + biblioteca de por vida, SIEMPRE con los precios
+  // vivos del catálogo. Si falta alguno no se enseña ahorro: un «ahorras X»
+  // escrito a mano se queda viejo en cuanto cambia una tarifa y acaba
+  // prometiendo un descuento que no es el que se cobra.
+  const bundleBefore = pack && bibGroup?.tiers?.permanente
     ? pack.price + bibGroup.tiers.permanente.price
     : null
-  const bundleSave = bundleBefore && bundleBefore > bundle.price
-    ? { before: `${formatPrice(bundleBefore)} €`, label: `ahorras ${formatPrice(bundleBefore - bundle.price)} €` }
-    : { before: '238 €', label: 'ahorras 79 €' }
+  const bundleSave = bundleBefore && bundleBefore > bundlePrice
+    ? { before: `${formatPrice(bundleBefore)} €`, label: `ahorras ${formatPrice(bundleBefore - bundlePrice)} €` }
+    : null
 
   return (
     <section id="shop" className="py-16 px-4 bg-gray-50">
@@ -474,11 +443,10 @@ export default function Shop() {
             edgeOn={C.digitalSoft}
             title="Biblioteca digital"
             titleColor={C.digital}
-            selector={bibSelector}
             price={bibTierData ? formatPrice(bibTierData.price) : '—'}
-            per={bibPer}
+            per="pago único"
             desc="Toda la biblioteca: Vol. 1, 2, el 3 (próximamente) y futuros. Con 5 recetas nuevas cada semana."
-            ctaLabel={bibTier === 'mensual' || bibTier === 'trimestral' ? 'Suscribirme' : bibTier === 'anual' ? 'Acceso anual' : 'Acceso de por vida'}
+            ctaLabel="Acceso de por vida"
             ctaColor={C.digital}
             selected={selectedCard === 'digital'}
             onSelect={() => setSelectedCard('digital')}
@@ -495,8 +463,7 @@ export default function Shop() {
               aviso de «disponible muy pronto» que hay en `buyBundle`.
               Esto es un estado TRANSITORIO. Lo que falta para que sea real:
                 · crear el pack (2 libros impresos + biblioteca de por vida) a
-                  169 € — el 159 de aquí abajo es un literal de respaldo, nunca
-                  fue un precio de verdad;
+                  169 €, que es el precio que la tarjeta ya anuncia;
                 · y que el backend sepa concederlo: hoy `pack_items` lleva un
                   CHECK que obliga a que cada línea sea O un libro O un curso, y
                   la biblioteca digital no es ninguna de las dos. */}
@@ -507,7 +474,7 @@ export default function Shop() {
             edgeOn={C.hero}
             title="Lo quiero todo"
             titleColor={C.heroText}
-            price={bundle ? formatPrice(bundle.price) : '159'}
+            price={formatPrice(bundlePrice)}
             per="+ envío"
             save={bundleSave}
             desc="Los dos libros físicos + la biblioteca digital completa y siempre actualizada, para siempre."
