@@ -328,6 +328,26 @@ export default function Summary(props) {
                 </div>
               )}
 
+              {/* Un solo artículo por pedido.
+                  El cobro de físicos va por `create-payment-intent-version` o
+                  `-pack`, y ambos aceptan UN id: con dos artículos distintos el
+                  pago se corta. Eso ya pasaba, pero el aviso saltaba en el paso
+                  de PAGO — después de que el cliente hubiera dejado correo,
+                  dirección y DNI—, que es el peor momento para enterarse.
+                  Aquí se le dice en el paso 1, cuando corregirlo cuesta un clic
+                  en la papelera que ya tiene al lado. */}
+              {cart.length > 1 && (
+                <div className="mb-6 sm:mb-8 rounded-2xl border border-amber-300 bg-amber-50 p-4 text-left">
+                  <p className="text-amber-900 font-bold text-sm sm:text-base">
+                    Por ahora solo podemos enviar un artículo por pedido
+                  </p>
+                  <p className="text-amber-800 text-sm mt-1">
+                    Tienes {cart.length} en el carrito. Deja el que quieras recibir
+                    primero y haz el otro pedido después — te llegarán igual.
+                  </p>
+                </div>
+              )}
+
               {/* Totals — en móvil el texto es pequeño y discreto; crece a
                   partir de `sm:` (en el móvil de María, 375 px, se comía media
                   pantalla). */}
