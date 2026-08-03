@@ -255,8 +255,24 @@ export default function Payment(props) {
        payload = directItem.payload;
     } else {
        // Carrito global de productos físicos
+       // Solo se puede cobrar UN artículo físico por pedido: el backend expone
+       // create-payment-intent-version y -pack, y ambos aceptan un único id. El
+       // checkout de varios artículos es una fase aparte.
+       //
+       // El mensaje ya no habla de «la API»: quien lo lee es un cliente que
+       // acaba de dejar su correo, su dirección y su DNI, y no tiene por qué
+       // saber qué es eso. Dice qué pasa, con cuántos, y qué hacer.
+       //
+       // El aviso de verdad está ahora en el paso 1 (ver Summary.js): aquí se
+       // llegaba después de rellenar TODO el formulario, que es el peor momento
+       // posible para enterarse. Esto queda como última red por si alguien
+       // manipula el carrito por el camino.
        if (cart.length > 1) {
-           toast.error('La API actual solo procesa 1 tipo de artículo a la vez. Por favor ajusta tu carrito.', { duration: 5000 });
+           toast.error(
+             `Por ahora solo podemos enviar un artículo por pedido, y tienes ${cart.length}. ` +
+             `Deja uno en el carrito y haz el otro pedido después.`,
+             { duration: 7000 },
+           );
            setLoading(false);
            return;
        }
