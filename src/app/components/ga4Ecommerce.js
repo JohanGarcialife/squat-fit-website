@@ -11,18 +11,31 @@
  * evento clave en la propiedad. De ahí el «Eventos clave: 0» y «Compras: 0»
  * del panel de inicio.
  *
- * Dos cosas que hay que respetar aquí:
+ * Tres cosas que hay que respetar aquí:
  *
  * 1. **Consentimiento.** `GoogleAnalytics.js` solo inserta gtag si el visitante
- *    aceptó la categoría de analítica, así que `window.gtag` no existe cuando
- *    no la aceptó. Se comprueba antes de llamar y no se hace nada más: no se
- *    encola ni se guarda para después, porque eso sería medir a quien dijo que
- *    no.
- * 2. **No duplicar.** La pantalla de gracias es una URL con `session_id` que el
+ *    aceptó la categoría de analítica. Quien la rechazó no se mide, y punto: no
+ *    se encola ni se guarda para después.
+ * 2. **Pero «gtag todavía no está» NO es «dijo que no».** Corregido el 3-ago:
+ *    la puerta original era `typeof window.gtag !== 'function'`, que confunde
+ *    las dos cosas. Y justo en el caso que más importa —`purchase`— son
+ *    distintas: la pantalla de gracias es una carga de página LIMPIA después de
+ *    volver de stripe.com, y ahí gtag no existe hasta que React monta,
+ *    `GoogleAnalytics` lee el consentimiento en su efecto, re-renderiza, y Next
+ *    inserta el `<Script afterInteractive>`. El efecto de /cart que emite la
+ *    compra corre en esa misma tanda: si gana la carrera, la venta se descarta
+ *    en silencio y no hay segunda oportunidad. Los demás eventos no lo sufren
+ *    porque salen de un clic, con la página ya caliente — que es exactamente el
+ *    patrón «llegan miles de eventos y cero compras».
+ *    Así que ahora se pregunta por el consentimiento de verdad
+ *    (`analyticsAllowed`) y, si lo hay pero el script aún no está, se espera.
+ * 3. **No duplicar.** La pantalla de gracias es una URL con `session_id` que el
  *    cliente puede recargar, compartir o volver a abrir desde el historial.
  *    Sin protección, cada recarga sumaría una venta falsa. Se recuerdan los
  *    identificadores ya enviados en localStorage.
  */
+
+import { analyticsAllowed } from './cookieConsent';
 
 const CLAVE_ENVIADOS = 'sqf-ga4-purchases';
 // Suficiente para que una recarga o una vuelta atrás no cuele, sin dejar
@@ -85,12 +98,44 @@ export function valorDesdeCarrito(cart) {
   return Number(total.toFixed(2));
 }
 
+// Tope de espera a que gtag aparezca. 8 s cubre de sobra una descarga de
+// googletagmanager.com en 3G malo; pasado eso se abandona, porque un evento que
+// sale un minuto tarde ya no lo cuadra nadie con el pedido.
+const ESPERA_GTAG_MS = 8000;
+const REINTENTO_MS = 150;
+
+/**
+ * Ejecuta `accion(gtag)` en cuanto haya gtag, o nunca si no hay consentimiento.
+ *
+ * Devuelve true cuando el evento ha salido o queda comprometido a salir, y
+ * false cuando se descarta por consentimiento — que es la única razón legítima
+ * para no medir.
+ */
+function conGtag(accion) {
+  if (typeof window === 'undefined') return false;
+  if (typeof window.gtag === 'function') {
+    accion(window.gtag);
+    return true;
+  }
+  // Sin gtag: hay que distinguir «no quiso» de «aún no ha cargado».
+  if (!analyticsAllowed()) return false;
+
+  let esperado = 0;
+  const reloj = setInterval(() => {
+    if (typeof window.gtag === 'function') {
+      clearInterval(reloj);
+      accion(window.gtag);
+      return;
+    }
+    esperado += REINTENTO_MS;
+    if (esperado >= ESPERA_GTAG_MS) clearInterval(reloj);
+  }, REINTENTO_MS);
+  return true;
+}
+
 /** Emisión genérica, con la misma puerta de consentimiento que `purchase`. */
 function emitir(nombre, datos) {
-  if (typeof window === 'undefined') return false;
-  if (typeof window.gtag !== 'function') return false; // sin consentimiento
-  window.gtag('event', nombre, datos);
-  return true;
+  return conGtag((gtag) => gtag('event', nombre, datos));
 }
 
 /**
@@ -132,18 +177,28 @@ export function enviarBeginCheckout(cart) {
  * que quien llame pueda distinguir «no había consentimiento» de «ya estaba
  * enviado» en una depuración.
  */
+// Compras comprometidas en ESTA carga de página pero todavía sin salir, porque
+// se está esperando a gtag. `marcarEnviado` ya no es inmediato, así que sin esto
+// dos montajes seguidos del carrito pasarían los dos el filtro de localStorage y
+// contarían la venta dos veces. Deliberadamente en memoria y no en localStorage:
+// si la espera expira y el evento no llega a salir, una recarga de la pantalla
+// de gracias debe poder reintentarlo.
+const enVuelo = new Set();
+
 export function enviarPurchase({ transactionId, items, value, currency = 'EUR' }) {
   if (typeof window === 'undefined') return false;
-  if (typeof window.gtag !== 'function') return false; // sin consentimiento
   if (!transactionId) return false; // sin id no hay forma de evitar duplicados
+  if (enVuelo.has(transactionId)) return false;
   if (leerEnviados().includes(transactionId)) return false;
 
-  window.gtag('event', 'purchase', {
-    transaction_id: transactionId,
-    value,
-    currency,
-    items,
+  enVuelo.add(transactionId);
+  return conGtag((gtag) => {
+    gtag('event', 'purchase', {
+      transaction_id: transactionId,
+      value,
+      currency,
+      items,
+    });
+    marcarEnviado(transactionId);
   });
-  marcarEnviado(transactionId);
-  return true;
 }
