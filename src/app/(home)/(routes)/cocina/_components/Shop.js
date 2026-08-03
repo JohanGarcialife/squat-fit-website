@@ -336,6 +336,17 @@ export default function Shop() {
     : 'pago único'
 
   // Selector de tramo 2×2 dentro de la tarjeta digital.
+  //
+  // Las CUATRO opciones llevan caja, no solo la activa. Antes la seleccionada
+  // era la única con fondo blanco, así que en una rejilla 2×2 quedaba una
+  // pastilla suelta en una esquina y el bloque entero parecía descuadrado: se
+  // leía como una fila rota, no como cuatro botones.
+  //
+  // Y son cuatro y no tres porque la biblioteca tiene tramo trimestral. Medido:
+  // en la tarjeta hay 202 px útiles y la etiqueta más larga («De por vida»)
+  // ocupa 78; con columnas iguales, cuatro en una fila pedirían ~330 px. No
+  // caben, así que el 2×2 no es un capricho — lo que había que arreglar era que
+  // pareciera intencionado.
   const bibSelector = bibGroup ? (
     <div className="grid grid-cols-2 gap-1.5 bg-[#F3F2F9] rounded-2xl p-1.5 mb-4" role="tablist" aria-label="Modalidad de acceso a la biblioteca">
       {groupTierOrder(bibGroup).map((key) => {
@@ -347,8 +358,20 @@ export default function Shop() {
             role="tab"
             aria-selected={active}
             onClick={(e) => { e.stopPropagation(); setBibTier(key); setSelectedCard('digital') }}
-            className={`rounded-xl py-1.5 text-[13px] font-bold transition-all cursor-pointer ${active ? 'bg-white shadow-sm' : 'hover:opacity-80'}`}
-            style={{ color: active ? C.digital : '#8B87C9' }}
+            className="rounded-xl py-1.5 text-[13px] font-bold transition-all cursor-pointer"
+            style={{
+              // El fondo va en el `style` y no en clases para que no dependa
+              // del orden en que Tailwind emita `bg-white` y `bg-white/55`:
+              // son la misma propiedad y gana la última de la hoja, no la
+              // última del atributo class.
+              backgroundColor: active ? '#FFFFFF' : 'rgba(255,255,255,0.55)',
+              color: active ? C.digital : '#8B87C9',
+              // La elegida se marca con un aro, no por ser la única con fondo,
+              // que es lo que rompía la cuadrícula.
+              boxShadow: active
+                ? `inset 0 0 0 1.5px ${C.digital}, 0 1px 2px rgba(0,0,0,.05)`
+                : undefined,
+            }}
           >
             {TIER_META[key].label}
           </button>
