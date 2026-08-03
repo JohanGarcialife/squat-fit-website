@@ -18,6 +18,7 @@ import { resolveOrigin } from '@/app/components/UTMCapture';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import { toast } from 'react-hot-toast';
+import PagoSequra, { evaluarSequra } from './PagoSequra';
 
 // La clave publicable viene SIEMPRE del entorno (NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY).
 // Sin fallback de test: si falta, el pago embebido debe fallar a la vista, no
@@ -29,6 +30,17 @@ const stripePromise = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
 // Componente interno que ya tiene acceso a los hooks de Stripe
 function PaymentInner(props) {
   const { setStep, setSuccess } = props;
+  const { cart } = useCartStore();
+  const datosCliente = useCheckoutStore((e) => e.formData);
+  const totalCarrito = (cart || []).reduce(
+    (acc, i) => acc + Number(i.price || 0) * (i.quantity || 1),
+    0,
+  );
+  // La divisa la elige el cliente arriba; seQura solo opera en euros.
+  const divisa = (() => {
+    try { return localStorage.getItem('sf_currency') || 'EUR'; } catch { return 'EUR'; }
+  })();
+  const sequra = evaluarSequra(cart, totalCarrito, divisa);
   const stripe = useStripe();
   const elements = useElements();
   const [isProcessing, setIsProcessing] = useState(false);
@@ -105,6 +117,24 @@ function PaymentInner(props) {
             <div className="animate-in fade-in zoom-in-95 duration-300">
                 <PaymentElement />
                 
+                {/* Pago fraccionado con seQura. Solo se pinta cuando de verdad
+                    se puede usar: sin suscripciones, en euros y entre 50 y
+                    4.000 €. Enseñar una opción que al pulsarla dice «no
+                    disponible» es peor que no enseñarla. */}
+                {sequra.aplica && (
+                    <div className="mt-8 pt-8 border-t border-indigo-100">
+                        <p className="text-slate-500 text-sm mb-4 text-center">o si lo prefieres</p>
+                        <PagoSequra cart={cart} total={totalCarrito} formData={datosCliente} />
+                    </div>
+                )}
+                {/* Si falta poco para el mínimo, se dice: al cliente le sirve y
+                    de paso sube el importe medio del pedido. */}
+                {!sequra.aplica && sequra.cerca && (
+                    <p className="mt-8 pt-8 border-t border-indigo-100 text-sm text-slate-500 text-center">
+                        Añade {sequra.falta.toFixed(2)} € más y podrás pagarlo a plazos con seQura.
+                    </p>
+                )}
+
                 {/* Logos de seguridad */}
                 <div className="mt-10 opacity-80">
                     <div className="relative w-48 h-12">
