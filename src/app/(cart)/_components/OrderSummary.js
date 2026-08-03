@@ -177,13 +177,27 @@ export default function OrderSummary(props) {
                 España (el caso normal) desplegar «Ver resumen» enseñaba el libro
                 a 34,95 € y «Hoy pagarás 39,94 €» sin decir de dónde salían los
                 4,99: los únicos que veían el desglose eran los envíos a EE. UU.
-                Con envío gratis (subtotal ≥ 90 €) la línea sigue apareciendo y
-                dice «Gratis», que es lo que explica por qué el total no sube.
+                Con envío gratis la línea sigue apareciendo y dice «Gratis», que
+                es lo que explica por qué el total no sube.
                 Aquí NO se toca ningún importe ni ningún cálculo: `finalShipping`,
                 `arancel` y `total` son los de antes, letra por letra. Lo único
-                que cambia es qué líneas se enseñan. El desajuste conocido de que
-                el envío se muestre y Stripe no lo cobre está en espera y no se
-                toca desde aquí. */}
+                que cambia es qué líneas se enseñan.
+
+                DOS COSAS DE ESTE COMENTARIO ESTABAN CADUCADAS, corregidas el
+                3-ago tras preguntarle las tarifas reales a
+                `POST /shipping/quote` (me hicieron perseguir una falsa alarma):
+
+                · NO hay ningún umbral de 90 €. Los de verdad, por zona:
+                    España peninsular ... tarifa 0    (gratis SIEMPRE, umbral 0)
+                    Europa cercana ...... 9,90 €      (gratis desde 100 €)
+                    Norteamérica ........ 22,90 €     (gratis desde 150 €)
+                    Latinoamérica ....... 19,90 €     (gratis desde 150 €)
+                  Así que el ejemplo de «envío a España … 4,99» tampoco vale:
+                  a España peninsular no se cobra envío.
+
+                · El desajuste de que el envío se pintara y Stripe no lo cobrase
+                  YA NO está en espera: se arregló el 30-jul (revisión
+                  00353-duy). */}
             {(hasPhysicalItems || arancel > 0) && (
                 <div className={`${expanded ? 'block' : 'hidden'} lg:block space-y-2`}>
                     {hasPhysicalItems && (
