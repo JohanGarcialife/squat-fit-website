@@ -230,6 +230,14 @@ export default function Shop() {
               id: version.version_id,
               type: 'version',
               name: PRINT_TITLES.vol1,
+              // Nombre con el que entra al CARRITO. Va aparte del título de la
+              // tarjeta porque ahí la etiqueta «Impreso» ya da el contexto y
+              // repetirlo quedaría redundante; en el carrito, en cambio,
+              // «Volumen 1» a secas no dice de qué. Es además el mismo texto
+              // EXACTO que Stripe enseña en el cargo (NOMBRE_COMERCIAL en
+              // book.service.ts), que es lo que pidió María: que el cliente lea
+              // el mismo nombre en la tienda, en el carrito y en el banco.
+              cartName: 'Impreso Volumen 1',
               price: version.version_price,
               image: version.version_image || book.image || '/LibrosFisicos.png',
             })
@@ -270,6 +278,9 @@ export default function Shop() {
               id: printPack.id,
               type: 'pack',
               name: PRINT_TITLES.pack,
+              // El pack ya se llama igual en `packs.name` y en el cargo de
+              // Stripe, así que su nombre de carrito es el suyo, sin prefijo.
+              cartName: PRINT_TITLES.pack,
               price: parseFloat(printPack.price),
               image: printPack.image || '/LibrosFisicos.png',
             })
@@ -302,7 +313,12 @@ export default function Shop() {
     addToCart({
       id: product.id,
       type: product.type,
-      name: `Libro Físico - ${product.name}`,
+      // «Libro Físico - X» era un tercer nombre para el mismo producto: la
+      // tarjeta decía «Impreso / Volumen 1», el carrito «Libro Físico - Volumen
+      // 1» y el cargo de Stripe «Impreso Volumen 1». Tres sitios seguidos de la
+      // misma compra, tres nombres. Ahora cada producto trae el suyo; el
+      // respaldo mantiene el comportamiento de antes para cualquier otro.
+      name: product.cartName ?? `Libro Físico - ${product.name}`,
       price: product.price,
       image: product.image || '/LibrosFisicos.png',
     })
