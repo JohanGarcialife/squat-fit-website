@@ -366,7 +366,27 @@ function CursosPageContent() {
   // Para cada curso, ¿tiene alguna clase marcada como muestra gratis en su
   // currícula pública? Detalle no disponible → se trata como "sin muestra"
   // (fallback seguro: nunca se inventa acceso).
+  //
+  // Desde el 3-ago `GET course/all` devuelve `free_sample_count`, así que la
+  // respuesta ya viene en la lista y esto no cuesta ni una petición. Antes se
+  // pedía `course/detail/:id` UNA VEZ POR CURSO —hoy 6— en cada carga de «Mis
+  // cursos», y encima en la pantalla que ve justo quien todavía no ha comprado:
+  // la primera impresión del producto era la más lenta.
+  //
+  // Se mantiene el camino viejo como respaldo por si esta instancia habla con
+  // un backend anterior: si UN solo curso no trae el recuento, se pregunta por
+  // todos como antes. Mezclar los dos daría un mapa a medias, y aquí un dato a
+  // medias significa esconderle a alguien una clase que sí podía ver.
   const fetchFreeSampleInfoFor = async (list, headers, API) => {
+    const todosTraenRecuento =
+      Array.isArray(list) &&
+      list.length > 0 &&
+      list.every((c) => typeof c?.free_sample_count === 'number');
+
+    if (todosTraenRecuento) {
+      return Object.fromEntries(list.map((c) => [c.id, c.free_sample_count > 0]));
+    }
+
     const entries = await Promise.all(
       list.map(async (course) => {
         try {
