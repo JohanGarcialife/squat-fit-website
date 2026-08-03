@@ -24,6 +24,15 @@ function ActivateContent() {
 
   const [status, setStatus] = useState('loading'); // 'loading' | 'success' | 'error'
   const [message, setMessage] = useState('');
+  // Cuenta activada pero SIN contraseña (compra como invitado). El backend lo
+  // dice en `needsPassword` y deja el token vivo justo para esto, así que se le
+  // pide aquí mismo en vez de mandarle a por un segundo correo.
+  const [pideContrasena, setPideContrasena] = useState(false);
+  const [clave, setClave] = useState('');
+  const [claveRepetida, setClaveRepetida] = useState('');
+  const [guardando, setGuardando] = useState(false);
+  const [errorClave, setErrorClave] = useState('');
+  const [claveLista, setClaveLista] = useState(false);
   // Reenvío del enlace desde la propia pantalla de error: si el enlace caducó,
   // la cuenta sigue SIN activar, y sin activar el login rechaza por `status`
   // antes incluso de mirar la contraseña. Mandar a «recuperar contraseña» no
@@ -46,9 +55,13 @@ function ActivateContent() {
           params: { token },
         });
 
-        console.log("Respuesta de activación:", response.data);
         setStatus('success');
-        setMessage('¡Cuenta verificada y activada con éxito!');
+        setPideContrasena(response?.data?.needsPassword === true);
+        setMessage(
+          response?.data?.needsPassword === true
+            ? 'Ya solo te falta elegir una contraseña.'
+            : '¡Cuenta verificada y activada con éxito!',
+        );
       } catch (error) {
         console.error("Error al activar cuenta:", error.response ? error.response.data : error.message);
         setStatus('error');
@@ -58,6 +71,37 @@ function ActivateContent() {
 
     activateAccount();
   }, [token]);
+
+  const guardarContrasena = async (e) => {
+    e.preventDefault();
+    setErrorClave('');
+    if (clave.length < 8) {
+      setErrorClave('La contraseña debe tener al menos 8 caracteres.');
+      return;
+    }
+    if (clave !== claveRepetida) {
+      setErrorClave('Las dos contraseñas no coinciden.');
+      return;
+    }
+    setGuardando(true);
+    try {
+      await axios.post(`${API_BASE}/api/v1/user/activate`, { token, password: clave });
+      setClaveLista(true);
+    } catch (error) {
+      // El token se consume al fijar la contraseña, así que un 400 aquí suele
+      // ser un segundo envío del mismo formulario. Se le manda a entrar en vez
+      // de dejarle mirando un error.
+      if (error?.response?.status === 400) {
+        setErrorClave(
+          'Este enlace ya se ha usado. Si acabas de crear la contraseña, entra con ella.',
+        );
+      } else {
+        setErrorClave('No hemos podido guardarla. Inténtalo en un momento.');
+      }
+    } finally {
+      setGuardando(false);
+    }
+  };
 
   const reenviarEnlace = async (e) => {
     e.preventDefault();
@@ -111,17 +155,71 @@ function ActivateContent() {
             <Sparkles className="absolute -top-2 -right-2 w-8 h-8 text-[#FF690B] animate-bounce" />
           </div>
           <div className="flex flex-col gap-3">
-            <h2 className="text-4xl font-bold text-green-600">¡Cuenta activada!</h2>
-            <p className="text-gray-600 text-lg font-medium">{message}</p>
+            <h2 className="text-4xl font-bold text-green-600">
+              {claveLista ? '¡Todo listo!' : '¡Cuenta activada!'}
+            </h2>
+            <p className="text-gray-600 text-lg font-medium">
+              {claveLista ? 'Ya puedes entrar con tu contraseña.' : message}
+            </p>
           </div>
+
           {/*
             Antes esto hacía una cuenta atrás de 3 segundos y empujaba a /login.
             Para quien compró como invitado eso era un callejón sin salida: el
             correo que le trae aquí se titula «Crea tu contraseña», pero su
             cuenta se creó SIN ninguna, así que llegaba a un formulario de
-            acceso que no podía rellenar. Ahora no se le empuja a ningún sitio:
-            elige él, y la opción de crear contraseña está a la vista.
+            acceso que no podía rellenar.
+
+            Corregido del todo el 3-ago: además de no empujarle, ahora la crea
+            AQUÍ. Mandarle a /forgot-password funcionaba, pero le costaba un
+            segundo correo —y encima ese flujo le devuelve una contraseña
+            generada, no la suya—. Medido en producción: los tres compradores
+            que abrieron su enlace lo hicieron en menos de 4 minutos y ninguno
+            llegó a tener contraseña. El paso de más era el que los perdía.
           */}
+          {claveLista ? (
+            <Link href="/login" className="w-full cursor-pointer bg-[#3932C0] text-white rounded-3xl p-5 text-lg font-bold hover:bg-[#3932C0]/90 transition duration-300 block">
+              Entrar en mi cuenta
+            </Link>
+          ) : pideContrasena ? (
+            <form onSubmit={guardarContrasena} className="w-full flex flex-col gap-3 text-left">
+              <label htmlFor="clave" className="text-sm font-semibold text-gray-600">
+                Elige tu contraseña
+              </label>
+              <input
+                id="clave"
+                type="password"
+                required
+                minLength={8}
+                autoComplete="new-password"
+                value={clave}
+                onChange={(e) => setClave(e.target.value)}
+                placeholder="Al menos 8 caracteres"
+                className="w-full rounded-2xl border border-gray-200 p-4 text-base text-gray-800 outline-hidden focus:border-[#3932C0]"
+              />
+              <label htmlFor="clave2" className="text-sm font-semibold text-gray-600">
+                Repítela
+              </label>
+              <input
+                id="clave2"
+                type="password"
+                required
+                autoComplete="new-password"
+                value={claveRepetida}
+                onChange={(e) => setClaveRepetida(e.target.value)}
+                placeholder="La misma otra vez"
+                className="w-full rounded-2xl border border-gray-200 p-4 text-base text-gray-800 outline-hidden focus:border-[#3932C0]"
+              />
+              {errorClave && <p className="text-sm text-red-600">{errorClave}</p>}
+              <button
+                type="submit"
+                disabled={guardando}
+                className="w-full cursor-pointer bg-[#FF690B] text-white rounded-3xl p-5 text-lg font-bold hover:bg-[#FF690B]/90 transition duration-300 disabled:opacity-60"
+              >
+                {guardando ? 'Guardando…' : 'Crear contraseña y entrar'}
+              </button>
+            </form>
+          ) : (
           <div className="w-full mt-2 flex flex-col gap-3">
             <Link href="/login" className="w-full cursor-pointer bg-[#3932C0] text-white rounded-3xl p-5 text-lg font-bold hover:bg-[#3932C0]/90 transition duration-300 block">
               Ya tengo contraseña · Entrar
@@ -134,6 +232,7 @@ function ActivateContent() {
               elige la segunda opción y la creas en un minuto.
             </p>
           </div>
+          )}
         </>
       )}
 
