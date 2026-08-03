@@ -12,6 +12,7 @@ import ProgramPricing from './_components/ProgramPricing';
 import AgendaSection from './_components/AgendaSection';
 import GuaranteeSection from './_components/GuaranteeSection';
 import FinalCTA from './_components/FinalCTA';
+import FAQPrograma from './_components/FAQPrograma';
 
 // Open Graph / Twitter específicos: reutiliza el titular y el subtítulo reales
 // del hero de esta página (HeroPlanes.js). La imagen la hereda del layout de
@@ -54,6 +55,10 @@ export default function page() {
       <Reveal><ProgramPricing /></Reveal>
       <Reveal><AgendaSection /></Reveal>
       <Reveal><GuaranteeSection /></Reveal>
+      {/* Las FAQ van ANTES del cierre a propósito: resuelven la última
+          objeción y dejan el botón como el paso siguiente natural. Si van
+          después, el cierre deja de ser el cierre. */}
+      <Reveal><FAQPrograma /></Reveal>
       <Reveal><FinalCTA /></Reveal>
     </div>
   );
