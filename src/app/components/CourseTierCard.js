@@ -7,13 +7,16 @@ import { toast } from 'react-hot-toast';
 import { useCartStore } from '@/stores/cart.store';
 import { useUiStore } from '@/stores/ui.store';
 import SequraSimulador from './SequraSimulador';
+import Link from 'next/link';
 import {
   TIER_META,
   buildTierCartItem,
   coverForCourse,
   formatEuros,
   groupTierOrder,
+  usuarioYaTiene,
 } from './courseCatalog';
+import { useProgramAccess } from './useProgramAccess';
 
 // UNA tarjeta por curso con el selector Mensual / Anual / De por vida (15.1):
 // mensual = suscripción X €/mes; anual = pago único con 12 meses de acceso;
@@ -28,6 +31,18 @@ export default function CourseTierCard({ group, defaultTier = 'anual', subtitle,
 
   const tier = group.tiers[tierKey];
   const meta = TIER_META[tierKey];
+
+  // ¿Ya lo tiene? Sin sesión, useProgramAccess no llama a nada, así que el
+  // visitante anónimo no paga ni una petición por esto.
+  //
+  // El aviso NO bloquea la compra, y es a propósito. Comprobado el 3-ago: el
+  // checkout de catálogo no mira la propiedad y el webhook concede con
+  // onConflict→ignore, así que hoy alguien puede pagar dos veces el mismo curso
+  // y no recibir nada nuevo, sin un solo aviso. Pero impedirlo del todo mataría
+  // el paso de mensual a permanente, que es una venta legítima. Así que se
+  // informa y se le ofrece ir a su curso; decidir él.
+  const { courses, checked } = useProgramAccess();
+  const yaLoTiene = checked && usuarioYaTiene(courses, group.baseName);
 
   const handleBuy = () => {
     if (cart.length > 0 && !cart.some((item) => item.isDirectCheckout)) {
@@ -99,10 +114,30 @@ export default function CourseTierCard({ group, defaultTier = 'anual', subtitle,
           className="mt-2"
         />
 
+        {yaLoTiene && (
+          <div className="mt-6 rounded-2xl bg-[#F3F2F9] border border-[#363C98]/15 p-4 text-left">
+            <p className="text-[#363C98] font-bold text-sm">Ya tienes este curso</p>
+            <p className="text-slate-500 text-sm mt-0.5">
+              Puedes verlo en tu panel. Si compras otra vez, pagarás de nuevo sin
+              añadir nada.
+            </p>
+            <Link
+              href="/panel-cursos"
+              className="inline-block mt-2 text-[#FF690B] font-bold text-sm hover:underline"
+            >
+              Ir a mis cursos →
+            </Link>
+          </div>
+        )}
+
         <button
           type="button"
           onClick={handleBuy}
-          className="mt-6 w-full bg-[#363C98] hover:bg-[#2c317c] text-white font-bold py-3.5 rounded-2xl text-base active:scale-[0.98] transition-all shadow-md cursor-pointer"
+          className={`w-full font-bold py-3.5 rounded-2xl text-base active:scale-[0.98] transition-all shadow-md cursor-pointer ${
+            yaLoTiene
+              ? 'mt-3 bg-white text-[#363C98] border-2 border-[#363C98] hover:bg-[#F3F2F9]'
+              : 'mt-6 bg-[#363C98] hover:bg-[#2c317c] text-white'
+          }`}
         >
           {tierKey === 'mensual' || tierKey === 'trimestral' ? 'Suscribirme' : 'Comprarlo'}
         </button>

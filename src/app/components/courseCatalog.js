@@ -100,6 +100,34 @@ export const LOCAL_CATALOG = [
 
 const SUFFIX_RE = /\s*\((mensual|trimestral|anual|permanente)\)\s*$/i;
 
+/**
+ * ¿Está este curso entre los que ya tiene el usuario?
+ *
+ * `courses` es lo que devuelve `GET /course/by-user` (lo trae useProgramAccess).
+ * El título de allí puede venir con el tramo pegado —«Fuerte y Definid@
+ * (anual)»— así que se le quita el sufijo antes de comparar.
+ *
+ * DELIBERADAMENTE ESTRICTO: igualdad exacta del nombre base normalizado, nada
+ * de «incluye». Un falso positivo aquí le dice a alguien que ya tiene algo que
+ * no tiene, y eso frena una venta; un falso negativo solo deja las cosas como
+ * están hoy. Ante la duda, que no avise.
+ */
+const normalizaNombre = (s) =>
+  String(s || '')
+    .replace(SUFFIX_RE, '')
+    .trim()
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '');
+
+export function usuarioYaTiene(courses, baseName) {
+  const buscado = normalizaNombre(baseName);
+  if (!buscado) return false;
+  return (courses || []).some(
+    (c) => normalizaNombre(c?.title || c?.name) === buscado,
+  );
+}
+
 // Agrupa el catálogo por producto base. Acepta DOS shapes:
 //  · el REAL del backend desplegado (verificado 21-jul-2026): filas ya
 //    agrupadas {base, area, tiers: [{id, name, tier, price, billing_period,
