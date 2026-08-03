@@ -68,7 +68,8 @@ const PHASE_BY_KEY = {
   tiempo_y_esfuerzo: 'Tu compromiso', inversion: 'Tu compromiso',
   obstaculo_importante: 'Tu situación', coach_squat_fit: 'Tu situación',
   peso_altura: 'Tu situación',
-  phone: 'Cómo te contactamos', instagram: 'Cómo te contactamos',
+  phone: 'Cómo te contactamos', email: 'Cómo te contactamos',
+  instagram: 'Cómo te contactamos',
   final: 'Cómo te contactamos',
 };
 const phaseOf = (step) => PHASE_BY_KEY[step?.key || step?.type] || null;
@@ -174,6 +175,20 @@ const STEPS = [
   },
   { type: 'phone', key: 'phone', title: 'Déjame tu número para WhatsApp' },
   {
+    // OBLIGATORIO, y no por costumbre: el backend YA tiene montado el correo de
+    // confirmación de prellamada —el que lleva el enlace para reservar la
+    // llamada— y solo lo manda `if (email)`. Sin este campo ese correo no se ha
+    // enviado nunca a un lead orgánico.
+    // Y va obligatorio y no opcional porque está medido: de los 15 leads
+    // entrados desde el 29-jul, los 15 rellenaron el teléfono (obligatorio) y
+    // solo 7 el Instagram (opcional). Como opcional, la mitad se quedaría igual
+    // de incomunicable.
+    type: 'email', key: 'email',
+    title: '¿A qué correo te mandamos la confirmación?',
+    subtitle: 'Ahí te llega el enlace para reservar tu llamada.',
+    placeholder: 'tu@correo.com',
+  },
+  {
     type: 'text', key: 'instagram', optional: true,
     title: 'Si quieres, déjame tu Instagram 😊',
     subtitle: 'Opcional',
@@ -273,7 +288,7 @@ export default function EmpiezaTuCambioPage() {
     objetivo_principal: '', impide_lograr: [], intentos: '',
     prioridad_para_ti: '', empuja_a_cambiar: '', tiempo_y_esfuerzo: '',
     inversion: '', obstaculo_importante: '', coach_squat_fit: '',
-    peso_altura: '', phone: '', instagram: '',
+    peso_altura: '', phone: '', email: '', instagram: '',
   });
   const [gdprAccepted, setGdprAccepted] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -372,6 +387,11 @@ export default function EmpiezaTuCambioPage() {
         return step.optional || answers[step.key].trim().length > 0;
       case 'phone':
         return String(answers.phone || '').replace(/\D/g, '').length >= 8;
+      case 'email':
+        // Comprobación de FORMA, deliberadamente laxa: algo@algo.algo. No se
+        // valida más porque rechazar un correo bueno por una regla lista cuesta
+        // un lead, y quien quiera colar basura la cuela igual.
+        return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(String(answers.email || '').trim());
       case 'final':
         return gdprAccepted;
       default:
@@ -453,8 +473,13 @@ export default function EmpiezaTuCambioPage() {
           first_name: (info.firstName || '').trim(),
           last_name: (info.lastName || '').trim(),
           edad: edadDesdeNacimiento(info.birth),
+          // El correo de la cuenta. No cuenta para `delPerfil` a efectos de
+          // saltar pantallas —el salto solo mira nombre y edad— pero sí se
+          // precarga: es el dato que menos apetece teclear en el móvil y aquí
+          // ya lo sabemos, y encima llega verificado en vez de tecleado mal.
+          email: (info.email || '').trim().toLowerCase(),
         };
-        if (!datos.first_name && !datos.last_name && !datos.edad) return;
+        if (!datos.first_name && !datos.last_name && !datos.edad && !datos.email) return;
         setDelPerfil(datos);
         // Solo se rellena lo que esté en blanco: si ya escribió algo (o venía de
         // un progreso guardado), manda lo suyo.
@@ -463,6 +488,7 @@ export default function EmpiezaTuCambioPage() {
           first_name: a.first_name || datos.first_name,
           last_name: a.last_name || datos.last_name,
           edad: a.edad || datos.edad,
+          email: a.email || datos.email,
         }));
       })
       .catch(() => {});
@@ -553,12 +579,16 @@ export default function EmpiezaTuCambioPage() {
       if (SUBMIT_ENDPOINT) {
         // Contrato de POST /forms/public-answer: metadatos arriba, el resto de
         // respuestas como pares {question, answer}. website = honeypot vacío.
-        const META_KEYS = ['first_name', 'last_name', 'phone', 'timestamp', 'origen',
+        const META_KEYS = ['first_name', 'last_name', 'phone', 'email', 'timestamp', 'origen',
           'via', 'utm_source', 'utm_medium', 'utm_campaign', 'utm_content'];
         const body = {
           form_id: PRELLAMADA_FORM_ID,
           name: [submission.first_name, submission.last_name].filter(Boolean).join(' '),
           phone: String(submission.phone || ''),
+          // El backend lo espera desde siempre (`body.email` en
+          // public-forms.service.ts): con él enlaza la respuesta a un usuario ya
+          // registrado y manda la confirmación con el enlace de la agenda.
+          email: String(submission.email || '').trim().toLowerCase(),
           answers: Object.entries(submission)
             .filter(([k]) => !META_KEYS.includes(k))
             .map(([question, answer]) => ({ question, answer })),
@@ -993,6 +1023,24 @@ export default function EmpiezaTuCambioPage() {
               </div>
             )}
 
+            {step.type === 'email' && (
+              <div className="max-w-md">
+                {/* `type="email"` e `inputMode="email"` para que el móvil saque
+                    el teclado con la @ y el navegador ofrezca autocompletar: en
+                    un formulario que se rellena de pie con el móvil, eso vale
+                    más que cualquier validación. */}
+                <Field
+                  type="email"
+                  inputMode="email"
+                  autoComplete="email"
+                  placeholder={step.placeholder}
+                  value={answers[step.key]}
+                  onChange={(v) => set({ [step.key]: v })}
+                  autoFocus
+                />
+              </div>
+            )}
+
             {step.type === 'phone' && (
               <div className="max-w-md onb-phone">
                 <PhoneInput
@@ -1097,10 +1145,13 @@ export default function EmpiezaTuCambioPage() {
 }
 
 // Input de texto con el estilo naranja del onboarding.
-function Field({ value, onChange, placeholder, autoFocus }) {
+function Field({ value, onChange, placeholder, autoFocus, type = 'text', inputMode, autoComplete }) {
   return (
     <input
       autoFocus={autoFocus}
+      type={type}
+      inputMode={inputMode}
+      autoComplete={autoComplete}
       value={value}
       onChange={(e) => onChange(e.target.value)}
       placeholder={placeholder}
