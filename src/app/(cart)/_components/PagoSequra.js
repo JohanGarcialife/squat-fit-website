@@ -32,10 +32,32 @@ export const SEQURA_MAX = 4000;
 export const SEQURA_AVISO_CERCA = 15;
 
 /**
+ * Interruptor general, el mismo que apaga el simulador de cuotas
+ * (SequraSimulador.js). Apagado por defecto y se enciende con
+ * NEXT_PUBLIC_SEQURA_READY=true en Vercel.
+ *
+ * ESTO FALTABA, y era grave: el botón se pintaba siempre, mientras el backend
+ * apuntaba a `sandbox.sequrapi.com`. Un cliente real con 50 € o más en el
+ * carrito veía «Pagar a plazos con seQura», entraba en el formulario de PRUEBAS
+ * de seQura y, si lo completaba, se le concedía el acceso sin que hubiera
+ * ningún cobro. Estuvo tapado por dos fallos que se anulaban entre sí —la CSP
+ * bloqueaba el iframe y la concesión no concedía nada—; al arreglar los dos el
+ * 3-ago quedó un camino de acceso gratis abierto durante ~25 minutos. Ningún
+ * cliente llegó a usarlo (comprobado en `sequra_orders`: solo los 2 pedidos de
+ * prueba internos).
+ *
+ * La lección: arreglar dos fallos que se compensaban puede destapar un tercero.
+ * Un método de pago se enciende con un interruptor explícito, nunca por el
+ * hecho de que su código esté desplegado.
+ */
+const ENCENDIDO = process.env.NEXT_PUBLIC_SEQURA_READY === 'true';
+
+/**
  * ¿Se puede fraccionar este carrito? Devuelve el motivo cuando no, para poder
  * decir algo útil en vez de callar.
  */
 export function evaluarSequra(cart, total, divisa) {
+  if (!ENCENDIDO) return { aplica: false, motivo: 'apagado' };
   if (divisa !== 'EUR') return { aplica: false, motivo: 'divisa' };
   const haySuscripcion = (cart || []).some(
     (i) => i.period === '/mes' || i.period === '/trimestre',
