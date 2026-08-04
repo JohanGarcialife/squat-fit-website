@@ -551,10 +551,18 @@ export default function Payment(props) {
             </p>
           )}
 
+          {/* Botón de atrás, no un enlace subrayado suelto.
+              «Volver al carrito» en medio de la nada, debajo del pago, se leía
+              como un enlace de pie de página — pequeño, sin forma y fácil de
+              pulsar sin querer justo cuando el cliente busca el botón de pagar.
+              Ahora tiene forma de control, la flecha dice a dónde lleva, y va
+              alineado a la izquierda como la cabecera del paso. */}
           <button
+            type="button"
             onClick={() => props.setStep(1)}
-            className="mt-6 block mx-auto text-secondary font-bold underline cursor-pointer"
+            className="mt-8 inline-flex items-center gap-1.5 rounded-lg px-3 py-2 -ml-3 text-slate-500 font-semibold text-sm hover:bg-slate-50 hover:text-indigo-900 active:scale-[0.98] transition-all cursor-pointer"
           >
+            <ChevronLeft size={18} className="shrink-0" />
             Volver al carrito
           </button>
         </div>

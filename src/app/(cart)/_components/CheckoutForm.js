@@ -116,6 +116,34 @@ export default function CheckoutForm({ setStep, onValidationChange, submitRef, s
     };
   }, [formData, user]);
 
+  /**
+   * Enter salta al campo siguiente en vez de enviar el formulario.
+   *
+   * `enterKeyHint="next"` SOLO cambia la etiqueta de la tecla: el móvil pinta
+   * «siguiente» y al pulsarla se envía igual, porque eso es lo que hace Enter
+   * en HTML. Prometía una cosa y hacía otra — el cliente pulsaba «siguiente» y
+   * se le disparaba la validación entera con medio formulario vacío.
+   *
+   * Se buscan los campos por orden de aparición en el DOM y se enfoca el que
+   * viene detrás. Se excluye el textarea (ahí Enter es un salto de línea de
+   * verdad) y los deshabilitados u ocultos — si no, con la dirección de envío
+   * plegada el foco saltaría a un campo que no está en pantalla.
+   *
+   * En el último campo no se hace nada: Enter envía, que es lo esperado.
+   */
+  const enterAlSiguiente = (e) => {
+    if (e.key !== 'Enter') return;
+    const el = e.target;
+    if (!el || el.tagName === 'TEXTAREA') return;
+    const campos = [...e.currentTarget.querySelectorAll('input, select')].filter(
+      (c) => !c.disabled && !c.readOnly && c.type !== 'hidden' && c.offsetParent !== null,
+    );
+    const i = campos.indexOf(el);
+    if (i === -1 || i === campos.length - 1) return;
+    e.preventDefault();
+    campos[i + 1].focus();
+  };
+
   return (
     <div className="w-full max-w-lg mx-auto pb-10">
         <div className="mb-8">
@@ -177,7 +205,7 @@ export default function CheckoutForm({ setStep, onValidationChange, submitRef, s
             }
 
             return (
-              <Form className="space-y-8">
+              <Form className="space-y-8" onKeyDown={enterAlSiguiente}>
                 {/* ── Sección 1: contacto — el email va primero para reconocer
                     a clientes que ya iniciaron sesión y traer sus datos. ── */}
                 <section className="space-y-4">
