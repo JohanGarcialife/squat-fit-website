@@ -35,7 +35,7 @@ export default function Content() {
             <p className='font-bold text-primary tracking-[0.2em] text-base sm:text-3xl uppercase whitespace-nowrap'>Contenido</p>
             <span className='w-8 sm:w-20 h-[2px] bg-primary rounded-full'></span>
           </div>
-          <p className='font-bold text-primary text-center md:text-start text-6xl max-w-[300px] '>Échale un vistazo al temario</p>
+          <p className='font-bold text-primary text-center md:text-start text-4xl md:text-6xl max-w-[300px] '>Échale un vistazo al temario</p>
           {/* key = src para re-montar la imagen al cambiar de bloque, como en cocina */}
           <Image key={image} src={image} width={340} height={575} alt='Contenido del temario' className='object-contain rounded-3xl transition-opacity duration-300 w-full max-w-[300px] md:max-w-[340px] h-auto' />
         </div>
