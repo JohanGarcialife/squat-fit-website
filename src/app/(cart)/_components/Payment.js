@@ -452,7 +452,10 @@ export default function Payment(props) {
   if (embeddedSecret) {
     return (
       <div className="min-h-screen bg-white flex flex-col lg:flex-row font-sans">
-        <div className="w-full lg:w-3/5 xl:w-1/2 p-6 lg:p-14 lg:pl-40 min-h-screen bg-white">
+        {/* `lg:min-h-screen` en vez de `min-h-screen`: en móvil el resumen ya
+            va encima, y forzar aquí una pantalla entera dejaba un socavón
+            blanco debajo del botón de seQura. */}
+        <div className="w-full lg:w-3/5 xl:w-1/2 p-6 lg:p-14 lg:pl-40 lg:min-h-screen bg-white">
 
           {/* Cabecera: la misma que los pasos 1, 2 y el pago con Payment
               Element. Sin ella, si el iframe de Stripe no llega a pintar (nos
@@ -508,10 +511,18 @@ export default function Payment(props) {
         </div>
 
         {/* Resumen del pedido, SIN su «Continuar»: aquí quien cobra es el
-            botón de Stripe. En móvil sale plegado tras «Ver resumen (N)», que
-            es como se comporta en los pasos 1 y 2. */}
-        <div className="w-full lg:w-2/5 xl:w-1/2 lg:min-h-screen bg-orange-50 sticky bottom-0 lg:static z-40 rounded-t-3xl lg:rounded-none shadow-[0_-10px_30px_rgba(0,0,0,0.10)] lg:shadow-none">
-          <div className="lg:sticky lg:top-0 lg:h-screen max-h-[70vh] lg:max-h-none overflow-y-auto">
+            botón de Stripe. En móvil sale plegado tras «Ver resumen (N)».
+
+            EN MÓVIL VA ARRIBA, no como barra flotante abajo. La barra `sticky
+            bottom-0` de los pasos 1 y 2 funciona allí porque el botón que
+            cobra vive DENTRO de ella. Aquí no: el botón «Pagar» es de Stripe y
+            queda en la columna de al lado, así que la barra se le montaba
+            encima y lo cortaba por la mitad — en la pantalla del cobro. De
+            paso se comía el simulador de cuotas y dejaba 200px de hueco.
+            `order-first lg:order-last` lo sube al principio en móvil y lo
+            devuelve a la derecha en escritorio, donde no cambia nada. */}
+        <div className="w-full order-first lg:order-last lg:w-2/5 xl:w-1/2 lg:min-h-screen bg-orange-50">
+          <div className="lg:sticky lg:top-0 lg:h-screen lg:overflow-y-auto">
             <OrderSummary mostrarCta={false} mostrarSimuladorSequra={false} />
           </div>
         </div>
