@@ -235,10 +235,10 @@ export default function CheckoutForm({ setStep, onValidationChange, submitRef, s
                     <ErrorMessage name="country" component="div" className="text-red-500 text-sm" />
                   </div>
                   <div className="flex items-center gap-3 cursor-pointer pt-1" onClick={() => setSameAddress(!sameAddress)}>
-                    <div className={`w-6 h-6 rounded-full flex items-center justify-center transition-colors ${sameAddress ? 'bg-orange-500' : 'border border-slate-300'}`}>
-                      {sameAddress && <Check size={16} className="text-white" strokeWidth={3} />}
+                    <div className={`w-5 h-5 rounded-full flex items-center justify-center transition-colors shrink-0 ${sameAddress ? 'bg-orange-500' : 'border border-slate-300'}`}>
+                      {sameAddress && <Check size={13} className="text-white" strokeWidth={3} />}
                     </div>
-                    <span className="text-orange-500">Usar la misma dirección para Envío</span>
+                    <span className="text-slate-600 text-sm">Usar la misma dirección para el envío</span>
                   </div>
                   <div className="flex flex-col gap-1">
                     <label htmlFor="shippingNotes" className={CLASES_ETIQUETA}>Notas del envío (opcional)</label>
@@ -276,6 +276,10 @@ export default function CheckoutForm({ setStep, onValidationChange, submitRef, s
 export const CLASES_CAMPO =
   'w-full border border-slate-200 rounded-xl px-4 py-3 text-slate-800 placeholder-slate-400 ' +
   'outline-none bg-white transition-all ' +
+  // Relleno pero sin el foco puesto: naranja pálido. Marca lo que ya está hecho
+  // sin gritar, y de un vistazo se ve cuánto queda por rellenar. `:not(:placeholder-shown)`
+  // es lo que distingue «tiene contenido» de «vacío» sin necesidad de estado en React.
+  'not-placeholder-shown:border-orange-200 ' +
   'focus:border-orange-500 focus:ring-4 focus:ring-orange-500/15';
 
 /** Etiqueta: gris y sin `font-medium`. La etiqueta acompaña, no compite. */

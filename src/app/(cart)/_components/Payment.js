@@ -101,7 +101,7 @@ function PaymentInner(props) {
   return (
     <div className="min-h-screen bg-white flex flex-col lg:flex-row font-sans">
       {/* Columna Izquierda: Formulario Stripe (aprox 60%) */}
-      <div className="w-full lg:w-3/5 xl:w-1/2 p-6 lg:p-14 lg:pl-40 min-h-screen bg-white">
+      <div className="w-full lg:w-2/3 p-6 lg:p-14 lg:pl-40 min-h-screen bg-white">
         
         {/* Header */}
         <div className="mb-10">
@@ -150,7 +150,7 @@ function PaymentInner(props) {
       </div>
       
       {/* Columna Derecha: Resumen */}
-      <div className="w-full lg:w-2/5 xl:w-1/2 lg:min-h-screen bg-orange-50 sticky bottom-0 lg:static z-40 rounded-t-3xl lg:rounded-none shadow-[0_-10px_30px_rgba(0,0,0,0.10)] lg:shadow-none">
+      <div className="w-full lg:w-1/3 lg:min-h-screen bg-orange-50 sticky bottom-0 lg:static z-40 rounded-t-3xl lg:rounded-none shadow-[0_-10px_30px_rgba(0,0,0,0.10)] lg:shadow-none">
         <div className="lg:sticky lg:top-0 lg:h-screen max-h-[70vh] lg:max-h-none overflow-y-auto">
           <OrderSummary 
              triggerCheckoutFormSubmit={handleSubmit}
@@ -465,7 +465,7 @@ export default function Payment(props) {
         {/* `lg:min-h-screen` en vez de `min-h-screen`: en móvil el resumen ya
             va encima, y forzar aquí una pantalla entera dejaba un socavón
             blanco debajo del botón de seQura. */}
-        <div className="w-full lg:w-3/5 xl:w-1/2 p-6 lg:p-14 lg:pl-40 lg:min-h-screen bg-white">
+        <div className="w-full lg:w-2/3 p-6 lg:p-14 lg:pl-40 lg:min-h-screen bg-white">
 
           {/* Cabecera: la misma que los pasos 1, 2 y el pago con Payment
               Element. Sin ella, si el iframe de Stripe no llega a pintar (nos
@@ -517,7 +517,11 @@ export default function Payment(props) {
               la rama que el backend devuelve HOY, no en la que se estaba
               leyendo al escribirlo. */}
           {sequra.aplica && (
-            <div className="mt-8 pt-8 border-t border-indigo-100">
+            <div className="mt-8 pt-8 border-t border-indigo-100 max-w-[420px] mx-auto">
+              {/* Acotado al ancho de la caja de Stripe (~420px), no al de la
+                  columna: Stripe pinta su tarjeta centrada y estrecha, así que
+                  un botón a todo lo ancho de la columna se veía bastante mayor
+                  que su «Pagar» y desequilibraba las dos opciones. */}
               {/* La cuota la calcula seQura, no nosotros. Dividir el total
                   entre 12 daría 15,67 € cuando lo que se cobra son 18,06 €:
                   la diferencia son sus comisiones, y anunciar una cuota que no
@@ -562,7 +566,7 @@ export default function Payment(props) {
             paso se comía el simulador de cuotas y dejaba 200px de hueco.
             `order-first lg:order-last` lo sube al principio en móvil y lo
             devuelve a la derecha en escritorio, donde no cambia nada. */}
-        <div className="w-full order-first lg:order-last lg:w-2/5 xl:w-1/2 lg:min-h-screen bg-orange-50">
+        <div className="w-full order-first lg:order-last lg:w-1/3 lg:min-h-screen bg-orange-50">
           <div className="lg:sticky lg:top-0 lg:h-screen lg:overflow-y-auto">
             <OrderSummary mostrarCta={false} />
           </div>

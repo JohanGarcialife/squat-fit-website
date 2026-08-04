@@ -24,7 +24,7 @@ export default function SaveCardCheckbox({ checked, onChange, id = 'save-card', 
           type="checkbox"
           checked={checked}
           onChange={(e) => onChange(e.target.checked)}
-          className="h-5 w-5 rounded accent-[#FF690B] cursor-pointer"
+          className="h-[18px] w-[18px] rounded accent-[#FF690B] cursor-pointer"
         />
       </span>
       {/* Dos líneas y para: la primera dice qué haces, la segunda quita el
@@ -35,9 +35,9 @@ export default function SaveCardCheckbox({ checked, onChange, id = 'save-card', 
           sensación de que hay algo que leer. Lo de Stripe sigue estando donde
           importa (la política de privacidad) y el propio Stripe lo repite en su
           caja de pago justo después. */}
-      <span className="text-sm leading-snug text-[#363C98]/80 -ml-1 py-3">
+      <span className="text-sm leading-snug text-slate-600 -ml-1 py-3">
         Quiero guardar mi método de pago
-        <span className="block text-[#363C98]/50 text-xs mt-0.5">
+        <span className="block text-slate-400 text-xs mt-0.5">
           Podrás gestionarlo o eliminarlo luego en Ajustes
         </span>
       </span>

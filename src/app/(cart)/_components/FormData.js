@@ -61,7 +61,7 @@ export default function FormData(props) {
     <div className="min-h-screen bg-white flex flex-col lg:flex-row font-sans">
       
       {/* Columna Izquierda: Formulario (aprox 60%) */}
-      <div className="w-full lg:w-3/5 xl:w-1/2 p-6 lg:p-14 lg:pl-40 min-h-screen bg-white">
+      <div className="w-full lg:w-2/3 p-6 lg:p-14 lg:pl-40 min-h-screen bg-white">
         <CheckoutForm
             setStep={setStep}
             onValidationChange={handleValidationChange}
@@ -86,7 +86,7 @@ export default function FormData(props) {
           pantalla y no llegaba a deslizarse nunca. `max-height` anima igual y
           no crea contenedor. */}
       <div
-        className={`w-full lg:w-2/5 xl:w-1/2 lg:min-h-screen bg-orange-50 sticky bottom-0 lg:static z-40 rounded-t-3xl lg:rounded-none shadow-[0_-10px_30px_rgba(0,0,0,0.10)] lg:shadow-none transition-[max-height] duration-200 ${
+        className={`w-full lg:w-1/3 lg:min-h-screen bg-orange-50 sticky bottom-0 lg:static z-40 rounded-t-3xl lg:rounded-none shadow-[0_-10px_30px_rgba(0,0,0,0.10)] lg:shadow-none transition-[max-height] duration-200 ${
           tecladoAbierto ? 'max-h-0 overflow-hidden lg:max-h-none lg:overflow-visible' : 'max-h-[80vh] lg:max-h-none'
         }`}
       >

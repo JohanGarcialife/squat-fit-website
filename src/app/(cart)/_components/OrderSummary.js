@@ -3,7 +3,7 @@
 import React, { useCallback, useRef, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ChevronDown, X } from 'lucide-react';
+import { ChevronDown, ChevronRight, X } from 'lucide-react';
 import { useCartStore } from '@/stores/cart.store';
 import { useCheckoutStore } from '@/stores/checkout.store';
 import { useCurrency } from './useCurrency';
@@ -106,7 +106,10 @@ export default function OrderSummary(props) {
         </span>
         <span className="flex items-center gap-1 text-indigo-900 font-bold text-sm shrink-0">
           Ver detalle
-          <ChevronDown size={18} className="shrink-0" />
+          {/* Antes era una flecha hacia abajo, que promete desplegar en línea.
+              El resumen ya no se despliega: entra deslizando desde la derecha,
+              así que la flecha correcta apunta hacia allí. */}
+          <ChevronRight size={18} className="shrink-0" />
         </span>
       </button>
 
