@@ -137,11 +137,11 @@ export default function OrderSummary(props) {
           y hace falta para que en escritorio el resumen vuelva a su sitio. */}
       <div
         id="resumen-pedido"
-        style={{ translate: expanded ? '0' : '100%' }}
+        style={{ transform: expanded ? 'translateX(0)' : 'translateX(100%)' }}
         className={`
           fixed right-0 top-0 z-[100] h-full w-[86%] max-w-[420px] overflow-y-auto
           bg-orange-50 shadow-2xl p-6 transition-transform duration-300 ease-out
-          lg:static lg:z-auto lg:h-auto lg:w-auto lg:max-w-none lg:translate-x-0!
+          lg:static lg:z-auto lg:h-auto lg:w-auto lg:max-w-none lg:[transform:none]!
           lg:bg-transparent lg:shadow-none lg:p-0 lg:overflow-visible
         `}
       >

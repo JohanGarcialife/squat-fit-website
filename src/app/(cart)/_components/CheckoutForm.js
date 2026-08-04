@@ -166,12 +166,12 @@ export default function CheckoutForm({ setStep, onValidationChange, submitRef, s
                 <section className="space-y-4">
                   <SectionHeading n={1} title="Tus datos" />
                   {isCompany && (
-                    <InputField label="Nombre de empresa / razón social" name="companyName" placeholder="Razón social de la empresa" />
+                    <InputField label="Nombre de empresa / razón social" name="companyName" placeholder="Razón social de la empresa" autoComplete="organization" />
                   )}
-                  <InputField label="E-mail" name="email" placeholder="ana@correo.com" type="email" />
+                  <InputField label="E-mail" name="email" placeholder="ana@correo.com" type="email" autoComplete="email" />
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <InputField label="Nombre" name="firstName" placeholder="Ana" />
-                    <InputField label="Apellidos" name="lastName" placeholder="García López" />
+                    <InputField label="Nombre" name="firstName" placeholder="Ana" autoComplete="given-name" />
+                    <InputField label="Apellidos" name="lastName" placeholder="García López" autoComplete="family-name" />
                   </div>
                   <InputField
                     label={isCompany ? 'CIF*' : (dniRequired ? 'DNI/CIF* (obligatorio en pedidos de +400 €)' : 'DNI/CIF (opcional)')}
@@ -206,11 +206,11 @@ export default function CheckoutForm({ setStep, onValidationChange, submitRef, s
                 {/* ── Sección 2: dirección de envío ── */}
                 <section className="space-y-4">
                   <SectionHeading n={2} title="Dirección de envío" />
-                  <InputField label="Dirección" name="address" placeholder="Calle Mayor, 12" />
-                  <InputField label="Piso / puerta (opcional)" name="apartment" placeholder="3º B" />
+                  <InputField label="Dirección" name="address" placeholder="Calle Mayor, 12" autoComplete="address-line1" />
+                  <InputField label="Piso / puerta (opcional)" name="apartment" placeholder="3º B" autoComplete="address-line2" />
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <InputField label="Código postal" name="postalCode" placeholder="03003" />
-                    <InputField label="Ciudad" name="city" placeholder="Alicante" />
+                    <InputField label="Código postal" name="postalCode" placeholder="03003" autoComplete="postal-code" />
+                    <InputField label="Ciudad" name="city" placeholder="Alicante" autoComplete="address-level2" />
                   </div>
                   <div className="flex flex-col gap-1">
                     <label htmlFor="country" className={CLASES_ETIQUETA}>País</label>
@@ -295,7 +295,21 @@ function SectionHeading({ n, title }) {
   );
 }
 
-function InputField({ label, placeholder, type = 'text', name }) {
+/**
+ * Los botones «anterior / siguiente» del teclado del móvil NO se pintan desde
+ * la web: los pone el sistema, y solo aparecen si puede deducir que los campos
+ * forman una serie. Para eso hacen falta tres cosas, y aquí faltaban las tres:
+ *
+ *   · que todos los campos estén dentro del mismo `<form>` (lo están),
+ *   · `autoComplete` reconocible en cada uno — es lo que le dice a iOS que
+ *     esto es un formulario de dirección de verdad y no campos sueltos, y de
+ *     paso activa el autorrelleno del cliente,
+ *   · `enterKeyHint="next"` para que la tecla de intro diga «siguiente» en vez
+ *     de «ir», y salte al campo de al lado en lugar de enviar.
+ *
+ * El último campo del formulario no lo lleva: ahí «intro» sí debe enviar.
+ */
+function InputField({ label, placeholder, type = 'text', name, autoComplete, ultimo = false }) {
   return (
     <div className="flex flex-col gap-1">
       <label htmlFor={name} className={CLASES_ETIQUETA}>{label}</label>
@@ -304,9 +318,19 @@ function InputField({ label, placeholder, type = 'text', name }) {
         name={name}
         id={name}
         placeholder={placeholder}
+        autoComplete={autoComplete}
+        enterKeyHint={ultimo ? 'done' : 'next'}
         className={CLASES_CAMPO}
       />
-      <ErrorMessage name={name} component="div" className="text-red-500 text-sm ml-1" />
+      {/* Rojo, pero el justo. `red-500` sobre blanco competía con el naranja de
+          la marca; `red-700` a 13px pesa menos y se sigue leyendo sin esfuerzo.
+          El tono NO se cambia a naranja ni a azul, aunque haya varios colores en
+          la pantalla: el naranja significa ahora «aquí estás escribiendo» y el
+          azul es el de marca. Si el error compartiera cualquiera de los dos,
+          «enfocado» y «mal» se verían igual — que es justo lo que se acaba de
+          arreglar. El rojo puede permitirse ser el único que grita porque es el
+          único que aparece solo cuando algo va mal. */}
+      <ErrorMessage name={name} component="div" className="text-red-700 text-[13px] ml-1" />
     </div>
   );
 }
