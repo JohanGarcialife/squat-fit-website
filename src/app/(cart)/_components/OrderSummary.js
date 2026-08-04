@@ -126,13 +126,22 @@ export default function OrderSummary(props) {
           que el resumen se comporte igual en toda la web. Desplegarlo en línea
           empujaba el formulario fuera de la vista, que es lo que lo hacía
           incómodo en el paso 2. */}
+      {/* El desplazamiento va en `style`, no en clases de Tailwind.
+          Con `translate-x-full`/`translate-x-0` el cajón se quedaba clavado
+          fuera de pantalla: medido en el preview, `left` calculado 54,6px pero
+          el rectángulo real en 390px, y `translate: 100%` seguía puesto con la
+          clase `translate-x-0` ya aplicada. Tailwind v4 escribe la propiedad
+          `translate` (no `transform`), y ahí las dos utilidades se pisaban.
+          Un estilo en línea no admite ese empate. El `lg:translate-x-0!` lleva
+          `!important` a propósito: es lo único que gana a un estilo en línea,
+          y hace falta para que en escritorio el resumen vuelva a su sitio. */}
       <div
         id="resumen-pedido"
+        style={{ translate: expanded ? '0' : '100%' }}
         className={`
           fixed right-0 top-0 z-[100] h-full w-[86%] max-w-[420px] overflow-y-auto
           bg-orange-50 shadow-2xl p-6 transition-transform duration-300 ease-out
-          ${expanded ? 'translate-x-0' : 'translate-x-full'}
-          lg:static lg:z-auto lg:h-auto lg:w-auto lg:max-w-none lg:translate-x-0
+          lg:static lg:z-auto lg:h-auto lg:w-auto lg:max-w-none lg:translate-x-0!
           lg:bg-transparent lg:shadow-none lg:p-0 lg:overflow-visible
         `}
       >
