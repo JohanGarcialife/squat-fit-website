@@ -26,6 +26,20 @@ import React, { useEffect, useState } from 'react';
 
 const API = 'https://squatfit-api-cyrc2g3zra-no.a.run.app';
 
+/**
+ * Verde de seQura, tomado de su propia web (sequra.es) el 4-ago, no inventado.
+ * Usan dos: #21CFAC es el claro y #00C2A3 el de acento — este último es el que
+ * aguanta como borde sobre blanco.
+ */
+export const SEQURA_VERDE = '#00C2A3';
+/**
+ * El mismo verde oscurecido para el TEXTO. `#00C2A3` sobre blanco da 2,2:1 de
+ * contraste y el mínimo legible es 4,5:1: con su color exacto, el rótulo del
+ * botón no se lee. Se oscurece manteniendo el tono, que es lo que conserva la
+ * identidad de la marca sin dejar a nadie fuera.
+ */
+export const SEQURA_VERDE_TEXTO = '#00786B';
+
 export const SEQURA_MIN = 50;
 export const SEQURA_MAX = 4000;
 /** Cuánto puede faltar para que merezca la pena avisar al cliente. */
@@ -146,11 +160,21 @@ export default function PagoSequra({ cart, total, formData, onError }) {
 
   return (
     <div className="w-full">
+      {/* Deliberadamente MÁS discreto que el «Pagar» de Stripe: más estrecho,
+          borde de 1px en vez de 2 y sin relleno. La tarjeta sigue siendo la
+          opción principal; esta es la alternativa. Si pesara igual o más, le
+          quitaría fuerza a la que convierte mejor.
+
+          Colores: SEQURA_VERDE es el de su propia web. El texto va en
+          SEQURA_VERDE_TEXTO —el mismo tono, oscurecido— porque su verde sobre
+          blanco da 2,2:1 de contraste y no llega al 4,5:1 que hace falta para
+          leerlo. El borde sí puede llevar el color exacto. */}
       <button
         type="button"
         onClick={empezar}
         disabled={estado === 'cargando'}
-        className="w-full rounded-2xl border-2 border-indigo-800 py-4 font-bold text-indigo-900 hover:bg-indigo-50 active:scale-[0.99] transition-all cursor-pointer disabled:opacity-60"
+        style={{ borderColor: SEQURA_VERDE, color: SEQURA_VERDE_TEXTO }}
+        className="block w-[84%] mx-auto rounded-xl border py-3 font-semibold hover:bg-[#F0FBF8] active:scale-[0.99] transition-all cursor-pointer disabled:opacity-60"
       >
         {estado === 'cargando' ? 'Preparando…' : 'Pagar a plazos con seQura'}
       </button>

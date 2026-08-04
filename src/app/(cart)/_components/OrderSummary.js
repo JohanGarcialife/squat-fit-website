@@ -14,7 +14,7 @@ import { useShippingQuote } from './useShippingQuote';
 import useCerrarAlTocarFuera from '@/hooks/useCerrarAlTocarFuera';
 
 export default function OrderSummary(props) {
-    const { isFormValid, isFormDirty, triggerCheckoutFormSubmit } = props;
+    const { isFormValid, isFormDirty, triggerCheckoutFormSubmit, mostrarCta = true } = props;
     const { cart } = useCartStore();
 
     // En MÓVIL el resumen va plegado: ocupaba media pantalla y empujaba el
@@ -255,13 +255,20 @@ export default function OrderSummary(props) {
         </div>
       </div>
 
-      <button
-        onClick={triggerCheckoutFormSubmit}
-        disabled={!isFormValid}
-        className="w-full bg-indigo-800 text-white cursor-pointer font-bold text-base py-3 lg:text-lg lg:py-4 rounded-2xl hover:bg-indigo-900 transition-all shadow-xl shadow-indigo-200 disabled:opacity-50 disabled:cursor-not-allowed"
-      >
-        Continuar
-      </button>
+      {/* En el paso del checkout incrustado, quien cobra es el botón «Pagar»
+          de Stripe: repetir aquí un «Continuar» daría dos llamadas a la acción
+          en la misma pantalla y ninguna de las dos sería obvia. El resumen se
+          queda por lo que aporta —recordar qué se está comprando y por cuánto,
+          justo cuando se decide el pago—, pero sin CTA propia. */}
+      {mostrarCta && (
+        <button
+          onClick={triggerCheckoutFormSubmit}
+          disabled={!isFormValid}
+          className="w-full bg-indigo-800 text-white cursor-pointer font-bold text-base py-3 lg:text-lg lg:py-4 rounded-2xl hover:bg-indigo-900 transition-all shadow-xl shadow-indigo-200 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          Continuar
+        </button>
+      )}
 
     </div>
   );

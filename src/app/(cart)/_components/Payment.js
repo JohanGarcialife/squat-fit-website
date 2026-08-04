@@ -19,6 +19,7 @@ import { loadStripe } from '@stripe/stripe-js';
 import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import { toast } from 'react-hot-toast';
 import PagoSequra, { evaluarSequra } from './PagoSequra';
+import SequraSimulador from '@/app/components/SequraSimulador';
 
 // La clave publicable viene SIEMPRE del entorno (NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY).
 // Sin fallback de test: si falta, el pago embebido debe fallar a la vista, no
@@ -436,14 +437,22 @@ export default function Payment(props) {
     );
   }
 
-  // Checkout incrustado: el pago de Stripe dentro de nuestra propia página,
-  // con la marca de la cuenta (logo, #363c98 y #ff6a0b) y sin salir del sitio.
+  // Checkout incrustado: el pago de Stripe dentro de nuestra propia página.
+  //
+  // De la marca de la cuenta de Stripe solo llega el COLOR del botón (y la
+  // forma y la tipografía, si se configuran en Ajustes → Pagos → Checkout;
+  // es un ajuste distinto del de Marca, que solo afecta a facturas y recibos).
+  // El fondo blanco, las cajas y el espaciado son suyos y no se tocan.
+  //
+  // Por eso lo que personaliza esta pantalla es el MARCO: las dos columnas de
+  // los pasos 1 y 2, nuestros encabezados y el resumen del pedido. La versión
+  // anterior era una columna blanca suelta, y en el momento de pagar el
+  // cliente no veía qué estaba comprando — solo un importe dentro de la caja
+  // de Stripe. El resumen vuelve por eso, no por decoración.
   if (embeddedSecret) {
     return (
-      <div className="min-h-screen bg-white font-sans">
-        {/* El ancho de la columna (max-w-xl, sin padding lateral a partir de
-            md) se mantiene igual que antes: el padding solo entra en móvil. */}
-        <div className="w-full max-w-xl mx-auto px-6 md:px-0 py-6">
+      <div className="min-h-screen bg-white flex flex-col lg:flex-row font-sans">
+        <div className="w-full lg:w-3/5 xl:w-1/2 p-6 lg:p-14 lg:pl-40 min-h-screen bg-white">
 
           {/* Cabecera: la misma que los pasos 1, 2 y el pago con Payment
               Element. Sin ella, si el iframe de Stripe no llega a pintar (nos
@@ -458,6 +467,7 @@ export default function Payment(props) {
               </div>
           </div>
 
+          <h2 className="text-indigo-900 font-bold text-lg mb-4">Métodos de pago</h2>
           <CheckoutIncrustado clientSecret={embeddedSecret} />
 
           {/* Pago fraccionado con seQura, DEBAJO del pago de Stripe.
@@ -472,7 +482,14 @@ export default function Payment(props) {
               leyendo al escribirlo. */}
           {sequra.aplica && (
             <div className="mt-8 pt-8 border-t border-indigo-100">
-              <p className="text-slate-500 text-sm mb-4 text-center">o si lo prefieres</p>
+              {/* La cuota la calcula seQura, no nosotros. Dividir el total
+                  entre 12 daría 15,67 € cuando lo que se cobra son 18,06 €:
+                  la diferencia son sus comisiones, y anunciar una cuota que no
+                  es la real no es un detalle estético. Su widget lee el importe
+                  del `data-amount` y pinta la cifra buena. */}
+              <div className="mb-4 flex justify-center">
+                <SequraSimulador importeEur={totalCarrito} divisa={divisa} />
+              </div>
               <PagoSequra cart={cart} total={totalCarrito} formData={datosCliente} />
             </div>
           )}
@@ -488,6 +505,15 @@ export default function Payment(props) {
           >
             Volver al carrito
           </button>
+        </div>
+
+        {/* Resumen del pedido, SIN su «Continuar»: aquí quien cobra es el
+            botón de Stripe. En móvil sale plegado tras «Ver resumen (N)», que
+            es como se comporta en los pasos 1 y 2. */}
+        <div className="w-full lg:w-2/5 xl:w-1/2 lg:min-h-screen bg-orange-50 sticky bottom-0 lg:static z-40 rounded-t-3xl lg:rounded-none shadow-[0_-10px_30px_rgba(0,0,0,0.10)] lg:shadow-none">
+          <div className="lg:sticky lg:top-0 lg:h-screen max-h-[70vh] lg:max-h-none overflow-y-auto">
+            <OrderSummary mostrarCta={false} />
+          </div>
         </div>
       </div>
     );
