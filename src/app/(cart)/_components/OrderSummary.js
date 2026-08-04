@@ -49,13 +49,26 @@ export default function OrderSummary(props) {
 
     // Envío real por zona (12.2). El backend es quien manda: aquí solo se
     // pinta lo mismo que se va a cobrar.
+    // ENVÍO: el destino manda, no la facturación.
+    // Si el cliente desmarcó «usar la misma dirección», la tarifa tiene que
+    // salir del CP y el país a los que se manda el paquete. Calcularla con los
+    // de facturación es cobrar la zona equivocada — entre España peninsular
+    // (0 €) y Norteamérica (22,90 €) la diferencia no es un redondeo.
+    const destinoEnvio = formData?.sameAddress === false
+      ? { pais: formData?.shippingCountry, cp: formData?.shippingPostalCode }
+      : { pais: formData?.country, cp: formData?.postalCode };
     const { shippingCost: finalShipping, sinDestino } = useShippingQuote(
       subtotal,
-      formData?.country,
-      formData?.postalCode,
+      destinoEnvio.pais,
+      destinoEnvio.cp,
       hasPhysicalItems,
     );
-    const arancel = arancelParaCarrito(cart, formData?.country);
+    // Los aranceles de importación los cobra la ADUANA DE DESTINO, así que
+    // salen del país al que se envía, no del de facturación. Con la dirección
+    // separada era el mismo fallo que el envío: alguien que factura en España
+    // y manda a Estados Unidos no veía el arancel, y al revés se le cobraba
+    // uno que no le corresponde.
+    const arancel = arancelParaCarrito(cart, destinoEnvio.pais);
 
     const total = subtotal + finalShipping + arancel;
 

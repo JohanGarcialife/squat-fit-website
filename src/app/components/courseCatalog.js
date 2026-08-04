@@ -286,12 +286,75 @@ export function buildTierCartItem(group, tierKey) {
 // misma app servida desde Vercel.
 export const CHECKOUT_KNOWN_ORIGIN = 'https://squadfit.es';
 
-export async function createTierCheckout(item, { token, saveCard = false } = {}) {
+/**
+ * Datos del comprador que viajan al checkout, sacados del paso 2.
+ *
+ * Dos cosas que arregla:
+ *
+ * 1. **La dirección de ENVÍO.** El presupuesto de envío se calcula con el CP y
+ *    el país que el cliente escribe en nuestro formulario, pero el destino real
+ *    era el que tecleaba dentro de la caja de Stripe. Si no coincidían, se
+ *    cobraba la tarifa de una zona y se enviaba a otra. Mandándola nosotros,
+ *    Stripe deja de pedirla y solo hay una.
+ *
+ * 2. **El nombre y el teléfono.** Los pedidos salían sin nombre en el panel de
+ *    Stripe porque solo se mandaba el email. Con estos, el backend crea el
+ *    customer y el pago llega identificado.
+ *
+ * Solo se manda la dirección si está COMPLETA: si falta un campo, el backend la
+ * rechazaría y con ella la sesión de pago entera. Incompleta es mejor no
+ * mandarla — Stripe la pide y el cliente sigue comprando.
+ */
+function datosDelComprador(formData) {
+  if (!formData) return {};
+  const envio = formData.sameAddress === false ? 'shipping' : 'facturacion';
+  const d = envio === 'shipping'
+    ? {
+        line1: formData.shippingAddress,
+        line2: formData.shippingApartment,
+        postal_code: formData.shippingPostalCode,
+        city: formData.shippingCity,
+        country: formData.shippingCountry,
+      }
+    : {
+        line1: formData.address,
+        line2: formData.apartment,
+        postal_code: formData.postalCode,
+        city: formData.city,
+        country: formData.country,
+      };
+
+  const nombre = [formData.firstName, formData.lastName].filter(Boolean).join(' ').trim();
+  const completa = d.line1 && d.postal_code && d.city && d.country && nombre;
+
+  return {
+    ...(formData.firstName ? { name: formData.firstName } : {}),
+    ...(formData.lastName ? { last_name: formData.lastName } : {}),
+    ...(formData.phone ? { phone: formData.phone } : {}),
+    ...(completa
+      ? {
+          shipping_address: {
+            name: nombre,
+            line1: d.line1,
+            ...(d.line2 ? { line2: d.line2 } : {}),
+            postal_code: d.postal_code,
+            city: d.city,
+            // ISO-2 en mayúsculas: es lo que exige Stripe. El selector de país
+            // ya guarda el código, pero se normaliza por si acaso.
+            country: String(d.country).toUpperCase().slice(0, 2),
+          },
+        }
+      : {}),
+  };
+}
+
+export async function createTierCheckout(item, { token, saveCard = false, formData } = {}) {
   const origin = resolveOrigin();
 
   const attempt = async (base) => {
     const payload = {
       items: [{ ...item.payload, quantity: 1 }],
+      ...datosDelComprador(formData),
       // Checkout INCRUSTADO: el pago se monta dentro de nuestra página en vez
       // de mandar al cliente a checkout.stripe.com. Si el backend desplegado
       // todavía no lo soporta, devolverá una `url` y seguimos redirigiendo

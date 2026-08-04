@@ -63,7 +63,12 @@ export default function Summary(props) {
     // sale del checkout persistido (paso 2); línea aparte del envío. El cobro
     // real llega con la Fase 16.
     const { formData } = useCheckoutStore();
-    const arancel = arancelParaCarrito(cart, formData?.country);
+    // Mismo criterio que en el resumen del paso 2/3: el arancel lo cobra la
+    // aduana de DESTINO, así que sale del país al que se envía.
+    const paisDestino = formData?.sameAddress === false
+      ? formData?.shippingCountry
+      : formData?.country;
+    const arancel = arancelParaCarrito(cart, paisDestino);
 
     // Cursos con tramos (15.1): el item lleva su grupo completo, así que aquí
     // también se puede cambiar entre Mensual / Anual / De por vida.

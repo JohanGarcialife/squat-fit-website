@@ -29,10 +29,18 @@ export default function FormData(props) {
   // Tarifa real de la zona de destino (12.2), no un 4,99 fijo para todo el
   // mundo. La calcula el backend, que es también quien la cobra.
   const { formData } = useCheckoutStore();
+  // ENVÍO: el destino manda, no la facturación.
+  // Si el cliente desmarcó «usar la misma dirección», la tarifa tiene que
+  // salir del CP y el país a los que se manda el paquete. Calcularla con los
+  // de facturación es cobrar la zona equivocada — entre España peninsular
+  // (0 €) y Norteamérica (22,90 €) la diferencia no es un redondeo.
+  const destinoEnvio = formData?.sameAddress === false
+    ? { pais: formData?.shippingCountry, cp: formData?.shippingPostalCode }
+    : { pais: formData?.country, cp: formData?.postalCode };
   const { shippingCost: finalShipping } = useShippingQuote(
     subtotal,
-    formData?.country,
-    formData?.postalCode,
+    destinoEnvio.pais,
+    destinoEnvio.cp,
     hasPhysicalItems,
   );
   const total = subtotal + finalShipping;
