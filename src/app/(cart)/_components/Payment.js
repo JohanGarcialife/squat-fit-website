@@ -258,7 +258,11 @@ export default function Payment(props) {
     // clientSecret se monta el Payment Element; si el endpoint aún no está
     // desplegado (404), se mantiene el aviso honesto de «muy pronto».
     if (directItem && (directItem.tierGroup || directItem.tier)) {
-       createTierCheckout(directItem, { token, saveCard })
+       // `datosCliente` es lo que el cliente escribió en el paso 2: de ahí
+       // salen la dirección de envío (para que Stripe no la vuelva a pedir y
+       // se envíe adonde se calculó el precio) y su nombre y teléfono (para
+       // que el pago no aparezca sin nombre en el panel de Stripe).
+       createTierCheckout(directItem, { token, saveCard, formData: datosCliente })
          .then((result) => {
            if (result.status === 'embedded') {
              // Lo normal desde ahora: el pago se pinta AQUÍ, sin salir de la web.

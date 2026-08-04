@@ -47,7 +47,16 @@ const buildCountryOptions = () => {
 // Localización española del selector de teléfono (con GB → Inglaterra).
 const esPhoneLocalization = { ...esPhone, gb: 'Inglaterra' };
 
-const buildValidationSchema = (dniRequired, isCompany) => Yup.object({
+// `sameAddress` entra en el esquema porque los campos de envío solo son
+// obligatorios cuando está desmarcada. Con el esquema fijo, o se pedían
+// siempre (y bloqueaban a quien envía a su propia dirección) o nunca (y se
+// mandaba una dirección a medias que el backend rechaza, tumbando el pago).
+const buildValidationSchema = (dniRequired, isCompany, sameAddress) => Yup.object({
+  shippingAddress: sameAddress ? Yup.string() : Yup.string().required('La dirección de envío es obligatoria'),
+  shippingApartment: Yup.string(),
+  shippingPostalCode: sameAddress ? Yup.string() : Yup.string().required('El código postal de envío es obligatorio'),
+  shippingCity: sameAddress ? Yup.string() : Yup.string().required('La ciudad de envío es obligatoria'),
+  shippingCountry: sameAddress ? Yup.string() : Yup.string().required('El país de envío es obligatorio'),
   companyName: isCompany
     ? Yup.string().required('El nombre de la empresa es obligatorio')
     : Yup.string(),
@@ -82,8 +91,8 @@ export default function CheckoutForm({ setStep, onValidationChange, submitRef, s
   );
   const dniRequired = subtotal >= DNI_REQUIRED_FROM;
   const validationSchema = useMemo(
-    () => buildValidationSchema(dniRequired, isCompany),
-    [dniRequired, isCompany],
+    () => buildValidationSchema(dniRequired, isCompany, sameAddress),
+    [dniRequired, isCompany, sameAddress],
   );
 
   const initialValues = useMemo(() => {
@@ -94,6 +103,11 @@ export default function CheckoutForm({ setStep, onValidationChange, submitRef, s
       : ((user?.username && user.username.includes('@')) ? user.username : '');
     return {
       companyName: '',
+      shippingAddress: '',
+      shippingApartment: '',
+      shippingPostalCode: '',
+      shippingCity: '',
+      shippingCountry: '',
       ...formData,
       email: formData.email || userEmail || '',
       firstName: formData.firstName || user?.firstName || '',
@@ -136,7 +150,10 @@ export default function CheckoutForm({ setStep, onValidationChange, submitRef, s
           initialValues={initialValues}
           validationSchema={validationSchema}
           onSubmit={(values) => {
-            updateFormData(values);
+            // `sameAddress` va con los datos: es lo que decide, en el paso 3,
+            // si la dirección que se manda a Stripe es la de facturación o la
+            // de envío. Sin esto el checkout no puede saberlo.
+            updateFormData({ ...values, sameAddress });
             // setStep(3) will be handled by OrderSummary
           }}
         >
@@ -240,6 +257,47 @@ export default function CheckoutForm({ setStep, onValidationChange, submitRef, s
                     </div>
                     <span className="text-slate-600 text-sm">Usar la misma dirección para el envío</span>
                   </div>
+
+                  {/* Dirección de envío distinta.
+                      Hasta el 5-ago esta casilla NO HACÍA NADA: `sameAddress`
+                      solo se pintaba a sí misma y no existía ningún campo de
+                      envío. Quien la desmarcaba esperando escribir otra
+                      dirección no veía nada aparecer, y su pedido salía a la de
+                      facturación.
+                      Peor: el presupuesto de envío se calcula con este código
+                      postal, así que con destino real distinto se cobraba la
+                      tarifa de una zona y se enviaba a otra. */}
+                  {!sameAddress && (
+                    <div className="space-y-4 rounded-xl border border-slate-200 p-4">
+                      <p className="text-slate-500 text-sm">¿A dónde lo enviamos?</p>
+                      <InputField label="Dirección" name="shippingAddress" placeholder="Calle Mayor, 12" autoComplete="shipping address-line1" />
+                      <InputField label="Piso / puerta (opcional)" name="shippingApartment" placeholder="3º B" autoComplete="shipping address-line2" />
+                      <div className="grid grid-cols-2 gap-4">
+                        <InputField label="Código postal" name="shippingPostalCode" placeholder="03003" autoComplete="shipping postal-code" />
+                        <InputField label="Ciudad" name="shippingCity" placeholder="Alicante" autoComplete="shipping address-level2" />
+                      </div>
+                      <div className="flex flex-col gap-1">
+                        <label htmlFor="shippingCountry" className={CLASES_ETIQUETA}>País</label>
+                        <div className="relative">
+                          <Field as="select" id="shippingCountry" name="shippingCountry" className={`${CLASES_CAMPO} appearance-none cursor-pointer`}>
+                            <option value="">Selecciona un país</option>
+                            {countryOptions.priority.map((c) => (
+                              <option key={`s-${c.code}`} value={c.code}>{c.name}</option>
+                            ))}
+                            <option disabled>──────────</option>
+                            {countryOptions.rest.map((c) => (
+                              <option key={`sr-${c.code}`} value={c.code}>{c.name}</option>
+                            ))}
+                          </Field>
+                          <div className="pointer-events-none absolute inset-y-0 right-4 flex items-center text-slate-400">
+                            <ChevronDown size={20} />
+                          </div>
+                        </div>
+                        <ErrorMessage name="shippingCountry" component="div" className="text-red-700 text-[13px] ml-1" />
+                      </div>
+                    </div>
+                  )}
+
                   <div className="flex flex-col gap-1">
                     <label htmlFor="shippingNotes" className={CLASES_ETIQUETA}>Notas del envío (opcional)</label>
                     <Field as="textarea" id="shippingNotes" name="shippingNotes" rows={3} placeholder="Escribe aquí..." className={`${CLASES_CAMPO} resize-none`} />
