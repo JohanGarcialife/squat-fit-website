@@ -27,11 +27,19 @@ export default function SaveCardCheckbox({ checked, onChange, id = 'save-card', 
           className="h-5 w-5 rounded accent-[#FF690B] cursor-pointer"
         />
       </span>
+      {/* Dos líneas y para: la primera dice qué haces, la segunda quita el
+          miedo. La versión anterior metía en el mismo párrafo que lo guarda
+          Stripe y no nosotros, que no marcarla no cambia nada, y la ruta exacta
+          del ajuste — cinco líneas de letra pequeña al lado de una casilla que
+          se decide en un segundo. Nadie lee eso; lo que hace es dar la
+          sensación de que hay algo que leer. Lo de Stripe sigue estando donde
+          importa (la política de privacidad) y el propio Stripe lo repite en su
+          caja de pago justo después. */}
       <span className="text-sm leading-snug text-[#363C98]/80 -ml-1 py-3">
-        Guardar esta tarjeta para mis próximas compras. La guarda Stripe
-        (nuestra pasarela de pago), no nosotros. No marcarla no cambia nada en
-        este pago, y puedes gestionarla o eliminarla luego desde «Gestionar
-        pagos y facturas» en Ajustes.
+        Quiero guardar mi método de pago
+        <span className="block text-[#363C98]/50 text-xs mt-0.5">
+          Podrás gestionarlo o eliminarlo luego en Ajustes
+        </span>
       </span>
     </label>
   );
