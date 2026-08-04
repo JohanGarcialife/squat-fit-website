@@ -133,8 +133,15 @@ function conGtag(accion) {
   return true;
 }
 
-/** Emisión genérica, con la misma puerta de consentimiento que `purchase`. */
-function emitir(nombre, datos) {
+/**
+ * Emisión genérica, con la misma puerta de consentimiento que `purchase`.
+ *
+ * Se exporta (4-ago-2026) para que `ga4Formularios.js` reutilice esta puerta en
+ * vez de escribir otra: lo delicado no es el `gtag('event', …)`, es esperar al
+ * consentimiento sin confundirlo con «gtag todavía no ha cargado», y eso ya
+ * está resuelto aquí.
+ */
+export function emitir(nombre, datos) {
   return conGtag((gtag) => gtag('event', nombre, datos));
 }
 

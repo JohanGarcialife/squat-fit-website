@@ -14,6 +14,7 @@ import Link from 'next/link';
 import PhoneInput from 'react-phone-input-2';
 import 'react-phone-input-2/lib/style.css';
 import esPhone from 'react-phone-input-2/lang/es.json';
+import { enviarFormSubmit } from '@/app/components/ga4Formularios';
 import GdprCheckbox from '@/app/components/GdprCheckbox';
 import { normalizeName } from '@/app/components/nameUtils';
 import TextareaMeter from '@/app/components/TextareaMeter';
@@ -557,6 +558,23 @@ export default function EmpiezaTuCambioPage() {
     setIndex(esLaMasLejana ? Math.max(destino, maxIndex) : destino);
   };
 
+  // GA4 no puede medir este envío por su cuenta: su medición mejorada solo
+  // cuenta `form_submit` cuando el envío NO está prevenido, y aquí el `<form>`
+  // hace `preventDefault` porque el paso final es una petición, no una
+  // navegación. Comprobado en producción el 4-ago-2026: llega `form_start` y no
+  // llega `form_submit`. Por eso se emite a mano, en las DOS salidas de
+  // `handleSubmit` —la buena y la de respaldo—: desde el lado del visitante la
+  // acción es la misma, y que nuestro POST falle es problema nuestro. El
+  // parámetro `registrado` permite separarlos luego en el informe.
+  const medirEnvio = (registrado) =>
+    enviarFormSubmit({
+      id: FORM_ID,
+      nombre: 'Prellamada · Aquí empieza tu cambio',
+      destino: BOOKING_URL,
+      textoBoton: 'Enviar',
+      registrado,
+    });
+
   const handleSubmit = async () => {
     if (!puedeAvanzar || saving) return;
     playFinish();
@@ -619,6 +637,7 @@ export default function EmpiezaTuCambioPage() {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(prev));
       }
       borrarProgreso(FORM_ID);
+      medirEnvio(true);
       setSent(true);
     } catch (e) {
       console.error('prellamada submit', e);
@@ -628,6 +647,7 @@ export default function EmpiezaTuCambioPage() {
         prev.push(submission);
         localStorage.setItem(STORAGE_KEY, JSON.stringify(prev));
         borrarProgreso(FORM_ID);
+        medirEnvio(false);
         setSent(true);
       } catch {}
     } finally {
