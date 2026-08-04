@@ -266,7 +266,9 @@ export default function OrderSummary(props) {
             {/* El desglose (envío, aranceles) se mudó ARRIBA, dentro del
                 detalle: en móvil el detalle es ahora un cajón lateral y estas
                 líneas tienen que ir con él, no quedarse sueltas en la barra. */}
-            <div className="flex justify-between items-center text-indigo-900/80 text-sm sm:text-base lg:text-lg">
+            {/* Solo en escritorio: en móvil este mismo total ya va en la barra
+                compacta de arriba, y salían los dos «Hoy pagarás» seguidos. */}
+            <div className="hidden lg:flex justify-between items-center text-indigo-900/80 text-sm sm:text-base lg:text-lg">
                 <span>Hoy pagarás</span>
                 <span className="font-bold text-indigo-900 text-base sm:text-lg lg:text-xl">
                     {convertPrice(total)} {symbol}
