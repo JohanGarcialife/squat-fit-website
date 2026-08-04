@@ -75,6 +75,26 @@ export const VENDEDORES = [
   { key: 'zerochats', label: 'ZeroChats' },
 ];
 
+// A DÓNDE MANDA EL BOTÓN DE LAS VIDEOCONSULTAS (4-ago-2026)
+// -----------------------------------------------------------------------------
+// Antes iba a `/contacto`, con un TODO de «enlazar la reserva TidyCal de pago
+// cuando exista». Medido: son 10 de los 30 combos —los del lead que pide
+// «Guía»—, y en 2 la videoconsulta es la única salida. Y `/contacto`, sin sesión
+// iniciada, no enseña formulario: responde «necesitas iniciar sesión» (deja una
+// vía de WhatsApp, así que no incomunica, pero a quien acaba de pulsar
+// «reservar» se le contesta otra cosa).
+//
+// Reserva de pago sigue sin haber: la cuenta de TidyCal tiene UNA sola agenda,
+// «Sesión diagnóstica» de 59 minutos y gratuita.
+//
+// Y NO se enlaza TidyCal directo a propósito. El calendario se quitó de
+// `/programa` para obligar a pasar antes por el formulario de prellamada
+// («bajará algo el número de citas y subirá lo que valen»), y `AgendaSection`
+// avisa por escrito de que un enlace directo «reabriría justo el agujero que
+// esto cierra». Así que se manda a la puerta de esa misma agenda, que es el
+// formulario: al terminarlo aparece el calendario.
+const RESERVA_LLAMADA = '/empieza-tu-cambio';
+
 // Ficha de cada producto recomendable.
 //  · catalogBase enlaza con el catálogo real (courseCatalog.js) para mostrar
 //    SIEMPRE el precio vigente — nada de precios congelados de la hoja vieja.
@@ -121,7 +141,7 @@ export const PRODUCTOS = {
   },
   vc_avanzada: {
     nombre: 'Videoconsulta avanzada · 1 hora',
-    href: '/contacto', // TODO: enlazar la reserva TidyCal de pago cuando exista
+    href: RESERVA_LLAMADA,
     cta: 'Reservar la videoconsulta',
     precio: 99.97,
     precioAntes: 160,
@@ -132,7 +152,7 @@ export const PRODUCTOS = {
   },
   vc_estrategica: {
     nombre: 'Videoconsulta estratégica · 30 min',
-    href: '/contacto', // TODO: enlazar la reserva TidyCal de pago cuando exista
+    href: RESERVA_LLAMADA,
     cta: 'Reservar la videoconsulta',
     precio: 79.99,
     nota: 'Sesión única de 30 minutos',
