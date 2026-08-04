@@ -476,7 +476,11 @@ export default function Payment(props) {
               pasó el 28-jul: la CSP lo bloqueó) el cliente ve una página
               vacía y da por hecho que el "Continuar" del paso 2 no hizo nada
               y que nunca llegó al pago. */}
-          <div className="mb-10">
+          {/* Cabecera pegada arriba en MÓVIL: la caja de Stripe es larga y al
+              bajar a pagar el «atrás» se quedaba fuera de pantalla, sin ninguna
+              forma de volver sin subir del todo. En escritorio no hace falta —
+              la columna cabe entera— así que se queda estática (`lg:static`). */}
+          <div className="mb-10 sticky top-0 z-30 bg-white pt-4 pb-3 -mx-6 px-6 lg:static lg:mx-0 lg:px-0 lg:pt-0 lg:pb-0 lg:bg-transparent">
               <span className="text-indigo-900 text-lg font-medium">Paso 3 de 3</span>
               <div onClick={() => props.setStep(2)} className="flex items-center gap-2 mt-2 cursor-pointer text-indigo-900 group">
                   <ChevronLeft size={28} className="group-hover:-translate-x-1 transition-transform" />
@@ -551,19 +555,20 @@ export default function Payment(props) {
             </p>
           )}
 
-          {/* Botón de atrás, no un enlace subrayado suelto.
-              «Volver al carrito» en medio de la nada, debajo del pago, se leía
-              como un enlace de pie de página — pequeño, sin forma y fácil de
-              pulsar sin querer justo cuando el cliente busca el botón de pagar.
-              Ahora tiene forma de control, la flecha dice a dónde lleva, y va
-              alineado a la izquierda como la cabecera del paso. */}
+          {/* «Atrás», y atrás es UN paso: al 2, no al carrito.
+              Decía «Volver al carrito» y mandaba al paso 1, saltándose de un
+              salto el formulario que el cliente acababa de rellenar. No había
+              ninguna intención detrás: venía así de antes y nadie lo miró. Si
+              alguien quiere cambiar lo que compra tiene el resumen al lado, con
+              su propio acceso al carrito; lo que se espera de un botón de atrás
+              en el paso 3 es el paso 2. */}
           <button
             type="button"
-            onClick={() => props.setStep(1)}
+            onClick={() => props.setStep(2)}
             className="mt-8 inline-flex items-center gap-1.5 rounded-lg px-3 py-2 -ml-3 text-slate-500 font-semibold text-sm hover:bg-slate-50 hover:text-indigo-900 active:scale-[0.98] transition-all cursor-pointer"
           >
             <ChevronLeft size={18} className="shrink-0" />
-            Volver al carrito
+            Atrás
           </button>
         </div>
 
