@@ -76,13 +76,18 @@ export default function FormData(props) {
 
           MIENTRAS SE ESCRIBE, LA BARRA SE VA. Con el teclado abierto quedaba
           una franja de dos o tres campos entre él y esta barra, y a veces el
-          campo que estabas rellenando caía justo detrás. Se oculta con
-          `translate-y-full` (no con `hidden`) para que vuelva deslizando y no
-          de golpe; en escritorio, donde no hay teclado que suba, esto no se
-          aplica nunca. */}
+          campo que estabas rellenando caía justo detrás. En escritorio, donde
+          no hay teclado que suba, no se aplica nunca.
+
+          SE ESCONDE CON `max-height`, NO CON `translate-y`. Un elemento con
+          `transform` pasa a ser el marco de referencia de sus descendientes
+          `position: fixed`, y el cajón del resumen es uno: con el translate
+          puesto, el cajón se posicionaba contra ESTA barra en vez de contra la
+          pantalla y no llegaba a deslizarse nunca. `max-height` anima igual y
+          no crea contenedor. */}
       <div
-        className={`w-full lg:w-2/5 xl:w-1/2 lg:min-h-screen bg-orange-50 sticky bottom-0 lg:static z-40 rounded-t-3xl lg:rounded-none shadow-[0_-10px_30px_rgba(0,0,0,0.10)] lg:shadow-none transition-transform duration-200 ${
-          tecladoAbierto ? 'translate-y-full lg:translate-y-0' : 'translate-y-0'
+        className={`w-full lg:w-2/5 xl:w-1/2 lg:min-h-screen bg-orange-50 sticky bottom-0 lg:static z-40 rounded-t-3xl lg:rounded-none shadow-[0_-10px_30px_rgba(0,0,0,0.10)] lg:shadow-none transition-[max-height] duration-200 ${
+          tecladoAbierto ? 'max-h-0 overflow-hidden lg:max-h-none lg:overflow-visible' : 'max-h-[80vh] lg:max-h-none'
         }`}
       >
         <div className="lg:sticky lg:top-0 lg:h-screen max-h-[70vh] lg:max-h-none overflow-y-auto">
