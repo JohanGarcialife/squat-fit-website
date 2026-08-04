@@ -87,13 +87,24 @@ export const VENDEDORES = [
 // Reserva de pago sigue sin haber: la cuenta de TidyCal tiene UNA sola agenda,
 // «Sesión diagnóstica» de 59 minutos y gratuita.
 //
-// Y NO se enlaza TidyCal directo a propósito. El calendario se quitó de
-// `/programa` para obligar a pasar antes por el formulario de prellamada
-// («bajará algo el número de citas y subirá lo que valen»), y `AgendaSection`
-// avisa por escrito de que un enlace directo «reabriría justo el agujero que
-// esto cierra». Así que se manda a la puerta de esa misma agenda, que es el
-// formulario: al terminarlo aparece el calendario.
-const RESERVA_LLAMADA = '/empieza-tu-cambio';
+// PRIMERO SE RESERVA, DESPUÉS SE RELLENA. Esto se cambió el mismo día: la
+// primera versión mandaba a `/empieza-tu-cambio` para que nadie llegara al
+// calendario sin pasar antes por el formulario. Hamlet lo corrigió, y con
+// razón — «formulario siempre antes de reservar» es una regla de `/programa`,
+// no una ley del sitio, y yo la apliqué donde no tocaba:
+//
+//   · Si la llamada es DE PAGO, quien ya ha pagado tiene más holgura para
+//     rellenar el formulario después, no menos.
+//   · Y aunque sea gratuita, a un lead que está comprometido conviene dejarle
+//     hacer primero la acción que lo compromete —coger hora— y enseñarle el
+//     formulario al terminar la reserva.
+//
+// Lo que NO cambia: la sección de agenda de `/programa` sigue sin calendario a
+// propósito, y ahí el formulario sí va delante. Son dos embudos distintos.
+//
+// PENDIENTE, y no es código: que el formulario aparezca al TERMINAR la reserva
+// depende del «redirect tras reservar» de TidyCal, que se configura en su panel.
+const RESERVA_LLAMADA = 'https://agenda.squadfit.es/sesion-diagnostica';
 
 // Ficha de cada producto recomendable.
 //  · catalogBase enlaza con el catálogo real (courseCatalog.js) para mostrar

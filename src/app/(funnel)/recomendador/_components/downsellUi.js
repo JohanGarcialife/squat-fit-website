@@ -206,7 +206,18 @@ export function ProductoCard({ productoId }) {
       )}
 
       <div className="mt-auto pt-2">
-        <LandingButton variant="orange" href={meta.href}>
+        {/* La reserva de la llamada vive en TidyCal, fuera del sitio: se abre en
+            pestaña nueva para no perder la recomendación —que es la que lleva
+            la configuración del downsell en la URL y no se puede reconstruir—,
+            y con `rel` porque el destino es de un tercero. Los demás productos
+            son rutas nuestras y siguen navegando en la misma pestaña. */}
+        <LandingButton
+          variant="orange"
+          href={meta.href}
+          {...(/^https?:\/\//.test(meta.href || '')
+            ? { target: '_blank', rel: 'noopener noreferrer' }
+            : {})}
+        >
           {meta.cta}
         </LandingButton>
       </div>
