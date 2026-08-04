@@ -102,7 +102,7 @@ export default function FAQ() {
               aria-expanded={openIndex === index}
               aria-controls={`faq-answer-${index}`}
             >
-              <span className="text-3xl md:text-2xl font-bold text-blue-800 cursor-pointer">
+              <span className="text-lg md:text-2xl font-bold text-blue-800 cursor-pointer">
                 {faq.question}
               </span>
               <span className="text-blue-800 cursor-pointer font-bold">
@@ -123,7 +123,7 @@ export default function FAQ() {
                   : 'max-h-0 opacity-0'
               }`}
             >
-              <p className="pt-0 pb-4 text-gray-700 text-3xl md:text-lg">{faq.answer}</p>
+              <p className="pt-0 pb-4 text-gray-700 text-base md:text-lg">{faq.answer}</p>
             </div>
           </div>
         ))}
