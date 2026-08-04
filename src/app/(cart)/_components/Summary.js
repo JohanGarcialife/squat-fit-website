@@ -5,7 +5,6 @@ import Link from 'next/link';
 import { useCurrency } from './useCurrency';
 import CurrencySelector from './CurrencySelector';
 import { useCartStore } from '@/stores/cart.store';
-import SequraSimulador from '@/app/components/SequraSimulador';
 import { useCheckoutStore } from '@/stores/checkout.store';
 import { arancelParaCarrito } from './aranceles';
 import { TIER_META, groupTierOrder, buildTierCartItem, formatEuros } from '@/app/components/courseCatalog';
@@ -409,18 +408,12 @@ export default function Summary(props) {
                   </span>
                 </div>
 
-                {/* Simulador de cuotas, justo bajo el total: es la cifra que el
-                    cliente está mirando cuando decide si sigue o abandona.
-                    Solo si este carrito se puede fraccionar de verdad — con una
-                    suscripción dentro no, porque seQura financia un importe
-                    cerrado. Por debajo de 50 € el propio widget no pinta nada,
-                    así que no hay que filtrarlo aquí. */}
-                <SequraSimulador
-                  importeEur={subtotal + (subtotal >= freeShippingThreshold ? 0 : shipping) + arancel}
-                  pagoUnico={!cart.some((i) => i.period === '/mes' || i.period === '/trimestre')}
-                  divisa={currency}
-                  className="pt-2"
-                />
+                {/* El simulador de cuotas se quitó de aquí el 4-ago. Estaba
+                    también en la tarjeta del curso, en el resumen (que sale en
+                    los tres pasos) y en el paso 3: cuatro apariciones de la
+                    marca de seQura en una sola compra. Ahora solo en la tarjeta
+                    del curso y en el paso 3, que son los dos momentos donde
+                    aporta algo — decidir el tramo y elegir cómo pagar. */}
               </div>
 
               {/* Action Button — un poco más pequeño en móvil */}

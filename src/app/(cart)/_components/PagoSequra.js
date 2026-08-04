@@ -90,12 +90,17 @@ export function evaluarSequra(cart, total, divisa) {
   return { aplica: true };
 }
 
-export default function PagoSequra({ cart, total, formData, onError }) {
+export default function PagoSequra({ cart, total, formData, onError, onAbrir }) {
   const [estado, setEstado] = useState('inicial'); // inicial | cargando | listo | error
   const [urlForm, setUrlForm] = useState(null);
   const [mensaje, setMensaje] = useState(null);
 
   const empezar = async () => {
+    // Se avisa ANTES de pedir nada: el acordeón pliega el pago con tarjeta en
+    // cuanto se pulsa, no cuando responde seQura. Si esperara a la respuesta,
+    // el cliente vería el botón «Preparando…» con la caja de Stripe todavía
+    // abierta encima y parecería que no ha pasado nada.
+    onAbrir?.();
     setEstado('cargando');
     setMensaje(null);
     try {
@@ -160,21 +165,20 @@ export default function PagoSequra({ cart, total, formData, onError }) {
 
   return (
     <div className="w-full">
-      {/* Deliberadamente MÁS discreto que el «Pagar» de Stripe: más estrecho,
-          borde de 1px en vez de 2 y sin relleno. La tarjeta sigue siendo la
-          opción principal; esta es la alternativa. Si pesara igual o más, le
-          quitaría fuerza a la que convierte mejor.
+      {/* Relleno y con el mismo radio que el «Pagar» de Stripe (`rounded-lg`,
+          8px, que es el preset «redondeado» de su apariencia): las dos
+          pasarelas se ofrecen como iguales, y una de las dos con menos peso
+          visual se leía como «la opción rara».
 
-          Colores: SEQURA_VERDE es el de su propia web. El texto va en
-          SEQURA_VERDE_TEXTO —el mismo tono, oscurecido— porque su verde sobre
-          blanco da 2,2:1 de contraste y no llega al 4,5:1 que hace falta para
-          leerlo. El borde sí puede llevar el color exacto. */}
+          El texto va en blanco sobre SEQURA_VERDE_TEXTO, no sobre su verde
+          exacto: `#00C2A3` con texto blanco da 2,1:1 de contraste y no se lee.
+          El tono es el mismo, solo oscurecido lo justo para pasar de 4,5:1. */}
       <button
         type="button"
         onClick={empezar}
         disabled={estado === 'cargando'}
-        style={{ borderColor: SEQURA_VERDE, color: SEQURA_VERDE_TEXTO }}
-        className="block w-[84%] mx-auto rounded-xl border py-3 font-semibold hover:bg-[#F0FBF8] active:scale-[0.99] transition-all cursor-pointer disabled:opacity-60"
+        style={{ backgroundColor: SEQURA_VERDE_TEXTO }}
+        className="block w-full rounded-lg py-3 font-semibold text-white hover:brightness-110 active:scale-[0.99] transition-all cursor-pointer disabled:opacity-60"
       >
         {estado === 'cargando' ? 'Preparando…' : 'Pagar a plazos con seQura'}
       </button>

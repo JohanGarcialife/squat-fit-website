@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { handleApiError } from '@/app/components/handleApiError';
-import { ChevronLeft } from 'lucide-react';
+import { ChevronLeft, ChevronDown } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import OrderSummary from './OrderSummary';
 import { useCartStore } from '@/stores/cart.store';
@@ -204,6 +204,16 @@ export default function Payment(props) {
     try { return localStorage.getItem('sf_currency') || 'EUR'; } catch { return 'EUR'; }
   })();
   const sequra = evaluarSequra(cart, totalCarrito, divisa);
+  // Qué pasarela está desplegada en el paso 3. Arranca en Stripe: la tarjeta
+  // es lo que espera la mayoría y lo que mejor convierte.
+  const [metodo, setMetodo] = useState('stripe');
+
+  // Al llegar al paso 3 la página debe empezar ARRIBA del todo. En móvil el
+  // resumen va encima del pago, y sin esto se entraba con el scroll heredado
+  // del paso 2: parecía que faltaba media pantalla por encima.
+  useEffect(() => {
+    if (embeddedSecret) window.scrollTo({ top: 0, behavior: 'auto' });
+  }, [embeddedSecret]);
 
   const appearance = useMemo(() => ({
     theme: 'stripe',
@@ -471,7 +481,30 @@ export default function Payment(props) {
           </div>
 
           <h2 className="text-indigo-900 font-bold text-lg mb-4">Métodos de pago</h2>
-          <CheckoutIncrustado clientSecret={embeddedSecret} />
+
+          {/* ── Acordeón: una pasarela a la vez ──────────────────────────────
+              Con las dos abiertas la pantalla pedía dos decisiones al mismo
+              tiempo y ninguna quedaba clara. Ahora la que no está elegida se
+              pliega a una línea, y al tocarla se cambia.
+
+              Stripe se OCULTA con CSS, nunca se desmonta: `EmbeddedCheckout`
+              se monta una sola vez contra su `clientSecret`, y si se
+              desmontara habría que crear otra sesión de pago para volver —
+              se perdería el estado que el cliente ya hubiera tecleado. */}
+          <div className={metodo === 'stripe' ? '' : 'hidden'}>
+            <CheckoutIncrustado clientSecret={embeddedSecret} />
+          </div>
+
+          {sequra.aplica && metodo === 'sequra' && (
+            <button
+              type="button"
+              onClick={() => setMetodo('stripe')}
+              className="w-full flex items-center justify-between rounded-lg border border-indigo-100 px-4 py-3 text-indigo-900 font-semibold hover:bg-indigo-50 transition-colors cursor-pointer"
+            >
+              <span>Pagar con tarjeta u otros métodos</span>
+              <ChevronDown size={18} className="shrink-0 -rotate-90" />
+            </button>
+          )}
 
           {/* Pago fraccionado con seQura, DEBAJO del pago de Stripe.
               Tiene que estar aquí y no solo en la rama del Payment Element:
@@ -490,10 +523,18 @@ export default function Payment(props) {
                   la diferencia son sus comisiones, y anunciar una cuota que no
                   es la real no es un detalle estético. Su widget lee el importe
                   del `data-amount` y pinta la cifra buena. */}
-              <div className="mb-4 flex justify-center">
-                <SequraSimulador importeEur={totalCarrito} divisa={divisa} />
-              </div>
-              <PagoSequra cart={cart} total={totalCarrito} formData={datosCliente} />
+              {metodo === 'stripe' && (
+                <div className="mb-4 flex justify-center">
+                  <SequraSimulador importeEur={totalCarrito} divisa={divisa} />
+                </div>
+              )}
+              <PagoSequra
+                cart={cart}
+                total={totalCarrito}
+                formData={datosCliente}
+                abierto={metodo === 'sequra'}
+                onAbrir={() => setMetodo('sequra')}
+              />
             </div>
           )}
           {!sequra.aplica && sequra.cerca && (
@@ -523,7 +564,7 @@ export default function Payment(props) {
             devuelve a la derecha en escritorio, donde no cambia nada. */}
         <div className="w-full order-first lg:order-last lg:w-2/5 xl:w-1/2 lg:min-h-screen bg-orange-50">
           <div className="lg:sticky lg:top-0 lg:h-screen lg:overflow-y-auto">
-            <OrderSummary mostrarCta={false} mostrarSimuladorSequra={false} />
+            <OrderSummary mostrarCta={false} />
           </div>
         </div>
       </div>
