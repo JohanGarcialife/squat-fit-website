@@ -191,6 +191,19 @@ export default function Payment(props) {
   // lo lee «tal cual»—, y el cliente se quedaba sin verlo.
   const [motivoDelFallo, setMotivoDelFallo] = useState(null);
 
+  // Pago fraccionado: los mismos datos que usa `PaymentInner`, porque la
+  // opción de seQura se ofrece en las DOS ramas del paso 3 (Payment Element y
+  // Checkout incrustado) y el cliente tiene que verla en cualquiera de ellas.
+  const datosCliente = useCheckoutStore((e) => e.formData);
+  const totalCarrito = (cart || []).reduce(
+    (acc, i) => acc + Number(i.price || 0) * (i.quantity || 1),
+    0,
+  );
+  const divisa = (() => {
+    try { return localStorage.getItem('sf_currency') || 'EUR'; } catch { return 'EUR'; }
+  })();
+  const sequra = evaluarSequra(cart, totalCarrito, divisa);
+
   const appearance = useMemo(() => ({
     theme: 'stripe',
     variables: {
@@ -446,6 +459,28 @@ export default function Payment(props) {
           </div>
 
           <CheckoutIncrustado clientSecret={embeddedSecret} />
+
+          {/* Pago fraccionado con seQura, DEBAJO del pago de Stripe.
+              Tiene que estar aquí y no solo en la rama del Payment Element:
+              esta es la que usa producción. El checkout de tramos devuelve hoy
+              un `cs_…` (Checkout Session incrustada), así que `PaymentInner`
+              —donde se puso primero— no llega a montarse nunca y el botón no
+              lo veía nadie. Se descubrió el 3-ago recorriendo la compra entera
+              en un build local, después de que seQura preguntara justamente
+              por qué no aparecía. Lección: un componente nuevo se comprueba en
+              la rama que el backend devuelve HOY, no en la que se estaba
+              leyendo al escribirlo. */}
+          {sequra.aplica && (
+            <div className="mt-8 pt-8 border-t border-indigo-100">
+              <p className="text-slate-500 text-sm mb-4 text-center">o si lo prefieres</p>
+              <PagoSequra cart={cart} total={totalCarrito} formData={datosCliente} />
+            </div>
+          )}
+          {!sequra.aplica && sequra.cerca && (
+            <p className="mt-8 pt-8 border-t border-indigo-100 text-sm text-slate-500 text-center">
+              Añade {sequra.falta.toFixed(2)} € más y podrás pagarlo a plazos con seQura.
+            </p>
+          )}
 
           <button
             onClick={() => props.setStep(1)}
