@@ -536,8 +536,8 @@ export default function Payment(props) {
                   es la real no es un detalle estético. Su widget lee el importe
                   del `data-amount` y pinta la cifra buena. */}
               {metodo === 'stripe' && (
-                <div className="mb-4 flex justify-center">
-                  <SequraSimulador importeEur={totalCarrito} divisa={divisa} />
+                <div className="mb-4">
+                  <SequraSimulador importeEur={totalCarrito} divisa={divisa} alineacion="left" />
                 </div>
               )}
               <PagoSequra

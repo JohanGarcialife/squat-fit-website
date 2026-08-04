@@ -104,16 +104,6 @@ export default function CourseTierCard({ group, defaultTier = 'anual', subtitle,
         </div>
         <p className="text-slate-500 text-sm font-semibold mt-1.5">{meta.note}</p>
 
-        {/* Simulador de cuotas de seQura. Solo en los tramos de PAGO ÚNICO:
-            «anual» y «permanente». En mensual y trimestral no, porque seQura
-            fracciona un importe cerrado y una suscripción no lo es — anunciar
-            cuotas ahí sería prometer algo que el checkout no puede cumplir. */}
-        <SequraSimulador
-          importeEur={tier.price}
-          pagoUnico={tierKey !== 'mensual' && tierKey !== 'trimestral'}
-          className="mt-2"
-        />
-
         {yaLoTiene && (
           <div className="mt-6 rounded-2xl bg-[#F3F2F9] border border-[#363C98]/15 p-4 text-left">
             <p className="text-[#363C98] font-bold text-sm">Ya tienes este curso</p>
@@ -141,6 +131,24 @@ export default function CourseTierCard({ group, defaultTier = 'anual', subtitle,
         >
           {tierKey === 'mensual' || tierKey === 'trimestral' ? 'Suscribirme' : 'Comprarlo'}
         </button>
+
+        {/* Simulador de cuotas de seQura, DESPUÉS del botón de compra.
+            Estaba justo debajo de «Pago único · 12 meses de acceso», y las dos
+            líneas seguidas se contradecían: «pago único» e inmediatamente «18,06 €
+            al mes». Quien lee rápido no sabe cuál de las dos aplica.
+            Ahora el bloque del precio dice una sola cosa —lo que cuesta y qué
+            incluye—, y el fraccionado aparece después del botón, como lo que es:
+            una alternativa para quien ya ha decidido comprar.
+
+            Solo en los tramos de PAGO ÚNICO: «anual» y «permanente». En mensual
+            y trimestral no, porque seQura fracciona un importe cerrado y una
+            suscripción no lo es — anunciar cuotas ahí sería prometer algo que el
+            checkout no puede cumplir. */}
+        <SequraSimulador
+          importeEur={tier.price}
+          pagoUnico={tierKey !== 'mensual' && tierKey !== 'trimestral'}
+          className="mt-3"
+        />
       </div>
     </div>
   );

@@ -108,7 +108,15 @@ function cargarSequra() {
  * @param {boolean} pagoUnico  false para suscripciones → no se pinta.
  * @param {string} divisa      Código de la divisa activa; solo se pinta en EUR.
  */
-export default function SequraSimulador({ importeEur, pagoUnico = true, divisa = 'EUR', className = '' }) {
+export default function SequraSimulador({
+  importeEur,
+  pagoUnico = true,
+  divisa = 'EUR',
+  className = '',
+  /** 'left' | 'center'. En la ficha del curso va centrado con el precio; en el
+   *  paso 3 va a la izquierda, alineado con el resto del formulario. */
+  alineacion = 'center',
+}) {
   const ref = useRef(null);
   const visible = ENCENDIDO && pagoUnico && divisa === 'EUR' && importeEur > 0;
 
@@ -142,6 +150,31 @@ export default function SequraSimulador({ importeEur, pagoUnico = true, divisa =
       // atributo no aparece en la documentación de componentes promocionales,
       // así que no hay forma de deducirlo leyendo.
       data-version="v2"
+      // ── Sin caja ──────────────────────────────────────────────────────
+      // El widget venía con recuadro y fondo propios, y en una página que ya
+      // tiene tarjetas se leía como un anuncio insertado: parecía que la
+      // tienda estuviera patrocinada por seQura. Con el borde y el fondo
+      // transparentes queda como una línea de texto más de la ficha.
+      //
+      // POR QUÉ SE CONFIGURA SU WIDGET EN VEZ DE ESCRIBIR EL TEXTO A MANO,
+      // que era la idea inicial: su «+info» es el que lleva el ejemplo
+      // representativo con la TAE, y eso lo exige la normativa española de
+      // crédito al consumo en cuanto se anuncia una cuota con cifras. No hay
+      // URL pública a la que enlazarlo por separado (probadas cinco, todas
+      // 404 o 403), así que sacarlo de su iframe significaba quedarse sin él.
+      //
+      // Y hay una trampa en sus datos que remata el argumento: de los dos
+      // campos que devuelve `computeCreditAgreements`, `instalment_amount`
+      // son 15,66 € (solo el principal) e `instalment_total` son 18,06 €, que
+      // es lo que se cobra. Escribiendo el texto a mano y cogiendo el campo
+      // del nombre obvio se anunciaría una cuota 2,40 € más barata que la
+      // real. Su widget ya pinta la buena.
+      //
+      // El TEMA se lee al MONTAR, no en `refreshComponents`: estos atributos
+      // tienen que estar puestos desde el primer render o se ignoran.
+      data-border-color="transparent"
+      data-background-color="transparent"
+      data-alignment={alineacion}
     />
   );
 }
