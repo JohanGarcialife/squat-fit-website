@@ -5,6 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import axios from 'axios';
 import Link from 'next/link';
 import { Loader2, CheckCircle, XCircle, Sparkles, MailCheck } from 'lucide-react';
+import { enviarFormSubmit } from '@/app/components/ga4Formularios';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://squatfit-api-cyrc2g3zra-no.a.run.app';
 
@@ -86,6 +87,7 @@ function ActivateContent() {
     setGuardando(true);
     try {
       await axios.post(`${API_BASE}/api/v1/user/activate`, { token, password: clave });
+      enviarFormSubmit({ id: 'activar_cuenta', nombre: 'Activar cuenta · crear contraseña' });
       setClaveLista(true);
     } catch (error) {
       // El token se consume al fijar la contraseña, así que un 400 aquí suele
@@ -111,6 +113,7 @@ function ActivateContent() {
     setErrorReenvio('');
     try {
       await axios.post(`${API_BASE}/api/v1/user/resend-activation`, { email });
+      enviarFormSubmit({ id: 'reenviar_activacion', nombre: 'Activar cuenta · pedir otro enlace' });
       setReenvio('enviado');
     } catch (error) {
       const status = error?.response?.status;
