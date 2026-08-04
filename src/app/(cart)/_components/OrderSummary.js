@@ -91,7 +91,11 @@ export default function OrderSummary(props) {
         : 'Los siguientes meses';
 
     return (
-    <div ref={resumenRef} className="w-full h-full p-6 lg:p-14 xl:p-20 font-sans flex flex-col justify-start lg:justify-center">
+    // `px-5 py-3` en móvil en vez de `p-6`: la barra pegada abajo es UNA línea
+    // con el total y el acceso al detalle, y 24px de aire por los cuatro lados
+    // la hacían casi el doble de alta de lo necesario. En escritorio no cambia
+    // nada — ahí esto no es una barra, es la columna entera (`lg:p-14`).
+    <div ref={resumenRef} className="w-full h-full px-5 py-3 lg:p-14 xl:p-20 font-sans flex flex-col justify-start lg:justify-center">
 
       {/* Logo (oculto en móvil para compactar) + selector de moneda (siempre
           visible: en móvil se quedaba escondido dentro del bloque del logo). */}
