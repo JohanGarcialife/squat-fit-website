@@ -25,6 +25,14 @@ export default function robots() {
           '/activate',
           '/PaymentSuccess',
           '/r/',
+          // El quiz del downsell. No es una página que venda a quien llega de
+          // Google: es el final de una conversación concreta, con su copy
+          // aprobado y sus precios propios (la videoconsulta sale a 99,97 desde
+          // 160). El equipo lo manda enlazado —`?c=1100&o=GM&via=karl`—, y ese
+          // `via` es además quien se lleva la atribución de la venta. Suelto en
+          // el buscador ofrecería ese precio a cualquiera y sin nadie detrás.
+          // Misma razón por la que ya están fuera `/r/` y `/formulario/`.
+          '/recomendador',
         ],
       },
     ],
