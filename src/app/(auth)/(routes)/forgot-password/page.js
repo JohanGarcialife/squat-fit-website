@@ -8,6 +8,7 @@ import axios from 'axios';
 import { useRouter, useSearchParams } from 'next/navigation';
 import toast from 'react-hot-toast';
 import { Eye, EyeOff, ArrowLeft } from 'lucide-react';
+import { enviarFormSubmit } from '@/app/components/ga4Formularios';
 
 function ForgotPasswordContent() {
   const router = useRouter();
@@ -40,6 +41,7 @@ function ForgotPasswordContent() {
       });
 
       if (response.data === true) {
+        enviarFormSubmit({ id: 'recuperar_pedir_codigo', nombre: 'Recuperar contraseña · pedir código' });
         toast.success('Código de recuperación enviado a tu correo');
         setUserEmail(email);
         setStep(2);
@@ -67,6 +69,7 @@ function ForgotPasswordContent() {
       const response = await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/user/reset-password`, payload);
       
       if (response.data === true) {
+        enviarFormSubmit({ id: 'recuperar_nueva_clave', nombre: 'Recuperar contraseña · fijar la nueva' });
         toast.success('¡Contraseña restablecida con éxito!');
         router.push(`/login${redirectParam}`);
       } else {

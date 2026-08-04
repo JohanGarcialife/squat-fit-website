@@ -9,6 +9,7 @@ import toast from 'react-hot-toast';
 import { Eye, EyeOff, Check } from 'lucide-react';
 import GdprCheckbox from '@/app/components/GdprCheckbox';
 import { normalizeName } from '@/app/components/nameUtils';
+import { enviarFormSubmit } from '@/app/components/ga4Formularios';
 
 function RegisterContent() {
   const router = useRouter();
@@ -74,6 +75,7 @@ function RegisterContent() {
       const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/user/register`, payload);
       
       if (response.status === 201 || response.status === 200 || response.data) {
+        enviarFormSubmit({ id: 'registro', nombre: 'Crear cuenta' });
         toast.success("Registro exitoso. Por favor revisa tu correo electrónico para activar tu cuenta.");
         router.push(`/login${redirectParam}`);
       }

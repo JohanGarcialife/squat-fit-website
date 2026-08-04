@@ -9,6 +9,7 @@ import { useAuthStore } from '../../../../stores/auth.store';
 import toast from 'react-hot-toast';
 import { Eye, EyeOff } from 'lucide-react';
 import { safeRedirectPath } from '@/app/components/safeRedirect';
+import { enviarFormSubmit } from '@/app/components/ga4Formularios';
 
 function LoginContent() {
   const router = useRouter();
@@ -88,6 +89,7 @@ function LoginContent() {
       const { token } = response.data;
       if (token) {
         setToken(token);
+        enviarFormSubmit({ id: 'login', nombre: 'Iniciar sesión' });
         toast.success('Inicio de sesión exitoso!');
         // Saneado: solo rutas internas (evita open redirect vía ?redirect=).
         const redirect = safeRedirectPath(searchParams.get('redirect'), '/panel-control');

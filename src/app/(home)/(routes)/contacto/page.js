@@ -11,6 +11,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import GdprCheckbox from '@/app/components/GdprCheckbox';
 import { normalizeName } from '@/app/components/nameUtils';
+import { enviarFormSubmit } from '@/app/components/ga4Formularios';
 
 // --- Esquema de Validación con Yup ---
 const ContactSchema = Yup.object().shape({
@@ -113,6 +114,7 @@ ${values.mensaje}
           { headers: { Authorization: `Bearer ${token}` } }
         );
 
+        enviarFormSubmit({ id: 'contacto', nombre: 'Contacto' });
         toast.success('¡Mensaje enviado con éxito! Nos pondremos en contacto contigo pronto.');
         
         // Resetear formulario pero conservar datos del usuario
