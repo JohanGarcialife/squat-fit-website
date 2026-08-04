@@ -512,7 +512,7 @@ export default function Payment(props) {
             es como se comporta en los pasos 1 y 2. */}
         <div className="w-full lg:w-2/5 xl:w-1/2 lg:min-h-screen bg-orange-50 sticky bottom-0 lg:static z-40 rounded-t-3xl lg:rounded-none shadow-[0_-10px_30px_rgba(0,0,0,0.10)] lg:shadow-none">
           <div className="lg:sticky lg:top-0 lg:h-screen max-h-[70vh] lg:max-h-none overflow-y-auto">
-            <OrderSummary mostrarCta={false} />
+            <OrderSummary mostrarCta={false} mostrarSimuladorSequra={false} />
           </div>
         </div>
       </div>

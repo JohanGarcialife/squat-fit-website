@@ -14,7 +14,17 @@ import { useShippingQuote } from './useShippingQuote';
 import useCerrarAlTocarFuera from '@/hooks/useCerrarAlTocarFuera';
 
 export default function OrderSummary(props) {
-    const { isFormValid, isFormDirty, triggerCheckoutFormSubmit, mostrarCta = true } = props;
+    // Las dos banderas van por defecto a `true`: los pasos 1 y 2 no pasan
+    // ninguna y siguen comportándose exactamente igual que antes. Solo el paso
+    // 3 (checkout incrustado) las apaga, y cada una por su motivo — ver dónde
+    // se usan más abajo.
+    const {
+      isFormValid,
+      isFormDirty,
+      triggerCheckoutFormSubmit,
+      mostrarCta = true,
+      mostrarSimuladorSequra = true,
+    } = props;
     const { cart } = useCartStore();
 
     // En MÓVIL el resumen va plegado: ocupaba media pantalla y empujaba el
@@ -237,12 +247,20 @@ export default function OrderSummary(props) {
                 - Por debajo de 50 € el propio widget no pinta nada.
                 Se pasa `total` (lo que se paga hoy), no el subtotal: es la cifra
                 que el cliente está mirando cuando duda. */}
-            <SequraSimulador
-              importeEur={total}
-              pagoUnico={!hasRecurring}
-              divisa={currency}
-              className="pt-1"
-            />
+            {/* En el paso 3 el simulador se apaga aquí: allí ya va uno pegado
+                al botón «Pagar a plazos con seQura», que es donde de verdad
+                sirve. Con los dos, el mismo «18,06 € al mes» salía dos veces en
+                la misma pantalla y con dos selectores de cuotas que además
+                pueden quedar en números distintos. En los pasos 1 y 2, donde no
+                hay botón de seQura, este es el único sitio donde se ve. */}
+            {mostrarSimuladorSequra && (
+              <SequraSimulador
+                importeEur={total}
+                pagoUnico={!hasRecurring}
+                divisa={currency}
+                className="pt-1"
+              />
+            )}
 
             {hasRecurring && (
                 <div className="flex justify-between items-center text-indigo-900 font-bold text-sm sm:text-base lg:text-lg pt-2 border-t border-indigo-100/50">
