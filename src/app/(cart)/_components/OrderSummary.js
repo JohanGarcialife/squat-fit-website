@@ -3,7 +3,7 @@
 import React, { useCallback, useRef, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, X } from 'lucide-react';
 import { useCartStore } from '@/stores/cart.store';
 import { useCheckoutStore } from '@/stores/checkout.store';
 import { useCurrency } from './useCurrency';
@@ -87,25 +87,66 @@ export default function OrderSummary(props) {
           <Image src="/LogotipoSquatfit.png" layout="fill" objectFit="contain" alt="Logo Squad Fit" />
         </div>
       </Link>
-      {/* Barra para plegar/desplegar el detalle — SOLO móvil */}
+      {/* Barra compacta — SOLO móvil. Una línea: lo que se paga a la izquierda
+          y el acceso al detalle a la derecha. Antes eran dos («Ver resumen (1)»
+          arriba y «Hoy pagarás …» debajo) y en un móvil con el teclado abierto
+          esas dos líneas se comían la mitad de lo que quedaba de pantalla. */}
       <button
         type="button"
-        onClick={() => setExpanded((v) => !v)}
+        onClick={() => setExpanded(true)}
         aria-expanded={expanded}
         aria-controls="resumen-pedido"
         className="lg:hidden flex items-center justify-between w-full gap-3 mb-4 cursor-pointer"
       >
-        <span className="text-indigo-900 font-bold">
-          {expanded ? 'Ocultar resumen' : `Ver resumen (${totalItems})`}
+        <span className="text-indigo-900/80 text-sm">
+          Hoy pagarás{' '}
+          <span className="font-bold text-indigo-900 text-base">
+            {convertPrice(total)} {symbol}
+          </span>
         </span>
-        <ChevronDown
-          size={20}
-          className={`text-indigo-900 shrink-0 transition-transform ${expanded ? 'rotate-180' : ''}`}
-        />
+        <span className="flex items-center gap-1 text-indigo-900 font-bold text-sm shrink-0">
+          Ver detalle
+          <ChevronDown size={18} className="shrink-0" />
+        </span>
       </button>
 
-      {/* Detalle: plegado en móvil, siempre visible en escritorio */}
-      <div id="resumen-pedido" className={`${expanded ? 'block' : 'hidden'} lg:block`}>
+      {/* Fondo del cajón — solo móvil. Cierra al tocar fuera, igual que el
+          cajón del carrito. */}
+      <div
+        onClick={plegar}
+        className={`lg:hidden fixed inset-0 z-[99] bg-black/25 transition-opacity duration-300 ${
+          expanded ? 'opacity-100' : 'opacity-0 pointer-events-none'
+        }`}
+        aria-hidden="true"
+      />
+
+      {/* Detalle. En ESCRITORIO va inline en la columna derecha, como siempre.
+          En MÓVIL es un cajón que entra deslizando desde la derecha — el mismo
+          gesto, tamaño y animación que el cajón del carrito (CartDrawer), para
+          que el resumen se comporte igual en toda la web. Desplegarlo en línea
+          empujaba el formulario fuera de la vista, que es lo que lo hacía
+          incómodo en el paso 2. */}
+      <div
+        id="resumen-pedido"
+        className={`
+          fixed right-0 top-0 z-[100] h-full w-[86%] max-w-[420px] overflow-y-auto
+          bg-orange-50 shadow-2xl p-6 transition-transform duration-300 ease-out
+          ${expanded ? 'translate-x-0' : 'translate-x-full'}
+          lg:static lg:z-auto lg:h-auto lg:w-auto lg:max-w-none lg:translate-x-0
+          lg:bg-transparent lg:shadow-none lg:p-0 lg:overflow-visible
+        `}
+      >
+        <div className="lg:hidden flex items-center justify-between mb-6">
+          <span className="text-indigo-900 font-bold">Tu pedido ({totalItems})</span>
+          <button
+            type="button"
+            onClick={plegar}
+            aria-label="Cerrar resumen"
+            className="p-1.5 rounded-full text-indigo-900/60 hover:bg-indigo-100 active:scale-90 transition cursor-pointer"
+          >
+            <X size={20} />
+          </button>
+        </div>
 
       <div className="mb-6 flex justify-center">
         <CurrencySelector currency={currency} setCurrency={setCurrency} currencies={currencies} />
@@ -162,8 +203,31 @@ export default function OrderSummary(props) {
             </div>
         )}
 
+        {(hasPhysicalItems || arancel > 0) && (
+            <div className="space-y-2">
+                {hasPhysicalItems && (
+                    <div className="flex justify-between items-center text-indigo-900/70 text-sm sm:text-base">
+                        <span>Envío</span>
+                        <span>
+                            {sinDestino
+                                ? 'Según destino'
+                                : finalShipping > 0
+                                    ? `${convertPrice(finalShipping)} ${symbol}`
+                                    : 'Gratis'}
+                        </span>
+                    </div>
+                )}
+                {arancel > 0 && (
+                    <div className="flex justify-between items-center text-indigo-900/70 text-sm sm:text-base">
+                        <span>Aranceles (importación EE. UU.)</span>
+                        <span>{convertPrice(arancel)} {symbol}</span>
+                    </div>
+                )}
+            </div>
+        )}
+
       </div>
-      {/* fin del detalle plegable */}
+      {/* fin del detalle */}
 
       {/* Totales y botón. Con el resumen plegado se ve SOLO lo que se paga: el
           desglose (envío, aranceles) se va con el detalle, porque plegado no
@@ -199,28 +263,9 @@ export default function OrderSummary(props) {
                 · El desajuste de que el envío se pintara y Stripe no lo cobrase
                   YA NO está en espera: se arregló el 30-jul (revisión
                   00353-duy). */}
-            {(hasPhysicalItems || arancel > 0) && (
-                <div className={`${expanded ? 'block' : 'hidden'} lg:block space-y-2`}>
-                    {hasPhysicalItems && (
-                        <div className="flex justify-between items-center text-indigo-900/70 text-sm sm:text-base">
-                            <span>Envío</span>
-                            <span>
-                                {sinDestino
-                                    ? 'Según destino'
-                                    : finalShipping > 0
-                                        ? `${convertPrice(finalShipping)} ${symbol}`
-                                        : 'Gratis'}
-                            </span>
-                        </div>
-                    )}
-                    {arancel > 0 && (
-                        <div className="flex justify-between items-center text-indigo-900/70 text-sm sm:text-base">
-                            <span>Aranceles (importación EE. UU.)</span>
-                            <span>{convertPrice(arancel)} {symbol}</span>
-                        </div>
-                    )}
-                </div>
-            )}
+            {/* El desglose (envío, aranceles) se mudó ARRIBA, dentro del
+                detalle: en móvil el detalle es ahora un cajón lateral y estas
+                líneas tienen que ir con él, no quedarse sueltas en la barra. */}
             <div className="flex justify-between items-center text-indigo-900/80 text-sm sm:text-base lg:text-lg">
                 <span>Hoy pagarás</span>
                 <span className="font-bold text-indigo-900 text-base sm:text-lg lg:text-xl">

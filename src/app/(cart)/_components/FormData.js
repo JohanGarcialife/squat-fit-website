@@ -5,10 +5,13 @@ import OrderSummary from "./OrderSummary";
 import { useCartStore } from "@/stores/cart.store";
 import { useCheckoutStore } from "@/stores/checkout.store";
 import { useShippingQuote } from "./useShippingQuote";
+import useTecladoAbierto from "@/hooks/useTecladoAbierto";
 
 export default function FormData(props) {
   const { setStep, saveCard, onSaveCardChange } = props;
   const { cart } = useCartStore();
+  // Este es el paso con formulario largo: es donde el teclado tapa cosas.
+  const tecladoAbierto = useTecladoAbierto();
 
   const [isFormValid, setIsFormValid] = useState(false);
   const [isFormDirty, setIsFormDirty] = useState(false);
@@ -69,8 +72,19 @@ export default function FormData(props) {
       </div>
       
       {/* Columna Derecha: Resumen — sticky a la derecha en desktop, sticky
-          abajo (bottom sheet) en móvil para tener siempre a la vista el total. */}
-      <div className="w-full lg:w-2/5 xl:w-1/2 lg:min-h-screen bg-orange-50 sticky bottom-0 lg:static z-40 rounded-t-3xl lg:rounded-none shadow-[0_-10px_30px_rgba(0,0,0,0.10)] lg:shadow-none">
+          abajo (bottom sheet) en móvil para tener siempre a la vista el total.
+
+          MIENTRAS SE ESCRIBE, LA BARRA SE VA. Con el teclado abierto quedaba
+          una franja de dos o tres campos entre él y esta barra, y a veces el
+          campo que estabas rellenando caía justo detrás. Se oculta con
+          `translate-y-full` (no con `hidden`) para que vuelva deslizando y no
+          de golpe; en escritorio, donde no hay teclado que suba, esto no se
+          aplica nunca. */}
+      <div
+        className={`w-full lg:w-2/5 xl:w-1/2 lg:min-h-screen bg-orange-50 sticky bottom-0 lg:static z-40 rounded-t-3xl lg:rounded-none shadow-[0_-10px_30px_rgba(0,0,0,0.10)] lg:shadow-none transition-transform duration-200 ${
+          tecladoAbierto ? 'translate-y-full lg:translate-y-0' : 'translate-y-0'
+        }`}
+      >
         <div className="lg:sticky lg:top-0 lg:h-screen max-h-[70vh] lg:max-h-none overflow-y-auto">
           <OrderSummary 
             setStep={setStep} 
