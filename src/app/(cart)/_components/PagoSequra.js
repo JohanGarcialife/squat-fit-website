@@ -26,6 +26,20 @@ import React, { useEffect, useState } from 'react';
 
 const API = 'https://squatfit-api-cyrc2g3zra-no.a.run.app';
 
+/**
+ * Verde de seQura, tomado de su propia web (sequra.es) el 4-ago, no inventado.
+ * Usan dos: #21CFAC es el claro y #00C2A3 el de acento — este último es el que
+ * aguanta como borde sobre blanco.
+ */
+export const SEQURA_VERDE = '#00C2A3';
+/**
+ * El mismo verde oscurecido para el TEXTO. `#00C2A3` sobre blanco da 2,2:1 de
+ * contraste y el mínimo legible es 4,5:1: con su color exacto, el rótulo del
+ * botón no se lee. Se oscurece manteniendo el tono, que es lo que conserva la
+ * identidad de la marca sin dejar a nadie fuera.
+ */
+export const SEQURA_VERDE_TEXTO = '#00786B';
+
 export const SEQURA_MIN = 50;
 export const SEQURA_MAX = 4000;
 /** Cuánto puede faltar para que merezca la pena avisar al cliente. */
@@ -76,12 +90,17 @@ export function evaluarSequra(cart, total, divisa) {
   return { aplica: true };
 }
 
-export default function PagoSequra({ cart, total, formData, onError }) {
+export default function PagoSequra({ cart, total, formData, onError, onAbrir }) {
   const [estado, setEstado] = useState('inicial'); // inicial | cargando | listo | error
   const [urlForm, setUrlForm] = useState(null);
   const [mensaje, setMensaje] = useState(null);
 
   const empezar = async () => {
+    // Se avisa ANTES de pedir nada: el acordeón pliega el pago con tarjeta en
+    // cuanto se pulsa, no cuando responde seQura. Si esperara a la respuesta,
+    // el cliente vería el botón «Preparando…» con la caja de Stripe todavía
+    // abierta encima y parecería que no ha pasado nada.
+    onAbrir?.();
     setEstado('cargando');
     setMensaje(null);
     try {
@@ -146,11 +165,20 @@ export default function PagoSequra({ cart, total, formData, onError }) {
 
   return (
     <div className="w-full">
+      {/* Relleno y con el mismo radio que el «Pagar» de Stripe (`rounded-lg`,
+          8px, que es el preset «redondeado» de su apariencia): las dos
+          pasarelas se ofrecen como iguales, y una de las dos con menos peso
+          visual se leía como «la opción rara».
+
+          El texto va en blanco sobre SEQURA_VERDE_TEXTO, no sobre su verde
+          exacto: `#00C2A3` con texto blanco da 2,1:1 de contraste y no se lee.
+          El tono es el mismo, solo oscurecido lo justo para pasar de 4,5:1. */}
       <button
         type="button"
         onClick={empezar}
         disabled={estado === 'cargando'}
-        className="w-full rounded-2xl border-2 border-indigo-800 py-4 font-bold text-indigo-900 hover:bg-indigo-50 active:scale-[0.99] transition-all cursor-pointer disabled:opacity-60"
+        style={{ backgroundColor: SEQURA_VERDE_TEXTO }}
+        className="block w-full rounded-lg py-3 font-semibold text-white hover:brightness-110 active:scale-[0.99] transition-all cursor-pointer disabled:opacity-60"
       >
         {estado === 'cargando' ? 'Preparando…' : 'Pagar a plazos con seQura'}
       </button>

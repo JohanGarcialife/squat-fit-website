@@ -117,7 +117,7 @@ export default function CheckoutForm({ setStep, onValidationChange, submitRef, s
           <button
             onClick={(e) => { e.preventDefault(); setCustomerType('particular'); }}
             className={`px-8 py-2.5 rounded-full font-bold transition-all border-2 cursor-pointer ${
-              customerType === 'particular' ? 'bg-orange-500 text-white border-orange-500' : 'bg-white text-orange-500 border-orange-300 hover:border-orange-500'
+              customerType === 'particular' ? 'bg-orange-500 text-white border-orange-500' : 'bg-white text-slate-600 border-slate-200 hover:border-slate-300'
             }`}
           >
             Particular
@@ -125,7 +125,7 @@ export default function CheckoutForm({ setStep, onValidationChange, submitRef, s
           <button
             onClick={(e) => { e.preventDefault(); setCustomerType('empresa'); }}
             className={`px-8 py-2.5 rounded-full font-bold transition-all border-2 cursor-pointer ${
-              customerType === 'empresa' ? 'bg-orange-500 text-white border-orange-500' : 'bg-white text-orange-500 border-orange-300 hover:border-orange-500'
+              customerType === 'empresa' ? 'bg-orange-500 text-white border-orange-500' : 'bg-white text-slate-600 border-slate-200 hover:border-slate-300'
             }`}
           >
             Empresa
@@ -166,12 +166,12 @@ export default function CheckoutForm({ setStep, onValidationChange, submitRef, s
                 <section className="space-y-4">
                   <SectionHeading n={1} title="Tus datos" />
                   {isCompany && (
-                    <InputField label="Nombre de empresa / razón social*" name="companyName" placeholder="Razón social de la empresa" />
+                    <InputField label="Nombre de empresa / razón social" name="companyName" placeholder="Razón social de la empresa" autoComplete="organization" />
                   )}
-                  <InputField label="E-mail*" name="email" placeholder="tu@correo.com" type="email" />
+                  <InputField label="E-mail" name="email" placeholder="ana@correo.com" type="email" autoComplete="email" />
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <InputField label="Nombre*" name="firstName" placeholder="Tu nombre" />
-                    <InputField label="Apellidos*" name="lastName" placeholder="Tus apellidos" />
+                    <InputField label="Nombre" name="firstName" placeholder="Ana" autoComplete="given-name" />
+                    <InputField label="Apellidos" name="lastName" placeholder="García López" autoComplete="family-name" />
                   </div>
                   <InputField
                     label={isCompany ? 'CIF*' : (dniRequired ? 'DNI/CIF* (obligatorio en pedidos de +400 €)' : 'DNI/CIF (opcional)')}
@@ -179,7 +179,7 @@ export default function CheckoutForm({ setStep, onValidationChange, submitRef, s
                     placeholder={isCompany ? 'CIF de la empresa' : 'Número de identificación'}
                   />
                   <div className="flex flex-col gap-1">
-                    <label htmlFor="phone" className="text-orange-500 text-sm ml-1 font-medium">Teléfono*</label>
+                    <label htmlFor="phone" className={CLASES_ETIQUETA}>Teléfono</label>
                     <PhoneInput
                       country={'es'}
                       preferredCountries={['es', 'pt', 'gb', 'fr', 'mx', 'ar', 'co', 'cl']}
@@ -190,7 +190,7 @@ export default function CheckoutForm({ setStep, onValidationChange, submitRef, s
                       searchNotFound="Sin resultados"
                       value={values.phone}
                       onChange={(phone) => setFieldValue('phone', phone)}
-                      inputClass="!w-full !border !border-orange-300 !rounded-2xl !pl-16 !pr-5 !py-3 !placeholder-orange-300 !text-black !outline-none focus:!border-orange-500 focus:!ring-1 focus:!ring-orange-500 !transition-all"
+                      inputClass="!w-full !border !border-slate-200 !rounded-xl !pl-16 !pr-4 !py-3 !placeholder-slate-400 !text-slate-800 !outline-none focus:!border-orange-500 focus:!ring-4 focus:!ring-orange-500/15 !transition-all"
                       containerClass="!w-full"
                       buttonClass="!bg-transparent !border-0 !rounded-l-2xl !pl-3"
                       dropdownClass="!rounded-b-2xl !text-black !max-h-60"
@@ -206,16 +206,16 @@ export default function CheckoutForm({ setStep, onValidationChange, submitRef, s
                 {/* ── Sección 2: dirección de envío ── */}
                 <section className="space-y-4">
                   <SectionHeading n={2} title="Dirección de envío" />
-                  <InputField label="Dirección*" name="address" placeholder="Introduce tu calle y número" />
-                  <InputField label="Piso / puerta (opcional)" name="apartment" placeholder="Piso, puerta, etc." />
+                  <InputField label="Dirección" name="address" placeholder="Calle Mayor, 12" autoComplete="address-line1" />
+                  <InputField label="Piso / puerta (opcional)" name="apartment" placeholder="3º B" autoComplete="address-line2" />
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <InputField label="Código postal*" name="postalCode" placeholder="XXXXX" />
-                    <InputField label="Ciudad*" name="city" placeholder="Tu ciudad" />
+                    <InputField label="Código postal" name="postalCode" placeholder="03003" autoComplete="postal-code" />
+                    <InputField label="Ciudad" name="city" placeholder="Alicante" autoComplete="address-level2" />
                   </div>
                   <div className="flex flex-col gap-1">
-                    <label htmlFor="country" className="text-orange-500 text-sm ml-1 font-medium">País*</label>
+                    <label htmlFor="country" className={CLASES_ETIQUETA}>País</label>
                     <div className="relative">
-                      <Field as="select" id="country" name="country" className="w-full appearance-none bg-white border border-orange-300 rounded-2xl px-5 py-3 text-gray-700 outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all cursor-pointer">
+                      <Field as="select" id="country" name="country" className={`${CLASES_CAMPO} appearance-none cursor-pointer`}>
                         <option value="">Selecciona un país</option>
                         <optgroup label="Principales">
                           {countryOptions.priority.map((c) => (
@@ -235,14 +235,14 @@ export default function CheckoutForm({ setStep, onValidationChange, submitRef, s
                     <ErrorMessage name="country" component="div" className="text-red-500 text-sm" />
                   </div>
                   <div className="flex items-center gap-3 cursor-pointer pt-1" onClick={() => setSameAddress(!sameAddress)}>
-                    <div className={`w-6 h-6 rounded-full flex items-center justify-center transition-colors ${sameAddress ? 'bg-orange-500' : 'border border-orange-300'}`}>
-                      {sameAddress && <Check size={16} className="text-white" strokeWidth={3} />}
+                    <div className={`w-5 h-5 rounded-full flex items-center justify-center transition-colors shrink-0 ${sameAddress ? 'bg-orange-500' : 'border border-slate-300'}`}>
+                      {sameAddress && <Check size={13} className="text-white" strokeWidth={3} />}
                     </div>
-                    <span className="text-orange-500">Usar la misma dirección para Envío</span>
+                    <span className="text-slate-600 text-sm">Usar la misma dirección para el envío</span>
                   </div>
                   <div className="flex flex-col gap-1">
-                    <label htmlFor="shippingNotes" className="text-orange-500 text-sm ml-1 font-medium">Notas del envío (opcional)</label>
-                    <Field as="textarea" id="shippingNotes" name="shippingNotes" rows={3} placeholder="Escribe aquí..." className="w-full border border-orange-300 rounded-2xl px-5 py-3 placeholder-orange-200 text-gray-700 outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all resize-none" />
+                    <label htmlFor="shippingNotes" className={CLASES_ETIQUETA}>Notas del envío (opcional)</label>
+                    <Field as="textarea" id="shippingNotes" name="shippingNotes" rows={3} placeholder="Escribe aquí..." className={`${CLASES_CAMPO} resize-none`} />
                   </div>
                 </section>
 
@@ -263,12 +263,35 @@ export default function CheckoutForm({ setStep, onValidationChange, submitRef, s
   );
 }
 
-// Encabezado de sección: número en círculo naranja + título en azul de marca,
-// con una línea divisoria para dar jerarquía visual a cada bloque del formulario.
+/**
+ * Clases del campo de texto, compartidas por los `InputField`, el `select` de
+ * país, el teléfono y el textarea, para que no se separen con el tiempo.
+ *
+ * REPOSO GRIS, NARANJA SOLO AL ESCRIBIR. Antes el borde, la etiqueta y el
+ * placeholder iban los tres en naranja: doce campos gritando lo mismo, ninguno
+ * destacando, y —lo que de verdad importa— un campo con error se marcaba
+ * también en un tono cálido y no se distinguía de los demás. Con el reposo en
+ * gris, el naranja señala dónde estás y el rojo del error se ve al instante.
+ */
+export const CLASES_CAMPO =
+  'w-full border border-slate-200 rounded-xl px-4 py-3 text-slate-800 placeholder-slate-400 ' +
+  'outline-none bg-white transition-all ' +
+  // Relleno pero sin el foco puesto: naranja pálido. Marca lo que ya está hecho
+  // sin gritar, y de un vistazo se ve cuánto queda por rellenar. `:not(:placeholder-shown)`
+  // es lo que distingue «tiene contenido» de «vacío» sin necesidad de estado en React.
+  'not-placeholder-shown:border-orange-200 ' +
+  'focus:border-orange-500 focus:ring-4 focus:ring-orange-500/15';
+
+/** Etiqueta: gris y sin `font-medium`. La etiqueta acompaña, no compite. */
+export const CLASES_ETIQUETA = 'text-slate-500 text-sm ml-1';
+
+// Encabezado de sección: el número deja de ser un círculo naranja relleno. Es
+// una referencia de posición, no una llamada a la acción, y con el relleno
+// competía con el botón «Continuar», que sí lo es.
 function SectionHeading({ n, title }) {
   return (
-    <div className="flex items-center gap-3 border-b border-orange-100 pb-2">
-      <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-orange-500 text-sm font-bold text-white">
+    <div className="flex items-center gap-3 pb-2">
+      <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-indigo-50 text-xs font-bold text-indigo-900">
         {n}
       </span>
       <h2 className="text-indigo-900 text-lg font-bold">{title}</h2>
@@ -276,18 +299,42 @@ function SectionHeading({ n, title }) {
   );
 }
 
-function InputField({ label, placeholder, type = 'text', name }) {
+/**
+ * Los botones «anterior / siguiente» del teclado del móvil NO se pintan desde
+ * la web: los pone el sistema, y solo aparecen si puede deducir que los campos
+ * forman una serie. Para eso hacen falta tres cosas, y aquí faltaban las tres:
+ *
+ *   · que todos los campos estén dentro del mismo `<form>` (lo están),
+ *   · `autoComplete` reconocible en cada uno — es lo que le dice a iOS que
+ *     esto es un formulario de dirección de verdad y no campos sueltos, y de
+ *     paso activa el autorrelleno del cliente,
+ *   · `enterKeyHint="next"` para que la tecla de intro diga «siguiente» en vez
+ *     de «ir», y salte al campo de al lado en lugar de enviar.
+ *
+ * El último campo del formulario no lo lleva: ahí «intro» sí debe enviar.
+ */
+function InputField({ label, placeholder, type = 'text', name, autoComplete, ultimo = false }) {
   return (
     <div className="flex flex-col gap-1">
-      <label htmlFor={name} className="text-orange-500 text-sm ml-1 font-medium">{label}</label>
+      <label htmlFor={name} className={CLASES_ETIQUETA}>{label}</label>
       <Field
         type={type}
         name={name}
         id={name}
         placeholder={placeholder}
-        className="w-full border border-orange-300 rounded-2xl px-5 py-3 placeholder-orange-200 text-gray-700 outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all"
+        autoComplete={autoComplete}
+        enterKeyHint={ultimo ? 'done' : 'next'}
+        className={CLASES_CAMPO}
       />
-      <ErrorMessage name={name} component="div" className="text-red-500 text-sm" />
+      {/* Rojo, pero el justo. `red-500` sobre blanco competía con el naranja de
+          la marca; `red-700` a 13px pesa menos y se sigue leyendo sin esfuerzo.
+          El tono NO se cambia a naranja ni a azul, aunque haya varios colores en
+          la pantalla: el naranja significa ahora «aquí estás escribiendo» y el
+          azul es el de marca. Si el error compartiera cualquiera de los dos,
+          «enfocado» y «mal» se verían igual — que es justo lo que se acaba de
+          arreglar. El rojo puede permitirse ser el único que grita porque es el
+          único que aparece solo cuando algo va mal. */}
+      <ErrorMessage name={name} component="div" className="text-red-700 text-[13px] ml-1" />
     </div>
   );
 }

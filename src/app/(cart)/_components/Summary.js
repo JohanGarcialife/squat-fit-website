@@ -5,7 +5,6 @@ import Link from 'next/link';
 import { useCurrency } from './useCurrency';
 import CurrencySelector from './CurrencySelector';
 import { useCartStore } from '@/stores/cart.store';
-import SequraSimulador from '@/app/components/SequraSimulador';
 import { useCheckoutStore } from '@/stores/checkout.store';
 import { arancelParaCarrito } from './aranceles';
 import { TIER_META, groupTierOrder, buildTierCartItem, formatEuros } from '@/app/components/courseCatalog';
@@ -115,7 +114,7 @@ export default function Summary(props) {
      <div className="min-h-screen bg-white flex flex-col lg:flex-row font-sans">
         
           {/* Columna Izquierda: Lista de Productos */}
-          <div className="w-full lg:w-3/5 xl:w-1/2 p-6 lg:p-14 lg:pl-40 min-h-screen bg-white">
+          <div className="w-full lg:w-2/3 p-6 lg:p-14 lg:pl-40 min-h-screen bg-white">
             <div className="mb-10">
                 <span className="text-indigo-900 text-lg font-medium">Paso 1 de 3</span>
                 <Link
@@ -293,7 +292,7 @@ export default function Summary(props) {
 
         {/* Columna Derecha: Resumen — sticky a la derecha en desktop, sticky
             abajo (bottom sheet) en móvil para tener siempre a la vista el total. */}
-        <div ref={hojaRef} className="w-full lg:w-2/5 xl:w-1/2 lg:min-h-screen bg-orange-50 sticky bottom-0 lg:static z-40 rounded-t-3xl lg:rounded-none shadow-[0_-10px_30px_rgba(0,0,0,0.10)] lg:shadow-none">
+        <div ref={hojaRef} className="w-full lg:w-1/3 lg:min-h-screen bg-orange-50 sticky bottom-0 lg:static z-40 rounded-t-3xl lg:rounded-none shadow-[0_-10px_30px_rgba(0,0,0,0.10)] lg:shadow-none">
           <div className="lg:sticky lg:top-0 lg:h-screen max-h-[70vh] lg:max-h-none overflow-y-auto">
             <div className="py-8 lg:py-14 px-6 lg:px-20 xl:px-32 flex flex-col h-full justify-start lg:justify-center">
               
@@ -409,18 +408,12 @@ export default function Summary(props) {
                   </span>
                 </div>
 
-                {/* Simulador de cuotas, justo bajo el total: es la cifra que el
-                    cliente está mirando cuando decide si sigue o abandona.
-                    Solo si este carrito se puede fraccionar de verdad — con una
-                    suscripción dentro no, porque seQura financia un importe
-                    cerrado. Por debajo de 50 € el propio widget no pinta nada,
-                    así que no hay que filtrarlo aquí. */}
-                <SequraSimulador
-                  importeEur={subtotal + (subtotal >= freeShippingThreshold ? 0 : shipping) + arancel}
-                  pagoUnico={!cart.some((i) => i.period === '/mes' || i.period === '/trimestre')}
-                  divisa={currency}
-                  className="pt-2"
-                />
+                {/* El simulador de cuotas se quitó de aquí el 4-ago. Estaba
+                    también en la tarjeta del curso, en el resumen (que sale en
+                    los tres pasos) y en el paso 3: cuatro apariciones de la
+                    marca de seQura en una sola compra. Ahora solo en la tarjeta
+                    del curso y en el paso 3, que son los dos momentos donde
+                    aporta algo — decidir el tramo y elegir cómo pagar. */}
               </div>
 
               {/* Action Button — un poco más pequeño en móvil */}

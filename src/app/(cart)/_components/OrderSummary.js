@@ -3,9 +3,8 @@
 import React, { useCallback, useRef, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, ChevronRight, X } from 'lucide-react';
 import { useCartStore } from '@/stores/cart.store';
-import SequraSimulador from '@/app/components/SequraSimulador';
 import { useCheckoutStore } from '@/stores/checkout.store';
 import { useCurrency } from './useCurrency';
 import CurrencySelector from './CurrencySelector';
@@ -14,7 +13,9 @@ import { useShippingQuote } from './useShippingQuote';
 import useCerrarAlTocarFuera from '@/hooks/useCerrarAlTocarFuera';
 
 export default function OrderSummary(props) {
-    const { isFormValid, isFormDirty, triggerCheckoutFormSubmit } = props;
+    // `mostrarCta` va por defecto a `true`: los pasos 1 y 2 no la pasan y
+    // siguen igual que antes. Solo el paso 3 la apaga — ver dónde se usa.
+    const { isFormValid, isFormDirty, triggerCheckoutFormSubmit, mostrarCta = true } = props;
     const { cart } = useCartStore();
 
     // En MÓVIL el resumen va plegado: ocupaba media pantalla y empujaba el
@@ -86,25 +87,78 @@ export default function OrderSummary(props) {
           <Image src="/LogotipoSquatfit.png" layout="fill" objectFit="contain" alt="Logo Squad Fit" />
         </div>
       </Link>
-      {/* Barra para plegar/desplegar el detalle — SOLO móvil */}
+      {/* Barra compacta — SOLO móvil. Una línea: lo que se paga a la izquierda
+          y el acceso al detalle a la derecha. Antes eran dos («Ver resumen (1)»
+          arriba y «Hoy pagarás …» debajo) y en un móvil con el teclado abierto
+          esas dos líneas se comían la mitad de lo que quedaba de pantalla. */}
       <button
         type="button"
-        onClick={() => setExpanded((v) => !v)}
+        onClick={() => setExpanded(true)}
         aria-expanded={expanded}
         aria-controls="resumen-pedido"
         className="lg:hidden flex items-center justify-between w-full gap-3 mb-4 cursor-pointer"
       >
-        <span className="text-indigo-900 font-bold">
-          {expanded ? 'Ocultar resumen' : `Ver resumen (${totalItems})`}
+        <span className="text-indigo-900/80 text-sm">
+          Hoy pagarás{' '}
+          <span className="font-bold text-indigo-900 text-base">
+            {convertPrice(total)} {symbol}
+          </span>
         </span>
-        <ChevronDown
-          size={20}
-          className={`text-indigo-900 shrink-0 transition-transform ${expanded ? 'rotate-180' : ''}`}
-        />
+        <span className="flex items-center gap-1 text-indigo-900 font-bold text-sm shrink-0">
+          Ver detalle
+          {/* Antes era una flecha hacia abajo, que promete desplegar en línea.
+              El resumen ya no se despliega: entra deslizando desde la derecha,
+              así que la flecha correcta apunta hacia allí. */}
+          <ChevronRight size={18} className="shrink-0" />
+        </span>
       </button>
 
-      {/* Detalle: plegado en móvil, siempre visible en escritorio */}
-      <div id="resumen-pedido" className={`${expanded ? 'block' : 'hidden'} lg:block`}>
+      {/* Fondo del cajón — solo móvil. Cierra al tocar fuera, igual que el
+          cajón del carrito. */}
+      <div
+        onClick={plegar}
+        className={`lg:hidden fixed inset-0 z-[99] bg-black/25 transition-opacity duration-300 ${
+          expanded ? 'opacity-100' : 'opacity-0 pointer-events-none'
+        }`}
+        aria-hidden="true"
+      />
+
+      {/* Detalle. En ESCRITORIO va inline en la columna derecha, como siempre.
+          En MÓVIL es un cajón que entra deslizando desde la derecha — el mismo
+          gesto, tamaño y animación que el cajón del carrito (CartDrawer), para
+          que el resumen se comporte igual en toda la web. Desplegarlo en línea
+          empujaba el formulario fuera de la vista, que es lo que lo hacía
+          incómodo en el paso 2. */}
+      {/* El desplazamiento va en `style`, no en clases de Tailwind.
+          Con `translate-x-full`/`translate-x-0` el cajón se quedaba clavado
+          fuera de pantalla: medido en el preview, `left` calculado 54,6px pero
+          el rectángulo real en 390px, y `translate: 100%` seguía puesto con la
+          clase `translate-x-0` ya aplicada. Tailwind v4 escribe la propiedad
+          `translate` (no `transform`), y ahí las dos utilidades se pisaban.
+          Un estilo en línea no admite ese empate. El `lg:translate-x-0!` lleva
+          `!important` a propósito: es lo único que gana a un estilo en línea,
+          y hace falta para que en escritorio el resumen vuelva a su sitio. */}
+      <div
+        id="resumen-pedido"
+        style={{ transform: expanded ? 'translateX(0)' : 'translateX(100%)' }}
+        className={`
+          fixed right-0 top-0 z-[100] h-full w-[86%] max-w-[420px] overflow-y-auto
+          bg-orange-50 shadow-2xl p-6 transition-transform duration-300 ease-out
+          lg:static lg:z-auto lg:h-auto lg:w-auto lg:max-w-none lg:[transform:none]!
+          lg:bg-transparent lg:shadow-none lg:p-0 lg:overflow-visible
+        `}
+      >
+        <div className="lg:hidden flex items-center justify-between mb-6">
+          <span className="text-indigo-900 font-bold">Tu pedido ({totalItems})</span>
+          <button
+            type="button"
+            onClick={plegar}
+            aria-label="Cerrar resumen"
+            className="p-1.5 rounded-full text-indigo-900/60 hover:bg-indigo-100 active:scale-90 transition cursor-pointer"
+          >
+            <X size={20} />
+          </button>
+        </div>
 
       <div className="mb-6 flex justify-center">
         <CurrencySelector currency={currency} setCurrency={setCurrency} currencies={currencies} />
@@ -161,8 +215,31 @@ export default function OrderSummary(props) {
             </div>
         )}
 
+        {(hasPhysicalItems || arancel > 0) && (
+            <div className="space-y-2">
+                {hasPhysicalItems && (
+                    <div className="flex justify-between items-center text-indigo-900/70 text-sm sm:text-base">
+                        <span>Envío</span>
+                        <span>
+                            {sinDestino
+                                ? 'Según destino'
+                                : finalShipping > 0
+                                    ? `${convertPrice(finalShipping)} ${symbol}`
+                                    : 'Gratis'}
+                        </span>
+                    </div>
+                )}
+                {arancel > 0 && (
+                    <div className="flex justify-between items-center text-indigo-900/70 text-sm sm:text-base">
+                        <span>Aranceles (importación EE. UU.)</span>
+                        <span>{convertPrice(arancel)} {symbol}</span>
+                    </div>
+                )}
+            </div>
+        )}
+
       </div>
-      {/* fin del detalle plegable */}
+      {/* fin del detalle */}
 
       {/* Totales y botón. Con el resumen plegado se ve SOLO lo que se paga: el
           desglose (envío, aranceles) se va con el detalle, porque plegado no
@@ -198,29 +275,12 @@ export default function OrderSummary(props) {
                 · El desajuste de que el envío se pintara y Stripe no lo cobrase
                   YA NO está en espera: se arregló el 30-jul (revisión
                   00353-duy). */}
-            {(hasPhysicalItems || arancel > 0) && (
-                <div className={`${expanded ? 'block' : 'hidden'} lg:block space-y-2`}>
-                    {hasPhysicalItems && (
-                        <div className="flex justify-between items-center text-indigo-900/70 text-sm sm:text-base">
-                            <span>Envío</span>
-                            <span>
-                                {sinDestino
-                                    ? 'Según destino'
-                                    : finalShipping > 0
-                                        ? `${convertPrice(finalShipping)} ${symbol}`
-                                        : 'Gratis'}
-                            </span>
-                        </div>
-                    )}
-                    {arancel > 0 && (
-                        <div className="flex justify-between items-center text-indigo-900/70 text-sm sm:text-base">
-                            <span>Aranceles (importación EE. UU.)</span>
-                            <span>{convertPrice(arancel)} {symbol}</span>
-                        </div>
-                    )}
-                </div>
-            )}
-            <div className="flex justify-between items-center text-indigo-900/80 text-sm sm:text-base lg:text-lg">
+            {/* El desglose (envío, aranceles) se mudó ARRIBA, dentro del
+                detalle: en móvil el detalle es ahora un cajón lateral y estas
+                líneas tienen que ir con él, no quedarse sueltas en la barra. */}
+            {/* Solo en escritorio: en móvil este mismo total ya va en la barra
+                compacta de arriba, y salían los dos «Hoy pagarás» seguidos. */}
+            <div className="hidden lg:flex justify-between items-center text-indigo-900/80 text-sm sm:text-base lg:text-lg">
                 <span>Hoy pagarás</span>
                 <span className="font-bold text-indigo-900 text-base sm:text-lg lg:text-xl">
                     {convertPrice(total)} {symbol}
@@ -237,12 +297,15 @@ export default function OrderSummary(props) {
                 - Por debajo de 50 € el propio widget no pinta nada.
                 Se pasa `total` (lo que se paga hoy), no el subtotal: es la cifra
                 que el cliente está mirando cuando duda. */}
-            <SequraSimulador
-              importeEur={total}
-              pagoUnico={!hasRecurring}
-              divisa={currency}
-              className="pt-1"
-            />
+            {/* AQUÍ NO VA EL SIMULADOR DE seQURA, a propósito.
+                Este resumen se pinta en los tres pasos del carrito, así que su
+                cuadro salía en todos — y con el de la tarjeta del curso y el
+                del paso 3, el cliente se cruzaba con la marca de seQura cuatro
+                veces en una sola compra. Deja de parecer un método de pago y
+                empieza a parecer que la tienda está patrocinada por ellos.
+                Decisión de María el 4-ago: solo en dos sitios, la tarjeta del
+                curso (donde ayuda a decidir) y el paso 3 (donde se elige cómo
+                pagar). */}
 
             {hasRecurring && (
                 <div className="flex justify-between items-center text-indigo-900 font-bold text-sm sm:text-base lg:text-lg pt-2 border-t border-indigo-100/50">
@@ -255,13 +318,20 @@ export default function OrderSummary(props) {
         </div>
       </div>
 
-      <button
-        onClick={triggerCheckoutFormSubmit}
-        disabled={!isFormValid}
-        className="w-full bg-indigo-800 text-white cursor-pointer font-bold text-base py-3 lg:text-lg lg:py-4 rounded-2xl hover:bg-indigo-900 transition-all shadow-xl shadow-indigo-200 disabled:opacity-50 disabled:cursor-not-allowed"
-      >
-        Continuar
-      </button>
+      {/* En el paso del checkout incrustado, quien cobra es el botón «Pagar»
+          de Stripe: repetir aquí un «Continuar» daría dos llamadas a la acción
+          en la misma pantalla y ninguna de las dos sería obvia. El resumen se
+          queda por lo que aporta —recordar qué se está comprando y por cuánto,
+          justo cuando se decide el pago—, pero sin CTA propia. */}
+      {mostrarCta && (
+        <button
+          onClick={triggerCheckoutFormSubmit}
+          disabled={!isFormValid}
+          className="w-full bg-indigo-800 text-white cursor-pointer font-bold text-base py-3 lg:text-lg lg:py-4 rounded-2xl hover:bg-indigo-900 transition-all shadow-xl shadow-indigo-200 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          Continuar
+        </button>
+      )}
 
     </div>
   );

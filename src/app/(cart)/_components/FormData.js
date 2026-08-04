@@ -5,10 +5,13 @@ import OrderSummary from "./OrderSummary";
 import { useCartStore } from "@/stores/cart.store";
 import { useCheckoutStore } from "@/stores/checkout.store";
 import { useShippingQuote } from "./useShippingQuote";
+import useTecladoAbierto from "@/hooks/useTecladoAbierto";
 
 export default function FormData(props) {
   const { setStep, saveCard, onSaveCardChange } = props;
   const { cart } = useCartStore();
+  // Este es el paso con formulario largo: es donde el teclado tapa cosas.
+  const tecladoAbierto = useTecladoAbierto();
 
   const [isFormValid, setIsFormValid] = useState(false);
   const [isFormDirty, setIsFormDirty] = useState(false);
@@ -58,7 +61,7 @@ export default function FormData(props) {
     <div className="min-h-screen bg-white flex flex-col lg:flex-row font-sans">
       
       {/* Columna Izquierda: Formulario (aprox 60%) */}
-      <div className="w-full lg:w-3/5 xl:w-1/2 p-6 lg:p-14 lg:pl-40 min-h-screen bg-white">
+      <div className="w-full lg:w-2/3 p-6 lg:p-14 lg:pl-40 min-h-screen bg-white">
         <CheckoutForm
             setStep={setStep}
             onValidationChange={handleValidationChange}
@@ -69,8 +72,24 @@ export default function FormData(props) {
       </div>
       
       {/* Columna Derecha: Resumen — sticky a la derecha en desktop, sticky
-          abajo (bottom sheet) en móvil para tener siempre a la vista el total. */}
-      <div className="w-full lg:w-2/5 xl:w-1/2 lg:min-h-screen bg-orange-50 sticky bottom-0 lg:static z-40 rounded-t-3xl lg:rounded-none shadow-[0_-10px_30px_rgba(0,0,0,0.10)] lg:shadow-none">
+          abajo (bottom sheet) en móvil para tener siempre a la vista el total.
+
+          MIENTRAS SE ESCRIBE, LA BARRA SE VA. Con el teclado abierto quedaba
+          una franja de dos o tres campos entre él y esta barra, y a veces el
+          campo que estabas rellenando caía justo detrás. En escritorio, donde
+          no hay teclado que suba, no se aplica nunca.
+
+          SE ESCONDE CON `max-height`, NO CON `translate-y`. Un elemento con
+          `transform` pasa a ser el marco de referencia de sus descendientes
+          `position: fixed`, y el cajón del resumen es uno: con el translate
+          puesto, el cajón se posicionaba contra ESTA barra en vez de contra la
+          pantalla y no llegaba a deslizarse nunca. `max-height` anima igual y
+          no crea contenedor. */}
+      <div
+        className={`w-full lg:w-1/3 lg:min-h-screen bg-orange-50 sticky bottom-0 lg:static z-40 rounded-t-3xl lg:rounded-none shadow-[0_-10px_30px_rgba(0,0,0,0.10)] lg:shadow-none transition-[max-height] duration-200 ${
+          tecladoAbierto ? 'max-h-0 overflow-hidden lg:max-h-none lg:overflow-visible' : 'max-h-[80vh] lg:max-h-none'
+        }`}
+      >
         <div className="lg:sticky lg:top-0 lg:h-screen max-h-[70vh] lg:max-h-none overflow-y-auto">
           <OrderSummary 
             setStep={setStep} 

@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { handleApiError } from '@/app/components/handleApiError';
-import { ChevronLeft } from 'lucide-react';
+import { ChevronLeft, ChevronDown } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import OrderSummary from './OrderSummary';
 import { useCartStore } from '@/stores/cart.store';
@@ -19,6 +19,7 @@ import { loadStripe } from '@stripe/stripe-js';
 import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import { toast } from 'react-hot-toast';
 import PagoSequra, { evaluarSequra } from './PagoSequra';
+import SequraSimulador from '@/app/components/SequraSimulador';
 
 // La clave publicable viene SIEMPRE del entorno (NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY).
 // Sin fallback de test: si falta, el pago embebido debe fallar a la vista, no
@@ -100,7 +101,7 @@ function PaymentInner(props) {
   return (
     <div className="min-h-screen bg-white flex flex-col lg:flex-row font-sans">
       {/* Columna Izquierda: Formulario Stripe (aprox 60%) */}
-      <div className="w-full lg:w-3/5 xl:w-1/2 p-6 lg:p-14 lg:pl-40 min-h-screen bg-white">
+      <div className="w-full lg:w-2/3 p-6 lg:p-14 lg:pl-40 min-h-screen bg-white">
         
         {/* Header */}
         <div className="mb-10">
@@ -149,7 +150,7 @@ function PaymentInner(props) {
       </div>
       
       {/* Columna Derecha: Resumen */}
-      <div className="w-full lg:w-2/5 xl:w-1/2 lg:min-h-screen bg-orange-50 sticky bottom-0 lg:static z-40 rounded-t-3xl lg:rounded-none shadow-[0_-10px_30px_rgba(0,0,0,0.10)] lg:shadow-none">
+      <div className="w-full lg:w-1/3 lg:min-h-screen bg-orange-50 sticky bottom-0 lg:static z-40 rounded-t-3xl lg:rounded-none shadow-[0_-10px_30px_rgba(0,0,0,0.10)] lg:shadow-none">
         <div className="lg:sticky lg:top-0 lg:h-screen max-h-[70vh] lg:max-h-none overflow-y-auto">
           <OrderSummary 
              triggerCheckoutFormSubmit={handleSubmit}
@@ -203,6 +204,16 @@ export default function Payment(props) {
     try { return localStorage.getItem('sf_currency') || 'EUR'; } catch { return 'EUR'; }
   })();
   const sequra = evaluarSequra(cart, totalCarrito, divisa);
+  // Qué pasarela está desplegada en el paso 3. Arranca en Stripe: la tarjeta
+  // es lo que espera la mayoría y lo que mejor convierte.
+  const [metodo, setMetodo] = useState('stripe');
+
+  // Al llegar al paso 3 la página debe empezar ARRIBA del todo. En móvil el
+  // resumen va encima del pago, y sin esto se entraba con el scroll heredado
+  // del paso 2: parecía que faltaba media pantalla por encima.
+  useEffect(() => {
+    if (embeddedSecret) window.scrollTo({ top: 0, behavior: 'auto' });
+  }, [embeddedSecret]);
 
   const appearance = useMemo(() => ({
     theme: 'stripe',
@@ -436,14 +447,25 @@ export default function Payment(props) {
     );
   }
 
-  // Checkout incrustado: el pago de Stripe dentro de nuestra propia página,
-  // con la marca de la cuenta (logo, #363c98 y #ff6a0b) y sin salir del sitio.
+  // Checkout incrustado: el pago de Stripe dentro de nuestra propia página.
+  //
+  // De la marca de la cuenta de Stripe solo llega el COLOR del botón (y la
+  // forma y la tipografía, si se configuran en Ajustes → Pagos → Checkout;
+  // es un ajuste distinto del de Marca, que solo afecta a facturas y recibos).
+  // El fondo blanco, las cajas y el espaciado son suyos y no se tocan.
+  //
+  // Por eso lo que personaliza esta pantalla es el MARCO: las dos columnas de
+  // los pasos 1 y 2, nuestros encabezados y el resumen del pedido. La versión
+  // anterior era una columna blanca suelta, y en el momento de pagar el
+  // cliente no veía qué estaba comprando — solo un importe dentro de la caja
+  // de Stripe. El resumen vuelve por eso, no por decoración.
   if (embeddedSecret) {
     return (
-      <div className="min-h-screen bg-white font-sans">
-        {/* El ancho de la columna (max-w-xl, sin padding lateral a partir de
-            md) se mantiene igual que antes: el padding solo entra en móvil. */}
-        <div className="w-full max-w-xl mx-auto px-6 md:px-0 py-6">
+      <div className="min-h-screen bg-white flex flex-col lg:flex-row font-sans">
+        {/* `lg:min-h-screen` en vez de `min-h-screen`: en móvil el resumen ya
+            va encima, y forzar aquí una pantalla entera dejaba un socavón
+            blanco debajo del botón de seQura. */}
+        <div className="w-full lg:w-2/3 p-6 lg:p-14 lg:pl-40 lg:min-h-screen bg-white">
 
           {/* Cabecera: la misma que los pasos 1, 2 y el pago con Payment
               Element. Sin ella, si el iframe de Stripe no llega a pintar (nos
@@ -458,7 +480,31 @@ export default function Payment(props) {
               </div>
           </div>
 
-          <CheckoutIncrustado clientSecret={embeddedSecret} />
+          <h2 className="text-indigo-900 font-bold text-lg mb-4">Métodos de pago</h2>
+
+          {/* ── Acordeón: una pasarela a la vez ──────────────────────────────
+              Con las dos abiertas la pantalla pedía dos decisiones al mismo
+              tiempo y ninguna quedaba clara. Ahora la que no está elegida se
+              pliega a una línea, y al tocarla se cambia.
+
+              Stripe se OCULTA con CSS, nunca se desmonta: `EmbeddedCheckout`
+              se monta una sola vez contra su `clientSecret`, y si se
+              desmontara habría que crear otra sesión de pago para volver —
+              se perdería el estado que el cliente ya hubiera tecleado. */}
+          <div className={metodo === 'stripe' ? '' : 'hidden'}>
+            <CheckoutIncrustado clientSecret={embeddedSecret} />
+          </div>
+
+          {sequra.aplica && metodo === 'sequra' && (
+            <button
+              type="button"
+              onClick={() => setMetodo('stripe')}
+              className="w-full flex items-center justify-between rounded-lg border border-indigo-100 px-4 py-3 text-indigo-900 font-semibold hover:bg-indigo-50 transition-colors cursor-pointer"
+            >
+              <span>Pagar con tarjeta u otros métodos</span>
+              <ChevronDown size={18} className="shrink-0 -rotate-90" />
+            </button>
+          )}
 
           {/* Pago fraccionado con seQura, DEBAJO del pago de Stripe.
               Tiene que estar aquí y no solo en la rama del Payment Element:
@@ -471,9 +517,28 @@ export default function Payment(props) {
               la rama que el backend devuelve HOY, no en la que se estaba
               leyendo al escribirlo. */}
           {sequra.aplica && (
-            <div className="mt-8 pt-8 border-t border-indigo-100">
-              <p className="text-slate-500 text-sm mb-4 text-center">o si lo prefieres</p>
-              <PagoSequra cart={cart} total={totalCarrito} formData={datosCliente} />
+            <div className="mt-8 pt-8 border-t border-indigo-100 max-w-[420px] mx-auto">
+              {/* Acotado al ancho de la caja de Stripe (~420px), no al de la
+                  columna: Stripe pinta su tarjeta centrada y estrecha, así que
+                  un botón a todo lo ancho de la columna se veía bastante mayor
+                  que su «Pagar» y desequilibraba las dos opciones. */}
+              {/* La cuota la calcula seQura, no nosotros. Dividir el total
+                  entre 12 daría 15,67 € cuando lo que se cobra son 18,06 €:
+                  la diferencia son sus comisiones, y anunciar una cuota que no
+                  es la real no es un detalle estético. Su widget lee el importe
+                  del `data-amount` y pinta la cifra buena. */}
+              {metodo === 'stripe' && (
+                <div className="mb-4 flex justify-center">
+                  <SequraSimulador importeEur={totalCarrito} divisa={divisa} />
+                </div>
+              )}
+              <PagoSequra
+                cart={cart}
+                total={totalCarrito}
+                formData={datosCliente}
+                abierto={metodo === 'sequra'}
+                onAbrir={() => setMetodo('sequra')}
+              />
             </div>
           )}
           {!sequra.aplica && sequra.cerca && (
@@ -488,6 +553,23 @@ export default function Payment(props) {
           >
             Volver al carrito
           </button>
+        </div>
+
+        {/* Resumen del pedido, SIN su «Continuar»: aquí quien cobra es el
+            botón de Stripe. En móvil sale plegado tras «Ver resumen (N)».
+
+            EN MÓVIL VA ARRIBA, no como barra flotante abajo. La barra `sticky
+            bottom-0` de los pasos 1 y 2 funciona allí porque el botón que
+            cobra vive DENTRO de ella. Aquí no: el botón «Pagar» es de Stripe y
+            queda en la columna de al lado, así que la barra se le montaba
+            encima y lo cortaba por la mitad — en la pantalla del cobro. De
+            paso se comía el simulador de cuotas y dejaba 200px de hueco.
+            `order-first lg:order-last` lo sube al principio en móvil y lo
+            devuelve a la derecha en escritorio, donde no cambia nada. */}
+        <div className="w-full order-first lg:order-last lg:w-1/3 lg:min-h-screen bg-orange-50">
+          <div className="lg:sticky lg:top-0 lg:h-screen lg:overflow-y-auto">
+            <OrderSummary mostrarCta={false} />
+          </div>
         </div>
       </div>
     );
