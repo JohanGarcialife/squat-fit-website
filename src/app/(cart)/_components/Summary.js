@@ -1,5 +1,5 @@
 import React, { useCallback, useRef, useState, useEffect } from 'react'
-import { ChevronLeft, ChevronDown, ChevronRight, X, RotateCcw } from "lucide-react";
+import { ChevronDown, ChevronRight, X, RotateCcw } from "lucide-react";
 import Image from "next/image";
 import Link from 'next/link';
 import { useCurrency } from './useCurrency';
@@ -9,6 +9,7 @@ import { useCheckoutStore } from '@/stores/checkout.store';
 import { arancelParaCarrito } from './aranceles';
 import { TIER_META, groupTierOrder, buildTierCartItem, formatEuros } from '@/app/components/courseCatalog';
 import useCerrarAlTocarFuera from '@/hooks/useCerrarAlTocarFuera';
+import CabeceraPaso from './CabeceraPaso';
 
 // Sufijo de cobro por tramo (el trimestral se etiquetaba antes como «pago
 // único» porque el selector usaba un orden fijo de 3 tramos).
@@ -120,15 +121,12 @@ export default function Summary(props) {
         
           {/* Columna Izquierda: Lista de Productos */}
           <div className="w-full lg:w-2/3 p-6 lg:p-14 lg:pl-40 min-h-screen bg-white">
-            <div className="mb-10">
-                <span className="text-indigo-900 text-lg font-medium">Paso 1 de 3</span>
-                <Link
-                href="/cocina"
-                className="flex items-center gap-2 mt-4 cursor-pointer text-indigo-900 group">
-                <ChevronLeft size={28} className="group-hover:-translate-x-1 transition-transform" />
-                <h1 className="text-3xl md:text-4xl font-bold">Carrito ({totalItems})</h1>
-                </Link>
-            </div>
+            <CabeceraPaso
+              paso="Paso 1 de 3"
+              titulo={`Carrito (${totalItems})`}
+              atrasHref="/cocina"
+              aria="Volver a la tienda"
+            />
 
             {/* Aviso de deshacer: al eliminar un producto (papelera, "x" o el
                 botón − llegando a 0) se puede recuperar aquí mismo. */}
