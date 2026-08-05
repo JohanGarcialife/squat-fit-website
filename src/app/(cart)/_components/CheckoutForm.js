@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useMemo, useEffect, useRef } from 'react';
-import { ChevronLeft, ChevronDown } from 'lucide-react';
+import { ChevronDown } from 'lucide-react';
 import { useCheckoutStore } from '@/stores/checkout.store';
 import { useAuthStore } from '@/stores/auth.store';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
@@ -13,6 +13,7 @@ import { getData as getCountryData } from 'country-list';
 import { useCartStore } from '@/stores/cart.store';
 import SaveCardCheckbox from './SaveCardCheckbox';
 import Casilla from './Casilla';
+import CabeceraPaso from './CabeceraPaso';
 import GuardarDireccion from './GuardarDireccion';
 
 
@@ -148,13 +149,12 @@ export default function CheckoutForm({ setStep, onValidationChange, submitRef, s
 
   return (
     <div className="w-full max-w-lg mx-auto pb-10">
-        <div className="mb-8">
-          <span className="text-indigo-900 text-lg font-medium">Paso 2 de 3</span>
-          <div className="cursor-pointer" onClick={() => setStep(1)} className="flex items-center gap-2 mt-2 cursor-pointer text-indigo-900 group">
-            <ChevronLeft size={28} className="group-hover:-translate-x-1 transition-transform" />
-            <h1 className="text-3xl md:text-4xl font-bold">Mis datos</h1>
-          </div>
-        </div>
+        <CabeceraPaso
+          paso="Paso 2 de 3"
+          titulo="Mis datos"
+          onAtras={() => setStep(1)}
+          aria="Volver al carrito"
+        />
 
         {/* Tipo de cliente: al elegir Empresa aparece la razón social */}
         <div className="flex gap-4 mb-8">
@@ -316,6 +316,11 @@ export default function CheckoutForm({ setStep, onValidationChange, submitRef, s
                     <span className="text-slate-600 text-sm">Usar la misma dirección para el envío</span>
                   </Casilla>
 
+                  {/* Guardar la de FACTURACIÓN. Queda predeterminada de
+                      facturación sin preguntar: es lo que dice el bloque en el
+                      que está. */}
+                  <GuardarDireccion tipo="facturacion" valores={values} />
+
                   {/* Dirección de envío distinta.
                       Hasta el 5-ago esta casilla NO HACÍA NADA: `sameAddress`
                       solo se pintaba a sí misma y no existía ningún campo de
@@ -358,6 +363,10 @@ export default function CheckoutForm({ setStep, onValidationChange, submitRef, s
                         </div>
                         <ErrorMessage name="shippingCountry" component="div" className="text-red-700 text-[13px] ml-1" />
                       </div>
+
+                      {/* Guardar la de ENVÍO, dentro de su propio recuadro y
+                          predeterminada de envío. */}
+                      <GuardarDireccion tipo="envio" valores={values} />
                     </div>
                   )}
 
@@ -366,10 +375,6 @@ export default function CheckoutForm({ setStep, onValidationChange, submitRef, s
                     <Field as="textarea" id="shippingNotes" name="shippingNotes" rows={3} placeholder="Escribe aquí..." className={`${CLASES_CAMPO} resize-none`} />
                   </div>
 
-                  {/* Guardar la dirección en la agenda del cliente. Se pinta
-                      sola solo si hay sesión: la agenda cuelga del usuario y
-                      sin cuenta no hay dónde guardarla. */}
-                  <GuardarDireccion valores={values} sameAddress={sameAddress} />
                 </section>
 
                 {/* ── Sección 3: guardar tarjeta (save_card) — fuera de Formik

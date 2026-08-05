@@ -26,7 +26,7 @@ export default function SaveCardCheckbox({ checked, onChange, id = 'save-card', 
     <Casilla checked={checked} onChange={onChange} id={id} destacada className={className}>
       <span className="flex items-center gap-1.5 font-semibold text-indigo-900">
         <Zap size={15} className="shrink-0 text-orange-500" />
-        Que la próxima compra sea un toque
+        Que la próxima compra sea un solo clic
       </span>
       {/* Dos líneas y para. La versión anterior metía en el mismo párrafo que
           lo guarda Stripe y no nosotros, que no marcarla no cambia nada, y la

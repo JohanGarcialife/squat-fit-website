@@ -19,8 +19,41 @@ import { resolveOrigin } from '@/app/components/UTMCapture';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import { toast } from 'react-hot-toast';
-import PagoSequra, { evaluarSequra, SEQURA_VERDE_TEXTO } from './PagoSequra';
+import PagoSequra, { evaluarSequra } from './PagoSequra';
 import SequraSimulador from '@/app/components/SequraSimulador';
+import CabeceraPaso from './CabeceraPaso';
+
+/**
+ * Iconos de los métodos de pago.
+ *
+ * Dibujados a mano en SVG en vez de traídos de un CDN: la CSP de esta web no
+ * deja cargar imágenes de terceros sin tocarla, y ya nos costó 15 horas de
+ * carrito caído el 28-jul. Además son dos formas simples — una tarjeta y unas
+ * cuotas — que no justifican una dependencia.
+ *
+ * `currentColor` a propósito: el icono se tiñe con el color del texto de la
+ * fila, así acompaña al estado elegido/sin elegir sin lógica aparte.
+ */
+function IconoTarjeta() {
+  return (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <rect x="2" y="5" width="20" height="14" rx="3" stroke="currentColor" strokeWidth="1.6" />
+      <path d="M2 9.5h20" stroke="currentColor" strokeWidth="1.6" />
+      <rect x="5" y="13" width="5" height="2" rx="1" fill="currentColor" />
+    </svg>
+  );
+}
+
+/** Tres cuotas: un importe que se parte en plazos iguales. */
+function IconoPlazos() {
+  return (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <rect x="2" y="7" width="6" height="10" rx="2" stroke="currentColor" strokeWidth="1.6" />
+      <rect x="9" y="7" width="6" height="10" rx="2" stroke="currentColor" strokeWidth="1.6" />
+      <rect x="16" y="7" width="6" height="10" rx="2" stroke="currentColor" strokeWidth="1.6" />
+    </svg>
+  );
+}
 
 /**
  * Una fila del selector de método de pago, en el paso 3.
@@ -29,8 +62,11 @@ import SequraSimulador from '@/app/components/SequraSimulador';
  * opciones con las flechas y el lector de pantalla las anuncia como «1 de 2».
  * Un div con onClick no hace ninguna de las dos cosas, y esto es la pantalla
  * donde se paga.
+ *
+ * `onClick` en vez de `onChange`: las filas también PLIEGAN al volver a
+ * pulsarlas, y un `onChange` de radio no dispara cuando ya está marcado.
  */
-function OpcionDePago({ activo, onClick, titulo, marca, pie }) {
+function OpcionDePago({ activo, onClick, titulo, sub, icono, pie }) {
   return (
     <label
       className={`flex items-start gap-3 rounded-xl border px-4 py-3 cursor-pointer transition-all ${
@@ -43,18 +79,16 @@ function OpcionDePago({ activo, onClick, titulo, marca, pie }) {
         type="radio"
         name="metodo-de-pago"
         checked={activo}
-        onChange={onClick}
+        onChange={() => {}}
+        onClick={onClick}
         className="mt-1 accent-indigo-600 cursor-pointer"
       />
+      <span className={`mt-0.5 shrink-0 ${activo ? 'text-indigo-600' : 'text-slate-400'}`}>
+        {icono}
+      </span>
       <span className="min-w-0 flex-1">
-        <span className="flex items-baseline gap-2 flex-wrap">
-          <span className="font-semibold text-indigo-900">{titulo}</span>
-          {marca && (
-            <span className="text-sm font-semibold" style={{ color: SEQURA_VERDE_TEXTO }}>
-              {marca}
-            </span>
-          )}
-        </span>
+        <span className="block font-semibold text-indigo-900">{titulo}</span>
+        {sub && <span className="block text-xs text-slate-500 mt-0.5">{sub}</span>}
         {/* El simulador de cuotas se pinta aunque la opción esté sin elegir:
             es justo el dato que hace que alguien la elija. */}
         {pie && <span className="block mt-0.5">{pie}</span>}
@@ -279,9 +313,11 @@ export default function Payment(props) {
     try { return localStorage.getItem('sf_currency') || 'EUR'; } catch { return 'EUR'; }
   })();
   const sequra = evaluarSequra(cart, totalCarrito, divisa, datosCliente);
-  // Qué pasarela está desplegada en el paso 3. Arranca en Stripe: la tarjeta
-  // es lo que espera la mayoría y lo que mejor convierte.
-  const [metodo, setMetodo] = useState('stripe');
+  // Qué pasarela está desplegada en el paso 3. Arranca en NINGUNA: las dos
+  // filas se ven plegadas y el cliente abre la suya. Antes arrancaba en Stripe
+  // con su caja ya desplegada, y eso convertía la otra opción en la rara de
+  // debajo en vez de en una alternativa de igual peso.
+  const [metodo, setMetodo] = useState(null);
 
   // Al llegar al paso 3 la página debe empezar ARRIBA del todo. En móvil el
   // resumen va encima del pago, y sin esto se entraba con el scroll heredado
@@ -546,22 +582,16 @@ export default function Payment(props) {
             blanco debajo del botón de seQura. */}
         <div className="w-full lg:w-2/3 p-6 lg:p-14 lg:pl-40 lg:min-h-screen bg-white">
 
-          {/* Cabecera: la misma que los pasos 1, 2 y el pago con Payment
-              Element. Sin ella, si el iframe de Stripe no llega a pintar (nos
-              pasó el 28-jul: la CSP lo bloqueó) el cliente ve una página
-              vacía y da por hecho que el "Continuar" del paso 2 no hizo nada
-              y que nunca llegó al pago. */}
-          {/* Cabecera pegada arriba en MÓVIL: la caja de Stripe es larga y al
-              bajar a pagar el «atrás» se quedaba fuera de pantalla, sin ninguna
-              forma de volver sin subir del todo. En escritorio no hace falta —
-              la columna cabe entera— así que se queda estática (`lg:static`). */}
-          <div className="mb-10 sticky top-0 z-30 bg-white pt-4 pb-3 -mx-6 px-6 lg:static lg:mx-0 lg:px-0 lg:pt-0 lg:pb-0 lg:bg-transparent">
-              <span className="text-indigo-900 text-lg font-medium">Paso 3 de 3</span>
-              <div onClick={() => props.setStep(2)} className="flex items-center gap-2 mt-2 cursor-pointer text-indigo-900 group">
-                  <ChevronLeft size={28} className="group-hover:-translate-x-1 transition-transform" />
-                  <h1 className="text-3xl md:text-4xl font-bold">Pago</h1>
-              </div>
-          </div>
+          {/* Cabecera: la misma que los pasos 1 y 2. Sin ella, si el iframe de
+              Stripe no llega a pintar (nos pasó el 28-jul: la CSP lo bloqueó)
+              el cliente ve una página vacía y da por hecho que el «Continuar»
+              del paso 2 no hizo nada y que nunca llegó al pago. */}
+          <CabeceraPaso
+            paso="Paso 3 de 3"
+            titulo="Pago"
+            onAtras={() => props.setStep(2)}
+            aria="Volver a mis datos"
+          />
 
           <h2 className="text-indigo-900 font-bold text-lg mb-4">Métodos de pago</h2>
 
@@ -582,23 +612,40 @@ export default function Payment(props) {
               se monta una sola vez contra su `clientSecret`, y si se
               desmontara habría que crear otra sesión de pago para volver —
               se perdería el estado que el cliente ya hubiera tecleado. */}
+          {/* ── Todo plegado al llegar ───────────────────────────────────────
+              Ninguna opción viene abierta: el cliente elige y solo entonces se
+              despliega la suya. Antes la caja de Stripe estaba desplegada de
+              salida y seQura quedaba como la alternativa rara de debajo.
+
+              POR QUÉ SON DOS FILAS Y NO CUATRO: Apple Pay y Google Pay no son
+              métodos de pago aparte en Stripe — viajan sobre `card` y Stripe
+              los pinta él mismo, arriba de su caja, SOLO si el dispositivo los
+              admite. Sacarlos a una fila fija haría que en un Android sin
+              Google Pay el cliente la pulse y no encuentre nada. Y PayPal hoy
+              no está enchufado a este checkout (las credenciales existen en
+              Cloud Run, pero no hay código que las use aquí). */}
           {sequra.aplica && (
             <div className="max-w-[420px] mx-auto space-y-2 mb-6">
               <OpcionDePago
                 activo={metodo === 'stripe'}
-                onClick={() => setMetodo('stripe')}
-                titulo="Tarjeta, Apple Pay y más"
+                onClick={() => setMetodo(metodo === 'stripe' ? null : 'stripe')}
+                titulo="Tarjeta o wallet"
+                sub="Visa, Mastercard, Apple Pay, Google Pay y Link"
+                icono={<IconoTarjeta />}
               />
               {/* «Paga Fraccionado» es el nombre del producto de seQura, no
                   una descripción nuestra. Lo pidieron el 5-ago: aquí ponía
                   «Pagar a plazos con seQura», que dice lo mismo pero no es
                   como se llama el método, y el cliente que lo ha usado en otra
-                  tienda no lo reconoce por ese texto. */}
+                  tienda no lo reconoce por ese texto.
+                  SIN logo ni rótulo verde de seQura: su propia caja lleva el
+                  logo a un tamaño que no podemos reducir, así que repetirlo
+                  aquí lo duplicaría y encima más pequeño. */}
               <OpcionDePago
                 activo={metodo === 'sequra'}
-                onClick={() => setMetodo('sequra')}
+                onClick={() => setMetodo(metodo === 'sequra' ? null : 'sequra')}
                 titulo="Paga Fraccionado"
-                marca="seQura"
+                icono={<IconoPlazos />}
                 /* La cuota la calcula seQura, no nosotros. Dividir el total
                    entre 12 daría 15,67 € cuando lo que se cobra son 18,06 €:
                    la diferencia son sus comisiones, y anunciar una cuota que
@@ -609,7 +656,12 @@ export default function Payment(props) {
             </div>
           )}
 
-          <div className={metodo === 'stripe' ? '' : 'hidden'}>
+          {/* Stripe se OCULTA con CSS, nunca se desmonta: `EmbeddedCheckout` se
+              monta una sola vez contra su `clientSecret`, y desmontarlo
+              obligaría a crear otra sesión de pago para volver — se perdería lo
+              que el cliente ya hubiera tecleado. Cuando seQura no aplica no hay
+              nada que elegir, así que se enseña directamente. */}
+          <div className={!sequra.aplica || metodo === 'stripe' ? '' : 'hidden'}>
             <CheckoutIncrustado clientSecret={embeddedSecret} />
           </div>
 
