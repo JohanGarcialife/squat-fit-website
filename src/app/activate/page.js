@@ -249,7 +249,7 @@ function ActivateContent() {
             <h2 className="text-3xl font-bold text-red-600">Este enlace ya no vale</h2>
             <p className="text-gray-600 text-lg font-medium">{message}</p>
             <p className="text-gray-400 text-sm">
-              Los enlaces de activación duran 24 horas y solo se pueden usar una vez.
+              Los enlaces de activación duran 4 días y solo se pueden usar una vez.
               No pasa nada: te mandamos otro ahora mismo.
             </p>
           </div>
@@ -267,7 +267,7 @@ function ActivateContent() {
               <MailCheck className="w-12 h-12 text-green-600" strokeWidth={1.5} />
               <p className="text-green-800 font-semibold text-lg">Enlace enviado</p>
               <p className="text-green-700 text-sm">
-                Búscalo en tu correo (mira también en spam) y ábrelo antes de 24 horas.
+                Búscalo en tu correo (mira también en spam): tienes 4 días para abrirlo.
               </p>
             </div>
           ) : (
