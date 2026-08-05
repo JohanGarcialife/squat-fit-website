@@ -14,6 +14,7 @@ import { ORDER_REF_KEY, saveOrderItems } from './TrustpilotInvitation';
 import { saveOrderAccess } from './accesoComprado';
 import axios from 'axios';
 import { createTierCheckout } from '@/app/components/courseCatalog';
+import { enviarPurchase, itemsDesdeCarrito, valorDesdeCarrito } from '@/app/components/ga4Ecommerce';
 import { resolveOrigin } from '@/app/components/UTMCapture';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
@@ -77,6 +78,39 @@ function PaymentInner(props) {
           // de gracias no recibe `session_id` ni `payment_intent` en la URL,
           // así que se la dejamos escrita nosotros.
           try { sessionStorage.setItem(ORDER_REF_KEY, paymentIntent.id); } catch {}
+
+          // `purchase` para GA4, AQUÍ y no en la pantalla de gracias.
+          //
+          // Con `redirect: 'if_required'` —la línea de arriba— una tarjeta que no
+          // pide 3-D Secure se confirma en esta misma página: no hay redirección,
+          // la URL no recibe `session_id` ni `payment_intent`, y por tanto el
+          // `finishAsPaid` de /cart/page.js NUNCA llega a ejecutarse. Ese es el
+          // único sitio donde se emitía `purchase`.
+          //
+          // Medido el 5-ago-2026 en GA4: el flujo del sitio nuevo manda
+          // `add_to_cart` y `begin_checkout`, y CERO `purchase` en 28 días —
+          // mientras que en la base había cuatro pedidos reales por la web en esa
+          // misma ventana. O sea que la analítica no ha visto ni un euro de lo
+          // que se vende por el carrito, y el embudo se corta antes de la venta.
+          //
+          // El importe sale del PaymentIntent (céntimos → euros), que es lo que
+          // Stripe ha cobrado de verdad, con envío y cupones ya dentro; el
+          // subtotal del carrito queda de respaldo, igual que en la otra rama.
+          // Y el carrito se lee ANTES de vaciarlo.
+          //
+          // No hay riesgo de contar la venta dos veces: `enviarPurchase` ignora
+          // un `transaction_id` ya enviado, y además los dos caminos no coinciden
+          // nunca — el checkout incrustado vuelve con `cs_...` por la URL y este
+          // confirma aquí con `pi_...` sin recargar.
+          const comprado = useCartStore.getState().cart;
+          enviarPurchase({
+            transactionId: paymentIntent.id,
+            items: itemsDesdeCarrito(comprado),
+            value: typeof paymentIntent.amount === 'number'
+              ? paymentIntent.amount / 100
+              : valorDesdeCarrito(comprado),
+            currency: (paymentIntent.currency || 'eur').toUpperCase(),
+          });
 
           // Limpiar el carrito y actualizar estado de suscripción en el store global
           useCartStore.getState().clearCart();
