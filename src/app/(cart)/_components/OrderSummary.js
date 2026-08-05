@@ -101,7 +101,7 @@ export default function OrderSummary(props) {
           visible: en móvil se quedaba escondido dentro del bloque del logo). */}
       <Link href="/" className="mb-4 hidden lg:block self-center">
         <div className="w-20 h-20 relative">
-          <Image src="/LogotipoSquatfit.png" layout="fill" objectFit="contain" alt="Logo Squad Fit" />
+          <Image src="/LogotipoSquatfit.png" fill sizes="80px" className="object-contain" alt="Logo Squad Fit" />
         </div>
       </Link>
       {/* Barra compacta — SOLO móvil. Una línea: lo que se paga a la izquierda
@@ -190,10 +190,11 @@ export default function OrderSummary(props) {
           >
             <div className="w-16 h-16 shrink-0 bg-gray-50 rounded-xl overflow-hidden relative">
               <Image 
-                src={item.image} 
-                alt={item.name} 
-                layout="fill"
-                className="object-contain p-1" 
+                src={item.image}
+                alt={item.name}
+                fill
+                sizes="64px"
+                className="object-contain p-1"
               />
             </div>
 
