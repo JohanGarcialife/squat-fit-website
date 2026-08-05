@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { handleApiError } from '@/app/components/handleApiError';
-import { ChevronLeft, ChevronDown } from 'lucide-react';
+import { ChevronLeft } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import OrderSummary from './OrderSummary';
 import { useCartStore } from '@/stores/cart.store';
@@ -19,8 +19,49 @@ import { resolveOrigin } from '@/app/components/UTMCapture';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import { toast } from 'react-hot-toast';
-import PagoSequra, { evaluarSequra } from './PagoSequra';
+import PagoSequra, { evaluarSequra, SEQURA_VERDE_TEXTO } from './PagoSequra';
 import SequraSimulador from '@/app/components/SequraSimulador';
+
+/**
+ * Una fila del selector de método de pago, en el paso 3.
+ *
+ * Es un `radio` de verdad, no un `<div onClick>`: con teclado se recorren las
+ * opciones con las flechas y el lector de pantalla las anuncia como «1 de 2».
+ * Un div con onClick no hace ninguna de las dos cosas, y esto es la pantalla
+ * donde se paga.
+ */
+function OpcionDePago({ activo, onClick, titulo, marca, pie }) {
+  return (
+    <label
+      className={`flex items-start gap-3 rounded-xl border px-4 py-3 cursor-pointer transition-all ${
+        activo
+          ? 'border-indigo-500 bg-indigo-50/60 ring-1 ring-indigo-500'
+          : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50'
+      }`}
+    >
+      <input
+        type="radio"
+        name="metodo-de-pago"
+        checked={activo}
+        onChange={onClick}
+        className="mt-1 accent-indigo-600 cursor-pointer"
+      />
+      <span className="min-w-0 flex-1">
+        <span className="flex items-baseline gap-2 flex-wrap">
+          <span className="font-semibold text-indigo-900">{titulo}</span>
+          {marca && (
+            <span className="text-sm font-semibold" style={{ color: SEQURA_VERDE_TEXTO }}>
+              {marca}
+            </span>
+          )}
+        </span>
+        {/* El simulador de cuotas se pinta aunque la opción esté sin elegir:
+            es justo el dato que hace que alguien la elija. */}
+        {pie && <span className="block mt-0.5">{pie}</span>}
+      </span>
+    </label>
+  );
+}
 
 // La clave publicable viene SIEMPRE del entorno (NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY).
 // Sin fallback de test: si falta, el pago embebido debe fallar a la vista, no
@@ -42,7 +83,7 @@ function PaymentInner(props) {
   const divisa = (() => {
     try { return localStorage.getItem('sf_currency') || 'EUR'; } catch { return 'EUR'; }
   })();
-  const sequra = evaluarSequra(cart, totalCarrito, divisa);
+  const sequra = evaluarSequra(cart, totalCarrito, divisa, datosCliente);
   const stripe = useStripe();
   const elements = useElements();
   const [isProcessing, setIsProcessing] = useState(false);
@@ -237,7 +278,7 @@ export default function Payment(props) {
   const divisa = (() => {
     try { return localStorage.getItem('sf_currency') || 'EUR'; } catch { return 'EUR'; }
   })();
-  const sequra = evaluarSequra(cart, totalCarrito, divisa);
+  const sequra = evaluarSequra(cart, totalCarrito, divisa, datosCliente);
   // Qué pasarela está desplegada en el paso 3. Arranca en Stripe: la tarjeta
   // es lo que espera la mayoría y lo que mejor convierte.
   const [metodo, setMetodo] = useState('stripe');
@@ -524,61 +565,65 @@ export default function Payment(props) {
 
           <h2 className="text-indigo-900 font-bold text-lg mb-4">Métodos de pago</h2>
 
-          {/* ── Acordeón: una pasarela a la vez ──────────────────────────────
-              Con las dos abiertas la pantalla pedía dos decisiones al mismo
-              tiempo y ninguna quedaba clara. Ahora la que no está elegida se
-              pliega a una línea, y al tocarla se cambia.
+          {/* ── El selector va ANTES del contenido, no intercalado ───────────
+              Antes esto era un acordeón normal: cabecera, contenido, cabecera,
+              contenido. El problema es que el contenido de Stripe es una caja
+              alta con su propio botón «Pagar» al final, así que la segunda
+              cabecera —seQura— caía por debajo del botón de pagar y había que
+              bajar a buscarla. Lo reportó seQura el 5-ago y tienen razón: un
+              método de pago que aparece después del botón de pagar no es una
+              opción, es una nota al pie.
+
+              Con las dos filas juntas arriba, la elección se ve entera antes
+              de que empiece ningún formulario, y debajo se pinta solo lo del
+              método elegido.
 
               Stripe se OCULTA con CSS, nunca se desmonta: `EmbeddedCheckout`
               se monta una sola vez contra su `clientSecret`, y si se
               desmontara habría que crear otra sesión de pago para volver —
               se perdería el estado que el cliente ya hubiera tecleado. */}
+          {sequra.aplica && (
+            <div className="max-w-[420px] mx-auto space-y-2 mb-6">
+              <OpcionDePago
+                activo={metodo === 'stripe'}
+                onClick={() => setMetodo('stripe')}
+                titulo="Tarjeta, Apple Pay y más"
+              />
+              {/* «Paga Fraccionado» es el nombre del producto de seQura, no
+                  una descripción nuestra. Lo pidieron el 5-ago: aquí ponía
+                  «Pagar a plazos con seQura», que dice lo mismo pero no es
+                  como se llama el método, y el cliente que lo ha usado en otra
+                  tienda no lo reconoce por ese texto. */}
+              <OpcionDePago
+                activo={metodo === 'sequra'}
+                onClick={() => setMetodo('sequra')}
+                titulo="Paga Fraccionado"
+                marca="seQura"
+                /* La cuota la calcula seQura, no nosotros. Dividir el total
+                   entre 12 daría 15,67 € cuando lo que se cobra son 18,06 €:
+                   la diferencia son sus comisiones, y anunciar una cuota que
+                   no es la real no es un detalle estético. Su widget lee el
+                   importe del `data-amount` y pinta la cifra buena. */
+                pie={<SequraSimulador importeEur={totalCarrito} divisa={divisa} alineacion="left" />}
+              />
+            </div>
+          )}
+
           <div className={metodo === 'stripe' ? '' : 'hidden'}>
             <CheckoutIncrustado clientSecret={embeddedSecret} />
           </div>
 
+          {/* Acotado al ancho de la caja de Stripe (~420px), no al de la
+              columna: Stripe pinta su tarjeta centrada y estrecha, así que un
+              botón a todo lo ancho de la columna se veía bastante mayor que su
+              «Pagar» y desequilibraba las dos opciones. */}
           {sequra.aplica && metodo === 'sequra' && (
-            <button
-              type="button"
-              onClick={() => setMetodo('stripe')}
-              className="w-full flex items-center justify-between rounded-lg border border-indigo-100 px-4 py-3 text-indigo-900 font-semibold hover:bg-indigo-50 transition-colors cursor-pointer"
-            >
-              <span>Pagar con tarjeta u otros métodos</span>
-              <ChevronDown size={18} className="shrink-0 -rotate-90" />
-            </button>
-          )}
-
-          {/* Pago fraccionado con seQura, DEBAJO del pago de Stripe.
-              Tiene que estar aquí y no solo en la rama del Payment Element:
-              esta es la que usa producción. El checkout de tramos devuelve hoy
-              un `cs_…` (Checkout Session incrustada), así que `PaymentInner`
-              —donde se puso primero— no llega a montarse nunca y el botón no
-              lo veía nadie. Se descubrió el 3-ago recorriendo la compra entera
-              en un build local, después de que seQura preguntara justamente
-              por qué no aparecía. Lección: un componente nuevo se comprueba en
-              la rama que el backend devuelve HOY, no en la que se estaba
-              leyendo al escribirlo. */}
-          {sequra.aplica && (
-            <div className="mt-8 pt-8 border-t border-indigo-100 max-w-[420px] mx-auto">
-              {/* Acotado al ancho de la caja de Stripe (~420px), no al de la
-                  columna: Stripe pinta su tarjeta centrada y estrecha, así que
-                  un botón a todo lo ancho de la columna se veía bastante mayor
-                  que su «Pagar» y desequilibraba las dos opciones. */}
-              {/* La cuota la calcula seQura, no nosotros. Dividir el total
-                  entre 12 daría 15,67 € cuando lo que se cobra son 18,06 €:
-                  la diferencia son sus comisiones, y anunciar una cuota que no
-                  es la real no es un detalle estético. Su widget lee el importe
-                  del `data-amount` y pinta la cifra buena. */}
-              {metodo === 'stripe' && (
-                <div className="mb-4">
-                  <SequraSimulador importeEur={totalCarrito} divisa={divisa} alineacion="left" />
-                </div>
-              )}
+            <div className="max-w-[420px] mx-auto">
               <PagoSequra
                 cart={cart}
                 total={totalCarrito}
                 formData={datosCliente}
-                abierto={metodo === 'sequra'}
+                abierto
                 onAbrir={() => setMetodo('sequra')}
               />
             </div>

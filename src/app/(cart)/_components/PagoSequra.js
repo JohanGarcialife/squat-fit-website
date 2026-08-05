@@ -69,10 +69,37 @@ const ENCENDIDO = process.env.NEXT_PUBLIC_SEQURA_READY === 'true';
 /**
  * ¿Se puede fraccionar este carrito? Devuelve el motivo cuando no, para poder
  * decir algo útil en vez de callar.
+ *
+ * `datos` son los del paso 2 (`formData`). Hacen falta para el filtro de país:
+ * sin ellos no se puede saber a dónde va el pedido.
  */
-export function evaluarSequra(cart, total, divisa) {
+export function evaluarSequra(cart, total, divisa, datos) {
   if (!ENCENDIDO) return { aplica: false, motivo: 'apagado' };
   if (divisa !== 'EUR') return { aplica: false, motivo: 'divisa' };
+
+  // ── Las DOS direcciones tienen que estar en España ──────────────────────
+  //
+  // Lo pidió seQura el 5-ago y no es una preferencia suya: solo operan en
+  // España, y un pedido que se factura aquí pero se envía fuera se lo rechaza
+  // su análisis de riesgo. El cliente habría llegado hasta el final del
+  // formulario para que le dijeran que no.
+  //
+  // Ojo con la de envío: cuando la casilla «usar la misma dirección» está
+  // marcada, `shippingCountry` se queda VACÍO —no se copia— así que el país de
+  // envío es el de facturación. Leer `shippingCountry` a secas daría «no es
+  // España» en la compra más normal que existe, y apagaría seQura para todo
+  // el mundo. Es el mismo enredo que ya hizo cotizar el envío con el código
+  // postal de facturación.
+  const paisFactura = (datos?.country ?? '').toUpperCase();
+  const paisEnvio =
+    datos?.sameAddress === false
+      ? (datos?.shippingCountry ?? '').toUpperCase()
+      : paisFactura;
+  if (!paisFactura || !paisEnvio) return { aplica: false, motivo: 'sin_pais' };
+  if (paisFactura !== 'ES' || paisEnvio !== 'ES') {
+    return { aplica: false, motivo: 'fuera_de_espana' };
+  }
+
   const haySuscripcion = (cart || []).some(
     (i) => i.period === '/mes' || i.period === '/trimestre',
   );
@@ -180,7 +207,7 @@ export default function PagoSequra({ cart, total, formData, onError, onAbrir }) 
         style={{ backgroundColor: SEQURA_VERDE_TEXTO }}
         className="block w-full rounded-lg py-3 font-semibold text-white hover:brightness-110 active:scale-[0.99] transition-all cursor-pointer disabled:opacity-60"
       >
-        {estado === 'cargando' ? 'Preparando…' : 'Pagar a plazos con seQura'}
+        {estado === 'cargando' ? 'Preparando…' : 'Continuar con Paga Fraccionado'}
       </button>
       {mensaje && (
         <p className="text-sm text-[#B4230E] mt-3 text-center">{mensaje}</p>
