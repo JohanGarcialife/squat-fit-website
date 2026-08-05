@@ -9,6 +9,7 @@ import ConfirmationModal from '@/app/components/ConfirmationModal';
 import AccessNotice from '@/app/components/AccessNotice';
 import { handleApiError } from '@/app/components/handleApiError';
 import NotificationPrefs from '@/app/components/NotificationPrefs';
+import MisDirecciones from '@/app/components/MisDirecciones';
 import { TOUR_DONE_KEY, TOUR_EVENT } from '@/app/components/AppTour';
 import {
   CreditCard,
@@ -280,6 +281,12 @@ export default function AjustesPage() {
     <div className="flex-1 bg-[#F8F9FC] p-6 md:p-10 min-h-screen overflow-y-auto">
       <div className="max-w-4xl mx-auto space-y-8 pb-24">
         <h1 className="text-3xl font-extrabold text-[#363C98]">Ajustes</h1>
+
+        {/* Agenda de direcciones. Va antes de «Cuenta y facturación» porque es
+            lo que el cliente viene a tocar: los datos fiscales se rellenan una
+            vez y las direcciones cambian (mudanza, un envío al trabajo, un
+            regalo a casa de alguien). */}
+        <MisDirecciones />
 
         {/* ===== CUENTA Y FACTURACIÓN ===== */}
         <div className={CARD + ' space-y-6'}>
