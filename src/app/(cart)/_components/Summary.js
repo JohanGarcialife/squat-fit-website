@@ -168,7 +168,8 @@ export default function Summary(props) {
                     <Image
                         src={item.image || '/LibrosFisicos.png'}
                         alt={item.name}
-                        layout="fill"
+                        fill
+                        sizes="144px"
                         className="object-contain p-2"
                     />
                     </div>
@@ -305,9 +306,10 @@ export default function Summary(props) {
               <div className="flex flex-col items-center mb-6 lg:mb-10">
                 <div className="hidden lg:block w-24 h-24 relative mb-4">
                      <Image
-                        src="/LogotipoSquatfit.png" // Placeholder or existing logo
-                        layout="fill"
-                        objectFit="contain"
+                        src="/LogotipoSquatfit.png"
+                        fill
+                        sizes="96px"
+                        className="object-contain"
                         alt="Logo Squad Fit"
                      />
                 </div>
