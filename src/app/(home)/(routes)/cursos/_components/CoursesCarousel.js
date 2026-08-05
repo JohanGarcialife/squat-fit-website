@@ -70,7 +70,7 @@ const CoursesCarousel = () => {
         settings: {
           slidesToShow: 1,
           centerMode: true,
-          centerPadding: "20px",
+          centerPadding: "44px",
         },
       },
       {
@@ -100,7 +100,7 @@ const CoursesCarousel = () => {
   };
 
   return (
-    <div className="w-screen py-12 bg-white">
+    <div className="w-screen py-12 bg-[#F8F9FC]">
       <div className="w-full max-w-7xl mx-auto px-4">
         <div>
           <div className="relative">
@@ -118,7 +118,7 @@ const CoursesCarousel = () => {
                       alt={course.src}
                       width={333}
                       height={563}
-                      className="rounded-3xl"
+                      className="rounded-3xl w-full h-auto aspect-[333/563] object-cover"
                     />
                   </div>
                 ))}
@@ -137,7 +137,7 @@ const CoursesCarousel = () => {
                       alt={course.src}
                       width={333}
                       height={563}
-                      className="rounded-3xl"
+                      className="rounded-3xl w-full h-auto aspect-[333/563] object-cover"
                     />
                   </div>
                 ))}
@@ -145,16 +145,16 @@ const CoursesCarousel = () => {
             )}
 
             {isMobile ? (
-              <div className="flex  items-center justify-between mt-4">
+              <div className="pointer-events-none absolute inset-x-0 top-1/2 z-20 flex -translate-y-1/2 items-center justify-between px-1">
                 <button
                   aria-label="Anterior"
-                  className="cursor-pointer bg-[#FFEDE0] text-[#FF690B] rounded-full p-1.5 hover:scale-110 active:scale-95 transition-transform duration-200"
+                  className="pointer-events-auto cursor-pointer bg-[#FFEDE0]/95 text-[#FF690B] rounded-full p-1.5 shadow-md hover:scale-110 active:scale-95 transition-transform duration-200"
                   onClick={prev}>
                   <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
                 </button>
                 <button
                   aria-label="Siguiente"
-                  className="cursor-pointer bg-[#FFEDE0] text-[#FF690B] rounded-full p-1.5 hover:scale-110 active:scale-95 transition-transform duration-200"
+                  className="pointer-events-auto cursor-pointer bg-[#FFEDE0]/95 text-[#FF690B] rounded-full p-1.5 shadow-md hover:scale-110 active:scale-95 transition-transform duration-200"
                   onClick={next}>
                   <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6"/></svg>
                 </button>
