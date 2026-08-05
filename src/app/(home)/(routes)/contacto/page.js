@@ -147,31 +147,81 @@ ${values.mensaje}
           <h1 className="text-5xl font-black text-[#FF690B]">Contacto</h1>
 
           {isClient && !token ? (
-            /* --- ALERTA DE LOGUEO PARA USUARIOS NO AUTENTICADOS --- */
-            <div className="bg-[#FFF6F0] rounded-2xl p-6 border border-orange-100 flex flex-col space-y-4 items-center text-center">
-              <p className="text-[#363C98] font-bold text-lg">
-                Para poder enviarnos un mensaje de contacto directo, necesitas iniciar sesión en tu cuenta de Squad Fit.
+            /* --- VISITANTE SIN CUENTA: VÍAS QUE FUNCIONAN HOY ---
+               Lo que había aquí abría con «necesitas iniciar sesión» y dos
+               botones de cuenta, y dejaba el WhatsApp de consuelo al final. Dos
+               problemas medidos el 5-ago:
+
+                 · Ese WhatsApp NO existía. Apuntaba a wa.me/34600000000 —un
+                   número de relleno—, mientras que /nosotros usa el bueno. O
+                   sea que la «vía alternativa» no llevaba a ninguna parte y el
+                   anónimo se quedaba de verdad sin forma de escribir desde esta
+                   página. El número de abajo está copiado de /nosotros, no
+                   inventado.
+
+                 · Y el orden estaba del revés. A quien todavía no ha comprado
+                   —justo el que más razones tiene para preguntar antes de
+                   pagar— se le pedía crear una cuenta primero. Ahora lo primero
+                   son las tres vías que ya funcionan sin sesión (WhatsApp,
+                   correo y el formulario público de /empieza-tu-cambio) y la
+                   cuenta queda para lo único que la necesita de verdad: el
+                   soporte de algo ya comprado, que hay que poder atribuir a un
+                   cliente concreto.
+
+               PENDIENTE, y es decisión de producto, no código: abrir el propio
+               formulario de esta página a los anónimos. Hoy no se puede sin
+               tocar el backend —el envío va a POST /support/backoffice/tickets,
+               que exige token y un user_id— y además hay que decidir qué se
+               hace con el spam. */
+            <div className="bg-[#FFF6F0] rounded-2xl p-6 border border-orange-100 flex flex-col space-y-5">
+              <p className="text-[#363C98] font-bold text-lg text-center">
+                Escríbenos por donde te resulte más cómodo. No hace falta tener cuenta.
               </p>
-              <div className="flex gap-4 w-full justify-center">
-                <Link href="/login?redirect=/contacto" className="bg-[#3932C0] hover:bg-[#2e28a0] text-white font-bold py-2.5 px-6 rounded-xl transition-all text-sm">
-                  Iniciar Sesión
-                </Link>
-                <Link href="/register?redirect=/contacto" className="border-2 border-[#3932C0] text-[#3932C0] font-bold py-2 px-6 rounded-xl hover:bg-[#3932C0]/5 transition-all text-sm">
-                  Crear Cuenta Gratis
+
+              <div className="flex flex-col sm:flex-row gap-3">
+                <a
+                  href="https://wa.me/34623020494"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex-1 bg-[#FF690B] hover:bg-[#e65e09] text-white font-bold py-3 px-5 rounded-xl transition-all text-center"
+                >
+                  Escríbenos por WhatsApp
+                </a>
+                <a
+                  href="mailto:hola@squadfit.es"
+                  className="flex-1 border-2 border-[#FF690B] text-[#FF690B] font-bold py-2.5 px-5 rounded-xl hover:bg-[#FF690B]/5 transition-all text-center"
+                >
+                  hola@squadfit.es
+                </a>
+              </div>
+
+              <div className="w-full h-px bg-orange-100" />
+
+              <div className="text-center space-y-3">
+                <p className="text-[#363C98] font-semibold">
+                  ¿Preguntas sobre los programas o las asesorías?
+                </p>
+                <p className="text-gray-500 text-sm">
+                  Cuéntanos tu caso en dos minutos y te contestamos con algo concreto,
+                  no con un folleto.
+                </p>
+                <Link
+                  href="/empieza-tu-cambio"
+                  className="inline-block bg-[#3932C0] hover:bg-[#2e28a0] text-white font-bold py-3 px-6 rounded-xl transition-all"
+                >
+                  Cuéntanos tu caso
                 </Link>
               </div>
-              <div className="w-full h-px bg-orange-100 my-2" />
-              <p className="text-gray-500 text-sm">
-                ¿Prefieres otra vía? También puedes contactarnos por WhatsApp:
+
+              <div className="w-full h-px bg-orange-100" />
+
+              <p className="text-gray-500 text-sm text-center">
+                ¿Necesitas soporte de un curso, un libro o un pago que ya son tuyos?{' '}
+                <Link href="/login?redirect=/contacto" className="text-[#3932C0] font-bold hover:underline">
+                  Inicia sesión
+                </Link>{' '}
+                y el formulario se abre aquí mismo, ya rellenado con tus datos.
               </p>
-              <a 
-                href="https://wa.me/34600000000" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="text-[#FF690B] font-bold hover:underline text-base flex items-center gap-2"
-              >
-                Escríbenos al WhatsApp
-              </a>
             </div>
           ) : (
             <form onSubmit={formik.handleSubmit} className="space-y-6">
