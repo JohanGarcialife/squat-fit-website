@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
@@ -31,6 +31,12 @@ import {
   Dumbbell,
   Activity,
   Zap,
+  Camera,
+  Ruler,
+  Eye,
+  EyeOff,
+  Check,
+  Trash2,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import AccessNotice from '@/app/components/AccessNotice';
@@ -302,6 +308,277 @@ const LifestyleRow = ({ icon: Icon, label, name, value, options, onChange }) => 
   </div>
 );
 
+// Tarjeta de sección: mismo encabezado (icono + título) en todas, para que la
+// columna única se lea como una lista de bloques y no como retales sueltos.
+const Card = ({ icon: Icon, title, subtitle, children }) => (
+  <section className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-100 shadow-sm space-y-6 text-left">
+    <div className="flex items-center gap-3 border-b border-slate-100 pb-4">
+      <div className="bg-[#FFF6F0] p-2.5 rounded-2xl text-[#FF690B]">
+        <Icon className="w-6 h-6" />
+      </div>
+      <div className="min-w-0">
+        <h3 className="text-[#363C98] font-extrabold text-lg sm:text-xl">{title}</h3>
+        {subtitle && <p className="text-slate-400 text-sm">{subtitle}</p>}
+      </div>
+    </div>
+    {children}
+  </section>
+);
+
+// Foto de perfil. El backend ya la acepta en el mismo PUT /user/update (campo
+// `file`, que sube a GCS y guarda la URL en profile_picture): aquí solo hay que
+// elegirla y previsualizarla. Se guarda con el resto del formulario, no por su
+// cuenta, para que el usuario no tenga dos botones de guardar en la misma
+// pantalla.
+const MAX_FOTO_MB = 5;
+
+const AvatarPicker = ({ url, preview, onPick, onClear, nombre }) => {
+  const inputRef = useRef(null);
+  const src = preview || url || '';
+  const iniciales = (nombre || '')
+    .split(' ')
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((p) => p[0])
+    .join('')
+    .toUpperCase();
+
+  const elegir = (e) => {
+    const file = e.target.files?.[0];
+    // El input se limpia siempre: si no, elegir el MISMO fichero dos veces
+    // seguidas (por ejemplo tras cancelar los cambios) no dispara `change`.
+    e.target.value = '';
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      toast.error('Elige una imagen (JPG o PNG).');
+      return;
+    }
+    if (file.size > MAX_FOTO_MB * 1024 * 1024) {
+      toast.error(`La imagen no puede pasar de ${MAX_FOTO_MB} MB.`);
+      return;
+    }
+    onPick(file);
+  };
+
+  return (
+    <div className="flex items-center gap-4 sm:gap-5">
+      <div className="relative shrink-0">
+        <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full overflow-hidden bg-[#363C98] flex items-center justify-center">
+          {src ? (
+            // <img> y no next/image: la URL viene de GCS y de un blob: local,
+            // que el optimizador de Next no puede servir.
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={src} alt="Tu foto de perfil" className="w-full h-full object-cover" />
+          ) : (
+            <span className="text-white font-extrabold text-2xl">{iniciales || '·'}</span>
+          )}
+        </div>
+        <button
+          type="button"
+          onClick={() => inputRef.current?.click()}
+          aria-label="Cambiar foto de perfil"
+          className="absolute -bottom-1 -right-1 bg-[#FF690B] text-white p-2 rounded-full shadow-md hover:scale-105 active:scale-95 transition-all cursor-pointer"
+        >
+          <Camera className="w-4 h-4" />
+        </button>
+        <input
+          ref={inputRef}
+          type="file"
+          accept="image/*"
+          onChange={elegir}
+          className="hidden"
+        />
+      </div>
+
+      <div className="min-w-0 flex-1">
+        <button
+          type="button"
+          onClick={() => inputRef.current?.click()}
+          className="text-[#FF690B] font-bold text-sm hover:underline cursor-pointer"
+        >
+          {src ? 'Cambiar foto' : 'Subir una foto'}
+        </button>
+        {preview && (
+          <button
+            type="button"
+            onClick={onClear}
+            className="ml-3 text-slate-400 font-semibold text-sm hover:text-slate-600 cursor-pointer inline-flex items-center gap-1"
+          >
+            <Trash2 className="w-3.5 h-3.5" />
+            Descartar
+          </button>
+        )}
+        <p className="text-slate-400 text-xs mt-1">JPG o PNG, hasta {MAX_FOTO_MB} MB.</p>
+      </div>
+    </div>
+  );
+};
+
+// Reglas de contraseña del backend (mismo criterio que el registro): 8+, una
+// mayúscula, una minúscula, un número y un carácter especial. Se validan aquí
+// para no gastar un viaje y devolver un 400 en inglés.
+const REGLA_PASSWORD = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/;
+
+const PasswordModal = ({ open, onClose, token, apiBase }) => {
+  const [actual, setActual] = useState('');
+  const [nueva, setNueva] = useState('');
+  const [repetir, setRepetir] = useState('');
+  const [verActual, setVerActual] = useState(false);
+  const [verNueva, setVerNueva] = useState(false);
+  const [enviando, setEnviando] = useState(false);
+
+  useEffect(() => {
+    if (!open) {
+      setActual('');
+      setNueva('');
+      setRepetir('');
+      setVerActual(false);
+      setVerNueva(false);
+    }
+  }, [open]);
+
+  if (!open) return null;
+
+  const nuevaValida = REGLA_PASSWORD.test(nueva);
+  const coinciden = nueva !== '' && nueva === repetir;
+  const puedeEnviar = actual !== '' && nuevaValida && coinciden && !enviando;
+
+  const enviar = async () => {
+    if (!puedeEnviar) return;
+    setEnviando(true);
+    try {
+      await axios.put(
+        `${apiBase}/api/v1/user/update-temporal-password`,
+        { old_password: actual, new_password: nueva },
+        { headers: { Authorization: `Bearer ${token}` } },
+      );
+      toast.success('Contraseña actualizada');
+      onClose();
+    } catch (error) {
+      const status = error?.response?.status;
+      if (status === 401) {
+        toast.error('La contraseña actual no es correcta.');
+      } else if (status === 400) {
+        toast.error('La nueva contraseña no cumple los requisitos.');
+      } else {
+        toast.error('No se pudo cambiar la contraseña. Inténtalo de nuevo.');
+      }
+    } finally {
+      setEnviando(false);
+    }
+  };
+
+  const campo =
+    'w-full bg-transparent border-b border-slate-200 pb-1.5 pr-9 text-[#363C98] font-bold text-base focus:outline-none focus:border-[#FF690B] transition-colors placeholder:text-slate-300 placeholder:font-normal';
+
+  return (
+    <div className="fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-50 animate-fade-in backdrop-blur-xs">
+      <div className="bg-white w-full max-w-md rounded-3xl shadow-2xl border border-slate-100 overflow-hidden">
+        <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-[#F8F9FC]">
+          <div className="flex items-center gap-2 text-[#363C98]">
+            <KeyRound className="w-5 h-5" />
+            <h3 className="font-extrabold text-lg">Cambiar contraseña</h3>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="text-slate-400 hover:text-slate-600 p-1 rounded-full hover:bg-slate-100 transition-all cursor-pointer"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        <div className="p-6 space-y-5">
+          <div className="flex flex-col space-y-1.5">
+            <span className={fieldLabel}>Contraseña actual</span>
+            <div className="relative">
+              <input
+                type={verActual ? 'text' : 'password'}
+                value={actual}
+                onChange={(e) => setActual(e.target.value)}
+                autoComplete="current-password"
+                className={campo}
+                placeholder="La que usas ahora"
+              />
+              <button
+                type="button"
+                onClick={() => setVerActual((v) => !v)}
+                aria-label={verActual ? 'Ocultar contraseña' : 'Ver contraseña'}
+                className="absolute right-0 top-0 text-slate-300 hover:text-slate-500 cursor-pointer"
+              >
+                {verActual ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+              </button>
+            </div>
+          </div>
+
+          <div className="flex flex-col space-y-1.5">
+            <span className={fieldLabel}>Nueva contraseña</span>
+            <div className="relative">
+              <input
+                type={verNueva ? 'text' : 'password'}
+                value={nueva}
+                onChange={(e) => setNueva(e.target.value)}
+                autoComplete="new-password"
+                className={campo}
+                placeholder="Mínimo 8 caracteres"
+              />
+              <button
+                type="button"
+                onClick={() => setVerNueva((v) => !v)}
+                aria-label={verNueva ? 'Ocultar contraseña' : 'Ver contraseña'}
+                className="absolute right-0 top-0 text-slate-300 hover:text-slate-500 cursor-pointer"
+              >
+                {verNueva ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+              </button>
+            </div>
+            <p className={`text-xs ${nueva === '' || nuevaValida ? 'text-slate-400' : 'text-red-500'}`}>
+              8 caracteres o más, con mayúscula, minúscula, número y un símbolo.
+            </p>
+          </div>
+
+          <div className="flex flex-col space-y-1.5">
+            <span className={fieldLabel}>Repite la nueva</span>
+            <div className="relative">
+              <input
+                type={verNueva ? 'text' : 'password'}
+                value={repetir}
+                onChange={(e) => setRepetir(e.target.value)}
+                autoComplete="new-password"
+                className={campo}
+                placeholder="Otra vez, para confirmar"
+              />
+              {coinciden && (
+                <Check className="w-5 h-5 text-green-500 absolute right-0 top-0" />
+              )}
+            </div>
+            {repetir !== '' && !coinciden && (
+              <p className="text-xs text-red-500">Las dos contraseñas no coinciden.</p>
+            )}
+          </div>
+        </div>
+
+        <div className="p-4 bg-slate-50 border-t border-slate-100 flex justify-end gap-3">
+          <button
+            type="button"
+            onClick={onClose}
+            className="text-slate-500 hover:text-slate-800 font-bold text-sm px-4 py-2 cursor-pointer"
+          >
+            Cancelar
+          </button>
+          <button
+            type="button"
+            onClick={enviar}
+            disabled={!puedeEnviar}
+            className="bg-[#FF690B] text-white font-bold px-6 py-2.5 rounded-full hover:scale-105 active:scale-95 transition-all text-sm shadow-md cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:scale-100"
+          >
+            {enviando ? 'Guardando…' : 'Cambiar contraseña'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 export default function ProfilePage() {
   const router = useRouter();
   const { logout, token } = useAuthStore();
@@ -312,6 +589,15 @@ export default function ProfilePage() {
   const [privacyDone, setPrivacyDone] = useState(false);
   useEffect(() => { setPrivacyDone(hasAcceptedPrivacy()); }, []);
   const [isPurchasesModalOpen, setIsPurchasesModalOpen] = useState(false);
+  const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
+  // Foto de perfil: la guardada (URL de GCS) y la recién elegida, que solo
+  // existe en el navegador hasta que se pulse «Guardar cambios».
+  const [photoUrl, setPhotoUrl] = useState('');
+  const [photoFile, setPhotoFile] = useState(null);
+  const [photoPreview, setPhotoPreview] = useState('');
+  // Una cuenta creada como invitada (compra sin registro) puede no tener
+  // contraseña todavía: ahí «cambiar» no aplica, hay que crearla por correo.
+  const [tienePassword, setTienePassword] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
   const [advice, setAdvice] = useState(null);
   const [userId, setUserId] = useState(null);
@@ -379,10 +665,21 @@ export default function ProfilePage() {
         if (values.strength_training_id) formData.append('strength_training_id', values.strength_training_id);
         if (values.weekly_cardio_frequency_id) formData.append('weekly_cardio_frequency_id', values.weekly_cardio_frequency_id);
         if (values.daily_activity_id) formData.append('daily_activity_id', values.daily_activity_id);
+        // La foto viaja en el mismo PUT: el backend la sube a GCS y devuelve
+        // la URL ya guardada en `profile_picture`.
+        if (photoFile) formData.append('file', photoFile);
 
-        await axios.put(`${API}/api/v1/user/update?user_id=${userId}`, formData, {
+        const resp = await axios.put(`${API}/api/v1/user/update?user_id=${userId}`, formData, {
           headers: { Authorization: `Bearer ${token}` },
         });
+
+        if (photoFile) {
+          // Se pinta la URL que devuelve el servidor, no la previsualización
+          // local: así se ve de verdad lo que quedó guardado.
+          if (resp?.data?.profile_picture) setPhotoUrl(resp.data.profile_picture);
+          setPhotoFile(null);
+          setPhotoPreview('');
+        }
 
         // Aceptación registrada: no se volverá a pedir en próximos guardados.
         markPrivacyAccepted();
@@ -410,6 +707,20 @@ export default function ProfilePage() {
         const infoRes = await axios.get(`${API}/api/v1/user/info`, { headers });
         const info = infoRes.data;
         setUserId(info.id);
+        setPhotoUrl(info.profile_picture || '');
+
+        // ¿Tiene contraseña? Quien compró como invitado todavía no, y pedirle
+        // la «actual» sería un callejón sin salida.
+        if (info.email) {
+          try {
+            const chk = await axios.post(`${API}/api/v1/user/check-email`, { email: info.email });
+            setTienePassword(chk.data?.hasPassword !== false);
+          } catch {
+            // Si la comprobación falla, se asume que sí la tiene: el peor caso
+            // es un mensaje de «contraseña actual incorrecta», no un bloqueo.
+            setTienePassword(true);
+          }
+        }
 
         try {
           const [stepsRes, strengthRes, cardioRes, activityRes] = await Promise.all([
@@ -494,6 +805,24 @@ export default function ProfilePage() {
     router.push('/');
   };
 
+  // Previsualización local de la foto elegida. Se revoca la anterior para no
+  // dejar blobs colgando si el usuario prueba varias imágenes seguidas.
+  const elegirFoto = (file) => {
+    setPhotoPreview((prev) => {
+      if (prev) URL.revokeObjectURL(prev);
+      return URL.createObjectURL(file);
+    });
+    setPhotoFile(file);
+  };
+
+  const descartarFoto = () => {
+    setPhotoPreview((prev) => {
+      if (prev) URL.revokeObjectURL(prev);
+      return '';
+    });
+    setPhotoFile(null);
+  };
+
   // Preserva el país guardado aunque no esté en la lista estándar.
   const countryOptions = useMemo(() => {
     const cur = formik.values.paisIdioma;
@@ -540,43 +869,58 @@ export default function ProfilePage() {
 
   return (
     <div className="flex-1 bg-[#F8F9FC] p-6 md:p-10 min-h-screen overflow-y-auto">
-      <div className="max-w-6xl mx-auto space-y-8 pb-28">
-        {/* --- CABECERA: PROGRESO DEL PERFIL (gráfica de anillo) ---
-            Al llegar al 100% este bloque desaparece entero: es redundante. */}
-        {completion < 100 && (
-          <div className="bg-white rounded-3xl border-2 border-[#FF690B]/30 p-5 sm:p-6 flex items-center gap-4 sm:gap-6 shadow-sm">
-            <ProgressRing pct={completion} />
-            <div className="flex-1 min-w-0">
-              <h2 className="text-[#363C98] font-extrabold text-lg sm:text-2xl leading-tight">
-                {`Perfil casi completo, ${firstName}`}
-              </h2>
-              <p className="text-slate-500 text-sm sm:text-base mt-0.5">
-                Completa tus datos para que tu coach pueda ajustar tu plan.
-              </p>
+      {/* UNA SOLA COLUMNA. Antes esto era una rejilla de 2/3 + 1/3 donde el
+          coach, el estilo de vida, la privacidad y el plan caían en la columna
+          estrecha por orden de llegada: se leía como un tablón de anuncios.
+          Ahora las secciones van apiladas, en orden de importancia, y a un
+          ancho de lectura cómodo. Dentro de cada sección los campos siguen
+          emparejándose en escritorio: una única fila de inputs a lo largo de
+          toda la página sería peor, no mejor. */}
+      <div className="max-w-3xl mx-auto space-y-6 pb-28">
+        {/* --- CABECERA: QUIÉN ERES (foto, nombre, email y progreso) --- */}
+        <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-100 shadow-sm space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-6">
+            <AvatarPicker
+              url={photoUrl}
+              preview={photoPreview}
+              onPick={elegirFoto}
+              onClear={descartarFoto}
+              nombre={`${formik.values.nombre} ${formik.values.apellidos}`.trim()}
+            />
+            <div className="min-w-0 sm:border-l sm:border-slate-100 sm:pl-6">
+              <h1 className="text-[#363C98] font-extrabold text-xl sm:text-2xl leading-tight truncate">
+                {`${formik.values.nombre} ${formik.values.apellidos}`.trim() || 'Tu perfil'}
+              </h1>
+              <p className="text-slate-400 text-sm truncate">{formik.values.email || '—'}</p>
             </div>
-            <button
-              type="button"
-              onClick={() => router.push('/onboarding')}
-              className="shrink-0 bg-[#FF690B] text-white font-bold text-sm px-5 py-2.5 rounded-full hover:scale-105 active:scale-95 transition-all shadow-sm cursor-pointer"
-            >
-              Completar
-            </button>
           </div>
-        )}
 
-        {/* --- GRID PRINCIPAL --- */}
-        <form onSubmit={formik.handleSubmit} className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* ============ COLUMNA IZQUIERDA (2/3) ============ */}
-          <div className="lg:col-span-2 space-y-8">
-            {/* --- INFORMACIÓN PERSONAL --- */}
-            <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-100 shadow-sm space-y-6">
-              <div className="flex items-center gap-3 border-b border-slate-100 pb-4">
-                <div className="bg-[#FFF6F0] p-2.5 rounded-2xl text-[#FF690B]">
-                  <User className="w-6 h-6" />
-                </div>
-                <h3 className="text-[#363C98] font-extrabold text-xl">Información Personal</h3>
+          {/* El progreso solo aparece si falta algo: al 100% sobra. */}
+          {completion < 100 && (
+            <div className="flex items-center gap-4 sm:gap-6 border-t border-slate-100 pt-6">
+              <ProgressRing pct={completion} />
+              <div className="flex-1 min-w-0">
+                <h2 className="text-[#363C98] font-extrabold text-base sm:text-lg leading-tight">
+                  {`Perfil casi completo, ${firstName}`}
+                </h2>
+                <p className="text-slate-500 text-sm mt-0.5">
+                  Completa tus datos para que tu coach pueda ajustar tu plan.
+                </p>
               </div>
+              <button
+                type="button"
+                onClick={() => router.push('/onboarding')}
+                className="shrink-0 bg-[#FF690B] text-white font-bold text-sm px-5 py-2.5 rounded-full hover:scale-105 active:scale-95 transition-all shadow-sm cursor-pointer"
+              >
+                Completar
+              </button>
+            </div>
+          )}
+        </div>
 
+        <form onSubmit={formik.handleSubmit} className="space-y-6">
+            {/* --- DATOS PERSONALES --- */}
+            <Card icon={User} title="Datos personales">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-6">
                 {/* Nombre */}
                 <div className="flex flex-col space-y-1.5">
@@ -672,7 +1016,14 @@ export default function ProfilePage() {
 
                 {/* Sexo (2 botones) */}
                 <SexButtons value={formik.values.sexo} onChange={(v) => formik.setFieldValue('sexo', v)} />
+              </div>
+            </Card>
 
+            {/* --- MEDIDAS ---
+                Separadas de los datos personales: son las que cambian cada
+                semana, y mezcladas con el DNI del usuario no se encontraban. */}
+            <Card icon={Ruler} title="Tus medidas">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-6">
                 {/* Altura (cm / pies+pulgadas) */}
                 <HeightField
                   valueCm={formik.values.altura}
@@ -699,11 +1050,8 @@ export default function ProfilePage() {
                   onChangeKg={(kg) => formik.setFieldValue('pesoObjetivo', kg)}
                 />
               </div>
-            </div>
-          </div>
+            </Card>
 
-          {/* ============ COLUMNA DERECHA (1/3) ============ */}
-          <div className="space-y-8">
             {/* --- TU COACH ---
                 Aquí había un bloque naranja «Objetivo Activo» con Meta y Fase.
                 Se quita: lo que pintaba era «Tu mejor versión» y el nombre del
@@ -716,14 +1064,7 @@ export default function ProfilePage() {
                 Si no hay coach asignado no se pinta nada, que es mejor que un
                 hueco con un rótulo vacío. */}
             {advice?.adviser_firstName && (
-              <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-100 shadow-sm space-y-5 text-left">
-                <div className="flex items-center gap-3 border-b border-slate-100 pb-4">
-                  <div className="bg-[#FFF6F0] p-2.5 rounded-2xl text-[#FF690B]">
-                    <Target className="w-6 h-6" />
-                  </div>
-                  <h3 className="text-[#363C98] font-extrabold text-xl">Tu coach</h3>
-                </div>
-
+              <Card icon={Target} title="Tu coach">
                 <div className="flex items-center gap-3">
                   <div className="w-11 h-11 rounded-full bg-[#363C98] flex items-center justify-center font-bold text-white text-sm shrink-0">
                     {`${advice.adviser_firstName[0]}${advice.adviser_lastName ? advice.adviser_lastName[0] : ''}`.toUpperCase()}
@@ -735,18 +1076,11 @@ export default function ProfilePage() {
                     <span className="text-slate-400 text-sm">Te acompaña en tu programa</span>
                   </div>
                 </div>
-              </div>
+              </Card>
             )}
 
             {/* --- ESTILO DE VIDA --- */}
-            <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-100 shadow-sm space-y-6 text-left">
-              <div className="flex items-center gap-3 border-b border-slate-100 pb-4">
-                <div className="bg-[#FFF6F0] p-2.5 rounded-2xl text-[#FF690B]">
-                  <Moon className="w-6 h-6" />
-                </div>
-                <h3 className="text-[#363C98] font-extrabold text-xl">Estilo de Vida</h3>
-              </div>
-
+            <Card icon={Moon} title="Estilo de vida">
               <div className="space-y-5">
                 <LifestyleRow
                   icon={Footprints}
@@ -781,40 +1115,7 @@ export default function ProfilePage() {
                   onChange={formik.handleChange}
                 />
               </div>
-            </div>
-
-            {/* --- PRIVACIDAD --- */}
-            <div className="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm space-y-2 text-left">
-              <div className="flex items-center gap-3 border-b border-slate-100 pb-3 mb-2">
-                <div className="bg-[#FFF6F0] p-2.5 rounded-2xl text-[#FF690B]">
-                  <Shield className="w-6 h-6" />
-                </div>
-                <h3 className="text-[#363C98] font-extrabold text-lg">Privacidad</h3>
-              </div>
-
-              <button
-                type="button"
-                onClick={() => router.push('/forgot-password')}
-                className="w-full flex items-center justify-between p-3.5 hover:bg-slate-50 rounded-2xl transition-all text-[#363C98] font-bold text-sm cursor-pointer"
-              >
-                <span className="flex items-center gap-2.5">
-                  <KeyRound className="w-4 h-4 text-slate-400" />
-                  Cambiar contraseña
-                </span>
-                <ChevronRight className="w-4 h-4 text-slate-300" />
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setIsLogoutModalOpen(true)}
-                className="w-full flex items-center justify-between p-3.5 hover:bg-red-50 rounded-2xl border border-transparent hover:border-red-100 transition-all text-red-500 font-bold text-sm cursor-pointer"
-              >
-                <span className="flex items-center gap-2.5">
-                  <LogOut className="w-4 h-4" />
-                  Cerrar sesión
-                </span>
-              </button>
-            </div>
+            </Card>
 
             {/* --- MI PLAN --- */}
             {advice && (advice.suscription_name || advice.title) && (
@@ -888,18 +1189,63 @@ export default function ProfilePage() {
                 <ChevronRight className="w-4 h-4 text-slate-300" />
               </button>
             )}
-          </div>
+
+            {/* --- CUENTA Y SEGURIDAD ---
+                Va la última a propósito: son acciones, no datos, y una de
+                ellas cierra la sesión. Antes se llamaba «Privacidad» y vivía
+                en mitad de la columna estrecha, encima del plan.
+
+                «Cambiar contraseña» mandaba a /forgot-password, o sea: salir
+                del panel, pedir un correo y volver, estando ya identificado.
+                El backend acepta el cambio directo con la contraseña actual
+                (PUT /user/update-temporal-password), así que se hace aquí
+                mismo. Quien compró como invitado todavía no tiene contraseña
+                —no hay «actual» que pedirle—, y a ese sí hay que mandarlo al
+                correo para crearla. */}
+            <Card icon={Shield} title="Cuenta y seguridad">
+              <div className="space-y-1 -mt-2">
+                <button
+                  type="button"
+                  onClick={() =>
+                    tienePassword ? setIsPasswordModalOpen(true) : router.push('/forgot-password')
+                  }
+                  className="w-full flex items-center justify-between p-3.5 hover:bg-slate-50 rounded-2xl transition-all text-[#363C98] font-bold text-sm cursor-pointer"
+                >
+                  <span className="flex items-center gap-2.5">
+                    <KeyRound className="w-4 h-4 text-slate-400" />
+                    {tienePassword ? 'Cambiar contraseña' : 'Crear contraseña'}
+                  </span>
+                  <ChevronRight className="w-4 h-4 text-slate-300" />
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setIsLogoutModalOpen(true)}
+                  className="w-full flex items-center justify-between p-3.5 hover:bg-red-50 rounded-2xl border border-transparent hover:border-red-100 transition-all text-red-500 font-bold text-sm cursor-pointer"
+                >
+                  <span className="flex items-center gap-2.5">
+                    <LogOut className="w-4 h-4" />
+                    Cerrar sesión
+                  </span>
+                </button>
+              </div>
+            </Card>
         </form>
 
-        {/* --- BARRA DE GUARDAR (solo si hay cambios) --- */}
-        {formik.dirty && (
+        {/* --- BARRA DE GUARDAR (solo si hay cambios) ---
+            La foto vive fuera de Formik, así que `dirty` no la ve: sin este
+            `|| photoFile`, elegir una imagen no ofrecería guardarla. */}
+        {(formik.dirty || photoFile) && (
           <div className="fixed bottom-0 left-0 lg:left-64 right-0 bg-white border-t border-slate-100 p-4 sm:px-8 flex flex-wrap items-center justify-end gap-4 shadow-2xl z-40 animate-fade-in">
             <span className="mr-auto hidden sm:block text-slate-400 text-sm font-semibold">Tienes cambios sin guardar</span>
             {/* Solo en el PRIMER guardado: después la aceptación ya consta. */}
             {!privacyDone && <GdprCheckbox checked={gdprAccepted} onChange={setGdprAccepted} id="gdpr-profile" />}
             <button
               type="button"
-              onClick={() => formik.resetForm()}
+              onClick={() => {
+                formik.resetForm();
+                descartarFoto();
+              }}
               className="text-slate-500 hover:text-slate-800 font-bold text-sm sm:text-base px-4 py-2 hover:underline cursor-pointer"
             >
               Cancelar cambios
@@ -993,6 +1339,13 @@ export default function ProfilePage() {
           </div>
         </div>
       )}
+
+      <PasswordModal
+        open={isPasswordModalOpen}
+        onClose={() => setIsPasswordModalOpen(false)}
+        token={token}
+        apiBase={API}
+      />
 
       <ConfirmationModal
         isOpen={isLogoutModalOpen}
