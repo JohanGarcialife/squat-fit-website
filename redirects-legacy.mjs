@@ -29,6 +29,18 @@ const MAP = [
   // --- Libro de cocina -----------------------------------------------------
   // Antes de los comodines de /producto y /categoria-producto.
   ['/libro-de-cocina', '/cocina'],
+  // Atajos que un cliente teclea a mano cuando busca «el libro». No venían del
+  // WordPress viejo: los añado porque el 4-ago alguien escribió dos veces sin
+  // encontrar dónde comprarlo. Sin esto caían en el cajón de sastre del final y
+  // acababan en el home del dominio nuevo, que es justo donde ya no lo veía.
+  // Sus gemelas para squadfit.es están en next.config.mjs, sin condición de host.
+  ['/libro', '/cocina'],
+  ['/libros', '/cocina'],
+  ['/libros-de-cocina', '/cocina'],
+  ['/libro-de-recetas', '/cocina'],
+  ['/comprar-libro', '/cocina'],
+  ['/recetas', '/cocina'],
+  ['/recetario', '/cocina'],
   ['/producto/copia-extra-libro-impreso', '/cocina'],
   ['/producto/cocina-squat-fit-impreso', '/cocina'],
   ['/producto/la-cocina-squad-fit-trimestral', '/cocina'],
