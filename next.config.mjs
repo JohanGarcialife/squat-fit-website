@@ -61,6 +61,40 @@ const nextConfig = {
         destination: '/empieza-tu-cambio?via=formulario',
         permanent: false,
       },
+      // Atajos de «el libro» al sitio donde se vende.
+      //
+      // POR QUÉ EXISTEN. El 4-ago un cliente escribió DOS VECES a
+      // hola@squadfit.es: «quisiera comprar su libro pero no encuentro enlace,
+      // ni siquiera en su página», y después «entro en el enlace pero no
+      // encuentro dónde clickear, ¿me puedes mandar una captura?». Tenía razón:
+      // la portada nombra «libro» UNA sola vez, el menú dice «Cocina» y la
+      // página se titula «BIBLIOTECA DE RECETAS». Quien busca «el libro» no
+      // reconoce el camino, y al probar a adivinar la URL se estrella.
+      //
+      // Medido el 5-ago contra producción: las ocho de abajo daban 404 en LOS
+      // DOS dominios. Ojo con esto último, porque es lo que hace falta aquí y
+      // no lo cubría nada: redirects-legacy.mjs sí tiene /libro-de-cocina, pero
+      // con condición de host, así que solo dispara en squatfit.es; y /libro a
+      // secas no está en ese mapa, o sea que no existía en ningún sitio.
+      //
+      // ESTO NO ARREGLA EL PROBLEMA DE FONDO, que es cómo se llama el libro en
+      // el menú y en la portada. Eso es copy, y es de María. Esto solo evita
+      // que quien adivine la URL —o a quien se la dicten por teléfono— acabe
+      // en un 404 teniendo el dinero en la mano.
+      //
+      // 307 y no 308 a propósito: son alias de conveniencia, no URLs con
+      // historial que consolidar. Si algún día hay una página /libro de verdad,
+      // un 308 se habría quedado cacheado en los navegadores.
+      ...[
+        '/libro',
+        '/libros',
+        '/libro-de-cocina',
+        '/libros-de-cocina',
+        '/libro-de-recetas',
+        '/comprar-libro',
+        '/recetas',
+        '/recetario',
+      ].map((source) => ({ source, destination: '/cocina', permanent: false })),
     ];
   },
   async headers() {
