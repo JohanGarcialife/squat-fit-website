@@ -29,13 +29,17 @@ let cache = { token: null, promise: null }
 
 async function loadAccess(token) {
   const headers = { Authorization: `Bearer ${token}` }
-  const [adviceRes, coursesRes] = await Promise.allSettled([
+  // El perfil viaja con las otras dos: este hook ya se comparte y se cachea por
+  // token, así que sale gratis y evita que cada pantalla que necesite un dato
+  // del usuario (el sexo, para saludar bien) monte su propia petición.
+  const [adviceRes, coursesRes, infoRes] = await Promise.allSettled([
     axios.get(`${API}/api/v1/advice/by-user`, { headers }),
     axios.get(`${API}/api/v1/course/by-user`, { headers }),
+    axios.get(`${API}/api/v1/user/info`, { headers }),
   ])
 
   // Sesión caducada: si cualquiera devuelve 401, propaga para re-login.
-  for (const r of [adviceRes, coursesRes]) {
+  for (const r of [adviceRes, coursesRes, infoRes]) {
     if (r.status === 'rejected' && r.reason?.response?.status === 401) {
       throw r.reason
     }
@@ -60,10 +64,23 @@ async function loadAccess(token) {
     /entrena en casa/i.test(c?.title || c?.name || '')
   )
 
-  return { advice, hasProgram: !!advice, courses, hasEntrenaCourse }
+  // Un fallo del perfil NO tumba el acceso al programa: sin él se saluda en
+  // masculino genérico y ya, que es el comportamiento acordado para sexo
+  // desconocido. Perder el programa entero por un 500 del perfil sería peor.
+  const info = infoRes.status === 'fulfilled' ? infoRes.value.data : null
+  const perfil = info?.data ?? info ?? null
+
+  return {
+    advice,
+    hasProgram: !!advice,
+    courses,
+    hasEntrenaCourse,
+    perfil,
+    gender: perfil?.gender ?? null,
+  }
 }
 
-const EMPTY = { advice: null, hasProgram: false, courses: [], hasEntrenaCourse: false }
+const EMPTY = { advice: null, hasProgram: false, courses: [], hasEntrenaCourse: false, perfil: null, gender: null }
 
 export function useProgramAccess() {
   const { token } = useAuthStore()
