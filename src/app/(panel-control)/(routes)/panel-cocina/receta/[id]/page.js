@@ -1,14 +1,17 @@
 "use client";
 
-import React, { useEffect, useMemo, Suspense } from "react";
+import React, { useEffect, useMemo, useState, Suspense } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useSearchParams } from "next/navigation";
-import { ChevronLeft, Clock, Users, Flame, Wrench } from "lucide-react";
+import { ChevronLeft, ChevronDown, Clock, Users, Flame, Wrench } from "lucide-react";
 import { useAuthStore } from "@/stores/auth.store";
 import AccessNotice from "@/app/components/AccessNotice";
 import FreeSampleBadge from "@/app/components/FreeSampleBadge";
 import { useSystemRecipes } from "@/app/components/useSystemRecipes";
+import { etiquetasDe, taxonomiaDe } from "@/app/components/recetarioTaxonomia";
+import PreferenciasChips from "../../_components/PreferenciasChips";
+import ListaIngredientes, { AvisoPreferencias } from "../../_components/ListaIngredientes";
 import {
   trackRecipeEvent,
   flushRecipeMetrics,
@@ -43,16 +46,17 @@ function RecetaPageContent({ params }) {
   const searchParams = useSearchParams();
   // Enlace de vuelta opcional a un libro concreto, si se llegó desde su
   // lista de recetas nativas (?from=<bookId>&v=<versionId>). Sin ellos
-  // (enlace directo/compartido), vuelve a Mi cocina — el mismo criterio que
+  // (enlace directo/compartido), vuelve a Mis recetas — el mismo criterio que
   // ya usa el lector del libro con `redirect` en AccessNotice.
   const fromBook = searchParams.get("from");
   const fromVersion = searchParams.get("v");
   const backHref = fromBook
     ? `/panel-cocina/libro/${fromBook}${fromVersion ? `?v=${fromVersion}` : ""}`
-    : "/panel-cocina";
+    : "/panel-cocina/recetas";
 
   const { token } = useAuthStore();
   const { loading, checked, recipes } = useSystemRecipes();
+  const [preferenciasAbiertas, setPreferenciasAbiertas] = useState(false);
 
   const recipe = useMemo(
     () => recipes.find((r) => r.id === recipeId) || null,
@@ -110,9 +114,9 @@ function RecetaPageContent({ params }) {
           <p className="text-[#3932C0] font-semibold text-xl">
             No hemos encontrado esta receta, o no tienes acceso a ella.
           </p>
-          <Link href="/panel-cocina">
+          <Link href="/panel-cocina/recetas">
             <button className="mt-4 bg-[#3932C0] text-white font-bold py-3 px-8 rounded-xl hover:bg-[#3932C0]/90 transition-colors cursor-pointer">
-              Volver a Mi cocina
+              Volver a mis recetas
             </button>
           </Link>
         </div>
@@ -125,6 +129,9 @@ function RecetaPageContent({ params }) {
   const preparation = Array.isArray(recipe.preparation) ? [...recipe.preparation].sort(byPriority) : [];
   const materials = Array.isArray(recipe.materials) ? recipe.materials : [];
   const toppings = Array.isArray(recipe.toppings) ? recipe.toppings : [];
+  // Categoría e iconos del pie de página del libro (ver recetarioTaxonomia.js).
+  const taxonomia = taxonomiaDe(recipe);
+  const etiquetas = etiquetasDe(taxonomia);
   // nutritional_value.calories llega siempre a 0 desde el backend (columna
   // sin escribir todavía, ver recipe.repository.ts) — las kcal de verdad son
   // `recipe.kcal`. Por eso aquí solo se enseñan carbohidratos/proteínas/grasas.
@@ -139,7 +146,7 @@ function RecetaPageContent({ params }) {
     <div className="w-full min-h-screen bg-[#F8F9FC] flex flex-col p-6 md:p-10 pb-16 animate-in fade-in duration-300">
       <div className="w-full max-w-3xl mx-auto">
         <Link href={backHref} className="inline-flex items-center gap-2 text-sm font-bold text-slate-400 hover:text-[#FF690B] transition-colors mb-6">
-          <ChevronLeft className="w-4 h-4" /> {fromBook ? "Volver al libro" : "Mi cocina"}
+          <ChevronLeft className="w-4 h-4" /> {fromBook ? "Volver al libro" : "Mis recetas"}
         </Link>
 
         {recipe.is_free_sample && <FreeSampleBadge className="mb-3" />}
@@ -173,6 +180,30 @@ function RecetaPageContent({ params }) {
           )}
         </div>
 
+        {/* Categoría e iconos del pie de la receta en el libro. La categoría
+            no es decorativa: es el mismo filtro que se usa en Mis recetas. */}
+        {(taxonomia?.categoria || etiquetas.length > 0) && (
+          <div className="flex flex-wrap items-center gap-2 mb-6">
+            {taxonomia?.categoria && (
+              <Link
+                href={`/panel-cocina/recetas?categoria=${encodeURIComponent(taxonomia.categoria)}`}
+                className="text-xs font-bold uppercase tracking-wide rounded-full bg-[#3932C0] text-white px-3 py-1 hover:bg-[#3932C0]/90 transition-colors"
+              >
+                {taxonomia.categoria}
+              </Link>
+            )}
+            {etiquetas.map((e) => (
+              <span
+                key={e.id}
+                title={e.condicional ? 'Sin lácteos si cambias el queso por uno vegano' : undefined}
+                className="text-xs font-bold uppercase tracking-wide rounded-full bg-[#F1F0FB] text-[#3932C0]/70 px-3 py-1"
+              >
+                {e.label}
+              </span>
+            ))}
+          </div>
+        )}
+
         <div className="relative w-full aspect-[4/3] sm:aspect-[16/9] rounded-3xl overflow-hidden bg-[#FFF6F0] mb-8 shadow-sm">
           <Image
             src={getValidImageUrl(recipe.image)}
@@ -186,18 +217,27 @@ function RecetaPageContent({ params }) {
         <div className="space-y-6">
           {ingredients.length > 0 && (
             <section className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-100 shadow-sm">
-              <h2 className="text-[#363C98] font-extrabold text-xl mb-4">Ingredientes</h2>
-              <ul className="space-y-2.5">
-                {ingredients.map((ing) => (
-                  <li key={ing.id} className="flex items-start gap-3 text-slate-700">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#FF690B] shrink-0 mt-2.5" />
-                    <span>
-                      <span className="font-semibold">{ing.title}</span>
-                      {ing.subtitle && <span className="text-slate-400"> — {ing.subtitle}</span>}
-                    </span>
-                  </li>
-                ))}
-              </ul>
+              <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
+                <h2 className="text-[#363C98] font-extrabold text-xl">Ingredientes</h2>
+                <button
+                  type="button"
+                  onClick={() => setPreferenciasAbiertas((a) => !a)}
+                  aria-expanded={preferenciasAbiertas}
+                  className="inline-flex items-center gap-1 text-xs font-bold text-[#3932C0]/60 hover:text-[#FF690B] transition-colors cursor-pointer"
+                >
+                  <ChevronDown
+                    className={`w-3.5 h-3.5 transition-transform ${preferenciasAbiertas ? "rotate-180" : ""}`}
+                  />
+                  Mis preferencias
+                </button>
+              </div>
+              {preferenciasAbiertas && (
+                <div className="mb-5 bg-[#F8F9FC] rounded-2xl p-4">
+                  <PreferenciasChips compacto />
+                </div>
+              )}
+              <AvisoPreferencias />
+              <ListaIngredientes ingredientes={ingredients} />
             </section>
           )}
 

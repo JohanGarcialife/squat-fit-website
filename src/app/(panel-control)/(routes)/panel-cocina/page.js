@@ -129,10 +129,12 @@ export default function CocinaPage() {
 
       {/* ── MI PAUTA ─────────────────────────────────────────────────────────
           Sección movida desde Mi programa: la pauta nutricional (menús) del
-          programa vive ahora aquí, encima de la biblioteca de recetas, para
-          tener todo lo de comida junto. Solo para usuarios con programa. */}
+          programa vive ahora aquí. Solo para usuarios con programa.
+          El recetario ya NO vive en esta página: se ha ido a «Mis recetas»
+          (/panel-cocina/recetas), sección propia del menú. Aquí se queda lo de
+          la dieta —pauta y sustituciones— y abajo el acceso al recetario. */}
       {hasProgram && (
-        <div className="mb-16 space-y-6">
+        <div className="mb-12 space-y-6">
           <SectionCard Icon={UtensilsCrossed} title="Mi pauta">
             <EmptyState
               text="Tu pauta personalizada aparecerá aquí cuando tu coach la publique."
@@ -141,12 +143,14 @@ export default function CocinaPage() {
           </SectionCard>
           <SectionCard Icon={Replace} title="Sustituciones de mi pauta">
             <p className="text-slate-500 text-sm leading-relaxed">
-              ¿No te encaja un alimento de tu pauta? Justo debajo tienes las
-              recetas de tu biblioteca para encontrar alternativas equivalentes.
+              ¿No te encaja un alimento de tu pauta? En{' '}
+              <Link href="/panel-cocina/recetas" className="text-[#FF690B] font-bold hover:underline">
+                Mis recetas
+              </Link>{' '}
+              tienes toda tu biblioteca para encontrar alternativas equivalentes.
             </p>
             <EmptyState text="Las tablas de sustituciones de tu pauta aparecerán aquí." />
           </SectionCard>
-          <h2 className="text-[#3932C0] text-3xl font-bold pt-4">Mis recetas</h2>
         </div>
       )}
 
@@ -155,39 +159,37 @@ export default function CocinaPage() {
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-900"></div>
         </div>
       ) : (isSubscribed && ownedVersions.length > 0) ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-24">
-          
-          {ownedVersions.map((item, index) => (
-            <div key={item.versionId || index} className="flex flex-col items-center">
-                 <h2 className="text-[#FF690B] text-3xl font-bold mb-6 text-center cursor-pointer">{item.bookTitle}</h2>
-                 
-                 {/* Image Container with background shape effect */}
-                 <div className="relative mb-6 cursor-pointer">
-                    <div className="absolute top-4 left-[-10px] w-full h-full bg-[#FFF6F0] rounded-[24px] -z-10 transform scale-105"></div>
-                    <Image 
-                        src={getValidImageUrl(item.versionImage)}
-                        width={300} 
-                        height={300} 
-                        alt={`${item.bookTitle} - ${item.versionTitle}`} 
-                        className="object-cover rounded-[24px]"
-                    />
-                 </div>
-
-                 <p className="text-[#FF690B] text-3xl mb-8 text-center font-normal cursor-pointer">
-                    {item.versionTitle}
-                 </p>
-
-                 <Link
-                   href={`/panel-cocina/libro/${item.bookId}?v=${item.versionId}`}
-                 >
-                   <button className="bg-[#3932C0] text-white font-bold py-3 px-12 rounded-xl text-lg hover:bg-[#3932C0]/90 transition-colors shadow-lg cursor-pointer">
-                      {item.buttonText || 'Ver mi libro'}
-                   </button>
-                 </Link>
-            </div>
-          ))}
-
-        </div>
+        /* Con biblioteca: el recetario entero está en «Mis recetas». Aquí solo
+           queda la puerta de entrada, con las portadas de los libros. */
+        <Link
+          href="/panel-cocina/recetas"
+          className="group flex flex-col sm:flex-row items-center gap-6 bg-white rounded-[24px] border border-slate-100 shadow-sm hover:shadow-lg transition-shadow p-6"
+        >
+          <div className="flex -space-x-6 shrink-0">
+            {ownedVersions.slice(0, 3).map((item, index) => (
+              <Image
+                key={item.versionId || index}
+                src={getValidImageUrl(item.versionImage)}
+                width={90}
+                height={116}
+                alt={`${item.bookTitle} - ${item.versionTitle}`}
+                className="w-[90px] h-[116px] object-cover rounded-2xl border-4 border-white shadow-md"
+              />
+            ))}
+          </div>
+          <div className="text-center sm:text-left">
+            <h2 className="text-[#3932C0] text-2xl font-bold group-hover:text-[#FF690B] transition-colors">
+              Mis recetas
+            </h2>
+            <p className="text-slate-500 mt-1 leading-relaxed">
+              Todas las recetas de {ownedVersions.length === 1 ? 'tu libro' : 'tus libros'}, con
+              índice, buscador y filtros por los iconos del libro.
+            </p>
+            <span className="inline-block mt-3 text-[#FF690B] font-bold group-hover:underline">
+              Abrir el recetario →
+            </span>
+          </div>
+        </Link>
       ) : (
         /* --- Sin suscripción: primero las muestras gratuitas (si las hay),
             luego la tienda de siempre --- */

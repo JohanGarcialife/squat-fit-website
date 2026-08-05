@@ -8,6 +8,7 @@ import HomeIcon from '@/app/components/icons/HomeIcon'
 import StarIcon from '@/app/components/icons/StarIcon'
 import BarbellIcon from '@/app/components/icons/BarbellIcon'
 import AppleIcon from '@/app/components/icons/AppleIcon'
+import RecipeBookIcon from '@/app/components/icons/RecipeBookIcon'
 import SchoolIcon from '@/app/components/icons/SchoolIcon'
 import SettingsIcon from '@/app/components/icons/SettingsIcon'
 import { trackRecipeEvent } from '@/app/components/recipeMetrics'
@@ -85,15 +86,45 @@ const InfoIcon = ({ filled }) => (
 // Mi programa · Mi entreno · Mis cursos · Mi cocina · Perfil, con Ajustes
 // abajo (Contacto, Conócenos, Legal y las notificaciones viven en Ajustes).
 // `tour` = ancla del tour de bienvenida (AppTour usa [data-tour="..."]).
+//
+// «Mis recetas» es sección propia desde la fase B del recetario: el recetario
+// (índice, filtros, rejilla/lista) tiene entidad de sobra para no vivir
+// colgando de «Mi cocina», que se queda con lo de la dieta — Mi pauta y sus
+// sustituciones. `tambien` son rutas que también encienden ese ítem del menú:
+// la ficha de una receta y el lector de un libro son «Mis recetas» aunque
+// cuelguen de /panel-cocina.
 const MENU_ITEMS = [
   { id: 0, label: 'Inicio', href: '/panel-control', Icon: HomeIcon, tour: 'inicio' },
   { id: 3, label: 'Mi programa', href: '/mi-programa', Icon: StarIcon, tour: 'mi-programa' },
   { id: 8, label: 'Mi entreno', href: '/mi-entreno', Icon: BarbellIcon, tour: 'mi-entreno' },
   { id: 4, label: 'Mis cursos', href: '/panel-cursos', Icon: SchoolIcon, tour: 'mis-cursos' },
   { id: 2, label: 'Mi cocina', href: '/panel-cocina', Icon: AppleIcon, tour: 'mi-cocina' },
+  {
+    id: 9,
+    label: 'Mis recetas',
+    href: '/panel-cocina/recetas',
+    tambien: ['/panel-cocina/receta', '/panel-cocina/libro'],
+    Icon: RecipeBookIcon,
+    tour: 'mis-recetas',
+  },
   { id: 5, label: 'Perfil', href: '/profile-panel', Icon: UserIcon },
   { id: 7, label: 'Ajustes', href: '/panel-ajustes', Icon: SettingsIcon, tour: 'ajustes' },
 ]
+
+// Gana el prefijo MÁS LARGO que case, no el primero de la lista. Con
+// /panel-cocina y /panel-cocina/recetas conviviendo, un `find` a secas
+// encendía siempre «Mi cocina» estando en el recetario.
+function itemActivo(pathname) {
+  let mejor = null
+  for (const item of MENU_ITEMS) {
+    for (const ruta of [item.href, ...(item.tambien || [])]) {
+      if (ruta && pathname.startsWith(ruta) && (!mejor || ruta.length > mejor.longitud)) {
+        mejor = { item, longitud: ruta.length }
+      }
+    }
+  }
+  return mejor?.item || null
+}
 
 // ─── Default (navigation) Sidebar ───────────────────────────────────────────
 export default function Sidebar() {
@@ -126,7 +157,7 @@ export default function Sidebar() {
   })
 
   useEffect(() => {
-    const activeItem = MENU_ITEMS.find(item => item.href && pathname.startsWith(item.href))
+    const activeItem = itemActivo(pathname)
     if (activeItem) setActiveId(activeItem.id)
   }, [pathname])
 
@@ -297,7 +328,23 @@ function flattenIndexTree(nodes, inheritedLevel = 0) {
 //   items         – VersionIndexTreeNode[] del backend o array plano del fallback
 //   activePage    – número de página actual del PDF
 //   onItemClick   – callback(page) al hacer clic en un ítem
-export function BookIndexSidebar({ isOpen, onClose, items = [], activePage, onItemClick }) {
+//
+// Los textos son configurables porque este mismo índice lo usa ahora el
+// recetario de «Mis recetas» (donde los ítems son recetas, no páginas de un
+// PDF). Los valores por defecto son los del lector de libro de siempre, así
+// que ese uso no cambia ni una letra. `page` puede ser un número de página o
+// cualquier identificador: aquí solo se compara y se devuelve tal cual.
+export function BookIndexSidebar({
+  isOpen,
+  onClose,
+  items = [],
+  activePage,
+  onItemClick,
+  etiqueta = 'Índice',
+  placeholder = 'Buscar en este libro…',
+  unidad = { singular: 'sección', plural: 'secciones' },
+  vacio = <>Este libro no tiene<br />índice disponible.</>,
+}) {
   const flatItems = React.useMemo(() => {
     return flattenIndexTree(items);
   }, [items]);
@@ -355,7 +402,7 @@ export function BookIndexSidebar({ isOpen, onClose, items = [], activePage, onIt
         {/* Header: label + close button */}
         <div className="flex items-center justify-between mb-2">
           <span className="text-xs font-bold text-[#3932C0] uppercase tracking-widest opacity-50">
-            Índice
+            {etiqueta}
           </span>
           <button onClick={onClose} className="text-[#FF690B] hover:opacity-80 transition-opacity cursor-pointer">
             <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -370,8 +417,8 @@ export function BookIndexSidebar({ isOpen, onClose, items = [], activePage, onIt
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Buscar en este libro…"
-            aria-label="Buscar en el índice de este libro"
+            placeholder={placeholder}
+            aria-label={placeholder}
             className="mb-4 w-full rounded-xl border border-[#3932C0]/15 bg-white px-3 py-2 text-sm text-[#3932C0] placeholder:text-[#3932C0]/40 focus:outline-none focus:border-[#FF690B] transition-colors"
           />
         )}
@@ -380,8 +427,8 @@ export function BookIndexSidebar({ isOpen, onClose, items = [], activePage, onIt
         {flatItems.length > 0 && (
           <p className="text-[10px] text-[#3932C0]/40 mb-6">
             {query.trim()
-              ? `${filteredItems.length} de ${flatItems.length} ${flatItems.length === 1 ? 'sección' : 'secciones'}`
-              : `${flatItems.length} ${flatItems.length === 1 ? 'sección' : 'secciones'}`}
+              ? `${filteredItems.length} de ${flatItems.length} ${flatItems.length === 1 ? unidad.singular : unidad.plural}`
+              : `${flatItems.length} ${flatItems.length === 1 ? unidad.singular : unidad.plural}`}
           </p>
         )}
 
@@ -391,7 +438,7 @@ export function BookIndexSidebar({ isOpen, onClose, items = [], activePage, onIt
           <div className="flex flex-col items-center justify-center flex-1 gap-3 text-center py-8">
             <span className="text-4xl">📖</span>
             <p className="text-[#3932C0]/50 text-sm font-medium leading-relaxed">
-              Este libro no tiene<br />índice disponible.
+              {vacio}
             </p>
           </div>
         ) : filteredItems.length === 0 ? (
