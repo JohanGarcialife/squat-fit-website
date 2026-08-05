@@ -65,7 +65,7 @@ export default function MiProgramaPage() {
   // Detección del programa activo (advice/by-user) compartida con el Sidebar
   // y el resto de pestañas: el objeto advice existe si el usuario tiene
   // asesoría/programa (lo sincronizan los webhooks de Stripe).
-  const { loading, advice } = useProgramAccess();
+  const { loading, advice, gender } = useProgramAccess();
 
   if (!token) return <AccessNotice redirect="/mi-programa" />;
 
@@ -118,7 +118,7 @@ export default function MiProgramaPage() {
         <h1 className="text-3xl font-extrabold text-[#363C98]">Mi programa</h1>
 
         {/* Vídeo de bienvenida (solo con programa activo; descartable). */}
-        <WelcomeVideoCard />
+        <WelcomeVideoCard gender={gender} />
 
         {/* Cabecera del programa activo: datos reales de advice/by-user */}
         <div className="bg-[#FF690B] text-white rounded-3xl p-6 sm:p-8 shadow-lg">
