@@ -704,46 +704,37 @@ export default function ProfilePage() {
 
           {/* ============ COLUMNA DERECHA (1/3) ============ */}
           <div className="space-y-8">
-            {/* --- OBJETIVO ACTIVO --- */}
-            {advice && (
-              <div className="bg-[#FF690B] text-white rounded-3xl p-6 sm:p-8 shadow-lg space-y-6 text-left relative overflow-hidden">
-                <div className="flex items-center gap-3 border-b border-white/20 pb-4">
-                  <Target className="w-6 h-6" />
-                  <h3 className="font-extrabold text-xl">Objetivo Activo</h3>
-                </div>
+            {/* --- TU COACH ---
+                Aquí había un bloque naranja «Objetivo Activo» con Meta y Fase.
+                Se quita: lo que pintaba era «Tu mejor versión» y el nombre del
+                programa, que son el título comercial del producto, no un
+                objetivo de nadie. Ocupaba el sitio más visible de la columna
+                para no decir nada.
 
-                <div className="grid grid-cols-2 gap-4">
-                  {advice.training_goal_name && (
-                    <div className="flex flex-col">
-                      <span className="text-white/70 text-2xs font-extrabold uppercase tracking-widest">Meta</span>
-                      <span className="font-extrabold text-lg sm:text-2xl mt-1 leading-tight">
-                        {advice.training_goal_name}
-                      </span>
-                    </div>
-                  )}
-                  {advice.subtitle && (
-                    <div className="flex flex-col items-end text-right">
-                      <span className="text-white/70 text-2xs font-extrabold uppercase tracking-widest">Fase</span>
-                      <span className="font-extrabold text-lg sm:text-2xl mt-1 leading-tight">{advice.subtitle}</span>
-                    </div>
-                  )}
-                </div>
-
-                {advice.adviser_firstName && (
-                  <div className="bg-black/15 rounded-2xl p-4 flex items-center gap-3">
-                    <div className="relative w-10 h-10 rounded-full overflow-hidden border border-white/20">
-                      <div className="w-full h-full bg-[#363C98] flex items-center justify-center font-bold text-white text-xs">
-                        {`${advice.adviser_firstName[0]}${advice.adviser_lastName ? advice.adviser_lastName[0] : ''}`.toUpperCase()}
-                      </div>
-                    </div>
-                    <div className="flex flex-col">
-                      <span className="text-white/60 text-2xs font-bold uppercase tracking-wider">Coach Asignado</span>
-                      <span className="font-extrabold text-sm sm:text-base">
-                        {`${advice.adviser_firstName} ${advice.adviser_lastName || ''}`.trim()}
-                      </span>
-                    </div>
+                Lo que sí informa —quién es tu coach y cómo escribirle— se
+                queda, ahora sobrio y sin competir con el resto de la página.
+                Si no hay coach asignado no se pinta nada, que es mejor que un
+                hueco con un rótulo vacío. */}
+            {advice?.adviser_firstName && (
+              <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-100 shadow-sm space-y-5 text-left">
+                <div className="flex items-center gap-3 border-b border-slate-100 pb-4">
+                  <div className="bg-[#FFF6F0] p-2.5 rounded-2xl text-[#FF690B]">
+                    <Target className="w-6 h-6" />
                   </div>
-                )}
+                  <h3 className="text-[#363C98] font-extrabold text-xl">Tu coach</h3>
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <div className="w-11 h-11 rounded-full bg-[#363C98] flex items-center justify-center font-bold text-white text-sm shrink-0">
+                    {`${advice.adviser_firstName[0]}${advice.adviser_lastName ? advice.adviser_lastName[0] : ''}`.toUpperCase()}
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-[#363C98] font-extrabold text-base">
+                      {`${advice.adviser_firstName} ${advice.adviser_lastName || ''}`.trim()}
+                    </span>
+                    <span className="text-slate-400 text-sm">Te acompaña en tu programa</span>
+                  </div>
+                </div>
               </div>
             )}
 

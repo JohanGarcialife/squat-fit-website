@@ -26,11 +26,24 @@ const addBunnyParams = (url) => {
 const DISMISS_KEY = 'sf-welcome-video-dismissed';
 
 /**
+ * Saludo en el género de quien mira. Aquí ponía «Bienvenido/a», que es la
+ * solución de formulario administrativo: nadie habla así, y en la primera
+ * pantalla del programa que acabas de comprar chirría.
+ *
+ * Sin dato conocido se usa el masculino genérico — decidido así a propósito:
+ * es lo que menos ruido hace mientras no tengamos el sexo de todos los
+ * clientes antiguos.
+ */
+export function saludoDeBienvenida(gender) {
+  return String(gender ?? '').toLowerCase() === 'female' ? 'Bienvenida' : 'Bienvenido';
+}
+
+/**
  * Tarjeta de bienvenida al programa (solo se monta con programa activo).
  * Descartable: guarda el flag en localStorage y deja un enlace pequeño
  * «Ver de nuevo» para recuperarla.
  */
-export default function WelcomeVideoCard() {
+export default function WelcomeVideoCard({ gender } = {}) {
   // null = aún sin leer localStorage (evita el desajuste SSR/cliente).
   const [dismissed, setDismissed] = useState(null);
 
@@ -73,7 +86,7 @@ export default function WelcomeVideoCard() {
           </div>
           <div className="min-w-0">
             <h2 className="text-[#363C98] font-extrabold text-lg sm:text-xl leading-tight">
-              Bienvenido/a a tu programa 👋
+              {saludoDeBienvenida(gender)} a tu programa 👋
             </h2>
             <p className="text-slate-400 text-sm">
               Empieza por aquí: cómo sacar el máximo partido a tu programa.
