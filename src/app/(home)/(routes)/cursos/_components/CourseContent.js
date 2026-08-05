@@ -20,15 +20,15 @@ export default function CourseContent() {
         />
 
         <div className="absolute inset-0 z-10 grid grid-cols-3 p-20 w-full gap-14">
-          <h2 className="text-6xl font-bold text-black pr-24">
+          <h2 className="text-4xl md:text-6xl font-bold text-black pr-24">
             Qué incluye el curso
           </h2>
           <div className="flex flex-col justify-between">
             <div className="flex items-start gap-3">
               <FeatureIcon icon={Clapperboard} />
               <div>
-                <p className="text-3xl text-black font-bold">Clases en vídeo</p>
-                <p className=" text-2xl text-black max-w-[273px] ">
+                <p className="text-xl md:text-3xl text-black font-bold">Clases en vídeo</p>
+                <p className=" text-base md:text-xl text-black max-w-[273px] ">
                   24+ horas de clases prácticas y 3 horas de clases teóricas.
                 </p>
               </div>
@@ -36,8 +36,8 @@ export default function CourseContent() {
             <div className="flex items-start gap-3">
               <FeatureIcon icon={Headset} />
               <div>
-                <p className="text-3xl text-black font-bold">Soporte</p>
-                <p className=" text-2xl text-black max-w-[273px] ">
+                <p className="text-xl md:text-3xl text-black font-bold">Soporte</p>
+                <p className=" text-base md:text-xl text-black max-w-[273px] ">
                  Atención 24/7 para las preguntas que tengas acerca del curso.
                 </p>
               </div>
@@ -47,8 +47,8 @@ export default function CourseContent() {
             <div className="flex items-start gap-3">
               <FeatureIcon icon={NotebookPen} />
               <div>
-                <p className="text-3xl text-black font-bold">Apuntes</p>
-                <p className=" text-2xl text-black max-w-[273px] ">              
+                <p className="text-xl md:text-3xl text-black font-bold">Apuntes</p>
+                <p className=" text-base md:text-xl text-black max-w-[273px] ">              
 Material de apoyo con fines de repasar el contenido
                 </p>
               </div>
@@ -58,8 +58,8 @@ Material de apoyo con fines de repasar el contenido
             <div className="flex items-start gap-3">
               <FeatureIcon icon={GraduationCap} />
               <div>
-                <p className="text-3xl text-black font-bold">Ponte a prueba</p>
-                <p className=" text-2xl text-black max-w-[273px] mb-6">
+                <p className="text-xl md:text-3xl text-black font-bold">Ponte a prueba</p>
+                <p className=" text-base md:text-xl text-black max-w-[273px] mb-6">
                   Al final harás un examen para obtener tu diploma
                 </p>
               </div>
@@ -86,8 +86,8 @@ Material de apoyo con fines de repasar el contenido
             <div className="flex items-start gap-3">
               <FeatureIcon icon={Clapperboard} />
               <div>
-                <p className="text-3xl text-black font-bold">Clases en vídeo</p>
-                <p className=" text-2xl text-black max-w-[273px] ">
+                <p className="text-xl md:text-3xl text-black font-bold">Clases en vídeo</p>
+                <p className=" text-base md:text-xl text-black max-w-[273px] ">
                   24+ horas de clases prácticas y 3 horas de clases teóricas.
                 </p>
               </div>
@@ -95,8 +95,8 @@ Material de apoyo con fines de repasar el contenido
             <div className="flex items-start gap-3">
               <FeatureIcon icon={Headset} />
               <div>
-                <p className="text-3xl text-black font-bold">Soporte</p>
-                <p className=" text-2xl text-black max-w-[273px] ">
+                <p className="text-xl md:text-3xl text-black font-bold">Soporte</p>
+                <p className=" text-base md:text-xl text-black max-w-[273px] ">
                  Atención 24/7 para las preguntas que tengas acerca del curso.
                 </p>
               </div>
@@ -106,8 +106,8 @@ Material de apoyo con fines de repasar el contenido
             <div className="flex items-start gap-3">
               <FeatureIcon icon={NotebookPen} />
               <div>
-                <p className="text-3xl text-black font-bold">Apuntes</p>
-                <p className=" text-2xl text-black max-w-[273px] ">              
+                <p className="text-xl md:text-3xl text-black font-bold">Apuntes</p>
+                <p className=" text-base md:text-xl text-black max-w-[273px] ">              
 Material de apoyo con fines de repasar el contenido
                 </p>
               </div>
@@ -117,8 +117,8 @@ Material de apoyo con fines de repasar el contenido
             <div className="flex items-start gap-3">
               <FeatureIcon icon={GraduationCap} />
               <div>
-                <p className="text-3xl text-black font-bold">Ponte a prueba</p>
-                <p className=" text-2xl text-black max-w-[273px] mb-6">
+                <p className="text-xl md:text-3xl text-black font-bold">Ponte a prueba</p>
+                <p className=" text-base md:text-xl text-black max-w-[273px] mb-6">
                   Al final harás un examen para obtener tu diploma
                 </p>
               </div>
