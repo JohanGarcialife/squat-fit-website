@@ -13,13 +13,17 @@ const Slider = dynamic(() => import('react-slick'), { ssr: false });
 // Reseñas de clientes con sabor "curso" (Fase 15: la prueba social de cliente
 // se concentra aquí y en /cocina; /programa pasa a transformaciones + Trustpilot).
 // Copys adaptados de reseñas reales — PENDIENTE de confirmación de cada persona.
+//
+// FUERA Elena Armada (5-ago-2026): tiene una incidencia abierta con nosotros, y
+// su cara abriendo la prueba social de la página de ventas es justo lo que no
+// puede pasar — ni por ella ni por nosotros. Su avatar sigue en
+// /resenasAvatar/ por si algún día procede reponerla.
+//
+// OJO con el «pendiente de confirmación» de la línea de arriba: NINGUNA de
+// estas personas ha confirmado que podamos publicar su testimonio con nombre y
+// foto. Son datos personales en una página comercial; hasta tener su permiso
+// por escrito, esto es una deuda legal, no un detalle.
 const testimonials = [
-    {
-        name: 'Elena Armada',
-        text: 'Gracias a ver resultados con el curso he ganado seguridad en mí misma y motivación para superarme, disfrutando del proceso.',
-        image: '/resenasAvatar/1 Elena Armada 1.png',
-        rating: 5,
-    },
     {
         name: 'Manuel López',
         text: 'Ahora sé entrenar y comer de forma óptima para mis objetivos y me siento mucho más motivado.',
