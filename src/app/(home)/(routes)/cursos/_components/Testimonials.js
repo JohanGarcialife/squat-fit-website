@@ -138,13 +138,13 @@ const Testimonials = () => {
                                     className="cursor-pointer px-3 py-5 "
                                     onClick={() => sliderRef.current && sliderRef.current.slickGoTo(index)}
                                 >
-                                    <div className="bg-[#3932C01A] h-full w-full lg:w-[420px] mx-auto p-8 rounded-3xl shadow-lg border border-[#3932C0]/15 hover:shadow-xl transition-shadow duration-300  flex flex-col items-center text-center">
+                                    <div className="bg-[#3932C01A] h-full w-full lg:w-[420px] mx-auto p-5 sm:p-8 rounded-3xl shadow-lg border border-[#3932C0]/15 hover:shadow-xl transition-shadow duration-300  flex flex-col items-center text-center">
                                         <div className="relative  mb-6">
                                             <Image
                                                 src={testimonial.image}
                                                 alt={testimonial.name}
-                                                width={80}
-                                                height={80}
+                                                width={64}
+                                                height={64}
                                                 className="rounded-full h-24 w-24 mx-auto border-4 border-violet-100"
                                             />
                                         </div>
@@ -154,7 +154,7 @@ const Testimonials = () => {
                                         <div className="text-yellow-400 mb-4 text-lg">
                                             {'★'.repeat(testimonial.rating)}
                                         </div>
-                                        <p className="text-gray-600 leading-relaxed flex-grow text-lg sm:text-xl">
+                                        <p className="text-gray-600 leading-snug flex-grow text-base sm:text-xl">
                                             {testimonial.text}
                                         </p>
                                     </div>
@@ -172,15 +172,15 @@ const Testimonials = () => {
                                     onClick={() => sliderRef.current && sliderRef.current.slickGoTo(index)}
                                 >
                                     {/* min-h para que las dos tarjetas visibles queden a la misma altura */}
-                                    <div className="bg-[#3932C01A] h-full w-full lg:w-[420px] mx-auto min-h-[240px] p-8 rounded-3xl shadow-lg border border-[#3932C0]/15 hover:shadow-xl transition-shadow duration-300  flex flex-col items-center text-center">
+                                    <div className="bg-[#3932C01A] h-full w-full lg:w-[420px] mx-auto min-h-[240px] p-5 sm:p-8 rounded-3xl shadow-lg border border-[#3932C0]/15 hover:shadow-xl transition-shadow duration-300  flex flex-col items-center text-center">
                                       <div className='flex gap-5 flex-row items-center '>
 
                                         <div className="relative  mb-6">
                                             <Image
                                                 src={testimonial.image}
                                                 alt={testimonial.name}
-                                                width={80}
-                                                height={80}
+                                                width={64}
+                                                height={64}
                                                 className="rounded-full h-24 w-24 mx-auto border-4 border-violet-100"
                                             />
                                         </div>
@@ -196,7 +196,7 @@ const Testimonials = () => {
                                         </div>
                                       </div>
 
-                                        <p className="text-gray-600 leading-relaxed flex-grow text-lg sm:text-xl">
+                                        <p className="text-gray-600 leading-snug flex-grow text-base sm:text-xl">
                                             {testimonial.text}
                                         </p>
                                     </div>
