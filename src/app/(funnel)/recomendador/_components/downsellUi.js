@@ -4,9 +4,13 @@
 // en components/downsellEngine.js; aquí solo hay presentación.
 
 import React, { useEffect, useRef, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import toast from 'react-hot-toast';
 import LandingButton from '@/app/components/LandingButton';
+import { useCartStore } from '@/stores/cart.store';
 import { OBJETIVOS, PRODUCTOS } from '@/app/components/downsellEngine';
 import {
+  buildTierCartItem,
   fetchTieredGroup,
   formatEuros,
   TIER_META,
@@ -155,9 +159,34 @@ export function Typewriter({ texto, onDone, velocidad = 24 }) {
 // Tarjeta de producto recomendado con el precio VIGENTE: los tramos se piden
 // al catálogo real (con espejo local de respaldo, igual que la tienda); las
 // videoconsultas llevan precio fijo de la lista de precios.
+//
+// EL BOTÓN AÑADE AL CARRITO EL CURSO RECOMENDADO (5-ago-2026)
+// ---------------------------------------------------------------------------
+// Antes llevaba a `meta.href`, que para los cuatro productos del catálogo era
+// `/cursos` o `/cocina`. Y `/cursos` SOLO VENDE «Fuerte y Definid@»: su tarjeta
+// de compra fija ese nombre a mano (cursos/_components/CTO.js) y el «carrusel de
+// cursos» de esa página son imágenes decorativas sin precio ni enlace. El
+// componente que lista todos los cursos vive únicamente en /panel-cursos, que
+// está dentro del panel privado.
+//
+// Medido: 12 de los 30 combos del downsell recomiendan «Pérdida de Grasa» o
+// «Ganar Músculo». En esos casos el lead veía aquí el precio correcto del
+// catálogo, pulsaba «Ver el curso»… y aterrizaba en la ficha de OTRO curso a
+// OTRO precio. Le enseñábamos 107,99 € y le poníamos delante 187,99 €.
+//
+// Se arregla donde nace el problema: la tarjeta ya tiene el `group` cargado con
+// su tramo y su precio, así que el botón mete en el carrito EXACTAMENTE lo que
+// acaba de enseñar y va al carrito, igual que hace CourseTierCard en la tienda.
+// No se toca `/cursos`: montarle un escaparate a los otros cinco cursos es
+// decisión de producto y copy, y va aparte.
+//
+// Si el catálogo no responde, el botón conserva el enlace de antes como
+// respaldo: es mejor una página de cursos que un botón muerto.
 export function ProductoCard({ productoId }) {
   const meta = PRODUCTOS[productoId];
   const [group, setGroup] = useState(null);
+  const router = useRouter();
+  const { setDirectCheckoutItem, cart } = useCartStore();
 
   useEffect(() => {
     let vivo = true;
@@ -171,6 +200,25 @@ export function ProductoCard({ productoId }) {
 
   if (!meta) return null;
 
+  // El tramo que se enseña, que es el que se compra: no puede haber diferencia
+  // entre el precio de la tarjeta y el del carrito.
+  const tramosVisibles = group
+    ? groupTierOrder(group).filter((t) => t === 'anual' || groupTierOrder(group).length === 1)
+    : [];
+  const tramoComprable = tramosVisibles[0] ?? null;
+
+  const comprar = () => {
+    if (cart.length > 0 && !cart.some((item) => item.isDirectCheckout)) {
+      toast.error(
+        'Tus productos físicos fueron removidos por seguridad (no se pueden mezclar suscripciones y productos de pago único).',
+        { duration: 5000 },
+      );
+    }
+    setDirectCheckoutItem(buildTierCartItem(group, tramoComprable));
+    toast.success(`${group.baseName} añadido al carrito`);
+    router.push('/cart?step=1');
+  };
+
   return (
     <div className="rounded-3xl bg-white border border-gray-100 shadow-md p-6 flex flex-col gap-3">
       <p className="text-lg font-extrabold text-[#363C98]">{meta.nombre}</p>
@@ -181,16 +229,14 @@ export function ProductoCard({ productoId }) {
             {/* Solo el tramo ANUAL (pago único): es el que coincide con los
                 precios históricos del generador (el xlsx) y evita que el lead
                 del downsell compare mensualidades. Petición de María, 27-jul. */}
-            {groupTierOrder(group)
-              .filter((tier) => tier === 'anual' || groupTierOrder(group).length === 1)
-              .map((tier) => (
-                <li key={tier} className="flex items-baseline justify-between gap-3">
-                  <span>Acceso 12 meses · pago único</span>
-                  <span className="font-bold text-[#363C98] whitespace-nowrap">
-                    {formatEuros(group.tiers[tier].price)} €
-                  </span>
-                </li>
-              ))}
+            {tramosVisibles.map((tier) => (
+              <li key={tier} className="flex items-baseline justify-between gap-3">
+                <span>Acceso 12 meses · pago único</span>
+                <span className="font-bold text-[#363C98] whitespace-nowrap">
+                  {formatEuros(group.tiers[tier].price)} €
+                </span>
+              </li>
+            ))}
           </ul>
         ) : (
           <p className="text-sm text-gray-400">Cargando precios…</p>
@@ -211,15 +257,21 @@ export function ProductoCard({ productoId }) {
             la configuración del downsell en la URL y no se puede reconstruir—,
             y con `rel` porque el destino es de un tercero. Los demás productos
             son rutas nuestras y siguen navegando en la misma pestaña. */}
-        <LandingButton
-          variant="orange"
-          href={meta.href}
-          {...(/^https?:\/\//.test(meta.href || '')
-            ? { target: '_blank', rel: 'noopener noreferrer' }
-            : {})}
-        >
-          {meta.cta}
-        </LandingButton>
+        {tramoComprable ? (
+          <LandingButton variant="orange" onClick={comprar}>
+            Lo quiero
+          </LandingButton>
+        ) : (
+          <LandingButton
+            variant="orange"
+            href={meta.href}
+            {...(/^https?:\/\//.test(meta.href || '')
+              ? { target: '_blank', rel: 'noopener noreferrer' }
+              : {})}
+          >
+            {meta.cta}
+          </LandingButton>
+        )}
       </div>
     </div>
   );
