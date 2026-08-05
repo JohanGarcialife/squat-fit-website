@@ -200,14 +200,19 @@ export default function CocinaPage() {
               </p>
               {/* Rejilla de RECETAS, no de libros: son fichas pequeñas y son
                   varias, así que caben de tres en tres en escritorio. */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+              <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
                 {freeSampleRecipes.map((receta, index) => (
                   <Link
                     key={receta.id || index}
                     href={`/panel-cocina/receta/${receta.id}`}
                     className="group flex flex-col rounded-[24px] overflow-hidden bg-white border border-slate-100 shadow-sm hover:shadow-lg transition-shadow"
                   >
-                    <div className="relative aspect-4/3 overflow-hidden bg-[#FFF6F0]">
+                    {/* 3:4, VERTICAL. Estaba en aspect-4/3 (apaisado) y TODAS las fotos del
+                        libro son verticales: cada tarjeta recortaba el plato por arriba y
+                        por abajo para meterlo en un hueco horizontal. Con la proporción
+                        correcta la foto entra entera y la rejilla gana altura, que es
+                        justo lo que luce en un recetario. */}
+                    <div className="relative aspect-[3/4] overflow-hidden bg-[#FFF6F0]">
                       <Image
                         src={getValidImageUrl(receta.image)}
                         alt={receta.name || 'Receta de muestra'}
