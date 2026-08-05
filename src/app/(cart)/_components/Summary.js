@@ -1,5 +1,5 @@
 import React, { useCallback, useRef, useState, useEffect } from 'react'
-import { ChevronLeft, ChevronDown, X, RotateCcw } from "lucide-react";
+import { ChevronLeft, ChevronDown, ChevronRight, X, RotateCcw } from "lucide-react";
 import Image from "next/image";
 import Link from 'next/link';
 import { useCurrency } from './useCurrency';
@@ -298,7 +298,7 @@ export default function Summary(props) {
 
         {/* Columna Derecha: Resumen — sticky a la derecha en desktop, sticky
             abajo (bottom sheet) en móvil para tener siempre a la vista el total. */}
-        <div ref={hojaRef} className="w-full lg:w-1/3 lg:min-h-screen bg-orange-50 sticky bottom-0 lg:static z-40 rounded-t-3xl lg:rounded-none shadow-[0_-10px_30px_rgba(0,0,0,0.10)] lg:shadow-none">
+        <div className="w-full lg:w-1/3 lg:min-h-screen bg-orange-50 sticky bottom-0 lg:static z-40 rounded-t-3xl lg:rounded-none shadow-[0_-10px_30px_rgba(0,0,0,0.10)] lg:shadow-none">
           <div className="lg:sticky lg:top-0 lg:h-screen max-h-[70vh] lg:max-h-none overflow-y-auto">
             <div className="py-8 lg:py-14 px-6 lg:px-20 xl:px-32 flex flex-col h-full justify-start lg:justify-center">
               
@@ -359,54 +359,100 @@ export default function Summary(props) {
                   pantalla). */}
               <div className="mb-6 sm:mb-8 lg:mb-12 max-w-md mx-auto w-full">
 
-                {/* Barra para plegar/desplegar el detalle — SOLO móvil */}
+                {/* Acceso al detalle — SOLO móvil.
+                    Era un desplegable con flecha hacia abajo mientras que en
+                    los pasos 2 y 3 el mismo «Ver detalle» abre un cajón que
+                    entra desde la derecha. La misma pasarela con dos gestos
+                    distintos para lo mismo se lee como dos webs pegadas, así
+                    que este paso pasa al cajón y la flecha apunta a donde
+                    aparece de verdad. */}
                 <button
                   type="button"
-                  onClick={() => setDetalleAbierto((v) => !v)}
+                  onClick={() => setDetalleAbierto(true)}
                   aria-expanded={detalleAbierto}
                   aria-controls="detalle-carrito"
                   className="lg:hidden flex items-center justify-between w-full gap-3 mb-3 cursor-pointer"
                 >
-                  <span className="text-indigo-900 font-bold text-sm">
-                    {detalleAbierto ? 'Ocultar detalle' : 'Ver detalle'}
-                  </span>
-                  <ChevronDown
-                    size={18}
-                    className={`text-indigo-900 shrink-0 transition-transform ${detalleAbierto ? 'rotate-180' : ''}`}
-                  />
+                  <span className="text-indigo-900 font-bold text-sm">Ver detalle</span>
+                  <ChevronRight size={18} className="text-indigo-900 shrink-0" />
                 </button>
 
-                {/* Detalle: plegado en móvil, siempre visible en escritorio */}
+                {/* Fondo del cajón — solo móvil, cierra al tocar fuera. */}
+                <div
+                  onClick={plegarDetalle}
+                  className={`lg:hidden fixed inset-0 z-[99] bg-black/25 transition-opacity duration-300 ${
+                    detalleAbierto ? 'opacity-100' : 'opacity-0 pointer-events-none'
+                  }`}
+                  aria-hidden="true"
+                />
+
+                {/* Detalle: cajón deslizante en móvil, inline en escritorio.
+                    El desplazamiento va en `style` y no en clases de Tailwind
+                    por el mismo motivo que en OrderSummary: Tailwind v4 escribe
+                    la propiedad `translate` y las utilidades se pisan entre sí,
+                    dejando el cajón clavado fuera de pantalla. El
+                    `lg:[transform:none]!` lleva `!important` porque es lo único
+                    que gana a un estilo en línea. */}
                 <div
                   id="detalle-carrito"
-                  className={`${detalleAbierto ? 'block' : 'hidden'} lg:block space-y-2 sm:space-y-4 lg:space-y-6`}
+                  ref={hojaRef}
+                  style={{ transform: detalleAbierto ? 'translateX(0)' : 'translateX(100%)' }}
+                  className={`
+                    fixed right-0 top-0 z-[100] h-full w-[86%] max-w-[420px] overflow-y-auto
+                    bg-orange-50 shadow-2xl p-6 transition-transform duration-300 ease-out
+                    text-left
+                    lg:static lg:z-auto lg:h-auto lg:w-auto lg:max-w-none lg:[transform:none]!
+                    lg:bg-transparent lg:shadow-none lg:p-0 lg:overflow-visible
+                    lg:space-y-6
+                  `}
                 >
-                  <div className="flex justify-between items-center text-indigo-900/80 text-sm sm:text-lg lg:text-xl">
-                    <span>Subtotal</span>
-                    <span>{convertPrice(subtotal)} {symbol}</span>
+                  <div className="lg:hidden flex items-center justify-between mb-6">
+                    <span className="text-indigo-900 font-bold">Detalle del pedido</span>
+                    <button
+                      type="button"
+                      onClick={plegarDetalle}
+                      aria-label="Cerrar detalle"
+                      className="p-1.5 rounded-full text-indigo-900/60 hover:bg-indigo-100 active:scale-90 transition cursor-pointer"
+                    >
+                      <X size={20} />
+                    </button>
                   </div>
-                  <div className="flex justify-between items-center text-indigo-900/80 text-sm sm:text-lg lg:text-xl">
-                    <span>Envío</span>
-                    <span>
-                      {/* `shipping` ya viene con la tarifa de la zona y el
-                          umbral de gratis aplicados (12.2); aquí no se
-                          recalcula nada. */}
-                      {sinDestino
-                        ? 'Según destino'
-                        : `${shipping > 0 ? convertPrice(shipping) : '0,00'} ${symbol}`}
-                    </span>
-                  </div>
-                  {arancel > 0 && (
+
+                  <div className="space-y-3 lg:space-y-6">
                     <div className="flex justify-between items-center text-indigo-900/80 text-sm sm:text-lg lg:text-xl">
-                      <span>Aranceles (EE. UU.)</span>
-                      <span>{convertPrice(arancel)} {symbol}</span>
+                      <span>Subtotal</span>
+                      <span>{convertPrice(subtotal)} {symbol}</span>
                     </div>
-                  )}
+                    <div className="flex justify-between items-center text-indigo-900/80 text-sm sm:text-lg lg:text-xl">
+                      <span>Envío</span>
+                      <span>
+                        {/* `shipping` ya viene con la tarifa de la zona y el
+                            umbral de gratis aplicados (12.2); aquí no se
+                            recalcula nada. */}
+                        {sinDestino
+                          ? 'Según destino'
+                          : `${shipping > 0 ? convertPrice(shipping) : '0,00'} ${symbol}`}
+                      </span>
+                    </div>
+                    {arancel > 0 && (
+                      <div className="flex justify-between items-center text-indigo-900/80 text-sm sm:text-lg lg:text-xl">
+                        <span>Aranceles (EE. UU.)</span>
+                        <span>{convertPrice(arancel)} {symbol}</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* El total va DENTRO del cajón además de fuera: quien lo abre
+                      para revisar las cuentas necesita ver la suma junto a los
+                      sumandos, no acordarse del número de la pantalla anterior. */}
+                  <div className="lg:hidden flex justify-between items-center text-indigo-900 font-bold text-base pt-3 mt-3 border-t border-indigo-100">
+                    <span>Total</span>
+                    <span>{convertPrice(subtotal + shipping + arancel)} {symbol}</span>
+                  </div>
                 </div>
 
-                {/* Total: lo único que se ve con el detalle plegado. El filete
-                    de separación solo tiene sentido si hay algo encima. */}
-                <div className={`flex justify-between items-center text-indigo-900 font-bold text-base sm:text-xl lg:text-2xl pt-3 sm:pt-4 lg:pt-6 lg:border-t lg:border-indigo-100 ${detalleAbierto ? 'border-t border-indigo-100 mt-2 sm:mt-4' : ''} lg:mt-6`}>
+                {/* Total siempre a la vista, con el cajón abierto o cerrado. */}
+                <div className="flex justify-between items-center text-indigo-900 font-bold text-base sm:text-xl lg:text-2xl pt-3 sm:pt-4 lg:pt-6 lg:border-t lg:border-indigo-100 lg:mt-6">
                   <span>Total</span>
                   <span>
                     {convertPrice(

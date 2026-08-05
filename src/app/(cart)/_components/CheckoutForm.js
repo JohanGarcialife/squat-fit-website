@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useMemo, useEffect, useRef } from 'react';
-import { ChevronLeft, ChevronDown, Check } from 'lucide-react';
+import { ChevronLeft, ChevronDown } from 'lucide-react';
 import { useCheckoutStore } from '@/stores/checkout.store';
 import { useAuthStore } from '@/stores/auth.store';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
@@ -12,6 +12,8 @@ import esPhone from 'react-phone-input-2/lang/es.json';
 import { getData as getCountryData } from 'country-list';
 import { useCartStore } from '@/stores/cart.store';
 import SaveCardCheckbox from './SaveCardCheckbox';
+import Casilla from './Casilla';
+import GuardarDireccion from './GuardarDireccion';
 
 
 // El DNI/CIF es obligatorio en pedidos de más de 400 € (requisito fiscal, Doc 0)
@@ -235,7 +237,24 @@ export default function CheckoutForm({ setStep, onValidationChange, submitRef, s
                       searchNotFound="Sin resultados"
                       value={values.phone}
                       onChange={(phone) => setFieldValue('phone', phone)}
-                      inputClass="!w-full !border !border-slate-200 !rounded-xl !pl-16 !pr-4 !py-3 !placeholder-slate-400 !text-slate-800 !outline-none focus:!border-orange-500 focus:!ring-4 focus:!ring-orange-500/15 !transition-all"
+                      /* El naranja suave de «esto ya está» lo pone
+                         `not-placeholder-shown:border-orange-200` en el resto
+                         de campos (ver CLASES_CAMPO). Aquí NO funcionaba: este
+                         input lo pinta react-phone-input-2 y siempre lleva un
+                         placeholder puesto por la librería, así que
+                         `:placeholder-shown` nunca llega a ser falso y la regla
+                         no dispara nunca. Era el único campo del formulario que
+                         se quedaba gris al rellenarlo.
+                         Se resuelve mirando el valor, que es lo que de verdad
+                         queremos saber. `values.phone` arranca con el prefijo
+                         del país ('34'), así que un teléfono escrito de verdad
+                         tiene más de 4 dígitos: comparar contra vacío daría el
+                         campo por relleno nada más abrir la página. */
+                      inputClass={`!w-full !border !rounded-xl !pl-16 !pr-4 !py-3 !placeholder-slate-400 !text-slate-800 !outline-none focus:!border-orange-500 focus:!ring-4 focus:!ring-orange-500/15 !transition-all ${
+                        (values.phone || '').replace(/\D/g, '').length > 4
+                          ? '!border-orange-200'
+                          : '!border-slate-200'
+                      }`}
                       containerClass="!w-full"
                       buttonClass="!bg-transparent !border-0 !rounded-l-2xl !pl-3"
                       dropdownClass="!rounded-b-2xl !text-black !max-h-60"
@@ -248,9 +267,14 @@ export default function CheckoutForm({ setStep, onValidationChange, submitRef, s
                   </div>
                 </section>
 
-                {/* ── Sección 2: dirección de envío ── */}
+                {/* ── Sección 2: dirección de FACTURACIÓN ──
+                    Se llamaba «Dirección de envío», que era mentira desde que
+                    existe la casilla de abajo: estos campos son los que van en
+                    la factura, y el destino del paquete puede ser otro. Un
+                    cliente que factura en la oficina leía «envío» y escribía
+                    ahí la de casa, con lo que la factura salía mal. */}
                 <section className="space-y-4">
-                  <SectionHeading n={2} title="Dirección de envío" />
+                  <SectionHeading n={2} title="Dirección de facturación" />
                   <InputField label="Dirección" name="address" placeholder="Calle Mayor, 12" autoComplete="address-line1" />
                   <InputField label="Piso / puerta (opcional)" name="apartment" placeholder="3º B" autoComplete="address-line2" />
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -279,12 +303,18 @@ export default function CheckoutForm({ setStep, onValidationChange, submitRef, s
                     </div>
                     <ErrorMessage name="country" component="div" className="text-red-500 text-sm" />
                   </div>
-                  <div className="flex items-center gap-3 cursor-pointer pt-1" onClick={() => setSameAddress(!sameAddress)}>
-                    <div className={`w-5 h-5 rounded-full flex items-center justify-center transition-colors shrink-0 ${sameAddress ? 'bg-orange-500' : 'border border-slate-300'}`}>
-                      {sameAddress && <Check size={13} className="text-white" strokeWidth={3} />}
-                    </div>
+                  {/* Misma casilla que el resto del carrito (Casilla.js). Antes
+                      esto era un círculo naranja dibujado a mano y la de guardar
+                      la tarjeta era la nativa del sistema: dos formas y dos
+                      colores en la misma pantalla de pago. */}
+                  <Casilla
+                    id="misma-direccion"
+                    checked={sameAddress}
+                    onChange={setSameAddress}
+                    className="pt-1"
+                  >
                     <span className="text-slate-600 text-sm">Usar la misma dirección para el envío</span>
-                  </div>
+                  </Casilla>
 
                   {/* Dirección de envío distinta.
                       Hasta el 5-ago esta casilla NO HACÍA NADA: `sameAddress`
@@ -297,7 +327,12 @@ export default function CheckoutForm({ setStep, onValidationChange, submitRef, s
                       tarifa de una zona y se enviaba a otra. */}
                   {!sameAddress && (
                     <div className="space-y-4 rounded-xl border border-slate-200 p-4">
-                      <p className="text-slate-500 text-sm">¿A dónde lo enviamos?</p>
+                      {/* Título de verdad, no una pregunta suelta: el apartado
+                          de arriba es «Dirección de facturación» y este es su
+                          par. Con «¿A dónde lo enviamos?» no quedaba claro que
+                          fueran dos direcciones distintas de la misma
+                          jerarquía. */}
+                      <h3 className="text-indigo-900 font-bold">Dirección de envío</h3>
                       <InputField label="Dirección" name="shippingAddress" placeholder="Calle Mayor, 12" autoComplete="shipping address-line1" />
                       <InputField label="Piso / puerta (opcional)" name="shippingApartment" placeholder="3º B" autoComplete="shipping address-line2" />
                       <div className="grid grid-cols-2 gap-4">
@@ -330,6 +365,11 @@ export default function CheckoutForm({ setStep, onValidationChange, submitRef, s
                     <label htmlFor="shippingNotes" className={CLASES_ETIQUETA}>Notas del envío (opcional)</label>
                     <Field as="textarea" id="shippingNotes" name="shippingNotes" rows={3} placeholder="Escribe aquí..." className={`${CLASES_CAMPO} resize-none`} />
                   </div>
+
+                  {/* Guardar la dirección en la agenda del cliente. Se pinta
+                      sola solo si hay sesión: la agenda cuelga del usuario y
+                      sin cuenta no hay dónde guardarla. */}
+                  <GuardarDireccion valores={values} sameAddress={sameAddress} />
                 </section>
 
                 {/* ── Sección 3: guardar tarjeta (save_card) — fuera de Formik
