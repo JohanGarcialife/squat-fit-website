@@ -153,7 +153,66 @@ export default function CartPage() {
   };
 
   const { cart, addToCart, decrementQuantity, removeFromCart, updateQuantity, lastRemoved, undoRemove } = useCartStore();
-  const { formData } = useCheckoutStore();
+  const { formData, updateFormData } = useCheckoutStore();
+
+  // El país de partida sale de la IP, no de un 'ES' escrito a mano.
+  //
+  // POR QUÉ. `checkout.store` arranca con `country: 'ES'`, así que hasta que
+  // alguien rellenaba la dirección el carrito enseñaba las tarifas de España a
+  // TODO EL MUNDO: «¡Tienes envío gratis!», «Envío 0,00 €» y un total sin
+  // envío. Medido el 6-ago contra la API de tarifas: a México y Argentina se
+  // les cobra 19,90 €, a Estados Unidos 22,90 y a Francia 9,90. O sea que a
+  // quien compra desde fuera se le prometía gratis algo que cuesta hasta 22,90
+  // y se enteraba al rellenar la dirección — y esa gente no es un caso raro: el
+  // propio carrito le ofrece pagar en pesos mexicanos, argentinos, colombianos
+  // y chilenos.
+  //
+  // `/api/geo` ya existe y es lo que usa el formulario de prellamada para
+  // preseleccionar el país. Es una PISTA, no un dato: con VPN se equivoca. Por
+  // eso solo se aplica cuando el formulario está SIN ESTRENAR (ni email, ni
+  // nombre, ni dirección, ni ciudad, ni código postal), que es la señal de que
+  // ese 'ES' es el valor por defecto y no algo que haya elegido nadie. En
+  // cuanto la persona escribe su dirección manda ella, y el backend vuelve a
+  // calcular el envío al cobrar, así que el importe real nunca depende de esto.
+  // HAY QUE ESPERAR A LA HIDRATACIÓN, y esto no es teórico: la primera versión
+  // de este efecto le CAMBIABA EL PAÍS a quien volvía con la dirección ya
+  // puesta. `persist` de zustand rellena desde localStorage DESPUÉS del primer
+  // render, así que en ese primer render el formulario parece recién estrenado
+  // aunque no lo esté, la comprobación de abajo pasaba y el país de la IP se
+  // colaba encima del que había guardado la persona. Se vio probando con un
+  // formulario a medias; sin esa prueba habría llegado a producción.
+  const geoPedido = useRef(false);
+  useEffect(() => {
+    const intentar = () => {
+      if (geoPedido.current) return;
+      const f = useCheckoutStore.getState().formData;
+      const sinEstrenar =
+        !f?.email &&
+        !f?.firstName &&
+        !f?.lastName &&
+        !f?.address &&
+        !f?.city &&
+        !f?.postalCode;
+      if (!sinEstrenar) return;
+      geoPedido.current = true;
+      fetch('/api/geo')
+        .then((r) => (r.ok ? r.json() : null))
+        .then((d) => {
+          // Sin cabecera de país (en local, o tras un proxy que la quita) no se
+          // toca nada: mejor el valor de antes que uno inventado.
+          if (d?.iso && d.iso !== useCheckoutStore.getState().formData?.country) {
+            updateFormData({ country: d.iso });
+          }
+        })
+        .catch(() => {});
+    };
+
+    if (useCheckoutStore.persist?.hasHydrated?.()) {
+      intentar();
+      return undefined;
+    }
+    return useCheckoutStore.persist?.onFinishHydration?.(intentar);
+  }, [updateFormData]);
 
   const totalItems = cart.reduce((acc, item) => acc + item.quantity, 0);
   const subtotal = cart.reduce(
