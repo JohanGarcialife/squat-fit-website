@@ -231,5 +231,42 @@ const legacyOnNewDomain = MAP.filter(([source, target]) => source !== target).ma
   }),
 );
 
+// ── Red: que un comodín no se vuelva a tragar los ficheros de /public ───────
+//
+// Las redirecciones se evalúan ANTES de servir los ficheros estáticos. Así que
+// `/courses/:path*` no solo capturaba las URLs viejas de WordPress: también
+// `/courses/2.png`, que era una foto real del carrusel de /cursos. El 5-ago
+// estuvo en producción devolviendo 301 a /cursos, con el carrusel roto para
+// todo el mundo — y sin ningún error en ninguna parte, porque un 301 es una
+// respuesta perfectamente válida.
+//
+// La foto se movió a /cursos-fotos, pero eso arregla el caso y no la causa. Lo
+// que impide que vuelva a pasar es esto: si alguien añade una carpeta a
+// /public que choque con un comodín, el BUILD FALLA con el nombre de las dos.
+// Vale más un build roto en local que un carrusel roto en producción.
+import { readdirSync } from 'fs';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
+
+const raiz = dirname(fileURLToPath(import.meta.url));
+try {
+  const enPublico = new Set(readdirSync(join(raiz, 'public')));
+  const choques = MAP.map(([source]) => source)
+    .filter((s) => s.includes('/:'))
+    .map((s) => s.split('/:')[0].replace(/^\//, ''))
+    .filter((carpeta) => carpeta && enPublico.has(carpeta));
+  if (choques.length) {
+    throw new Error(
+      `[redirects-legacy] Estas carpetas de /public las tapa un comodín de redirección ` +
+        `y sus ficheros devolverán 301 en vez de la imagen: ${choques.join(', ')}. ` +
+        `Renombra la carpeta o quita el comodín.`,
+    );
+  }
+} catch (e) {
+  // Si /public no existe (algún entorno raro) no se estorba al build; cualquier
+  // otro error sí sube, que es justo el aviso que queremos.
+  if (e.code !== 'ENOENT') throw e;
+}
+
 export default [...legacyRedirects, ...legacyCatchAll];
 export { legacyOnNewDomain };
