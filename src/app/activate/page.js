@@ -15,13 +15,20 @@ function mensajeEnCastellano(bruto) {
   const t = typeof bruto === 'string' ? bruto.toLowerCase() : '';
   if (t.includes('already') && t.includes('activ')) return 'Esta cuenta ya estaba activada. Puedes entrar directamente.';
   if (t.includes('not found')) return 'No encontramos ninguna cuenta para este enlace.';
-  // Desde el arreglo del escáner de enlaces (6-ago), un enlace ya usado NO
-  // llega aquí: responde bien y la página lo trata como éxito. Si se cae en
-  // este mensaje es porque el enlace ha caducado de verdad, o porque no
-  // existe. Decir «o ya se usó una vez» mandaba a la gente a buscar una
-  // explicación que ya no es la suya.
-  if (t.includes('expired') || t.includes('invalid'))
-    return 'Ha caducado. Los enlaces de activación duran 4 días.';
+  // Dos casos distintos que el servidor sí separa y aquí iban en el mismo
+  // saco. Contarle a alguien que su enlace «ha caducado» cuando lo que pasa es
+  // que ese enlace no existe le manda a buscar una explicación equivocada:
+  // mira la fecha del correo, ve que es de hoy, y no entiende nada.
+  //
+  //   · «Invalid or expired activation token» → el enlace no está: o se copió
+  //     a medias, o se anuló al pedir otro, o su cuenta ya no existe.
+  //   · «Token has expired»                   → existe y se le pasó el plazo.
+  //
+  // El orden importa: el primer mensaje lleva las DOS palabras, así que
+  // `invalid` tiene que mirarse antes.
+  if (t.includes('invalid'))
+    return 'Este enlace no es válido. Comprueba que lo has copiado entero, o pide uno nuevo.';
+  if (t.includes('expired')) return 'Ha caducado. Los enlaces de activación duran 4 días.';
   return 'Este enlace de activación no ha funcionado.';
 }
 
