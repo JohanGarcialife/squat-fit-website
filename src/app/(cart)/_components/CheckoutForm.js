@@ -14,7 +14,7 @@ import { useCartStore } from '@/stores/cart.store';
 import SaveCardCheckbox from './SaveCardCheckbox';
 import Interruptor from './Interruptor';
 import CabeceraPaso from './CabeceraPaso';
-import GuardarDireccion from './GuardarDireccion';
+import { useGuardarDireccion } from './GuardarDireccion';
 import { hayQueEnviar } from './hayQueEnviar';
 
 
@@ -105,6 +105,13 @@ export default function CheckoutForm({ setStep, onValidationChange, submitRef, s
   // `sameAddress` se mantiene en true: es lo que hace que el esquema de
   // validación NO exija los campos de envío, que ni siquiera se pintan.
   const mismaDireccion = conEnvio ? sameAddress : true;
+
+  // «Guardar dirección», partido en dos: la casilla y el nombre van pegados al
+  // título del apartado, y el botón al final, cuando los campos ya están
+  // rellenos. El estado vive aquí —fuera del render de Formik— porque un hook
+  // no puede llamarse dentro de él.
+  const guardarFacturacion = useGuardarDireccion('facturacion');
+  const guardarEnvio = useGuardarDireccion('envio');
 
   const subtotal = useMemo(
     () => cart.reduce((sum, item) => sum + item.price * (item.quantity || 1), 0),
@@ -300,6 +307,7 @@ export default function CheckoutForm({ setStep, onValidationChange, submitRef, s
                     ahí la de casa, con lo que la factura salía mal. */}
                 <section className="space-y-4">
                   <SectionHeading n={2} title="Dirección de facturación" />
+                  {guardarFacturacion.cabecera}
                   <InputField label="Dirección" name="address" placeholder="Calle Mayor, 12" autoComplete="address-line1" />
                   <InputField label="Piso / puerta (opcional)" name="apartment" placeholder="3º B" autoComplete="address-line2" />
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -339,7 +347,7 @@ export default function CheckoutForm({ setStep, onValidationChange, submitRef, s
                       Al final funciona porque su rótulo dice de qué dirección
                       habla —«de facturación»—, que era el motivo real por el
                       que se subió: no confundirlo con el de envío. */}
-                  <GuardarDireccion tipo="facturacion" valores={values} />
+                  {guardarFacturacion.pie(values)}
 
                   {/* INTERRUPTOR, no casilla, y a propósito.
                       Esto decide A DÓNDE VA EL PAQUETE. Estaba a dos dedos del
@@ -383,7 +391,7 @@ export default function CheckoutForm({ setStep, onValidationChange, submitRef, s
                           fueran dos direcciones distintas de la misma
                           jerarquía. */}
                       <h3 className="text-indigo-900 font-bold">Dirección de envío</h3>
-                      <GuardarDireccion tipo="envio" valores={values} />
+                      {guardarEnvio.cabecera}
                       <InputField label="Dirección" name="shippingAddress" placeholder="Calle Mayor, 12" autoComplete="shipping address-line1" />
                       <InputField label="Piso / puerta (opcional)" name="shippingApartment" placeholder="3º B" autoComplete="shipping address-line2" />
                       <div className="grid grid-cols-2 gap-4">
@@ -410,13 +418,20 @@ export default function CheckoutForm({ setStep, onValidationChange, submitRef, s
                         <ErrorMessage name="shippingCountry" component="div" className="text-red-700 text-[13px] ml-1" />
                       </div>
 
+                      {guardarEnvio.pie(values)}
                     </div>
                   )}
 
+                  {/* Notas SOLO cuando hay paquete. En una compra digital no
+                      hay nadie que las lea —no se imprime albarán ni pasa por
+                      un repartidor—, así que era un campo abierto pidiendo
+                      escribir para nada, en mitad del formulario de pago. */}
+                  {conEnvio && (
                   <div className="flex flex-col gap-1">
                     <label htmlFor="shippingNotes" className={CLASES_ETIQUETA}>Notas del envío (opcional)</label>
                     <Field as="textarea" id="shippingNotes" name="shippingNotes" rows={3} placeholder="Escribe aquí..." className={`${CLASES_CAMPO} resize-none`} />
                   </div>
+                  )}
 
                 </section>
 

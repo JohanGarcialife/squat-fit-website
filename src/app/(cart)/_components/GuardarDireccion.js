@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { Check, Loader2 } from 'lucide-react';
 import Casilla from './Casilla';
 import { CLASES_CAMPO, CLASES_ETIQUETA } from './CheckoutForm';
@@ -38,58 +38,68 @@ const SUGERENCIAS = ['Casa', 'Trabajo', 'Hotel', 'Otra'];
  * guardó, y el sitio donde lo comprobaría (su perfil) está dos pantallas atrás
  * en mitad de una compra.
  */
-export default function GuardarDireccion({ tipo, valores }) {
+export function useGuardarDireccion(tipo) {
   const { token } = useAuthStore();
   const [activo, setActivo] = useState(false);
   const [etiqueta, setEtiqueta] = useState('Casa');
   const [personalizada, setPersonalizada] = useState('');
   const [estado, setEstado] = useState('inicial'); // inicial | guardando | ok | error
   const [mensaje, setMensaje] = useState(null);
+  // Los valores del formulario llegan al pintar el pie, no al crear el hook:
+  // Formik los expone dentro de su render, y un hook no puede vivir ahí.
+  const valoresRef = useRef({});
 
-  if (!token) return null;
+  // Sin sesión no hay agenda donde guardar (cuelga del user_id): los dos
+  // trozos salen a null más abajo. No se corta aquí porque esto ya es un hook
+  // y tiene que devolver siempre la misma forma.
 
   const esEnvio = tipo === 'envio';
   const id = `guardar-direccion-${tipo}`;
 
-  const destino = esEnvio
-    ? {
-        linea1: valores.shippingAddress,
-        linea2: valores.shippingApartment,
-        codigo_postal: valores.shippingPostalCode,
-        ciudad: valores.shippingCity,
-        pais: valores.shippingCountry,
-      }
-    : {
-        linea1: valores.address,
-        linea2: valores.apartment,
-        codigo_postal: valores.postalCode,
-        ciudad: valores.city,
-        pais: valores.country,
-      };
+  const calcular = (valores = {}) => {
 
-  const nombre = [valores.firstName, valores.lastName].filter(Boolean).join(' ').trim();
+    const destino = esEnvio
+      ? {
+          linea1: valores.shippingAddress,
+          linea2: valores.shippingApartment,
+          codigo_postal: valores.shippingPostalCode,
+          ciudad: valores.shippingCity,
+          pais: valores.shippingCountry,
+        }
+      : {
+          linea1: valores.address,
+          linea2: valores.apartment,
+          codigo_postal: valores.postalCode,
+          ciudad: valores.city,
+          pais: valores.country,
+        };
 
-  // QUÉ falta exactamente, no «rellena la dirección completa».
-  //
-  // Esta casilla vive debajo del TÍTULO de su apartado, así que aparece ANTES
-  // de los campos que necesita: al abrirla están vacíos por fuerza. Con un
-  // aviso genérico, el cliente lo lee como «me falta algo dentro de esta caja»
-  // y se pone a buscar una casilla que no existe. Nombrando lo que falta, la
-  // frase apunta sola a los campos de abajo.
-  const faltan = [
-    !nombre && 'tu nombre',
-    !destino.linea1 && 'la dirección',
-    !destino.codigo_postal && 'el código postal',
-    !destino.ciudad && 'la ciudad',
-    !destino.pais && 'el país',
-  ].filter(Boolean);
-  const completa = faltan.length === 0;
-  // «Otra» no es un nombre: es la puerta al campo libre. Si el cliente la elige
-  // y no escribe nada, se guardaría una dirección llamada «Otra».
-  const laEtiqueta = (etiqueta === 'Otra' ? personalizada.trim() : etiqueta) || '';
-  const listo = completa && laEtiqueta;
+    const nombre = [valores.firstName, valores.lastName].filter(Boolean).join(' ').trim();
+
+    // QUÉ falta exactamente, no «rellena la dirección completa».
+    //
+    // Esta casilla vive debajo del TÍTULO de su apartado, así que aparece ANTES
+    // de los campos que necesita: al abrirla están vacíos por fuerza. Con un
+    // aviso genérico, el cliente lo lee como «me falta algo dentro de esta caja»
+    // y se pone a buscar una casilla que no existe. Nombrando lo que falta, la
+    // frase apunta sola a los campos de abajo.
+    const faltan = [
+      !nombre && 'tu nombre',
+      !destino.linea1 && 'la dirección',
+      !destino.codigo_postal && 'el código postal',
+      !destino.ciudad && 'la ciudad',
+      !destino.pais && 'el país',
+    ].filter(Boolean);
+    const completa = faltan.length === 0;
+    // «Otra» no es un nombre: es la puerta al campo libre. Si el cliente la elige
+    // y no escribe nada, se guardaría una dirección llamada «Otra».
+    const laEtiqueta = (etiqueta === 'Otra' ? personalizada.trim() : etiqueta) || '';
+    const listo = completa && laEtiqueta;
+    return { destino, nombre, faltan, completa, laEtiqueta, listo };
+  };
 
   const guardar = async () => {
+    const { destino, nombre, laEtiqueta } = calcular(valoresRef.current);
     setEstado('guardando');
     setMensaje(null);
     try {
@@ -121,98 +131,108 @@ export default function GuardarDireccion({ tipo, valores }) {
     }
   };
 
-  return (
+  // ── ARRIBA, pegado al título: la casilla y cómo se llama ──────────────
+  //
+  // Aquí NO va el botón. Este trozo aparece antes que los campos, así que un
+  // botón de guardar aquí solo puede estar apagado —no hay nada escrito
+  // todavía— y enseñar una lista de lo que falta a alguien que aún no ha
+  // tenido ocasión de rellenar nada.
+  const cabecera = !token ? null : (
     <div className="pt-1">
       <Casilla id={id} checked={activo} onChange={setActivo}>
-        {/* Se dice de QUÉ dirección hablamos. «Guardar esta dirección»
-            aparecía dos veces, idéntico, en la misma pantalla: había que
-            deducir cuál era cuál por dónde estaba puesto. */}
         <span className="text-slate-600 text-sm">
           Guardar dirección de {esEnvio ? 'envío' : 'facturación'} para futuras compras
         </span>
       </Casilla>
 
-      {activo && (
-        <div className="mt-3 space-y-4 rounded-xl border border-slate-200 p-4">
-          <div className="flex flex-col gap-1">
-            <span className={CLASES_ETIQUETA}>¿Cómo la llamamos?</span>
-            <div className="flex flex-wrap gap-2">
-              {SUGERENCIAS.map((s) => (
-                <button
-                  key={s}
-                  type="button"
-                  onClick={() => setEtiqueta(s)}
-                  className={`rounded-full border px-3 py-1 text-sm transition-all cursor-pointer ${
-                    etiqueta === s
-                      ? 'border-orange-500 bg-orange-50 text-orange-700 font-semibold'
-                      : 'border-slate-200 text-slate-600 hover:border-orange-300'
-                  }`}
-                >
-                  {s}
-                </button>
-              ))}
-            </div>
-            {/* El campo libre solo aparece con «Otra». Enseñarlo siempre, al
-                lado de cuatro botones que ya rellenan el nombre, invita a
-                escribir cuando no hace falta. */}
-            {etiqueta === 'Otra' && (
-              <input
-                id={`etiqueta-${tipo}`}
-                value={personalizada}
-                onChange={(e) => setPersonalizada(e.target.value)}
-                maxLength={60}
-                placeholder="Casa de mis padres, Almacén…"
-                className={`${CLASES_CAMPO} mt-2`}
-                autoFocus
-              />
-            )}
+      {activo && estado !== 'ok' && (
+        <div className="mt-3 flex flex-col gap-1 rounded-xl border border-slate-200 p-4">
+          <span className={CLASES_ETIQUETA}>¿Cómo la llamamos?</span>
+          <div className="flex flex-wrap gap-2">
+            {SUGERENCIAS.map((s) => (
+              <button
+                key={s}
+                type="button"
+                onClick={() => setEtiqueta(s)}
+                className={`rounded-full border px-3 py-1 text-sm transition-all cursor-pointer ${
+                  etiqueta === s
+                    ? 'border-orange-500 bg-orange-50 text-orange-700 font-semibold'
+                    : 'border-slate-200 text-slate-600 hover:border-orange-300'
+                }`}
+              >
+                {s}
+              </button>
+            ))}
           </div>
-
-          {estado === 'ok' ? (
-            /* Guardada: se recoge en una línea con su etiqueta y un «Editar»
-               que devuelve el formulario. Antes se quedaba abierto el bloque
-               entero con los botones de etiqueta encima, así que después de
-               guardar seguía ocupando lo mismo y parecía que faltaba algo por
-               hacer. */
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <p className="flex items-center gap-2 text-sm font-semibold text-emerald-700">
-                <Check size={16} strokeWidth={3} className="shrink-0" />
-                Guardada como «{laEtiqueta}»
-              </p>
-              <button
-                type="button"
-                onClick={() => setEstado('inicial')}
-                className="text-sm font-semibold text-indigo-900 underline underline-offset-2 hover:text-indigo-700 cursor-pointer"
-              >
-                Editar
-              </button>
-            </div>
-          ) : (
-            <>
-              <button
-                type="button"
-                onClick={guardar}
-                disabled={!listo || estado === 'guardando'}
-                className="inline-flex items-center gap-2 rounded-lg bg-indigo-900 px-4 py-2.5 text-sm font-semibold text-white transition-all hover:bg-indigo-800 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-40 cursor-pointer"
-              >
-                {estado === 'guardando' && <Loader2 size={15} className="animate-spin" />}
-                Guardar dirección
-              </button>
-              {/* Se dice POR QUÉ está apagado. Un botón gris sin explicación
-                  hace pensar que la web está rota. */}
-              {!listo && (
-                <p className="text-xs text-slate-400">
-                  {!completa
-                    ? `Falta ${faltan.join(', ').replace(/, ([^,]*)$/, ' y $1')} más abajo.`
-                    : 'Escribe un nombre para la dirección.'}
-                </p>
-              )}
-            </>
+          {/* El campo libre solo con «Otra»: enseñarlo siempre, al lado de
+              cuatro botones que ya rellenan el nombre, invita a escribir
+              cuando no hace falta. */}
+          {etiqueta === 'Otra' && (
+            <input
+              id={`etiqueta-${tipo}`}
+              value={personalizada}
+              onChange={(e) => setPersonalizada(e.target.value)}
+              maxLength={60}
+              placeholder="Casa de mis padres, Almacén…"
+              className={`${CLASES_CAMPO} mt-2`}
+              autoFocus
+            />
           )}
-
-          {mensaje && <p className="text-sm text-[#B4230E]">{mensaje}</p>}
         </div>
       )}
     </div>
   );
+
+  // ── ABAJO, cuando ya están los campos: el botón, y el resultado ───────────
+  const pie = (valoresDelFormulario) => {
+    valoresRef.current = valoresDelFormulario || {};
+    if (!token || !activo) return null;
+    const { faltan, completa, laEtiqueta, listo } = calcular(valoresRef.current);
+    return (
+    <div className="space-y-2">
+      {estado === 'ok' ? (
+        /* Guardada: se recoge en una línea con su etiqueta y un «Editar» que
+           devuelve el formulario. */
+        <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-emerald-200 bg-emerald-50/60 p-3">
+          <p className="flex items-center gap-2 text-sm font-semibold text-emerald-700">
+            <Check size={16} strokeWidth={3} className="shrink-0" />
+            Dirección de {esEnvio ? 'envío' : 'facturación'} guardada como «{(etiqueta === 'Otra' ? personalizada.trim() : etiqueta)}»
+          </p>
+          <button
+            type="button"
+            onClick={() => setEstado('inicial')}
+            className="text-sm font-semibold text-indigo-900 underline underline-offset-2 hover:text-indigo-700 cursor-pointer"
+          >
+            Editar
+          </button>
+        </div>
+      ) : (
+        <>
+          <button
+            type="button"
+            onClick={guardar}
+            disabled={!listo || estado === 'guardando'}
+            className="inline-flex items-center gap-2 rounded-lg bg-indigo-900 px-4 py-2.5 text-sm font-semibold text-white transition-all hover:bg-indigo-800 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-40 cursor-pointer"
+          >
+            {estado === 'guardando' && <Loader2 size={15} className="animate-spin" />}
+            Guardar dirección
+          </button>
+          {/* Se dice POR QUÉ está apagado: un botón gris sin explicación hace
+              pensar que la web está rota. */}
+          {!listo && (
+            <p className="text-xs text-slate-400">
+              {!completa
+                ? `Falta ${faltan.join(', ').replace(/, ([^,]*)$/, ' y $1')}.`
+                : 'Elige arriba un nombre para la dirección.'}
+            </p>
+          )}
+        </>
+      )}
+
+      {mensaje && <p className="text-sm text-[#B4230E]">{mensaje}</p>}
+      </div>
+    );
+  };
+
+  return { cabecera, pie };
 }
