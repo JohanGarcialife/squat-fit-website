@@ -64,7 +64,12 @@ function ActivateContent() {
         setMessage(
           response?.data?.needsPassword === true
             ? 'Ya solo te falta elegir una contraseña.'
-            : '¡Cuenta verificada y activada con éxito!',
+            : response?.data?.alreadyActive === true
+              // El enlace ya se había usado del todo. Antes esto era una
+              // pantalla de error —«este enlace ya no sirve»— y no lo es:
+              // la cuenta está lista y lo único que hay que hacer es entrar.
+              ? 'Tu cuenta ya está activada. Entra con tu contraseña.'
+              : '¡Cuenta verificada y activada con éxito!',
         );
       } catch (error) {
         console.error("Error al activar cuenta:", error.response ? error.response.data : error.message);
