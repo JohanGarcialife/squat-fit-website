@@ -4,8 +4,9 @@ import React, { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import axios from 'axios';
 import Link from 'next/link';
-import { Loader2, CheckCircle, XCircle, Sparkles, MailCheck } from 'lucide-react';
+import { Loader2, CheckCircle, XCircle, Sparkles, MailCheck, Eye, EyeOff, Check } from 'lucide-react';
 import { enviarFormSubmit } from '@/app/components/ga4Formularios';
+import { PasswordChecklist, cumpleReglas } from '@/app/components/passwordRules';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://squatfit-api-cyrc2g3zra-no.a.run.app';
 
@@ -47,6 +48,10 @@ function ActivateContent() {
   const [guardando, setGuardando] = useState(false);
   const [errorClave, setErrorClave] = useState('');
   const [claveLista, setClaveLista] = useState(false);
+  const [verClave, setVerClave] = useState(false);
+  // Las dos condiciones que se comprueban mientras escribe, no al pulsar.
+  const coinciden = claveRepetida.length > 0 && clave === claveRepetida;
+  const puedeGuardar = cumpleReglas(clave) && coinciden;
   // Reenvío del enlace desde la propia pantalla de error: si el enlace caducó,
   // la cuenta sigue SIN activar, y sin activar el login rechaza por `status`
   // antes incluso de mirar la contraseña. Mandar a «recuperar contraseña» no
@@ -118,8 +123,11 @@ function ActivateContent() {
   const guardarContrasena = async (e) => {
     e.preventDefault();
     setErrorClave('');
-    if (clave.length < 8) {
-      setErrorClave('La contraseña debe tener al menos 8 caracteres.');
+    // Mismas reglas que pinta la lista de arriba y que aplica el servidor: si
+    // aquí se comprobara otra cosa, la lista diría que todo está bien y el
+    // botón seguiría rechazándola.
+    if (!cumpleReglas(clave)) {
+      setErrorClave('La contraseña todavía no cumple los requisitos de arriba.');
       return;
     }
     if (clave !== claveRepetida) {
@@ -231,35 +239,67 @@ function ActivateContent() {
               <label htmlFor="clave" className="text-sm font-semibold text-gray-600">
                 Elige tu contraseña
               </label>
-              <input
-                id="clave"
-                type="password"
-                required
-                minLength={8}
-                autoComplete="new-password"
-                value={clave}
-                onChange={(e) => setClave(e.target.value)}
-                placeholder="Al menos 8 caracteres"
-                className="w-full rounded-2xl border border-gray-200 p-4 text-base text-gray-800 outline-hidden focus:border-[#363C98]"
-              />
+              <div className="relative">
+                <input
+                  id="clave"
+                  type={verClave ? 'text' : 'password'}
+                  required
+                  minLength={8}
+                  autoComplete="new-password"
+                  value={clave}
+                  onChange={(e) => setClave(e.target.value)}
+                  placeholder="Al menos 8 caracteres"
+                  className="w-full rounded-2xl border border-gray-200 p-4 pr-12 text-base text-gray-800 outline-hidden focus:border-[#363C98]"
+                />
+                <button
+                  type="button"
+                  onClick={() => setVerClave((v) => !v)}
+                  aria-label={verClave ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                  className="absolute inset-y-0 right-0 flex items-center pr-4 text-gray-400 hover:text-gray-600 cursor-pointer"
+                >
+                  {verClave ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                </button>
+              </div>
+
+              {/* Los requisitos, en vivo. Antes esto solo lo tenía el registro:
+                  aquí la contraseña se rechazaba al pulsar el botón, y con un
+                  mensaje genérico que no decía QUÉ faltaba. */}
+              <PasswordChecklist value={clave} />
+
               <label htmlFor="clave2" className="text-sm font-semibold text-gray-600">
                 Repítela
               </label>
-              <input
-                id="clave2"
-                type="password"
-                required
-                autoComplete="new-password"
-                value={claveRepetida}
-                onChange={(e) => setClaveRepetida(e.target.value)}
-                placeholder="La misma otra vez"
-                className="w-full rounded-2xl border border-gray-200 p-4 text-base text-gray-800 outline-hidden focus:border-[#363C98]"
-              />
+              <div className="relative">
+                <input
+                  id="clave2"
+                  type={verClave ? 'text' : 'password'}
+                  required
+                  autoComplete="new-password"
+                  value={claveRepetida}
+                  onChange={(e) => setClaveRepetida(e.target.value)}
+                  placeholder="La misma otra vez"
+                  className={`w-full rounded-2xl border p-4 pr-12 text-base text-gray-800 outline-hidden transition-colors ${
+                    coinciden ? 'border-green-500 ring-1 ring-green-500' : 'border-gray-200 focus:border-[#363C98]'
+                  }`}
+                />
+                {coinciden && (
+                  <span
+                    className="absolute inset-y-0 right-0 flex items-center pr-4 text-green-600"
+                    aria-label="Las contraseñas coinciden"
+                  >
+                    <Check className="h-5 w-5" strokeWidth={3} />
+                  </span>
+                )}
+              </div>
+              {claveRepetida.length > 0 && !coinciden && (
+                <p className="text-sm text-slate-400">Las dos contraseñas todavía no coinciden.</p>
+              )}
+
               {errorClave && <p className="text-sm text-red-600">{errorClave}</p>}
               <button
                 type="submit"
-                disabled={guardando}
-                className="w-full cursor-pointer bg-[#FF690B] text-white rounded-3xl p-5 text-lg font-bold hover:bg-[#FF690B]/90 transition duration-300 disabled:opacity-60"
+                disabled={guardando || !puedeGuardar}
+                className="w-full cursor-pointer bg-[#FF690B] text-white rounded-3xl p-5 text-lg font-bold hover:bg-[#FF690B]/90 transition duration-300 disabled:opacity-60 disabled:cursor-not-allowed"
               >
                 {guardando ? 'Guardando…' : 'Crear contraseña y entrar'}
               </button>

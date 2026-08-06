@@ -41,6 +41,7 @@ import {
 import toast from 'react-hot-toast';
 import AccessNotice from '@/app/components/AccessNotice';
 import PhotoCropModal from '@/app/components/PhotoCropModal';
+import { PasswordChecklist, cumpleReglas } from '@/app/components/passwordRules';
 
 const API = 'https://squatfit-api-cyrc2g3zra-no.a.run.app';
 
@@ -429,10 +430,10 @@ const AvatarPicker = ({ url, preview, onPick, onClear, nombre }) => {
   );
 };
 
-// Reglas de contraseña del backend (mismo criterio que el registro): 8+, una
-// mayúscula, una minúscula, un número y un carácter especial. Se validan aquí
-// para no gastar un viaje y devolver un 400 en inglés.
-const REGLA_PASSWORD = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/;
+// Las reglas de contraseña salen de `@/app/components/passwordRules`, que es de
+// donde las leen también el registro y la pantalla de activar cuenta. Aquí
+// había una copia en forma de expresión regular: decía lo mismo, pero cualquier
+// cambio en una de las tres se habría quedado sin llegar a las otras dos.
 
 const PasswordModal = ({ open, onClose, token, apiBase }) => {
   const [actual, setActual] = useState('');
@@ -454,7 +455,7 @@ const PasswordModal = ({ open, onClose, token, apiBase }) => {
 
   if (!open) return null;
 
-  const nuevaValida = REGLA_PASSWORD.test(nueva);
+  const nuevaValida = cumpleReglas(nueva);
   const coinciden = nueva !== '' && nueva === repetir;
   const puedeEnviar = actual !== '' && nuevaValida && coinciden && !enviando;
 
@@ -546,9 +547,17 @@ const PasswordModal = ({ open, onClose, token, apiBase }) => {
                 {verNueva ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
               </button>
             </div>
-            <p className={`text-xs ${nueva === '' || nuevaValida ? 'text-slate-400' : 'text-red-500'}`}>
-              8 caracteres o más, con mayúscula, minúscula, número y un símbolo.
-            </p>
+            {/* Antes era una frase estática con los requisitos; ahora es la
+                misma lista en vivo del registro y de «activar cuenta», que va
+                marcando lo que ya se cumple. Con el texto suelto había que
+                releerlo entero para saber qué faltaba. */}
+            {nueva === '' ? (
+              <p className="text-xs text-slate-400">
+                8 caracteres o más, con mayúscula, minúscula, número y un símbolo.
+              </p>
+            ) : (
+              <PasswordChecklist value={nueva} className="text-xs" />
+            )}
           </div>
 
           <div className="flex flex-col space-y-1.5">
