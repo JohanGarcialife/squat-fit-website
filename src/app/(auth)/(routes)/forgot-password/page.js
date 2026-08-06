@@ -10,11 +10,31 @@ import toast from 'react-hot-toast';
 import { Eye, EyeOff, ArrowLeft } from 'lucide-react';
 import { enviarFormSubmit } from '@/app/components/ga4Formularios';
 
+// El backend marca así el 400 del antiflood de 15 min. Se mira primero ese
+// código y solo si no viene se cae al texto, para que esto siga funcionando
+// contra la versión de la API que todavía no lo manda.
+const YA_TIENE_CODIGO = 'CODE_ALREADY_SENT';
+
+function esCodigoYaEnviado(error) {
+  const data = error.response?.data;
+  if (data?.code === YA_TIENE_CODIGO) return true;
+  return (
+    error.response?.status === 400 &&
+    typeof data?.message === 'string' &&
+    data.message.startsWith('Acabamos de enviarte un código')
+  );
+}
+
 function ForgotPasswordContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [step, setStep] = useState(1); // 1: request code, 2: reset password
-  const [userEmail, setUserEmail] = useState('');
+  // El correo del código enlaza aquí con ?step=2&email=…, para que quien lo
+  // recibe aterrice en el formulario donde meterlo en vez de en la pantalla
+  // que lo vuelve a pedir.
+  const emailInicial = (searchParams.get('email') || '').trim().toLowerCase();
+  const empiezaEnCodigo = searchParams.get('step') === '2' && Boolean(emailInicial);
+  const [step, setStep] = useState(empiezaEnCodigo ? 2 : 1); // 1: request code, 2: reset password
+  const [userEmail, setUserEmail] = useState(empiezaEnCodigo ? emailInicial : '');
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 
   const redirectParam = searchParams.get('redirect') ? `?redirect=${encodeURIComponent(searchParams.get('redirect'))}` : '';
@@ -50,6 +70,17 @@ function ForgotPasswordContent() {
       }
     } catch (error) {
       console.error('Error solicitando código', error);
+      // «Acabamos de enviarte un código» es información, no un fallo: el código
+      // está en su correo. Antes se pintaba en rojo y la pantalla se quedaba en
+      // el paso 1, o sea que quien ya lo tenía no podía llegar al formulario
+      // para meterlo hasta pasados 15 minutos. Ahora se le lleva allí.
+      if (esCodigoYaEnviado(error)) {
+        const email = (values.email || '').trim().toLowerCase();
+        toast(error.response?.data?.message || 'Ya te hemos enviado un código. Revisa tu correo.', { icon: '✉️' });
+        setUserEmail(email);
+        setStep(2);
+        return;
+      }
       const msg = error.response?.data?.message || 'Error al solicitar el código';
       toast.error(typeof msg === 'string' ? msg : 'Error al solicitar el código');
     } finally {
@@ -89,10 +120,17 @@ function ForgotPasswordContent() {
       <div className='md:w-1/2'>
         <h2 className='text-4xl md:text-8xl font-bold text-center md:text-start'>Recupera tu cuenta</h2>
         <p className='text-white text-lg md:text-3xl mt-4 md:mt-12 max-w-[430px] mx-auto md:mx-0 text-center md:text-start'>
-          {step === 1 
-            ? 'Ingresa tu correo para recibir un código de restablecimiento de contraseña.' 
+          {step === 1
+            ? 'Ingresa tu correo para recibir un código de restablecimiento de contraseña.'
             : 'Introduce el código enviado a tu correo y tu nueva contraseña.'}
         </p>
+        {/* Decir a qué dirección fue el código evita el caso más común de
+            «me da error»: haberlo pedido para otro correo del que se tiene. */}
+        {step === 2 && userEmail && (
+          <p className='text-white/80 text-base md:text-2xl mt-2 md:mt-4 max-w-[430px] mx-auto md:mx-0 text-center md:text-start break-words'>
+            Lo enviamos a <span className='font-bold'>{userEmail}</span>.
+          </p>
+        )}
       </div>
       <div className='md:w-1/2'>
         <div className='bg-white/30 rounded-[60px] md:rounded-[80px] py-16 px-10 md:py-32 md:px-20 text-black flex flex-col gap-5 relative'>
@@ -107,34 +145,60 @@ function ForgotPasswordContent() {
           )}
 
           {step === 1 ? (
+            /* La `key` no es decorativa: sin ella React reutiliza el mismo
+               <input> al cambiar de paso —los dos formularios tienen la misma
+               forma— y el campo del código aparecía relleno con el correo que
+               se acababa de escribir, mientras Formik lo consideraba vacío.
+               Comprobado en el navegador el 6-ago. */
             <Formik
-              initialValues={{ email: searchParams.get('email') || '' }}
+              key="paso-pedir-codigo"
+              initialValues={{ email: emailInicial }}
               validationSchema={requestSchema}
               onSubmit={handleRequestCode}
             >
-              {({ isSubmitting }) => (
+              {({ isSubmitting, values }) => (
                 <Form className='flex flex-col gap-5 mt-5'>
                   <div>
-                    <Field 
-                      type="email" 
-                      name="email" 
-                      placeholder='E-mail' 
-                      className='w-full text-white border border-gray-300 rounded-3xl p-5 text-lg focus:outline-none focus:ring-2 focus:ring-primary placeholder-white placeholder-opacity-50 placeholder:font-bold' 
+                    <Field
+                      type="email"
+                      name="email"
+                      placeholder='E-mail'
+                      className='w-full text-white border border-gray-300 rounded-3xl p-5 text-lg focus:outline-none focus:ring-2 focus:ring-primary placeholder-white placeholder-opacity-50 placeholder:font-bold'
                     />
                     <ErrorMessage name="email" component="div" className="text-red-500 text-sm mt-1" />
                   </div>
-                  <button 
-                    type="submit" 
-                    disabled={isSubmitting} 
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
                     className='cursor-pointer bg-white text-primary rounded-3xl p-5 text-lg font-bold hover:bg-primary-dark transition duration-300 disabled:opacity-50'
                   >
                     Enviar Código
+                  </button>
+                  {/* Sin esto, la única forma de llegar al formulario del código
+                      era pedir uno nuevo — y quien acababa de pedirlo chocaba
+                      con el antiflood. Quien cerró la pestaña para ir a su
+                      correo se quedaba fuera. */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const email = (values.email || '').trim().toLowerCase();
+                      if (!email) {
+                        toast('Escribe primero tu correo para continuar.', { icon: '✉️' });
+                        return;
+                      }
+                      setUserEmail(email);
+                      setStep(2);
+                    }}
+                    className='text-base md:text-xl text-gris underline cursor-pointer'
+                  >
+                    Ya tengo un código
                   </button>
                 </Form>
               )}
             </Formik>
           ) : (
             <Formik
+              key="paso-nueva-contrasena"
               initialValues={{ code: '', password: '', confirmPassword: '' }}
               validationSchema={resetSchema}
               onSubmit={handleResetPassword}
