@@ -39,6 +39,9 @@ function ActivateContent() {
   // antes incluso de mirar la contraseña. Mandar a «recuperar contraseña» no
   // les desbloquearía; lo único que sirve es un enlace de activación nuevo.
   const [emailReenvio, setEmailReenvio] = useState('');
+  // Si el email lo hemos puesto nosotros, el rótulo lo dice: si no, parece que
+  // el navegador lo ha autocompletado y no se sabe si es el correcto.
+  const [emailPrellenado, setEmailPrellenado] = useState(false);
   const [reenvio, setReenvio] = useState('idle'); // 'idle' | 'enviando' | 'enviado' | 'error'
   const [errorReenvio, setErrorReenvio] = useState('');
 
@@ -61,12 +64,38 @@ function ActivateContent() {
         setMessage(
           response?.data?.needsPassword === true
             ? 'Ya solo te falta elegir una contraseña.'
-            : '¡Cuenta verificada y activada con éxito!',
+            : response?.data?.alreadyActive === true
+              // El enlace ya se había usado del todo. Antes esto era una
+              // pantalla de error —«este enlace ya no sirve»— y no lo es:
+              // la cuenta está lista y lo único que hay que hacer es entrar.
+              ? 'Tu cuenta ya está activada. Entra con tu contraseña.'
+              : '¡Cuenta verificada y activada con éxito!',
         );
       } catch (error) {
         console.error("Error al activar cuenta:", error.response ? error.response.data : error.message);
         setStatus('error');
         setMessage(mensajeEnCastellano(error?.response?.data?.message));
+
+        // El enlace no vale, así que abajo se le ofrece pedir otro… y hasta
+        // ahora había que teclear el email a mano. A alguien que ACABA de
+        // llegar pinchando desde ese mismo correo: trabajo doble y una ocasión
+        // más de escribirlo mal. El token sigue identificando al destinatario
+        // aunque haya caducado, así que se le pregunta al servidor y el campo
+        // sale relleno.
+        //
+        // Si esto falla no se dice nada: el formulario se queda como estaba,
+        // vacío y perfectamente usable. Es una comodidad, no un requisito.
+        try {
+          const { data } = await axios.get(`${API_BASE}/api/v1/user/activation-email`, {
+            params: { token },
+          });
+          if (data?.email) {
+            setEmailReenvio(data.email);
+            setEmailPrellenado(true);
+          }
+        } catch {
+          /* sin prerrelleno */
+        }
       }
     }
 
@@ -273,16 +302,23 @@ function ActivateContent() {
           ) : (
             <form onSubmit={reenviarEnlace} className="w-full flex flex-col gap-3">
               <label htmlFor="email-reenvio" className="text-left text-sm font-semibold text-gray-600">
-                Tu correo, el mismo con el que compraste
+                {emailPrellenado
+                  ? 'Te lo mandamos aquí (puedes cambiarlo)'
+                  : 'Tu correo, el mismo con el que compraste'}
               </label>
               <input
                 id="email-reenvio"
                 type="email"
                 required
                 value={emailReenvio}
-                onChange={(e) => setEmailReenvio(e.target.value)}
+                onChange={(e) => {
+                  setEmailReenvio(e.target.value);
+                  setEmailPrellenado(false);
+                }}
                 placeholder="tucorreo@ejemplo.com"
-                className="w-full rounded-2xl border border-gray-200 p-4 text-base text-gray-800 outline-hidden focus:border-[#3932C0]"
+                className={`w-full rounded-2xl border p-4 text-base text-gray-800 outline-hidden focus:border-[#3932C0] ${
+                  emailPrellenado ? 'border-[#3932C0]/40 bg-[#F5F5FF]' : 'border-gray-200'
+                }`}
               />
               {errorReenvio && <p className="text-left text-sm text-red-600">{errorReenvio}</p>}
               <button
