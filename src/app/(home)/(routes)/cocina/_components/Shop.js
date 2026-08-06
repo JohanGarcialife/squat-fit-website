@@ -292,6 +292,15 @@ export default function Shop() {
               id: bundlePack.id,
               type: 'pack',
               name: bundlePack.name,
+              // Sin `cartName`, `addPhysical` cae en el respaldo «Libro Físico
+              // - X» y el carrito diría «Libro Físico - Lo quiero todo»: un
+              // tercer nombre para el mismo producto —el mismo fallo que ya se
+              // arregló en el pack impreso— y encima falso, porque este pack no
+              // es solo libros: lleva dentro la biblioteca digital de por vida.
+              // Se pone aquí y no al activarlo porque el pack ya existe en la
+              // base (169 €, inactivo) y el día que alguien le ponga
+              // is_active=true esto sale a producción sin que nadie lo revise.
+              cartName: bundlePack.name,
               price: parseFloat(bundlePack.price),
               image: bundlePack.image || '/LibrosFisicos.png',
             })
