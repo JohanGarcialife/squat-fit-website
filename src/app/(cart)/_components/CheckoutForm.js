@@ -15,6 +15,7 @@ import SaveCardCheckbox from './SaveCardCheckbox';
 import Interruptor from './Interruptor';
 import CabeceraPaso from './CabeceraPaso';
 import GuardarDireccion from './GuardarDireccion';
+import { hayQueEnviar } from './hayQueEnviar';
 
 
 // El DNI/CIF es obligatorio en pedidos de más de 400 € (requisito fiscal, Doc 0)
@@ -88,14 +89,31 @@ export default function CheckoutForm({ setStep, onValidationChange, submitRef, s
   const isCompany = customerType === 'empresa';
   const countryOptions = useMemo(() => buildCountryOptions(), []);
 
+  // ¿HAY ALGO QUE ENVIAR?
+  //
+  // Si el carrito solo lleva cosas digitales —un curso, la biblioteca, un
+  // pack— no hay paquete, no se cobra porte y no hay a dónde mandarlo. Pedir
+  // una dirección de envío ahí es hacerle rellenar datos que no vamos a usar,
+  // en la única pantalla donde se pierde dinero de verdad.
+  //
+  // Mismo criterio con el que `OrderSummary` decide si cobra envío (helper
+  // compartido): no puede pasar que se cobre porte sin haber pedido dirección,
+  // ni al revés.
+  const conEnvio = useMemo(() => hayQueEnviar(cart), [cart]);
+
+  // Sin envío, la dirección de facturación es la única que hay, así que
+  // `sameAddress` se mantiene en true: es lo que hace que el esquema de
+  // validación NO exija los campos de envío, que ni siquiera se pintan.
+  const mismaDireccion = conEnvio ? sameAddress : true;
+
   const subtotal = useMemo(
     () => cart.reduce((sum, item) => sum + item.price * (item.quantity || 1), 0),
     [cart],
   );
   const dniRequired = subtotal >= DNI_REQUIRED_FROM;
   const validationSchema = useMemo(
-    () => buildValidationSchema(dniRequired, isCompany, sameAddress),
-    [dniRequired, isCompany, sameAddress],
+    () => buildValidationSchema(dniRequired, isCompany, mismaDireccion),
+    [dniRequired, isCompany, mismaDireccion],
   );
 
   const initialValues = useMemo(() => {
@@ -183,7 +201,7 @@ export default function CheckoutForm({ setStep, onValidationChange, submitRef, s
             // `sameAddress` va con los datos: es lo que decide, en el paso 3,
             // si la dirección que se manda a Stripe es la de facturación o la
             // de envío. Sin esto el checkout no puede saberlo.
-            updateFormData({ ...values, sameAddress });
+            updateFormData({ ...values, sameAddress: mismaDireccion });
             // setStep(3) will be handled by OrderSummary
           }}
         >
@@ -282,11 +300,6 @@ export default function CheckoutForm({ setStep, onValidationChange, submitRef, s
                     ahí la de casa, con lo que la factura salía mal. */}
                 <section className="space-y-4">
                   <SectionHeading n={2} title="Dirección de facturación" />
-                  {/* El «guardar» va pegado a SU título, no al final del
-                      bloque. Al final quedaba a un dedo del de envío y del
-                      interruptor, y tres controles seguidos que dicen cosas
-                      parecidas no se distinguen: había que leerlos. */}
-                  <GuardarDireccion tipo="facturacion" valores={values} />
                   <InputField label="Dirección" name="address" placeholder="Calle Mayor, 12" autoComplete="address-line1" />
                   <InputField label="Piso / puerta (opcional)" name="apartment" placeholder="3º B" autoComplete="address-line2" />
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -315,6 +328,19 @@ export default function CheckoutForm({ setStep, onValidationChange, submitRef, s
                     </div>
                     <ErrorMessage name="country" component="div" className="text-red-500 text-sm" />
                   </div>
+                  {/* EL «GUARDAR» VA AL FINAL, no pegado al título.
+                      Arriba quedaba antes que los campos que necesita: se
+                      abría con todo vacío y lo único que podía hacer era
+                      enseñar un botón apagado y una lista de lo que falta, a
+                      alguien que todavía no había tenido ocasión de
+                      rellenarlo. Un botón de guardar antes de que haya nada
+                      que guardar no es una opción, es un reproche.
+
+                      Al final funciona porque su rótulo dice de qué dirección
+                      habla —«de facturación»—, que era el motivo real por el
+                      que se subió: no confundirlo con el de envío. */}
+                  <GuardarDireccion tipo="facturacion" valores={values} />
+
                   {/* INTERRUPTOR, no casilla, y a propósito.
                       Esto decide A DÓNDE VA EL PAQUETE. Estaba a dos dedos del
                       «guardar esta dirección», con la misma casilla cuadrada y
@@ -322,17 +348,19 @@ export default function CheckoutForm({ setStep, onValidationChange, submitRef, s
                       pegados que hacen cosas muy distintas. Un interruptor se
                       lee de un vistazo como «activado / desactivado», que es
                       justo lo que es, y deja de parecerse al de al lado. */}
-                  <Interruptor
-                    id="misma-direccion"
-                    checked={sameAddress}
-                    onChange={setSameAddress}
-                    titulo="Enviar a esta misma dirección"
-                    descripcion={
-                      sameAddress
-                        ? 'El paquete irá a la dirección de facturación.'
-                        : 'Escribe abajo a dónde quieres que llegue el paquete.'
-                    }
-                  />
+                  {conEnvio && (
+                    <Interruptor
+                      id="misma-direccion"
+                      checked={sameAddress}
+                      onChange={setSameAddress}
+                      titulo="Enviar a esta misma dirección"
+                      descripcion={
+                        sameAddress
+                          ? 'Se utilizará la misma dirección para envío y facturación.'
+                          : 'Escribe abajo a dónde quieres que llegue el paquete.'
+                      }
+                    />
+                  )}
 
                   {/* Guardar la de FACTURACIÓN. Queda predeterminada de
                       facturación sin preguntar: es lo que dice el bloque en el
@@ -347,7 +375,7 @@ export default function CheckoutForm({ setStep, onValidationChange, submitRef, s
                       Peor: el presupuesto de envío se calcula con este código
                       postal, así que con destino real distinto se cobraba la
                       tarifa de una zona y se enviaba a otra. */}
-                  {!sameAddress && (
+                  {conEnvio && !sameAddress && (
                     <div className="space-y-4 rounded-xl border border-slate-200 p-4">
                       {/* Título de verdad, no una pregunta suelta: el apartado
                           de arriba es «Dirección de facturación» y este es su

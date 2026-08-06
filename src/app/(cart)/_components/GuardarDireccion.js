@@ -169,10 +169,24 @@ export default function GuardarDireccion({ tipo, valores }) {
           </div>
 
           {estado === 'ok' ? (
-            <p className="flex items-center gap-2 text-sm font-semibold text-emerald-700">
-              <Check size={16} strokeWidth={3} className="shrink-0" />
-              Guardada como «{laEtiqueta}»
-            </p>
+            /* Guardada: se recoge en una línea con su etiqueta y un «Editar»
+               que devuelve el formulario. Antes se quedaba abierto el bloque
+               entero con los botones de etiqueta encima, así que después de
+               guardar seguía ocupando lo mismo y parecía que faltaba algo por
+               hacer. */
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <p className="flex items-center gap-2 text-sm font-semibold text-emerald-700">
+                <Check size={16} strokeWidth={3} className="shrink-0" />
+                Guardada como «{laEtiqueta}»
+              </p>
+              <button
+                type="button"
+                onClick={() => setEstado('inicial')}
+                className="text-sm font-semibold text-indigo-900 underline underline-offset-2 hover:text-indigo-700 cursor-pointer"
+              >
+                Editar
+              </button>
+            </div>
           ) : (
             <>
               <button
