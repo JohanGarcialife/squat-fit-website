@@ -18,6 +18,7 @@ import ToasterProvider from "@/components/ToasterProvider";
 import AutoShineObserver from "../components/AutoShineObserver";
 import UTMCapture from "../components/UTMCapture";
 import CookieBanner from "@/app/components/CookieBanner";
+import RecargaSiHayDespliegue from "@/app/components/RecargaSiHayDespliegue";
 import CartScrollRestore from "@/app/components/CartScrollRestore";
 import TrustpilotInvitations from "@/app/components/TrustpilotInvitations";
 
@@ -119,6 +120,7 @@ export default function RootLayout({ children }) {
         <CartDrawer />
         </div>
       <CookieBanner />
+      <RecargaSiHayDespliegue />
         <GoogleAnalytics />
       </body>
     </html>

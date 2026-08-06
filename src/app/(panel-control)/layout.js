@@ -7,6 +7,7 @@ import CartDrawer from "../components/CartDrawer";
 
 import Sidebar from "./(routes)/panel-control/_components/Sidebar";
 import CookieBanner from "@/app/components/CookieBanner";
+import RecargaSiHayDespliegue from "@/app/components/RecargaSiHayDespliegue";
 import AppTour from "@/app/components/AppTour";
 
 const inter = Inter({
@@ -58,6 +59,7 @@ export default function RootLayout({ children }) {
         <AppTour />
         </div>
       <CookieBanner />
+      <RecargaSiHayDespliegue />
         <GoogleAnalytics />
       </body>
     </html>

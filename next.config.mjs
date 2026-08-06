@@ -8,6 +8,14 @@ const nextConfig = {
   //   NEXT_DIST=.next-b npm run build && NEXT_DIST=.next-b PORT=4000 npm run start
   // Sin la variable se comporta igual que siempre (.next).
   distDir: process.env.NEXT_DIST || '.next',
+  // Versión desplegada, incrustada en el bundle del navegador. La usa
+  // RecargaSiHayDespliegue.js para saber si una pestaña restaurada de la caché
+  // de atrás/adelante se quedó en un despliegue anterior. Fuera de Vercel
+  // (local) vale 'dev' y ese mecanismo se queda desactivado.
+  env: {
+    NEXT_PUBLIC_BUILD_ID:
+      process.env.VERCEL_GIT_COMMIT_SHA || process.env.VERCEL_DEPLOYMENT_ID || 'dev',
+  },
   images: {
     // AVIF antes que WebP: sobre fotos comprime bastante mejor. Next negocia por
     // Accept, así que un navegador sin AVIF sigue recibiendo WebP.
