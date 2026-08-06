@@ -1,4 +1,4 @@
-import legacyRedirects from './redirects-legacy.mjs';
+import legacyRedirects, { legacyOnNewDomain } from './redirects-legacy.mjs';
 import { formLinkRedirects } from './form-links.mjs';
 
 /** @type {import('next').NextConfig} */
@@ -103,6 +103,13 @@ const nextConfig = {
         '/recetas',
         '/recetario',
       ].map((source) => ({ source, destination: '/cocina', permanent: false })),
+      // El resto del mapa del dominio viejo, aplicado también aquí. Va EL
+      // ÚLTIMO a propósito: Next usa la primera regla que encaja, así que todo
+      // lo de arriba —los enlaces de formulario y los atajos del libro— sigue
+      // ganando, y esto solo recoge las 59 rutas que hoy se caen en un 404.
+      // El porqué, y por qué NO se copia el cajón de sastre, en
+      // redirects-legacy.mjs.
+      ...legacyOnNewDomain,
     ];
   },
   async headers() {
