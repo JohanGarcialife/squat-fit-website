@@ -143,11 +143,28 @@ export default function CartPage() {
   const [needsAccess, setNeedsAccess] = useState(false);
 
   const handleSetStep = (nextStep) => {
+    // El checkout empieza al pulsar «Continuar», HAYA SESIÓN O NO. Antes esta
+    // línea estaba después del guard de abajo, así que a quien no tenía sesión
+    // se le hacía `return` antes de medir nada — y no tener sesión es el caso
+    // NORMAL aquí: este carrito no tiene muro de login a propósito, el paso
+    // intermedio solo pide el correo. Encima, cuando ese paso termina llama a
+    // `setStep(2)` directamente (ver `onReady` de CheckoutAccess), no a esta
+    // función, así que el evento no salía ni entonces.
+    //
+    // Se veía en los números y no lo estábamos leyendo: en 28 días GA4 tiene
+    // 46 `add_to_cart` y UN solo `begin_checkout`. No es que la gente abandone
+    // el carrito; es que su checkout no se contaba.
+    //
+    // Emitir aquí es además lo correcto por definición: `begin_checkout` marca
+    // el principio del proceso, y quien se cae en la pantalla del correo se
+    // cayó DENTRO del checkout — que es justo la fuga que interesa ver. No hay
+    // riesgo de contar de más: `emitirBeginCheckout` lleva su propio candado y
+    // solo deja pasar el primero de la visita.
+    if (nextStep === 2) emitirBeginCheckout();
     if (nextStep > 1 && !token) {
       setNeedsAccess(true);
       return;
     }
-    if (nextStep === 2) emitirBeginCheckout();
     setNeedsAccess(false);
     setStep(nextStep);
   };
