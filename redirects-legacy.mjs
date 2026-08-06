@@ -184,4 +184,52 @@ const legacyCatchAll = HOSTS.map((host) => ({
   statusCode: 301,
 }));
 
+// LAS MISMAS RUTAS, PERO TAMBIÉN EN EL DOMINIO NUEVO.
+//
+// POR QUÉ. Todo lo de arriba lleva condición de host, así que solo dispara en
+// squatfit.es. Quien tenga un enlace viejo y le cambie el dominio a mano —o lo
+// tenga ya reescrito, o se lo dicten— se estrella. No es una hipótesis: ya pasó
+// dos veces y las dos se arreglaron a mano, una ruta cada vez (`/formulario` y
+// los ocho atajos de «el libro», los dos parches en next.config.mjs). Medido el
+// 6-ago contra producción: de las 79 rutas del mapa, **59 daban 404 en
+// squadfit.es** y 301 en squatfit.es. Y Search Console enseña al menos un
+// enlace entrante real a una URL de tienda vieja EN EL DOMINIO NUEVO.
+//
+// El destino no me lo invento: es el que el mapa ya había decidido para cada
+// ruta. Lo único que cambia es en qué host se aplica.
+//
+// DOS COSAS QUE NO SE COPIAN, y son las que hacen que esto sea seguro:
+//
+//   1. El CAJÓN DE SASTRE se queda fuera. En squatfit.es está bien, porque ese
+//      dominio se apaga y es mejor el home que un 404. En squadfit.es sería un
+//      desastre: convertiría CUALQUIER error de tecleo en un 301 al home, que
+//      es un «soft 404» de manual, esconde los enlaces rotos de verdad y le
+//      enseña a Google que no existen las páginas que no existen.
+//
+//   2. Las reglas que apuntan a SÍ MISMAS. Doce del mapa (`/contacto`,
+//      `/unete`, `/acceder`, `/form`…) existen solo para cruzar de dominio: su
+//      origen y su destino son la misma ruta. Aplicadas aquí serían un bucle de
+//      redirección infinito, y `/contacto` además es una página real de la web
+//      nueva: se la comería. Se filtran comparando origen y destino, no con una
+//      lista escrita a mano, para que no se despiste ninguna al añadir rutas.
+//
+// Van al FINAL del array de `next.config.mjs`, después de los enlaces de
+// formulario y de los atajos del libro: Next aplica la primera regla que encaja,
+// así que todo lo que ya estaba resuelto sigue ganando y esto solo recoge lo que
+// hoy se cae.
+// El destino va RELATIVO, al revés que arriba. Arriba tiene que ser absoluto
+// porque cruza de dominio; aquí ya estamos en casa, y un destino absoluto se
+// saldría de los despliegues de vista previa de Vercel: pedir /mis-cursos en un
+// `*.vercel.app` te sacaría a producción y te quedarías sin poder revisar la
+// rama. Las tres reglas de afiliación siguen absolutas, que para eso apuntan
+// fuera.
+const legacyOnNewDomain = MAP.filter(([source, target]) => source !== target).map(
+  ([source, target, opts]) => ({
+    source,
+    destination: target,
+    statusCode: opts?.statusCode ?? 301,
+  }),
+);
+
 export default [...legacyRedirects, ...legacyCatchAll];
+export { legacyOnNewDomain };
