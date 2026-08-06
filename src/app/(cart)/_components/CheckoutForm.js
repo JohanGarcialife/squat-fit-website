@@ -226,7 +226,14 @@ export default function CheckoutForm({ setStep, onValidationChange, submitRef, s
                     placeholder={isCompany ? 'CIF de la empresa' : 'Número de identificación'}
                   />
                   <div className="flex flex-col gap-1">
-                    <label htmlFor="phone" className={CLASES_ETIQUETA}>Teléfono</label>
+                    {/* El asterisco no es decorativo: `phone` es required en el
+                        esquema y sin él el botón «Continuar» se queda apagado.
+                        Era la ÚNICA etiqueta del formulario que no decía si era
+                        obligatoria u opcional —DNI/CIF, piso y notas sí lo
+                        dicen—, así que quien lo dejaba en blanco veía el botón
+                        muerto sin saber por qué. Visto recorriendo la compra en
+                        el navegador el 6-ago. */}
+                    <label htmlFor="phone" className={CLASES_ETIQUETA}>Teléfono*</label>
                     <PhoneInput
                       country={'es'}
                       preferredCountries={['es', 'pt', 'gb', 'fr', 'mx', 'ar', 'co', 'cl']}
