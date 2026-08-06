@@ -334,6 +334,45 @@ function flattenIndexTree(nodes, inheritedLevel = 0) {
 // PDF). Los valores por defecto son los del lector de libro de siempre, así
 // que ese uso no cambia ni una letra. `page` puede ser un número de página o
 // cualquier identificador: aquí solo se compara y se devuelve tal cual.
+//
+// `variante` cambia el aspecto sin duplicar el componente:
+//   'libro'     — el de siempre, estrecho y compacto (lector de PDF).
+//   'recetario' — más ancho y con más cuerpo de letra. Con 260 px los nombres
+//                 de receta («Tarta de zanahoria y choco blanco») caían a tres
+//                 y cuatro líneas y el índice se volvía ilegible.
+const ESTILOS_INDICE = {
+  libro: {
+    ancho: 'w-[260px]',
+    padding: 'py-8 px-6',
+    etiqueta: 'text-xs tracking-widest',
+    buscador: 'rounded-xl px-3 py-2 text-sm mb-4',
+    conteo: 'text-[10px] mb-6',
+    hueco: 'space-y-2',
+    sangria: 14,
+    fila: 'gap-2.5 rounded-xl px-2 py-1.5',
+    activo: 'bg-[#FF690B]/10',
+    reposo: 'hover:bg-[#3932C0]/5',
+    recorte: '',
+    icono: 'text-lg w-6',
+    texto: ['text-base font-bold', 'text-sm font-semibold', 'text-xs font-medium'],
+  },
+  recetario: {
+    ancho: 'w-[min(88vw,360px)]',
+    padding: 'py-7 px-5',
+    etiqueta: 'text-[11px] tracking-[0.2em]',
+    buscador: 'rounded-2xl px-4 py-2.5 text-[15px] mb-3',
+    conteo: 'text-xs mb-4',
+    hueco: 'space-y-1.5',
+    sangria: 10,
+    fila: 'gap-3 rounded-2xl px-3 py-2.5',
+    activo: 'bg-white shadow-sm ring-1 ring-[#FF690B]/25',
+    reposo: 'hover:bg-white/70',
+    recorte: 'line-clamp-2',
+    icono: 'text-xl w-7',
+    texto: ['text-[17px] font-bold', 'text-[15px] font-semibold', 'text-sm font-medium'],
+  },
+};
+
 export function BookIndexSidebar({
   isOpen,
   onClose,
@@ -344,7 +383,9 @@ export function BookIndexSidebar({
   placeholder = 'Buscar en este libro…',
   unidad = { singular: 'sección', plural: 'secciones' },
   vacio = <>Este libro no tiene<br />índice disponible.</>,
+  variante = 'libro',
 }) {
+  const estilo = ESTILOS_INDICE[variante] || ESTILOS_INDICE.libro;
   const flatItems = React.useMemo(() => {
     return flattenIndexTree(items);
   }, [items]);
@@ -395,13 +436,13 @@ export function BookIndexSidebar({
 
       {/* Drawer */}
       <div
-        className={`fixed top-[20px] right-[20px] h-[calc(100vh-40px)] w-[260px] bg-[#FFF6F0] rounded-[40px] shadow-2xl z-50 flex flex-col py-8 px-6 transform transition-transform duration-300 ease-in-out overflow-y-auto ${
+        className={`fixed top-[20px] right-[20px] h-[calc(100vh-40px)] ${estilo.ancho} bg-[#FFF6F0] rounded-[40px] shadow-2xl z-50 flex flex-col ${estilo.padding} transform transition-transform duration-300 ease-in-out overflow-y-auto ${
           isOpen ? 'translate-x-0' : 'translate-x-[calc(100%+20px)]'
         }`}
       >
         {/* Header: label + close button */}
         <div className="flex items-center justify-between mb-2">
-          <span className="text-xs font-bold text-[#3932C0] uppercase tracking-widest opacity-50">
+          <span className={`${estilo.etiqueta} font-bold text-[#3932C0] uppercase opacity-50`}>
             {etiqueta}
           </span>
           <button onClick={onClose} className="text-[#FF690B] hover:opacity-80 transition-opacity cursor-pointer">
@@ -419,13 +460,13 @@ export function BookIndexSidebar({
             onChange={(e) => setQuery(e.target.value)}
             placeholder={placeholder}
             aria-label={placeholder}
-            className="mb-4 w-full rounded-xl border border-[#3932C0]/15 bg-white px-3 py-2 text-sm text-[#3932C0] placeholder:text-[#3932C0]/40 focus:outline-none focus:border-[#FF690B] transition-colors"
+            className={`${estilo.buscador} w-full border border-[#3932C0]/15 bg-white text-[#3932C0] placeholder:text-[#3932C0]/40 focus:outline-none focus:border-[#FF690B] transition-colors`}
           />
         )}
 
         {/* Conteo de secciones */}
         {flatItems.length > 0 && (
-          <p className="text-[10px] text-[#3932C0]/40 mb-6">
+          <p className={`${estilo.conteo} text-[#3932C0]/40`}>
             {query.trim()
               ? `${filteredItems.length} de ${flatItems.length} ${flatItems.length === 1 ? unidad.singular : unidad.plural}`
               : `${flatItems.length} ${flatItems.length === 1 ? unidad.singular : unidad.plural}`}
@@ -451,34 +492,34 @@ export function BookIndexSidebar({
           </div>
         ) : (
           /* Lista de items con indentación jerárquica */
-          <div className="flex flex-col space-y-2">
+          <div className={`flex flex-col ${estilo.hueco}`}>
             {filteredItems.map((item, index) => {
               const isActive = activePage === item.page;
-              const indentStyle = { paddingLeft: `${item.level * 14}px` };
-              const fontSizeClass = item.level === 0
-                ? 'text-base font-bold'
-                : item.level === 1
-                  ? 'text-sm font-semibold'
-                  : 'text-xs font-medium';
+              const indentStyle = { paddingLeft: `${item.level * estilo.sangria}px` };
+              const fontSizeClass = estilo.texto[Math.min(item.level, estilo.texto.length - 1)];
               const colorClass = isActive
                 ? 'text-[#FF690B]'
                 : item.level === 0
                   ? 'text-[#3932C0] group-hover:text-[#FF690B]'
                   : 'text-[#3932C0]/70 group-hover:text-[#FF690B]';
+              // Las cabeceras de sección respiran un poco más en el recetario:
+              // sin ese aire, categorías y recetas se leen como una lista sola.
+              const aire =
+                variante === 'recetario' && item.level === 0 && index > 0 ? 'mt-3' : '';
 
               return (
                 <button
                   key={item.id || index}
                   onClick={() => onItemClick(item.page)}
                   style={indentStyle}
-                  className={`flex items-center gap-2.5 cursor-pointer group text-left w-full transition-all duration-150 hover:translate-x-0.5 rounded-xl px-2 py-1.5 ${
-                    isActive ? 'bg-[#FF690B]/10' : 'hover:bg-[#3932C0]/5'
+                  className={`flex items-center ${estilo.fila} ${aire} cursor-pointer group text-left w-full transition-all duration-150 hover:translate-x-0.5 ${
+                    isActive ? estilo.activo : estilo.reposo
                   }`}
                 >
-                  <span className="text-lg w-6 flex-shrink-0 flex items-center justify-center transition-transform group-hover:scale-110">
+                  <span className={`${estilo.icono} flex-shrink-0 flex items-center justify-center transition-transform group-hover:scale-110`}>
                     {item.icon}
                   </span>
-                  <span className={`transition-colors leading-snug flex-1 ${fontSizeClass} ${colorClass}`}>
+                  <span className={`transition-colors leading-snug flex-1 ${estilo.recorte} ${fontSizeClass} ${colorClass}`}>
                     {item.title}
                   </span>
                   {isActive && (

@@ -204,12 +204,17 @@ function RecetaPageContent({ params }) {
           </div>
         )}
 
-        <div className="relative w-full aspect-[4/3] sm:aspect-[16/9] rounded-3xl overflow-hidden bg-[#FFF6F0] mb-8 shadow-sm">
+        {/* La foto, VERTICAL (3:4) y centrada, no apaisada. Todas las del
+            libro son verticales: en un hueco 4:3 —y peor en 16:9— el plato
+            salía recortado por arriba y por abajo y perdía toda la fuerza que
+            tiene en la página impresa. Se le pone un ancho máximo para que en
+            escritorio no ocupe pantalla y media. */}
+        <div className="relative w-full max-w-[300px] sm:max-w-[380px] mx-auto aspect-[3/4] rounded-3xl overflow-hidden bg-[#FFF6F0] mb-8 shadow-sm">
           <Image
             src={getValidImageUrl(recipe.image)}
             alt={recipe.name || "Receta"}
             fill
-            sizes="(max-width: 640px) 100vw, 720px"
+            sizes="(max-width: 640px) 100vw, 380px"
             className="object-cover"
           />
         </div>

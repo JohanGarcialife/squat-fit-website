@@ -89,7 +89,9 @@ function Linea({ ingrediente, preferencias }) {
  *  · Con preferencias marcadas, la opción que encaja sube a principal.
  */
 export default function ListaIngredientes({ ingredientes }) {
-  const { preferencias } = usePreferenciasAlimentarias();
+  // `claves` = dietas + alérgenos del cliente, que es lo que el motor de
+  // sustituciones sabe casar (ver recetarioIngredientes.js).
+  const { claves } = usePreferenciasAlimentarias();
   const bloques = useMemo(() => bloquesDeIngredientes(ingredientes), [ingredientes]);
 
   return (
@@ -97,13 +99,16 @@ export default function ListaIngredientes({ ingredientes }) {
       {bloques.map((bloque, i) => (
         <div key={`${bloque.titulo || 'sin-bloque'}-${i}`}>
           {bloque.titulo && (
-            <h3 className="text-[#363C98] font-bold text-sm mb-2 pb-1 border-b border-slate-100">
+            /* En el libro estos subtítulos («Para la spicy:», «Para la
+               urban:») pesan tanto como el nombre de la sección; a text-sm
+               se perdían entre los ingredientes y había que buscarlos. */
+            <h3 className="text-[#363C98] font-bold text-base sm:text-lg mb-2.5 pb-1.5 border-b border-slate-100">
               {conDosPuntos(bloque.titulo)}
             </h3>
           )}
           <ul className="space-y-2.5">
             {bloque.items.map((ingrediente) => (
-              <Linea key={ingrediente.id} ingrediente={ingrediente} preferencias={preferencias} />
+              <Linea key={ingrediente.id} ingrediente={ingrediente} preferencias={claves} />
             ))}
           </ul>
         </div>
@@ -114,8 +119,8 @@ export default function ListaIngredientes({ ingredientes }) {
 
 /** Aviso de que las preferencias están cambiando lo que se ve. */
 export function AvisoPreferencias() {
-  const { preferencias } = usePreferenciasAlimentarias();
-  if (!preferencias.length) return null;
+  const { claves } = usePreferenciasAlimentarias();
+  if (!claves.length) return null;
   return (
     <p className="inline-flex items-center gap-1.5 text-xs font-bold text-[#FF690B] mb-3">
       <Replace className="w-3.5 h-3.5" /> Ajustado a tus preferencias

@@ -26,13 +26,30 @@ const APERTURA_SUSTITUCION = /^[oóu]\s+/i;
 const ETIQUETA_DIETA = /^(vegan[oa]?s?|vegetarian[oa]s?|celiac[oa]s?|sin gluten|sin lactosa|sin l[aá]cteos)\s*:\s*/i;
 
 // Palabras del propio libro que delatan a qué preferencia sirve una
-// sustitución. Deliberadamente conservador: si no hay señal clara, la
-// sustitución se enseña igual, solo que sin promocionarse a principal.
+// sustitución. Las claves son las de la base de datos alimentaria (dietas y
+// alérgenos, ver preferenciasAlimentarias.js): una misma sustitución puede
+// servir a varias —una bebida de avena vale para vegana, vegetariana, sin
+// lactosa y para quien evita la leche—. Deliberadamente conservador: si no
+// hay señal clara, la sustitución se enseña igual, solo que sin promocionarse
+// a ingrediente principal.
+//
+// Las dietas que el libro NO sabe sustituir (halal, kosher, baja en FODMAP,
+// keto, alta en proteína) y los alérgenos de los que no ofrece alternativa no
+// aparecen aquí a propósito: se guardan en el perfil del cliente, pero
+// inventarles una equivalencia sería peor que no tenerla.
+const VEGETAL = /\bvegan|vegetarian|vegg biogr|harina de garbanzos?|yogur vegetal|queso vegano|leche vegetal|bebida de avena|leche de almendras?|almendras 0%|\btofu\b|\bheura\b|levadura de queso|anacardos?|soja texturizada|seitan|tempeh/i;
+const SIN_LACTEOS = /sin lactosa|deslactosad|bebida de avena|leche de almendras?|yogur vegetal|queso vegano|leche vegetal|bebida vegetal/i;
+const SIN_GLUTEN = /sin gluten|celiac|sin trigo|harina de garbanzos?|maicena/i;
+const SIN_HUEVO = /sin huevo|vegg biogr|harina de garbanzos?/i;
+
 const PISTAS = {
-  vegano: /\bvegan|vegetarian|vegg biogr|harina de garbanzos?|yogur vegetal|queso vegano|leche vegetal|bebida de avena|leche de almendras?|almendras 0%|\btofu\b|\bheura\b|levadura de queso|anacardos?|soja\b/i,
-  sin_lactosa: /sin lactosa|deslactosad|bebida de avena|leche de almendras?|yogur vegetal|queso vegano|leche vegetal|bebida vegetal/i,
-  sin_gluten: /sin gluten|celiac|sin trigo|harina de garbanzos?|maicena/i,
-  sin_huevo: /sin huevo|vegg biogr|harina de garbanzos?/i,
+  vegana: VEGETAL,
+  vegetariana: VEGETAL,
+  sin_lactosa: SIN_LACTEOS,
+  leche: SIN_LACTEOS,
+  sin_gluten: SIN_GLUTEN,
+  gluten: SIN_GLUTEN,
+  huevo: SIN_HUEVO,
 };
 
 // Trocea una línea en sus paréntesis de primer nivel. No se usa una expresión
@@ -76,9 +93,18 @@ function limpia(t) {
 function preferenciasQueCubre(texto, etiqueta) {
   const cubre = new Set();
   if (etiqueta) {
-    if (/vegan|vegetarian/i.test(etiqueta)) cubre.add('vegano');
-    if (/celiac|gluten/i.test(etiqueta)) cubre.add('sin_gluten');
-    if (/lactosa|l[aá]cteos/i.test(etiqueta)) cubre.add('sin_lactosa');
+    if (/vegan|vegetarian/i.test(etiqueta)) {
+      cubre.add('vegana');
+      cubre.add('vegetariana');
+    }
+    if (/celiac|gluten/i.test(etiqueta)) {
+      cubre.add('sin_gluten');
+      cubre.add('gluten');
+    }
+    if (/lactosa|l[aá]cteos/i.test(etiqueta)) {
+      cubre.add('sin_lactosa');
+      cubre.add('leche');
+    }
   }
   for (const [clave, patron] of Object.entries(PISTAS)) {
     if (patron.test(texto)) cubre.add(clave);

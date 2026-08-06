@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { Clock, Flame, Users } from 'lucide-react';
+import { Beef, Clock, Flame, Users } from 'lucide-react';
 import FreeSampleBadge from '@/app/components/FreeSampleBadge';
 import { etiquetasDe } from '@/app/components/recetarioTaxonomia';
 
@@ -29,16 +29,34 @@ export function minutosTotales(receta) {
   return total > 0 ? `${total} min` : null;
 }
 
+// Proteínas por ración, tal cual las sirve el backend en `nutritional_value`
+// (número pelado casi siempre: "23", a veces "23 g"). Se enseña junto a las
+// kcal porque es el dato por el que se elige una receta en un programa de
+// fuerza, y hasta ahora había que entrar en la ficha para verlo.
+export function formatoProteinas(receta) {
+  const valor = receta?.nutritional_value?.proteins;
+  if (valor === null || valor === undefined) return null;
+  const texto = String(valor).trim();
+  if (!texto || texto === '0') return null;
+  return /^[\d.,]+$/.test(texto) ? `${texto} g prot.` : texto;
+}
+
 function Datos({ receta, className = '' }) {
   const kcal = formatoKcal(receta.kcal);
+  const proteinas = formatoProteinas(receta);
   const tiempo = minutosTotales(receta);
   const raciones = Number(receta.racion) > 0 ? Number(receta.racion) : null;
-  if (!kcal && !tiempo && !raciones) return null;
+  if (!kcal && !proteinas && !tiempo && !raciones) return null;
   return (
     <div className={`flex flex-wrap items-center gap-x-3 gap-y-1 text-xs font-bold ${className}`}>
       {kcal && (
         <span className="inline-flex items-center gap-1 text-[#FF690B]">
           <Flame className="w-3.5 h-3.5" /> {kcal}
+        </span>
+      )}
+      {proteinas && (
+        <span className="inline-flex items-center gap-1 text-[#3932C0]">
+          <Beef className="w-3.5 h-3.5" /> {proteinas}
         </span>
       )}
       {tiempo && (

@@ -23,6 +23,7 @@ import {
 } from "@/app/components/recetarioTaxonomia";
 import TarjetaReceta, { urlDeImagen } from "../_components/TarjetaReceta";
 import PreferenciasChips from "../_components/PreferenciasChips";
+import BienvenidaPreferencias from "../_components/BienvenidaPreferencias";
 
 const API = process.env.NEXT_PUBLIC_API_URL;
 
@@ -43,7 +44,10 @@ function MisRecetasContenido() {
   const [busqueda, setBusqueda] = useState("");
   const [categoria, setCategoria] = useState(parametros.get("categoria") || null);
   const [facetas, setFacetas] = useState([]);
-  const [vista, setVista] = useState("rejilla");
+  // La LISTA es la vista por defecto: con la foto al lado (vertical, como en
+  // el libro) se lee mejor el nombre y los datos de un vistazo, y caben más
+  // recetas en pantalla. La rejilla sigue a un clic.
+  const [vista, setVista] = useState("lista");
   const [indiceAbierto, setIndiceAbierto] = useState(false);
   const [seccionVisible, setSeccionVisible] = useState(null);
   const [libros, setLibros] = useState([]);
@@ -482,7 +486,10 @@ function MisRecetasContenido() {
         placeholder="Buscar en el índice…"
         unidad={{ singular: "entrada", plural: "entradas" }}
         vacio={<>No hay recetas que<br />encajen con los filtros.</>}
+        variante="recetario"
       />
+
+      <BienvenidaPreferencias />
     </div>
   );
 }
