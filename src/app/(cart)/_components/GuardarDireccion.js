@@ -68,8 +68,22 @@ export default function GuardarDireccion({ tipo, valores }) {
       };
 
   const nombre = [valores.firstName, valores.lastName].filter(Boolean).join(' ').trim();
-  const completa =
-    destino.linea1 && destino.codigo_postal && destino.ciudad && destino.pais && nombre;
+
+  // QUÉ falta exactamente, no «rellena la dirección completa».
+  //
+  // Esta casilla vive debajo del TÍTULO de su apartado, así que aparece ANTES
+  // de los campos que necesita: al abrirla están vacíos por fuerza. Con un
+  // aviso genérico, el cliente lo lee como «me falta algo dentro de esta caja»
+  // y se pone a buscar una casilla que no existe. Nombrando lo que falta, la
+  // frase apunta sola a los campos de abajo.
+  const faltan = [
+    !nombre && 'tu nombre',
+    !destino.linea1 && 'la dirección',
+    !destino.codigo_postal && 'el código postal',
+    !destino.ciudad && 'la ciudad',
+    !destino.pais && 'el país',
+  ].filter(Boolean);
+  const completa = faltan.length === 0;
   // «Otra» no es un nombre: es la puerta al campo libre. Si el cliente la elige
   // y no escribe nada, se guardaría una dirección llamada «Otra».
   const laEtiqueta = (etiqueta === 'Otra' ? personalizada.trim() : etiqueta) || '';
@@ -175,7 +189,7 @@ export default function GuardarDireccion({ tipo, valores }) {
               {!listo && (
                 <p className="text-xs text-slate-400">
                   {!completa
-                    ? 'Rellena antes el nombre y la dirección completa.'
+                    ? `Falta ${faltan.join(', ').replace(/, ([^,]*)$/, ' y $1')} más abajo.`
                     : 'Escribe un nombre para la dirección.'}
                 </p>
               )}
