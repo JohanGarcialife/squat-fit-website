@@ -15,7 +15,13 @@ function mensajeEnCastellano(bruto) {
   const t = typeof bruto === 'string' ? bruto.toLowerCase() : '';
   if (t.includes('already') && t.includes('activ')) return 'Esta cuenta ya estaba activada. Puedes entrar directamente.';
   if (t.includes('not found')) return 'No encontramos ninguna cuenta para este enlace.';
-  if (t.includes('expired') || t.includes('invalid')) return 'Este enlace ya no sirve: o ha caducado o ya se usó una vez.';
+  // Desde el arreglo del escáner de enlaces (6-ago), un enlace ya usado NO
+  // llega aquí: responde bien y la página lo trata como éxito. Si se cae en
+  // este mensaje es porque el enlace ha caducado de verdad, o porque no
+  // existe. Decir «o ya se usó una vez» mandaba a la gente a buscar una
+  // explicación que ya no es la suya.
+  if (t.includes('expired') || t.includes('invalid'))
+    return 'Ha caducado. Los enlaces de activación duran 4 días.';
   return 'Este enlace de activación no ha funcionado.';
 }
 
@@ -277,9 +283,13 @@ function ActivateContent() {
           <div className="flex flex-col gap-3">
             <h2 className="text-3xl font-bold text-red-600">Este enlace ya no vale</h2>
             <p className="text-gray-600 text-lg font-medium">{message}</p>
+            {/* Antes ponía «solo se pueden usar una vez» —ya no es verdad para
+                abrir el enlace: desde el arreglo del 6-ago, abrirlo dos veces
+                no lo gasta— y «te mandamos otro ahora mismo», que tampoco:
+                hay que pulsar el botón. Prometer algo que no ha pasado deja a
+                la gente esperando un correo que nadie ha enviado. */}
             <p className="text-gray-400 text-sm">
-              Los enlaces de activación duran 4 días y solo se pueden usar una vez.
-              No pasa nada: te mandamos otro ahora mismo.
+              No pasa nada: pídenos otro aquí abajo y te llega al momento.
             </p>
           </div>
 
