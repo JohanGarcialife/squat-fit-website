@@ -341,9 +341,18 @@ function ActivateContent() {
             </form>
           )}
 
-          <div className="w-full flex flex-col gap-3">
-            <Link href="/forgot-password" className="w-full cursor-pointer bg-gray-100 text-gray-700 rounded-3xl p-4 text-base font-semibold hover:bg-gray-200 transition duration-300 block">
-              Mi cuenta ya estaba activada · Crear o recuperar contraseña
+          {/* El botón decía «Mi cuenta ya estaba activada · Crear o recuperar
+              contraseña» y ocupaba dos líneas: la mitad de ese texto es la
+              CONDICIÓN («si tu cuenta ya estaba activada») y la otra mitad la
+              acción. La condición sale fuera, como pregunta, y dentro se queda
+              solo lo que se va a hacer al pulsar. */}
+          <div className="w-full flex flex-col items-center gap-2">
+            <p className="text-sm text-gray-500">¿Tu cuenta ya estaba activada?</p>
+            <Link
+              href="/forgot-password"
+              className="w-full cursor-pointer bg-gray-100 text-gray-700 rounded-3xl p-4 text-base font-semibold hover:bg-gray-200 transition duration-300 block"
+            >
+              Crear o recuperar contraseña
             </Link>
           </div>
         </>
