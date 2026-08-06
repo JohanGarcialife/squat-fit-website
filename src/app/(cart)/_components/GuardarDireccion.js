@@ -99,7 +99,10 @@ export function useGuardarDireccion(tipo) {
   };
 
   const guardar = async () => {
-    const { destino, nombre, laEtiqueta } = calcular(valoresRef.current);
+    // `valores` ya no existe en este ámbito desde que el cálculo se movió a
+    // `calcular()`: el teléfono se saca de aquí, del mismo sitio que el resto.
+    const valoresActuales = valoresRef.current || {};
+    const { destino, nombre, laEtiqueta } = calcular(valoresActuales);
     setEstado('guardando');
     setMensaje(null);
     try {
@@ -114,7 +117,7 @@ export function useGuardarDireccion(tipo) {
           codigo_postal: destino.codigo_postal,
           ciudad: destino.ciudad,
           pais: String(destino.pais).toUpperCase().slice(0, 2),
-          ...(valores.phone ? { telefono: valores.phone } : {}),
+          ...(valoresActuales.phone ? { telefono: valoresActuales.phone } : {}),
           // Cada bloque marca lo suyo, sin preguntar.
           predeterminada_envio: esEnvio,
           predeterminada_facturacion: !esEnvio,
