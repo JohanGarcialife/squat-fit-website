@@ -40,6 +40,7 @@ import {
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import AccessNotice from '@/app/components/AccessNotice';
+import PhotoCropModal from '@/app/components/PhotoCropModal';
 
 const API = 'https://squatfit-api-cyrc2g3zra-no.a.run.app';
 
@@ -334,6 +335,10 @@ const MAX_FOTO_MB = 5;
 
 const AvatarPicker = ({ url, preview, onPick, onClear, nombre }) => {
   const inputRef = useRef(null);
+  // La foto elegida pasa primero por el recorte: el avatar es un círculo y una
+  // foto de cuerpo entero encajada con `object-cover` enseña el ombligo, no la
+  // cara. Aquí decide la persona qué parte se ve.
+  const [aRecortar, setARecortar] = useState(null);
   const src = preview || url || '';
   const iniciales = (nombre || '')
     .split(' ')
@@ -357,11 +362,19 @@ const AvatarPicker = ({ url, preview, onPick, onClear, nombre }) => {
       toast.error(`La imagen no puede pasar de ${MAX_FOTO_MB} MB.`);
       return;
     }
-    onPick(file);
+    setARecortar(file);
   };
 
   return (
     <div className="flex items-center gap-4 sm:gap-5">
+      <PhotoCropModal
+        file={aRecortar}
+        onCancel={() => setARecortar(null)}
+        onConfirm={(recortada) => {
+          setARecortar(null);
+          onPick(recortada);
+        }}
+      />
       <div className="relative shrink-0">
         <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full overflow-hidden bg-[#363C98] flex items-center justify-center">
           {src ? (
@@ -408,7 +421,9 @@ const AvatarPicker = ({ url, preview, onPick, onClear, nombre }) => {
             Descartar
           </button>
         )}
-        <p className="text-slate-400 text-xs mt-1">JPG o PNG, hasta {MAX_FOTO_MB} MB.</p>
+        <p className="text-slate-400 text-xs mt-1">
+          JPG o PNG, hasta {MAX_FOTO_MB} MB. Podrás encuadrarla antes de guardar.
+        </p>
       </div>
     </div>
   );
