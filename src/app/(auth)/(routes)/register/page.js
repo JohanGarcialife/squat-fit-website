@@ -10,6 +10,7 @@ import { Eye, EyeOff, Check } from 'lucide-react';
 import GdprCheckbox from '@/app/components/GdprCheckbox';
 import { normalizeName } from '@/app/components/nameUtils';
 import { enviarFormSubmit } from '@/app/components/ga4Formularios';
+import { PasswordChecklist, cumpleReglas } from '@/app/components/passwordRules';
 
 function RegisterContent() {
   const router = useRouter();
@@ -28,21 +29,17 @@ function RegisterContent() {
     confirmPassword: '',
   };
 
-  // Requisitos de la contraseña (mismos que muestra la lista en vivo)
-  const PASSWORD_RULES = [
-    { label: 'Al menos 8 caracteres', test: (v) => v.length >= 8 },
-    { label: '1 letra mayúscula', test: (v) => /[A-Z]/.test(v) },
-    { label: '1 letra minúscula', test: (v) => /[a-z]/.test(v) },
-    { label: '1 número', test: (v) => /[0-9]/.test(v) },
-    { label: '1 carácter especial', test: (v) => /[^A-Za-z0-9]/.test(v) },
-  ];
+  // Los requisitos ya no viven aquí: son los mismos en las tres pantallas donde
+  // se elige contraseña (registro, activar cuenta y cambiarla en el perfil), y
+  // tenerlos escritos tres veces era la forma de que un día dejaran de serlo.
+  // Ver `@/app/components/passwordRules`.
 
   const validationSchema = Yup.object({
     username: Yup.string().required('El nombre es obligatorio'),
     email: Yup.string().email('El formato del email no es válido').required('El email es obligatorio'),
     password: Yup.string()
       .required('La contraseña es obligatoria')
-      .test('reglas', 'La contraseña no cumple los requisitos', (v = '') => PASSWORD_RULES.every((r) => r.test(v))),
+      .test('reglas', 'La contraseña no cumple los requisitos', (v = '') => cumpleReglas(v)),
     confirmPassword: Yup.string()
       .oneOf([Yup.ref('password'), null], 'Las contraseñas deben coincidir')
       .required('Confirmar la contraseña es obligatorio'),
@@ -142,20 +139,9 @@ function RegisterContent() {
                       {isPasswordVisible ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                     </button>
                   </div>
-                  {/* Lista de requisitos en vivo: aparece al empezar a escribir */}
-                  {values.password.length > 0 && (
-                    <ul className="mt-2 space-y-1">
-                      {PASSWORD_RULES.map((rule) => {
-                        const ok = rule.test(values.password);
-                        return (
-                          <li key={rule.label} className={`flex items-center gap-2 text-sm transition-colors duration-200 ${ok ? 'text-green-200' : 'text-white/70'}`}>
-                            <span className="w-4 text-center font-bold">{ok ? '✓' : '✕'}</span>
-                            <span>{rule.label}</span>
-                          </li>
-                        );
-                      })}
-                    </ul>
-                  )}
+                  {/* Lista de requisitos en vivo: aparece al empezar a escribir.
+                      Mismo componente que usan «activar cuenta» y el perfil. */}
+                  <PasswordChecklist value={values.password} tono="oscuro" />
                 </div>
                 <div>
                   {(() => {
