@@ -117,10 +117,28 @@ export function evaluarSequra(cart, total, divisa, datos) {
   return { aplica: true };
 }
 
-export default function PagoSequra({ cart, total, formData, onError, onAbrir }) {
+export default function PagoSequra({ cart, total, formData, onError, onAbrir, abierto }) {
   const [estado, setEstado] = useState('inicial'); // inicial | cargando | listo | error
   const [urlForm, setUrlForm] = useState(null);
   const [mensaje, setMensaje] = useState(null);
+
+  /**
+   * Al elegir «Paga Fraccionado» el formulario se pide SOLO.
+   *
+   * Antes había un paso de más: elegías el método y aparecía un botón
+   * «Continuar con Paga Fraccionado» que era el que de verdad lo cargaba. Dos
+   * clics para una sola decisión, y con la caja de Stripe abriéndose de un
+   * clic al lado — así que la opción de plazos parecía la que costaba más.
+   *
+   * Se pide una sola vez: `estado === 'inicial'` corta los reintentos al
+   * plegar y desplegar, que crearían un pedido nuevo en seQura cada vez.
+   */
+  useEffect(() => {
+    if (abierto && estado === 'inicial') empezar();
+    // `empezar` se recrea en cada render y meterlo en las dependencias
+    // dispararía el efecto en bucle.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [abierto, estado]);
 
   const empezar = async () => {
     // Se avisa ANTES de pedir nada: el acordeón pliega el pago con tarjeta en
@@ -190,28 +208,28 @@ export default function PagoSequra({ cart, total, formData, onError, onAbrir }) 
     );
   }
 
-  return (
-    <div className="w-full">
-      {/* Relleno y con el mismo radio que el «Pagar» de Stripe (`rounded-lg`,
-          8px, que es el preset «redondeado» de su apariencia): las dos
-          pasarelas se ofrecen como iguales, y una de las dos con menos peso
-          visual se leía como «la opción rara».
+  // Mientras seQura prepara su formulario: un aviso, no un botón. El botón
+  // «Continuar con Paga Fraccionado» era un paso de más — elegir el método ya
+  // ES la decisión, y al lado la caja de Stripe se abría de un solo clic.
+  if (estado === 'error') {
+    return (
+      <div className="w-full rounded-xl border border-[#F3C9C2] bg-[#FDF3F1] p-4">
+        <p className="text-sm text-[#B4230E]">{mensaje}</p>
+        <button
+          type="button"
+          onClick={empezar}
+          className="mt-3 rounded-lg px-4 py-2 text-sm font-semibold text-white cursor-pointer hover:brightness-110"
+          style={{ backgroundColor: SEQURA_VERDE_TEXTO }}
+        >
+          Reintentar
+        </button>
+      </div>
+    );
+  }
 
-          El texto va en blanco sobre SEQURA_VERDE_TEXTO, no sobre su verde
-          exacto: `#00C2A3` con texto blanco da 2,1:1 de contraste y no se lee.
-          El tono es el mismo, solo oscurecido lo justo para pasar de 4,5:1. */}
-      <button
-        type="button"
-        onClick={empezar}
-        disabled={estado === 'cargando'}
-        style={{ backgroundColor: SEQURA_VERDE_TEXTO }}
-        className="block w-full rounded-lg py-3 font-semibold text-white hover:brightness-110 active:scale-[0.99] transition-all cursor-pointer disabled:opacity-60"
-      >
-        {estado === 'cargando' ? 'Preparando…' : 'Continuar con Paga Fraccionado'}
-      </button>
-      {mensaje && (
-        <p className="text-sm text-[#B4230E] mt-3 text-center">{mensaje}</p>
-      )}
+  return (
+    <div className="w-full rounded-xl border border-indigo-100 p-6 text-center">
+      <p className="text-sm text-slate-500">Preparando el pago a plazos…</p>
     </div>
   );
 }

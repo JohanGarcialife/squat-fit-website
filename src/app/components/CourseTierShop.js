@@ -17,7 +17,7 @@ export default function CourseTierShop({ highlight }) {
   if (groups === null) {
     return (
       <div className="w-full flex justify-center py-16">
-        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#3932C0]" />
+        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#363C98]" />
       </div>
     );
   }

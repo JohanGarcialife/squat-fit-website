@@ -12,7 +12,7 @@ import esPhone from 'react-phone-input-2/lang/es.json';
 import { getData as getCountryData } from 'country-list';
 import { useCartStore } from '@/stores/cart.store';
 import SaveCardCheckbox from './SaveCardCheckbox';
-import Casilla from './Casilla';
+import Interruptor from './Interruptor';
 import CabeceraPaso from './CabeceraPaso';
 import GuardarDireccion from './GuardarDireccion';
 
@@ -275,6 +275,11 @@ export default function CheckoutForm({ setStep, onValidationChange, submitRef, s
                     ahí la de casa, con lo que la factura salía mal. */}
                 <section className="space-y-4">
                   <SectionHeading n={2} title="Dirección de facturación" />
+                  {/* El «guardar» va pegado a SU título, no al final del
+                      bloque. Al final quedaba a un dedo del de envío y del
+                      interruptor, y tres controles seguidos que dicen cosas
+                      parecidas no se distinguen: había que leerlos. */}
+                  <GuardarDireccion tipo="facturacion" valores={values} />
                   <InputField label="Dirección" name="address" placeholder="Calle Mayor, 12" autoComplete="address-line1" />
                   <InputField label="Piso / puerta (opcional)" name="apartment" placeholder="3º B" autoComplete="address-line2" />
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -303,23 +308,28 @@ export default function CheckoutForm({ setStep, onValidationChange, submitRef, s
                     </div>
                     <ErrorMessage name="country" component="div" className="text-red-500 text-sm" />
                   </div>
-                  {/* Misma casilla que el resto del carrito (Casilla.js). Antes
-                      esto era un círculo naranja dibujado a mano y la de guardar
-                      la tarjeta era la nativa del sistema: dos formas y dos
-                      colores en la misma pantalla de pago. */}
-                  <Casilla
+                  {/* INTERRUPTOR, no casilla, y a propósito.
+                      Esto decide A DÓNDE VA EL PAQUETE. Estaba a dos dedos del
+                      «guardar esta dirección», con la misma casilla cuadrada y
+                      el mismo tamaño de letra: dos controles idénticos y
+                      pegados que hacen cosas muy distintas. Un interruptor se
+                      lee de un vistazo como «activado / desactivado», que es
+                      justo lo que es, y deja de parecerse al de al lado. */}
+                  <Interruptor
                     id="misma-direccion"
                     checked={sameAddress}
                     onChange={setSameAddress}
-                    className="pt-1"
-                  >
-                    <span className="text-slate-600 text-sm">Usar la misma dirección para el envío</span>
-                  </Casilla>
+                    titulo="Enviar a esta misma dirección"
+                    descripcion={
+                      sameAddress
+                        ? 'El paquete irá a la dirección de facturación.'
+                        : 'Escribe abajo a dónde quieres que llegue el paquete.'
+                    }
+                  />
 
                   {/* Guardar la de FACTURACIÓN. Queda predeterminada de
                       facturación sin preguntar: es lo que dice el bloque en el
                       que está. */}
-                  <GuardarDireccion tipo="facturacion" valores={values} />
 
                   {/* Dirección de envío distinta.
                       Hasta el 5-ago esta casilla NO HACÍA NADA: `sameAddress`
@@ -338,6 +348,7 @@ export default function CheckoutForm({ setStep, onValidationChange, submitRef, s
                           fueran dos direcciones distintas de la misma
                           jerarquía. */}
                       <h3 className="text-indigo-900 font-bold">Dirección de envío</h3>
+                      <GuardarDireccion tipo="envio" valores={values} />
                       <InputField label="Dirección" name="shippingAddress" placeholder="Calle Mayor, 12" autoComplete="shipping address-line1" />
                       <InputField label="Piso / puerta (opcional)" name="shippingApartment" placeholder="3º B" autoComplete="shipping address-line2" />
                       <div className="grid grid-cols-2 gap-4">
@@ -364,9 +375,6 @@ export default function CheckoutForm({ setStep, onValidationChange, submitRef, s
                         <ErrorMessage name="shippingCountry" component="div" className="text-red-700 text-[13px] ml-1" />
                       </div>
 
-                      {/* Guardar la de ENVÍO, dentro de su propio recuadro y
-                          predeterminada de envío. */}
-                      <GuardarDireccion tipo="envio" valores={values} />
                     </div>
                   )}
 

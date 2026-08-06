@@ -8,6 +8,11 @@
   --color-background: #ffffff;
   --color-primary: #FF690B;
   --color-secondary: #363C98;
+  /* Azul claro de marca. Es un color de FONDO, no de letra: sobre blanco da
+     1,72:1 de contraste y el mínimo legible es 4,5:1. El azul oscuro de marca
+     ENCIMA de él sí se lee (5,42:1), así que la pareja funciona como chip,
+     relleno o resalte — nunca como color de texto sobre blanco. */
+  --color-marca-claro: #C2C0FC;
   --color-gris: #d5d5d5;
   --font-sans: var(--font-inter);
   

@@ -15,14 +15,14 @@ import { trackRecipeEvent } from '@/app/components/recipeMetrics'
 
 // --- Icon Components ---
 const TelegramIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#3932C0" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="icon icon-tabler icons-tabler-outline icon-tabler-brand-telegram">
+  <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#363C98" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="icon icon-tabler icons-tabler-outline icon-tabler-brand-telegram">
     <path stroke="none" d="M0 0h24v24H0z" fill="none" />
     <path d="M15 10l-4 4l6 6l4 -16l-18 7l4 2l2 6l3 -4" />
   </svg>
 )
 
 const BellIcon = ({ filled }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill={filled ? "#FF690B" : "none"} stroke={filled ? "none" : "#3932C0"} strokeWidth={filled ? "0" : "2"} strokeLinecap="round" strokeLinejoin="round">
+  <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill={filled ? "#FF690B" : "none"} stroke={filled ? "none" : "#363C98"} strokeWidth={filled ? "0" : "2"} strokeLinecap="round" strokeLinejoin="round">
     <path stroke="none" d="M0 0h24v24H0z" fill="none" />
     {filled ? (
         <>
@@ -39,7 +39,7 @@ const BellIcon = ({ filled }) => (
 )
 
 const UserIcon = ({ filled }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill={filled ? "#FF690B" : "none"} stroke={filled ? "none" : "#3932C0"} strokeWidth={filled ? "0" : "2"} strokeLinecap="round" strokeLinejoin="round">
+  <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill={filled ? "#FF690B" : "none"} stroke={filled ? "none" : "#363C98"} strokeWidth={filled ? "0" : "2"} strokeLinecap="round" strokeLinejoin="round">
     <path stroke="none" d="M0 0h24v24H0z" fill="none" />
     {filled ? (
         <>
@@ -56,7 +56,7 @@ const UserIcon = ({ filled }) => (
 )
 
 const MessageIcon = ({ filled }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill={filled ? "#FF690B" : "none"} stroke={filled ? "none" : "#3932C0"} strokeWidth={filled ? "0" : "2"} strokeLinecap="round" strokeLinejoin="round">
+  <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill={filled ? "#FF690B" : "none"} stroke={filled ? "none" : "#363C98"} strokeWidth={filled ? "0" : "2"} strokeLinecap="round" strokeLinejoin="round">
     <path stroke="none" d="M0 0h24v24H0z" fill="none" />
     {filled ? (
         <path d="M5.821 4.91c3.899 -2.765 9.468 -2.539 13.073 .535c3.667 3.129 4.168 8.238 1.152 11.898c-2.841 3.447 -7.965 4.583 -12.231 2.805l-.233 -.101l-4.374 .931l-.04 .006l-.035 .007h-.018l-.022 .005h-.038l-.033 .004l-.021 -.001l-.023 .001l-.033 -.003h-.035l-.022 -.004l-.022 -.002l-.035 -.007l-.034 -.005l-.016 -.004l-.024 -.005l-.049 -.016l-.024 -.005l-.011 -.005l-.022 -.007l-.045 -.02l-.03 -.012l-.011 -.006l-.014 -.006l-.031 -.018l-.045 -.024l-.016 -.011l-.037 -.026l-.04 -.027l-.002 -.004l-.013 -.009l-.043 -.04l-.025 -.02l-.006 -.007l-.056 -.062l-.013 -.014l-.011 -.014l-.039 -.056l-.014 -.019l-.005 -.01l-.042 -.073l-.007 -.012l-.004 -.008l-.007 -.012l-.014 -.038l-.02 -.042l-.004 -.016l-.004 -.01l-.017 -.061l-.007 -.018l-.002 -.015l-.005 -.019l-.005 -.033l-.008 -.042l-.002 -.031l-.003 -.01v-.016l-.004 -.054l.001 -.036l.001 -.023l.002 -.053l.004 -.025v-.019l.008 -.035l.005 -.034l.005 -.02l.004 -.02l.018 -.06l.003 -.013l1.15 -3.45l-.022 -.037c-2.21 -3.747 -1.209 -8.391 2.413 -11.119z" />
@@ -67,7 +67,7 @@ const MessageIcon = ({ filled }) => (
 )
 
 const InfoIcon = ({ filled }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill={filled ? "#FF690B" : "none"} stroke={filled ? "none" : "#3932C0"} strokeWidth={filled ? "0" : "2"} strokeLinecap="round" strokeLinejoin="round">
+  <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill={filled ? "#FF690B" : "none"} stroke={filled ? "none" : "#363C98"} strokeWidth={filled ? "0" : "2"} strokeLinecap="round" strokeLinejoin="round">
     <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
     {filled ? (
         <path d="M12 2c5.523 0 10 4.477 10 10s-4.477 10 -10 10s-10 -4.477 -10 -10s4.477 -10 10 -10zm0 9h-1l-.117 .007a1 1 0 0 0 0 1.986l.117 .007v3l.007 .117a1 1 0 0 0 .876 .876l.117 .007h1l.117 -.007a1 1 0 0 0 .876 -.876l.007 -.117l-.007 -.117a1 1 0 0 0 -.764 -.857l-.112 -.02l-.117 -.006v-3l-.007 -.117a1 1 0 0 0 -.876 -.876l-.117 -.007zm.01 -3l-.127 .007a1 1 0 0 0 0 1.986l.117 .007l.127 -.007a1 1 0 0 0 0 -1.986l-.117 -.007z" />
@@ -190,7 +190,7 @@ export default function Sidebar() {
           const Content = (
             <div data-tour={item.tour} className="flex items-center space-x-3 cursor-pointer group" onClick={() => handleItemClick(item.id)}>
               <div className="transition-transform group-hover:scale-110"><item.Icon filled={isActive} /></div>
-              <span className={`text-lg transition-colors ${isActive ? 'font-bold text-[#FF690B]' : 'text-[#3932C0] group-hover:text-[#FF690B]'}`}>{item.label}</span>
+              <span className={`text-lg transition-colors ${isActive ? 'font-bold text-[#FF690B]' : 'text-[#363C98] group-hover:text-[#FF690B]'}`}>{item.label}</span>
             </div>
           )
           return item.href ? (<Link key={item.id} href={item.href} className="no-underline" onClick={onNavigate}>{Content}</Link>) : (<div key={item.id}>{Content}</div>)
@@ -204,7 +204,7 @@ export default function Sidebar() {
           const Content = (
             <div data-tour={item.tour} className="flex items-center space-x-3 cursor-pointer group" onClick={() => handleItemClick(item.id)}>
               <div className="transition-transform group-hover:scale-110"><item.Icon filled={isActive} /></div>
-              <span className={`text-lg transition-colors ${isActive ? 'font-bold text-[#FF690B]' : 'text-[#3932C0] group-hover:text-[#FF690B]'}`}>{item.label}</span>
+              <span className={`text-lg transition-colors ${isActive ? 'font-bold text-[#FF690B]' : 'text-[#363C98] group-hover:text-[#FF690B]'}`}>{item.label}</span>
             </div>
           )
           return item.href
@@ -225,7 +225,7 @@ export default function Sidebar() {
           type="button"
           onClick={() => setMobileOpen(true)}
           aria-label="Abrir menú"
-          className="p-2 text-[#3932C0] hover:text-[#FF690B] transition-colors cursor-pointer"
+          className="p-2 text-[#363C98] hover:text-[#FF690B] transition-colors cursor-pointer"
         >
           <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
             <path d="M4 6h16M4 12h16M4 18h16" />
@@ -351,7 +351,7 @@ const ESTILOS_INDICE = {
     sangria: 14,
     fila: 'gap-2.5 rounded-xl px-2 py-1.5',
     activo: 'bg-[#FF690B]/10',
-    reposo: 'hover:bg-[#3932C0]/5',
+    reposo: 'hover:bg-[#363C98]/5',
     recorte: '',
     icono: 'text-lg w-6',
     texto: ['text-base font-bold', 'text-sm font-semibold', 'text-xs font-medium'],
@@ -442,7 +442,7 @@ export function BookIndexSidebar({
       >
         {/* Header: label + close button */}
         <div className="flex items-center justify-between mb-2">
-          <span className={`${estilo.etiqueta} font-bold text-[#3932C0] uppercase opacity-50`}>
+          <span className={`${estilo.etiqueta} font-bold text-[#363C98] uppercase opacity-50`}>
             {etiqueta}
           </span>
           <button onClick={onClose} className="text-[#FF690B] hover:opacity-80 transition-opacity cursor-pointer">
@@ -460,13 +460,13 @@ export function BookIndexSidebar({
             onChange={(e) => setQuery(e.target.value)}
             placeholder={placeholder}
             aria-label={placeholder}
-            className={`${estilo.buscador} w-full border border-[#3932C0]/15 bg-white text-[#3932C0] placeholder:text-[#3932C0]/40 focus:outline-none focus:border-[#FF690B] transition-colors`}
+            className={`${estilo.buscador} w-full border border-[#363C98]/15 bg-white text-[#363C98] placeholder:text-[#363C98]/40 focus:outline-none focus:border-[#FF690B] transition-colors`}
           />
         )}
 
         {/* Conteo de secciones */}
         {flatItems.length > 0 && (
-          <p className={`${estilo.conteo} text-[#3932C0]/40`}>
+          <p className={`${estilo.conteo} text-[#363C98]/40`}>
             {query.trim()
               ? `${filteredItems.length} de ${flatItems.length} ${flatItems.length === 1 ? unidad.singular : unidad.plural}`
               : `${flatItems.length} ${flatItems.length === 1 ? unidad.singular : unidad.plural}`}
@@ -478,7 +478,7 @@ export function BookIndexSidebar({
           /* Estado vacío cuando no hay índices */
           <div className="flex flex-col items-center justify-center flex-1 gap-3 text-center py-8">
             <span className="text-4xl">📖</span>
-            <p className="text-[#3932C0]/50 text-sm font-medium leading-relaxed">
+            <p className="text-[#363C98]/50 text-sm font-medium leading-relaxed">
               {vacio}
             </p>
           </div>
@@ -486,7 +486,7 @@ export function BookIndexSidebar({
           /* Búsqueda sin resultados */
           <div className="flex flex-col items-center justify-center flex-1 gap-3 text-center py-8">
             <span className="text-4xl">🔍</span>
-            <p className="text-[#3932C0]/50 text-sm font-medium leading-relaxed">
+            <p className="text-[#363C98]/50 text-sm font-medium leading-relaxed">
               Nada con «{query.trim()}».
             </p>
           </div>
@@ -500,8 +500,8 @@ export function BookIndexSidebar({
               const colorClass = isActive
                 ? 'text-[#FF690B]'
                 : item.level === 0
-                  ? 'text-[#3932C0] group-hover:text-[#FF690B]'
-                  : 'text-[#3932C0]/70 group-hover:text-[#FF690B]';
+                  ? 'text-[#363C98] group-hover:text-[#FF690B]'
+                  : 'text-[#363C98]/70 group-hover:text-[#FF690B]';
               // Las cabeceras de sección respiran un poco más en el recetario:
               // sin ese aire, categorías y recetas se leen como una lista sola.
               const aire =

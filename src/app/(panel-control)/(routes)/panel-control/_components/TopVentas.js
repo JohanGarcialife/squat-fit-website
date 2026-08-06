@@ -110,7 +110,7 @@ const CarouselSection = ({ title, items, variant = 'default', onItemClick }) => 
 
   return (
     <div className="mb-16">
-      <h2 className="text-[#3932C0] font-bold text-3xl mb-8">{title}</h2>
+      <h2 className="text-[#363C98] font-bold text-3xl mb-8">{title}</h2>
       <div className="slider-container relative max-w-full mx-auto px-2">
         <Slider {...settings}>
           {items.map((item) => (
@@ -128,7 +128,7 @@ const CarouselSection = ({ title, items, variant = 'default', onItemClick }) => 
                         </div>
                         <div className="text-center p-6 flex-grow flex flex-col justify-center">
                             <p className="text-[#FF690B] font-bold text-xl mb-1">{item.title}</p>
-                            <p className="text-[#3932C0] text-lg font-medium">{item.subtitle}</p>
+                            <p className="text-[#363C98] text-lg font-medium">{item.subtitle}</p>
                         </div>
                     </div>
                     {/* Progress Bar Outside Card */}
@@ -150,7 +150,7 @@ const CarouselSection = ({ title, items, variant = 'default', onItemClick }) => 
                     </div>
                     <div className="text-center p-6 flex-grow flex flex-col justify-center">
                         <p className="text-[#FF690B] font-bold text-xl mb-1">{item.title}</p>
-                        <p className="text-[#3932C0] text-lg font-medium">{item.subtitle}</p>
+                        <p className="text-[#363C98] text-lg font-medium">{item.subtitle}</p>
                     </div>
                 </div>
               )}
@@ -207,7 +207,7 @@ export default function TopVentas({ courses = [], userCourses = [] }) {
         */}
         <div className="flex-grow"></div> {/* Spacer */}
         <div className="flex items-center space-x-6">
-             <div onClick={() => setIsModalOpen(true)} title="Cerrar sesión" className="cursor-pointer text-[#3932C0] hover:text-[#FF690B] transition-colors">
+             <div onClick={() => setIsModalOpen(true)} title="Cerrar sesión" className="cursor-pointer text-[#363C98] hover:text-[#FF690B] transition-colors">
                 <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
                     <path d="M14 8v-2a2 2 0 0 0 -2 -2h-7a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h7a2 2 0 0 0 2 -2v-2" />
@@ -219,7 +219,7 @@ export default function TopVentas({ courses = [], userCourses = [] }) {
               {/* Cart Icon */}
              <div
                onClick={openCart}
-               className="relative cursor-pointer text-[#3932C0] hover:text-[#FF690B] transition-colors"
+               className="relative cursor-pointer text-[#363C98] hover:text-[#FF690B] transition-colors"
              >
                 <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="icon icon-tabler icons-tabler-outline icon-tabler-shopping-cart">
                     <path stroke="none" d="M0 0h24v24H0z" fill="none" />

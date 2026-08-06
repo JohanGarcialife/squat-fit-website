@@ -58,7 +58,7 @@ function BenefitRow({ benefit, index }) {
 export default function HowItWorks() {
   return (
     <div className='w-full py-16 sm:py-20 px-4 flex flex-col items-center bg-white'>
-      <h2 className='text-[#3932C0] text-[34px] leading-[1.1] md:text-5xl font-bold text-center mb-4 max-w-[320px] md:max-w-none mx-auto'>
+      <h2 className='text-[#363C98] text-[34px] leading-[1.1] md:text-5xl font-bold text-center mb-4 max-w-[320px] md:max-w-none mx-auto'>
         ¿Cómo funciona <br className="md:hidden" /> el programa?
       </h2>
       <p className='text-slate-500 text-lg text-center mb-12 max-w-xl mx-auto'>

@@ -285,8 +285,8 @@ export default function BookReaderPage({ params, searchParams }) {
     return (
       <div className="w-full min-h-screen bg-transparent flex items-center justify-center pt-8 pl-8 pr-12 pb-12">
         <div className="flex flex-col items-center gap-4">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#3932C0]"></div>
-          <p className="text-[#3932C0] font-semibold text-lg">Cargando lector...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#363C98]"></div>
+          <p className="text-[#363C98] font-semibold text-lg">Cargando lector...</p>
         </div>
       </div>
     );
@@ -302,7 +302,7 @@ export default function BookReaderPage({ params, searchParams }) {
     return (
       <div className="w-full min-h-screen bg-[#F8F9FC] flex flex-col p-6 md:p-10 pb-16 animate-in fade-in duration-300">
         <div className="w-full max-w-5xl mx-auto">
-          <Link href="/panel-cocina" className="flex items-center gap-3 text-[#3932C0] hover:opacity-80 transition-opacity cursor-pointer mb-6">
+          <Link href="/panel-cocina" className="flex items-center gap-3 text-[#363C98] hover:opacity-80 transition-opacity cursor-pointer mb-6">
             <ChevronLeft className="w-8 h-8" strokeWidth={2.5} />
             <h1 className="text-3xl font-bold">
               {bookTitle}
@@ -387,16 +387,16 @@ export default function BookReaderPage({ params, searchParams }) {
     return (
       <div className="w-full min-h-screen bg-transparent flex flex-col pt-8 pl-8 pr-12 pb-12">
         <div className="w-full flex items-center mb-6">
-          <Link href="/panel-cocina" className="flex items-center gap-3 text-[#3932C0] hover:opacity-80 transition-opacity cursor-pointer">
+          <Link href="/panel-cocina" className="flex items-center gap-3 text-[#363C98] hover:opacity-80 transition-opacity cursor-pointer">
             <ChevronLeft className="w-8 h-8" strokeWidth={2.5} />
             <h1 className="text-3xl font-bold">Volver a Cocina</h1>
           </Link>
         </div>
         <div className="flex-1 flex flex-col items-center justify-center text-center gap-4">
           <span className="text-5xl">📚</span>
-          <p className="text-[#3932C0] font-semibold text-xl">{error}</p>
+          <p className="text-[#363C98] font-semibold text-xl">{error}</p>
           <Link href="/panel-cocina">
-            <button className="mt-4 bg-[#3932C0] text-white font-bold py-3 px-8 rounded-xl hover:bg-[#3932C0]/90 transition-colors cursor-pointer">
+            <button className="mt-4 bg-[#363C98] text-white font-bold py-3 px-8 rounded-xl hover:bg-[#363C98]/90 transition-colors cursor-pointer">
               Volver a la biblioteca
             </button>
           </Link>
@@ -411,7 +411,7 @@ export default function BookReaderPage({ params, searchParams }) {
       {/* Header outside the box */}
       <div className="w-full flex flex-col gap-2 mb-6">
         {isFreeSample && <FreeSampleBadge className="self-start" />}
-        <Link href="/panel-cocina" className="flex items-center gap-3 text-[#3932C0] hover:opacity-80 transition-opacity cursor-pointer">
+        <Link href="/panel-cocina" className="flex items-center gap-3 text-[#363C98] hover:opacity-80 transition-opacity cursor-pointer">
           <ChevronLeft className="w-8 h-8" strokeWidth={2.5} />
           <h1 className="text-3xl font-bold">
             {bookTitle}
@@ -425,7 +425,7 @@ export default function BookReaderPage({ params, searchParams }) {
         
         {/* Top Right Icons */}
         <div className="absolute top-6 right-8 flex items-center gap-6 z-10">
-          <button className="text-[#3932C0] hover:opacity-80 transition-opacity cursor-pointer">
+          <button className="text-[#363C98] hover:opacity-80 transition-opacity cursor-pointer">
             <LinkIcon className="w-7 h-7" strokeWidth={2.5} />
           </button>
           <button 

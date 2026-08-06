@@ -81,7 +81,7 @@ export default function BrandTabs({ tabs, active, onChange, className = '' }) {
               className={`whitespace-nowrap px-2 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-base transition-colors cursor-pointer border-b-[3px] ${
                 isActive
                   ? 'text-[#FF690B] border-[#FF690B] font-bold'
-                  : 'text-[#3932C0] border-transparent font-semibold hover:text-[#FF690B]'
+                  : 'text-[#363C98] border-transparent font-semibold hover:text-[#FF690B]'
               }`}
             >
               {tab.label}

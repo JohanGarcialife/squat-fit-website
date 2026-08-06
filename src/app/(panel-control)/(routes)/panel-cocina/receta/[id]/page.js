@@ -89,8 +89,8 @@ function RecetaPageContent({ params }) {
     return (
       <div className="w-full min-h-screen bg-transparent flex items-center justify-center pt-8 pl-8 pr-12 pb-12">
         <div className="flex flex-col items-center gap-4">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#3932C0]" />
-          <p className="text-[#3932C0] font-semibold text-lg">Cargando receta...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#363C98]" />
+          <p className="text-[#363C98] font-semibold text-lg">Cargando receta...</p>
         </div>
       </div>
     );
@@ -104,18 +104,18 @@ function RecetaPageContent({ params }) {
     return (
       <div className="w-full min-h-screen bg-transparent flex flex-col pt-8 pl-8 pr-12 pb-12">
         <div className="w-full flex items-center mb-6">
-          <Link href={backHref} className="flex items-center gap-3 text-[#3932C0] hover:opacity-80 transition-opacity cursor-pointer">
+          <Link href={backHref} className="flex items-center gap-3 text-[#363C98] hover:opacity-80 transition-opacity cursor-pointer">
             <ChevronLeft className="w-8 h-8" strokeWidth={2.5} />
             <h1 className="text-3xl font-bold">Volver</h1>
           </Link>
         </div>
         <div className="flex-1 flex flex-col items-center justify-center text-center gap-4">
           <span className="text-5xl">🔒</span>
-          <p className="text-[#3932C0] font-semibold text-xl">
+          <p className="text-[#363C98] font-semibold text-xl">
             No hemos encontrado esta receta, o no tienes acceso a ella.
           </p>
           <Link href="/panel-cocina/recetas">
-            <button className="mt-4 bg-[#3932C0] text-white font-bold py-3 px-8 rounded-xl hover:bg-[#3932C0]/90 transition-colors cursor-pointer">
+            <button className="mt-4 bg-[#363C98] text-white font-bold py-3 px-8 rounded-xl hover:bg-[#363C98]/90 transition-colors cursor-pointer">
               Volver a mis recetas
             </button>
           </Link>
@@ -187,7 +187,7 @@ function RecetaPageContent({ params }) {
             {taxonomia?.categoria && (
               <Link
                 href={`/panel-cocina/recetas?categoria=${encodeURIComponent(taxonomia.categoria)}`}
-                className="text-xs font-bold uppercase tracking-wide rounded-full bg-[#3932C0] text-white px-3 py-1 hover:bg-[#3932C0]/90 transition-colors"
+                className="text-xs font-bold uppercase tracking-wide rounded-full bg-[#363C98] text-white px-3 py-1 hover:bg-[#363C98]/90 transition-colors"
               >
                 {taxonomia.categoria}
               </Link>
@@ -196,7 +196,7 @@ function RecetaPageContent({ params }) {
               <span
                 key={e.id}
                 title={e.condicional ? 'Sin lácteos si cambias el queso por uno vegano' : undefined}
-                className="text-xs font-bold uppercase tracking-wide rounded-full bg-[#F1F0FB] text-[#3932C0]/70 px-3 py-1"
+                className="text-xs font-bold uppercase tracking-wide rounded-full bg-[#F1F0FB] text-[#363C98]/70 px-3 py-1"
               >
                 {e.label}
               </span>
@@ -228,7 +228,7 @@ function RecetaPageContent({ params }) {
                   type="button"
                   onClick={() => setPreferenciasAbiertas((a) => !a)}
                   aria-expanded={preferenciasAbiertas}
-                  className="inline-flex items-center gap-1 text-xs font-bold text-[#3932C0]/60 hover:text-[#FF690B] transition-colors cursor-pointer"
+                  className="inline-flex items-center gap-1 text-xs font-bold text-[#363C98]/60 hover:text-[#FF690B] transition-colors cursor-pointer"
                 >
                   <ChevronDown
                     className={`w-3.5 h-3.5 transition-transform ${preferenciasAbiertas ? "rotate-180" : ""}`}
@@ -330,7 +330,7 @@ export default function RecetaPage(props) {
     <Suspense
       fallback={
         <div className="w-full min-h-screen flex items-center justify-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#3932C0]" />
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#363C98]" />
         </div>
       }
     >

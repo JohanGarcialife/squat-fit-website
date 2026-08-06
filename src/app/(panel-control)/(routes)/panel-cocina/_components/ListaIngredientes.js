@@ -41,7 +41,7 @@ function Linea({ ingrediente, preferencias }) {
               type="button"
               onClick={() => setAbierto((a) => !a)}
               aria-expanded={abierto}
-              className="inline-flex items-center gap-1 text-xs font-bold text-[#3932C0]/60 hover:text-[#FF690B] transition-colors cursor-pointer"
+              className="inline-flex items-center gap-1 text-xs font-bold text-[#363C98]/60 hover:text-[#FF690B] transition-colors cursor-pointer"
             >
               <ChevronDown
                 className={`w-3.5 h-3.5 transition-transform ${abierto ? 'rotate-180' : ''}`}

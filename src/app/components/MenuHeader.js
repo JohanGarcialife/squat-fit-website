@@ -115,7 +115,7 @@ export default function MenuHeader() {
                         <button 
                             onClick={() => setIsModalOpen(true)} 
                             className='text-secondary font-bold hover:opacity-80 text-2xl transition cursor-pointer flex items-center gap-2'>
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#3932C0" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="icon icon-tabler icon-tabler-logout" aria-hidden="true" focusable="false">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#363C98" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="icon icon-tabler icon-tabler-logout" aria-hidden="true" focusable="false">
                               <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
                               <path d="M14 8v-2a2 2 0 0 0 -2 -2h-7a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h7a2 2 0 0 0 2 -2v-2" />
                               <path d="M9 12h12l-3 -3" />
