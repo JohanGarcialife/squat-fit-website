@@ -8,6 +8,7 @@ import CoursesCarousel from './_components/CoursesCarousel'
 import Content from './_components/Content'
 import GoalsAndBenefits from './_components/GoalsAndBenefits'
 import CTO from './_components/CTO'
+import OtrosCursos from './_components/OtrosCursos'
 import FAQ from './_components/FAQ'
 
 // Open Graph / Twitter específicos: reutiliza el titular y el copy reales del
@@ -46,6 +47,7 @@ export default function page() {
         <Reveal><GoalsAndBenefits /></Reveal>
         <Reveal><Content /></Reveal>
         <Reveal><CTO /></Reveal>
+        <Reveal><OtrosCursos /></Reveal>
         <Reveal><FAQ /></Reveal>
     </div>
   )
