@@ -12,24 +12,24 @@ const Slider = dynamic(() => import("react-slick"), { ssr: false });
 
 const courses = [
   {
-    src: "/courses/1.png",
+    src: "/cursos-fotos/1.png",
   },
   {
-    src: "/courses/2.png",
-  },
-
-  {
-    src: "/courses/5.png",
-  },
-  {
-    src: "/courses/1.png",
-  },
-  {
-    src: "/courses/2.png",
+    src: "/cursos-fotos/2.png",
   },
 
   {
-    src: "/courses/5.png",
+    src: "/cursos-fotos/5.png",
+  },
+  {
+    src: "/cursos-fotos/1.png",
+  },
+  {
+    src: "/cursos-fotos/2.png",
+  },
+
+  {
+    src: "/cursos-fotos/5.png",
   },
 ];
 
