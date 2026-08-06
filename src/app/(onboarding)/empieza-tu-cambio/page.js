@@ -236,6 +236,43 @@ const CRM_SOURCE = {
 const FORM_ID = 'prellamada';
 const FORM_URL = '/empieza-tu-cambio';
 
+// Cuerpo del POST a /forms/public-answer. Estaba dentro de `handleSubmit`; se
+// saca aquí porque ahora lo usan DOS sitios —el envío y el reintento de los que
+// se quedaron atrás— y dos copias de este contrato acabarían divergiendo.
+//
+// Contrato: metadatos arriba, el resto de respuestas como pares
+// {question, answer}. `website` es el honeypot y va vacío.
+const META_KEYS = ['first_name', 'last_name', 'phone', 'email', 'timestamp', 'origen',
+  'via', 'utm_source', 'utm_medium', 'utm_campaign', 'utm_content'];
+
+function cuerpoDelPost(submission, origenLead) {
+  return {
+    form_id: PRELLAMADA_FORM_ID,
+    name: [submission.first_name, submission.last_name].filter(Boolean).join(' '),
+    phone: String(submission.phone || ''),
+    // El backend lo espera desde siempre (`body.email` en
+    // public-forms.service.ts): con él enlaza la respuesta a un usuario ya
+    // registrado y manda la confirmación con el enlace de la agenda.
+    email: String(submission.email || '').trim().toLowerCase(),
+    answers: Object.entries(submission)
+      .filter(([k]) => !META_KEYS.includes(k))
+      .map(([question, answer]) => ({ question, answer })),
+    // El back office pinta la etiqueta de origen contra un vocabulario cerrado
+    // (web | ig | email | youtube | otro), así que aquí se manda uno de ésos y
+    // el detalle fino («ig-bio-maria») viaja en `via`. Si se mandara el detalle
+    // en `source`, el CRM enseñaría la etiqueta vacía. OJO: TikTok no tiene
+    // hueco en ese vocabulario y cae en «otro» hasta que se le añada uno.
+    //
+    // En el REINTENTO no hay `origenLead` en memoria (es otra visita), pero no
+    // se pierde nada: la propia solicitud guardada lleva dentro `via`,
+    // `utm_source` y `origen`, así que se leen de ahí.
+    source: CRM_SOURCE[(origenLead || submission)?.utm_source]
+      || fuenteCrmDesdeOrigen(submission.origen),
+    ...(((origenLead || submission)?.via) ? { via: (origenLead || submission).via } : {}),
+    website: '',
+  };
+}
+
 const esPhoneLocalization = { ...esPhone, gb: 'Inglaterra' };
 
 // ── Prellenado desde la cuenta (15.x, pedido por María) ──────────────────────
@@ -359,6 +396,67 @@ export default function EmpiezaTuCambioPage() {
         });
       })
       .catch(() => {});
+    return () => { vivo = false; };
+  }, []);
+
+  /**
+   * Reintenta las solicitudes que se quedaron atrás.
+   *
+   * QUÉ PASABA. Si el POST a `/forms/public-answer` falla, `handleSubmit` mete
+   * la solicitud en `localStorage` y le enseña al cliente la pantalla de
+   * «enviado» — que está bien, porque desde su lado la acción está hecha y que
+   * nuestro POST falle es problema nuestro. El problema es lo que venía
+   * después: NADA. Comprobado el 6-ago con un grep en todo el repo, esa clave
+   * se ESCRIBE y no la LEE nadie. O sea que la solicitud se quedaba en el
+   * navegador de esa persona, el lead no llegaba al CRM, no saltaba ningún
+   * aviso, y el cliente se iba convencido de que había aplicado. En un embudo
+   * donde cada lead va a una llamada de venta, eso es dinero perdido en
+   * silencio.
+   *
+   * QUÉ HACE. Al abrir la página, si hay solicitudes pendientes, las vuelve a
+   * mandar y borra las que entran. Las que fallen se quedan para el siguiente
+   * intento.
+   *
+   * POR QUÉ ES SEGURO REINTENTAR. El backend no inserta a ciegas: hace
+   * `upsertFromPublicForm`, que busca primero por correo/teléfono/Instagram
+   * (`findByStrongMatch`) y actualiza si ya existe. Así que si el POST original
+   * llegó a entrar y lo que se perdió fue la respuesta, esto no crea un lead
+   * duplicado.
+   *
+   * NO vuelve a emitir `form_submit`: el evento ya salió cuando la persona
+   * pulsó Enviar, con `registrado_en_backend: false`. Contarlo otra vez
+   * inflaría los envíos, y lo que se recupera aquí es el LEAD, no la acción.
+   */
+  useEffect(() => {
+    if (!SUBMIT_ENDPOINT) return;
+    let vivo = true;
+    (async () => {
+      let pendientes;
+      try {
+        pendientes = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+      } catch { return; }
+      if (!Array.isArray(pendientes) || pendientes.length === 0) return;
+
+      const quedan = [];
+      for (const solicitud of pendientes) {
+        try {
+          const res = await fetch(SUBMIT_ENDPOINT, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(cuerpoDelPost(solicitud, null)),
+          });
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        } catch {
+          // Sigue sin entrar: se conserva tal cual para el próximo intento.
+          quedan.push(solicitud);
+        }
+      }
+      if (!vivo) return;
+      try {
+        if (quedan.length === 0) localStorage.removeItem(STORAGE_KEY);
+        else localStorage.setItem(STORAGE_KEY, JSON.stringify(quedan));
+      } catch {}
+    })();
     return () => { vivo = false; };
   }, []);
 
@@ -595,39 +693,10 @@ export default function EmpiezaTuCambioPage() {
     };
     try {
       if (SUBMIT_ENDPOINT) {
-        // Contrato de POST /forms/public-answer: metadatos arriba, el resto de
-        // respuestas como pares {question, answer}. website = honeypot vacío.
-        const META_KEYS = ['first_name', 'last_name', 'phone', 'email', 'timestamp', 'origen',
-          'via', 'utm_source', 'utm_medium', 'utm_campaign', 'utm_content'];
-        const body = {
-          form_id: PRELLAMADA_FORM_ID,
-          name: [submission.first_name, submission.last_name].filter(Boolean).join(' '),
-          phone: String(submission.phone || ''),
-          // El backend lo espera desde siempre (`body.email` en
-          // public-forms.service.ts): con él enlaza la respuesta a un usuario ya
-          // registrado y manda la confirmación con el enlace de la agenda.
-          email: String(submission.email || '').trim().toLowerCase(),
-          answers: Object.entries(submission)
-            .filter(([k]) => !META_KEYS.includes(k))
-            .map(([question, answer]) => ({ question, answer })),
-          // El back office pinta la etiqueta de origen contra un vocabulario
-          // cerrado (web | ig | email | youtube | otro), así que aquí se manda
-          // uno de ésos y el detalle fino («ig-bio-maria») viaja en `via`. Si se
-          // mandara el detalle en `source`, el CRM enseñaría la etiqueta vacía.
-          // OJO: TikTok no tiene hueco en ese vocabulario y cae en «otro» hasta
-          // que se le añada uno en el dashboard.
-          source: CRM_SOURCE[origenLead?.utm_source] || fuenteCrmDesdeOrigen(submission.origen),
-          // El detalle fino viajaba en `submission` pero NO en el POST: `via`
-          // está en META_KEYS, así que se excluye de `answers`, y nadie lo
-          // volvía a añadir arriba. Se perdía entero: en el CRM «ig-bio-maria»
-          // era indistinguible de «ig-story-hamlet».
-          ...(origenLead?.via ? { via: origenLead.via } : {}),
-          website: '',
-        };
         const res = await fetch(SUBMIT_ENDPOINT, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(body),
+          body: JSON.stringify(cuerpoDelPost(submission, origenLead)),
         });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
       } else {
