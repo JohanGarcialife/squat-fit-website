@@ -421,17 +421,32 @@ export default function Summary(props) {
                       <span>Subtotal</span>
                       <span>{convertPrice(subtotal)} {symbol}</span>
                     </div>
-                    <div className="flex justify-between items-center text-indigo-900/80 text-sm sm:text-lg lg:text-xl">
-                      <span>Envío</span>
-                      <span>
-                        {/* `shipping` ya viene con la tarifa de la zona y el
-                            umbral de gratis aplicados (12.2); aquí no se
-                            recalcula nada. */}
-                        {sinDestino
-                          ? 'Según destino'
-                          : `${shipping > 0 ? convertPrice(shipping) : '0,00'} ${symbol}`}
-                      </span>
-                    </div>
+                    {/* La línea de envío solo si hay algo que enviar.
+                        Antes se pintaba SIEMPRE, así que quien compraba un
+                        curso —100 % digital— veía un «Envío 0,00 €» en su
+                        desglose. No era un error de importe (es 0 de verdad y
+                        no se le cobra nada) pero le aparece una línea que no le
+                        corresponde y le hace dudar de si va a recibir algo.
+                        Visto el 6-ago-2026 en producción, en navegador real,
+                        con «Fuerte y Definid@ — Anual» en el carrito.
+
+                        La condición es la MISMA que ya usa el banner de envío
+                        gratis unas líneas más arriba, y la misma que usa el
+                        desglose del paso de pago (`OrderSummary.js`), que ya lo
+                        hacía bien. Esto solo pone de acuerdo a los dos. */}
+                    {hasPhysicalItems && (
+                      <div className="flex justify-between items-center text-indigo-900/80 text-sm sm:text-lg lg:text-xl">
+                        <span>Envío</span>
+                        <span>
+                          {/* `shipping` ya viene con la tarifa de la zona y el
+                              umbral de gratis aplicados (12.2); aquí no se
+                              recalcula nada. */}
+                          {sinDestino
+                            ? 'Según destino'
+                            : `${shipping > 0 ? convertPrice(shipping) : '0,00'} ${symbol}`}
+                        </span>
+                      </div>
+                    )}
                     {arancel > 0 && (
                       <div className="flex justify-between items-center text-indigo-900/80 text-sm sm:text-lg lg:text-xl">
                         <span>Aranceles (EE. UU.)</span>
