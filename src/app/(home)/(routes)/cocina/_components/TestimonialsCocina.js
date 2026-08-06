@@ -75,7 +75,7 @@ const TestimonialsCocina = () => {
                 onClick={() => sliderRef.current && sliderRef.current.slickGoTo(index)}
               >
                 {/* Altura fija para que el carrusel no salte entre reseñas */}
-                <div className="bg-[#3932C01A] border border-[#3932C0]/15 rounded-3xl p-8 md:p-10 shadow-sm min-h-[280px] w-full max-w-[460px] mx-auto flex flex-col items-center justify-center text-center">
+                <div className="bg-[#363C981A] border border-[#363C98]/15 rounded-3xl p-8 md:p-10 shadow-sm min-h-[280px] w-full max-w-[460px] mx-auto flex flex-col items-center justify-center text-center">
                   <blockquote>
                     <p className="text-lg md:text-xl text-secondary font-medium mb-6 leading-relaxed">
                       "{testimonial.quote}"

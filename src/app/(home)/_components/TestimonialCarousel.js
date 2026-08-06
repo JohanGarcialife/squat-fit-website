@@ -109,7 +109,7 @@ const TestimonialCarousel = () => {
                                     className="cursor-pointer px-3 py-5 outline-none"
                                     onClick={() => sliderRef.current && sliderRef.current.slickGoTo(index)}
                                 >
-                                    <div className="bg-[#3932C01A] h-full w-full max-w-[420px] mx-auto p-8 rounded-3xl shadow-lg border border-[#3932C0]/15 hover:shadow-xl transition-shadow duration-300 flex flex-col items-center text-center min-h-[320px]">
+                                    <div className="bg-[#363C981A] h-full w-full max-w-[420px] mx-auto p-8 rounded-3xl shadow-lg border border-[#363C98]/15 hover:shadow-xl transition-shadow duration-300 flex flex-col items-center text-center min-h-[320px]">
                                         <div className="relative w-24 h-24 mb-6 flex-shrink-0 rounded-full overflow-hidden border-4 border-violet-100">
                                             <Image
                                                 src={testimonial.image}

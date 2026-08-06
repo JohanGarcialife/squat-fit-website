@@ -173,11 +173,11 @@ function ActivateContent() {
       {status === 'loading' && (
         <>
           <div className="relative flex items-center justify-center">
-            <Loader2 className="w-20 h-20 text-[#3932C0] animate-spin" strokeWidth={1.5} />
-            <div className="absolute w-12 h-12 bg-[#3932C0]/10 rounded-full animate-ping"></div>
+            <Loader2 className="w-20 h-20 text-[#363C98] animate-spin" strokeWidth={1.5} />
+            <div className="absolute w-12 h-12 bg-[#363C98]/10 rounded-full animate-ping"></div>
           </div>
           <div className="flex flex-col gap-3">
-            <h2 className="text-3xl font-bold text-[#3932C0]">Verificando tu cuenta</h2>
+            <h2 className="text-3xl font-bold text-[#363C98]">Verificando tu cuenta</h2>
             <p className="text-gray-500 text-lg">
               Por favor, espera un momento mientras validamos tu enlace de activación...
             </p>
@@ -216,7 +216,7 @@ function ActivateContent() {
             llegó a tener contraseña. El paso de más era el que los perdía.
           */}
           {claveLista ? (
-            <Link href="/login" className="w-full cursor-pointer bg-[#3932C0] text-white rounded-3xl p-5 text-lg font-bold hover:bg-[#3932C0]/90 transition duration-300 block">
+            <Link href="/login" className="w-full cursor-pointer bg-[#363C98] text-white rounded-3xl p-5 text-lg font-bold hover:bg-[#363C98]/90 transition duration-300 block">
               Entrar en mi cuenta
             </Link>
           ) : pideContrasena ? (
@@ -233,7 +233,7 @@ function ActivateContent() {
                 value={clave}
                 onChange={(e) => setClave(e.target.value)}
                 placeholder="Al menos 8 caracteres"
-                className="w-full rounded-2xl border border-gray-200 p-4 text-base text-gray-800 outline-hidden focus:border-[#3932C0]"
+                className="w-full rounded-2xl border border-gray-200 p-4 text-base text-gray-800 outline-hidden focus:border-[#363C98]"
               />
               <label htmlFor="clave2" className="text-sm font-semibold text-gray-600">
                 Repítela
@@ -246,7 +246,7 @@ function ActivateContent() {
                 value={claveRepetida}
                 onChange={(e) => setClaveRepetida(e.target.value)}
                 placeholder="La misma otra vez"
-                className="w-full rounded-2xl border border-gray-200 p-4 text-base text-gray-800 outline-hidden focus:border-[#3932C0]"
+                className="w-full rounded-2xl border border-gray-200 p-4 text-base text-gray-800 outline-hidden focus:border-[#363C98]"
               />
               {errorClave && <p className="text-sm text-red-600">{errorClave}</p>}
               <button
@@ -259,7 +259,7 @@ function ActivateContent() {
             </form>
           ) : (
           <div className="w-full mt-2 flex flex-col gap-3">
-            <Link href="/login" className="w-full cursor-pointer bg-[#3932C0] text-white rounded-3xl p-5 text-lg font-bold hover:bg-[#3932C0]/90 transition duration-300 block">
+            <Link href="/login" className="w-full cursor-pointer bg-[#363C98] text-white rounded-3xl p-5 text-lg font-bold hover:bg-[#363C98]/90 transition duration-300 block">
               Ya tengo contraseña · Entrar
             </Link>
             <Link href="/forgot-password" className="w-full cursor-pointer bg-[#FF690B] text-white rounded-3xl p-5 text-lg font-bold hover:bg-[#FF690B]/90 transition duration-300 block">
@@ -326,15 +326,15 @@ function ActivateContent() {
                   setEmailPrellenado(false);
                 }}
                 placeholder="tucorreo@ejemplo.com"
-                className={`w-full rounded-2xl border p-4 text-base text-gray-800 outline-hidden focus:border-[#3932C0] ${
-                  emailPrellenado ? 'border-[#3932C0]/40 bg-[#F5F5FF]' : 'border-gray-200'
+                className={`w-full rounded-2xl border p-4 text-base text-gray-800 outline-hidden focus:border-[#363C98] ${
+                  emailPrellenado ? 'border-[#363C98]/40 bg-[#F5F5FF]' : 'border-gray-200'
                 }`}
               />
               {errorReenvio && <p className="text-left text-sm text-red-600">{errorReenvio}</p>}
               <button
                 type="submit"
                 disabled={reenvio === 'enviando'}
-                className="w-full cursor-pointer bg-[#3932C0] text-white rounded-3xl p-5 text-lg font-bold hover:bg-[#3932C0]/90 transition duration-300 disabled:opacity-60"
+                className="w-full cursor-pointer bg-[#363C98] text-white rounded-3xl p-5 text-lg font-bold hover:bg-[#363C98]/90 transition duration-300 disabled:opacity-60"
               >
                 {reenvio === 'enviando' ? 'Enviando…' : 'Enviarme un enlace nuevo'}
               </button>
@@ -354,11 +354,11 @@ function ActivateContent() {
 
 export default function ActivatePage() {
   return (
-    <div className="min-h-screen text-xl text-white bg-linear-to-b from-[#3932C0] to-[#FF690B] flex items-center justify-center p-6">
+    <div className="min-h-screen text-xl text-white bg-linear-to-b from-[#363C98] to-[#FF690B] flex items-center justify-center p-6">
       <Suspense fallback={
         <div className="w-full max-w-lg bg-white rounded-[40px] shadow-2xl p-16 text-black flex flex-col items-center text-center gap-8 border border-white/20">
-          <Loader2 className="w-20 h-20 text-[#3932C0] animate-spin" strokeWidth={1.5} />
-          <h2 className="text-3xl font-bold text-[#3932C0]">Cargando...</h2>
+          <Loader2 className="w-20 h-20 text-[#363C98] animate-spin" strokeWidth={1.5} />
+          <h2 className="text-3xl font-bold text-[#363C98]">Cargando...</h2>
         </div>
       }>
         <ActivateContent />

@@ -136,7 +136,7 @@ export default function AlertasPage() {
           <h1 className="text-3xl font-extrabold text-[#363C98]">Alertas</h1>
           <button
             onClick={() => setShowPrefs((v) => !v)}
-            className="flex items-center gap-2 text-sm font-bold text-[#3932C0] hover:text-[#FF690B] transition-colors cursor-pointer"
+            className="flex items-center gap-2 text-sm font-bold text-[#363C98] hover:text-[#FF690B] transition-colors cursor-pointer"
           >
             <Sliders className="w-4 h-4" /> Gestionar mis avisos
           </button>
@@ -313,7 +313,7 @@ export default function AlertasPage() {
           <div className="flex items-center justify-between px-1">
             <span className="text-slate-400 text-sm font-semibold uppercase tracking-wider">Tus avisos</span>
             {items.some((i) => !i.is_read) && (
-              <button onClick={markAllRead} className="flex items-center gap-1.5 text-xs font-bold text-[#3932C0] hover:text-[#FF690B] transition-colors cursor-pointer">
+              <button onClick={markAllRead} className="flex items-center gap-1.5 text-xs font-bold text-[#363C98] hover:text-[#FF690B] transition-colors cursor-pointer">
                 <CheckCheck className="w-4 h-4" /> Marcar todo como leído
               </button>
             )}

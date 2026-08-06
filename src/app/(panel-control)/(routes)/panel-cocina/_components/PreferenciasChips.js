@@ -17,7 +17,7 @@ function Pastilla({ activa, onClick, children }) {
       className={`rounded-full px-3.5 py-1.5 text-sm font-bold border transition-colors cursor-pointer ${
         activa
           ? 'bg-[#FF690B] border-[#FF690B] text-white'
-          : 'bg-white border-slate-200 text-[#3932C0] hover:border-[#FF690B]'
+          : 'bg-white border-slate-200 text-[#363C98] hover:border-[#FF690B]'
       }`}
     >
       {children}
@@ -68,7 +68,7 @@ export default function PreferenciasChips({ compacto = false }) {
         type="button"
         onClick={() => setAlergenosAbiertos((a) => !a)}
         aria-expanded={alergenosAbiertos}
-        className="mt-3 inline-flex items-center gap-1 text-xs font-bold text-[#3932C0]/60 hover:text-[#FF690B] transition-colors cursor-pointer"
+        className="mt-3 inline-flex items-center gap-1 text-xs font-bold text-[#363C98]/60 hover:text-[#FF690B] transition-colors cursor-pointer"
       >
         <ChevronDown
           className={`w-3.5 h-3.5 transition-transform ${alergenosAbiertos ? 'rotate-180' : ''}`}

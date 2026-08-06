@@ -119,7 +119,7 @@ export default function WelcomeVideoCard({ gender } = {}) {
         </div>
       ) : (
         /* Placeholder «próximamente» mientras no haya URL de Bunny. */
-        <div className="w-full aspect-video rounded-[20px] bg-gradient-to-br from-[#363C98] to-[#3932C0] flex flex-col items-center justify-center text-center px-6 gap-3">
+        <div className="w-full aspect-video rounded-[20px] bg-gradient-to-br from-[#363C98] to-[#363C98] flex flex-col items-center justify-center text-center px-6 gap-3">
           <div className="w-14 h-14 rounded-full bg-white/10 flex items-center justify-center">
             <svg width="26" height="26" viewBox="0 0 24 24" fill="#FF690B" aria-hidden="true">
               <polygon points="6 3 21 12 6 21 6 3" />

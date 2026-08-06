@@ -595,37 +595,32 @@ export default function Payment(props) {
 
           <h2 className="text-indigo-900 font-bold text-lg mb-4">Métodos de pago</h2>
 
-          {/* ── El selector va ANTES del contenido, no intercalado ───────────
-              Antes esto era un acordeón normal: cabecera, contenido, cabecera,
-              contenido. El problema es que el contenido de Stripe es una caja
-              alta con su propio botón «Pagar» al final, así que la segunda
-              cabecera —seQura— caía por debajo del botón de pagar y había que
-              bajar a buscarla. Lo reportó seQura el 5-ago y tienen razón: un
-              método de pago que aparece después del botón de pagar no es una
-              opción, es una nota al pie.
+          {/* ── Acordeón de verdad: cada contenido debajo de SU fila ────────
+              Antes las dos filas iban juntas arriba y el contenido de la
+              elegida se pintaba debajo de LAS DOS. Al pulsar «Tarjeta», la caja
+              de Stripe aparecía al final del todo, por debajo de la fila de
+              seQura: parecía que el clic no había hecho nada y había que bajar
+              a buscarla.
 
-              Con las dos filas juntas arriba, la elección se ve entera antes
-              de que empiece ningún formulario, y debajo se pinta solo lo del
-              método elegido.
+              Aquello se hizo así para que seQura no quedara por debajo del
+              botón de pagar, que es lo que reportaron el 5-ago. Ya no hace
+              falta: como ahora TODO llega plegado, las dos opciones se ven
+              juntas al entrar, que era lo que pedían. Al abrir una, la otra se
+              cierra y vuelve a subir.
 
-              Stripe se OCULTA con CSS, nunca se desmonta: `EmbeddedCheckout`
-              se monta una sola vez contra su `clientSecret`, y si se
-              desmontara habría que crear otra sesión de pago para volver —
-              se perdería el estado que el cliente ya hubiera tecleado. */}
-          {/* ── Todo plegado al llegar ───────────────────────────────────────
-              Ninguna opción viene abierta: el cliente elige y solo entonces se
-              despliega la suya. Antes la caja de Stripe estaba desplegada de
-              salida y seQura quedaba como la alternativa rara de debajo.
+              Stripe se OCULTA con CSS, nunca se desmonta: `EmbeddedCheckout` se
+              monta una sola vez contra su `clientSecret`, y desmontarlo
+              obligaría a crear otra sesión de pago para volver — se perdería lo
+              que el cliente ya hubiera tecleado. Por eso su contenedor existe
+              siempre y solo cambia de clase.
 
               POR QUÉ SON DOS FILAS Y NO CUATRO: Apple Pay y Google Pay no son
-              métodos de pago aparte en Stripe — viajan sobre `card` y Stripe
-              los pinta él mismo, arriba de su caja, SOLO si el dispositivo los
-              admite. Sacarlos a una fila fija haría que en un Android sin
-              Google Pay el cliente la pulse y no encuentre nada. Y PayPal hoy
-              no está enchufado a este checkout (las credenciales existen en
-              Cloud Run, pero no hay código que las use aquí). */}
-          {sequra.aplica && (
-            <div className="max-w-[420px] mx-auto space-y-2 mb-6">
+              métodos aparte en Stripe — viajan sobre `card` y los pinta él
+              mismo, arriba de su caja, SOLO si el dispositivo los admite.
+              Sacarlos a una fila fija llevaría a un Android sin Google Pay a
+              pulsar y no encontrar nada. */}
+          <div className="max-w-[420px] mx-auto space-y-2 mb-6">
+            {sequra.aplica && (
               <OpcionDePago
                 activo={metodo === 'stripe'}
                 onClick={() => setMetodo(metodo === 'stripe' ? null : 'stripe')}
@@ -633,53 +628,37 @@ export default function Payment(props) {
                 sub="Visa, Mastercard, Apple Pay, Google Pay y Link"
                 icono={<IconoTarjeta />}
               />
-              {/* «Paga Fraccionado» es el nombre del producto de seQura, no
-                  una descripción nuestra. Lo pidieron el 5-ago: aquí ponía
-                  «Pagar a plazos con seQura», que dice lo mismo pero no es
-                  como se llama el método, y el cliente que lo ha usado en otra
-                  tienda no lo reconoce por ese texto.
-                  SIN logo ni rótulo verde de seQura: su propia caja lleva el
-                  logo a un tamaño que no podemos reducir, así que repetirlo
-                  aquí lo duplicaría y encima más pequeño. */}
-              <OpcionDePago
-                activo={metodo === 'sequra'}
-                onClick={() => setMetodo(metodo === 'sequra' ? null : 'sequra')}
-                titulo="Paga Fraccionado"
-                icono={<IconoPlazos />}
-                /* La cuota la calcula seQura, no nosotros. Dividir el total
-                   entre 12 daría 15,67 € cuando lo que se cobra son 18,06 €:
-                   la diferencia son sus comisiones, y anunciar una cuota que
-                   no es la real no es un detalle estético. Su widget lee el
-                   importe del `data-amount` y pinta la cifra buena. */
-                pie={<SequraSimulador importeEur={totalCarrito} divisa={divisa} alineacion="left" />}
-              />
+            )}
+            <div className={!sequra.aplica || metodo === 'stripe' ? '' : 'hidden'}>
+              <CheckoutIncrustado clientSecret={embeddedSecret} />
             </div>
-          )}
 
-          {/* Stripe se OCULTA con CSS, nunca se desmonta: `EmbeddedCheckout` se
-              monta una sola vez contra su `clientSecret`, y desmontarlo
-              obligaría a crear otra sesión de pago para volver — se perdería lo
-              que el cliente ya hubiera tecleado. Cuando seQura no aplica no hay
-              nada que elegir, así que se enseña directamente. */}
-          <div className={!sequra.aplica || metodo === 'stripe' ? '' : 'hidden'}>
-            <CheckoutIncrustado clientSecret={embeddedSecret} />
+            {/* «Paga Fraccionado» es el nombre del producto de seQura, no una
+                descripción nuestra. Y SIN logo ni rótulo verde: su propia caja
+                lleva el logo a un tamaño que no podemos reducir, así que
+                repetirlo aquí lo duplicaría y encima más pequeño. */}
+            {sequra.aplica && (
+              <>
+                <OpcionDePago
+                  activo={metodo === 'sequra'}
+                  onClick={() => setMetodo(metodo === 'sequra' ? null : 'sequra')}
+                  titulo="Paga Fraccionado"
+                  icono={<IconoPlazos />}
+                  pie={<SequraSimulador importeEur={totalCarrito} divisa={divisa} alineacion="left" />}
+                />
+                {metodo === 'sequra' && (
+                  <PagoSequra
+                    cart={cart}
+                    total={totalCarrito}
+                    formData={datosCliente}
+                    abierto
+                    onAbrir={() => setMetodo('sequra')}
+                  />
+                )}
+              </>
+            )}
           </div>
 
-          {/* Acotado al ancho de la caja de Stripe (~420px), no al de la
-              columna: Stripe pinta su tarjeta centrada y estrecha, así que un
-              botón a todo lo ancho de la columna se veía bastante mayor que su
-              «Pagar» y desequilibraba las dos opciones. */}
-          {sequra.aplica && metodo === 'sequra' && (
-            <div className="max-w-[420px] mx-auto">
-              <PagoSequra
-                cart={cart}
-                total={totalCarrito}
-                formData={datosCliente}
-                abierto
-                onAbrir={() => setMetodo('sequra')}
-              />
-            </div>
-          )}
           {!sequra.aplica && sequra.cerca && (
             <p className="mt-8 pt-8 border-t border-indigo-100 text-sm text-slate-500 text-center">
               Añade {sequra.falta.toFixed(2)} € más y podrás pagarlo a plazos con seQura.
@@ -733,12 +712,12 @@ export default function Payment(props) {
         <div className="min-h-screen bg-white flex flex-col items-center justify-center px-6 text-center">
             {motivoDelFallo ? (
               <>
-                <p className="text-[#3932C0] text-xl font-bold mb-2 max-w-md">{motivoDelFallo}</p>
+                <p className="text-[#363C98] text-xl font-bold mb-2 max-w-md">{motivoDelFallo}</p>
                 <p className="text-gray-500 mb-6 max-w-md">
                   Puedes quitarlo del carrito y seguir con el resto, o revisar lo que ya tienes en tu panel.
                 </p>
                 <div className="flex flex-col sm:flex-row gap-3">
-                  <button onClick={() => props.setStep(1)} className="bg-[#3932C0] text-white rounded-3xl px-8 py-3 font-bold cursor-pointer hover:bg-[#3932C0]/90">
+                  <button onClick={() => props.setStep(1)} className="bg-[#363C98] text-white rounded-3xl px-8 py-3 font-bold cursor-pointer hover:bg-[#363C98]/90">
                     Volver al carrito
                   </button>
                   <Link href="/panel-cocina" className="bg-gray-100 text-gray-700 rounded-3xl px-8 py-3 font-semibold hover:bg-gray-200">

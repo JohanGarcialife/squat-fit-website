@@ -110,8 +110,11 @@ export default function GuardarDireccion({ tipo, valores }) {
   return (
     <div className="pt-1">
       <Casilla id={id} checked={activo} onChange={setActivo}>
+        {/* Se dice de QUÉ dirección hablamos. «Guardar esta dirección»
+            aparecía dos veces, idéntico, en la misma pantalla: había que
+            deducir cuál era cuál por dónde estaba puesto. */}
         <span className="text-slate-600 text-sm">
-          Guardar esta dirección para futuras compras
+          Guardar dirección de {esEnvio ? 'envío' : 'facturación'} para futuras compras
         </span>
       </Casilla>
 

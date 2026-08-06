@@ -345,7 +345,7 @@ ${values.mensaje}
               <button
                 type="submit"
                 disabled={isSubmitting || !gdprAccepted}
-                className="w-full bg-[#3932C0] hover:bg-[#2e28a0] text-white font-bold py-4 rounded-2xl transition-all cursor-pointer shadow-lg shadow-indigo-100 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-lg"
+                className="w-full bg-[#363C98] hover:bg-[#2e28a0] text-white font-bold py-4 rounded-2xl transition-all cursor-pointer shadow-lg shadow-indigo-100 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-lg"
               >
                 {isSubmitting ? (
                   <>

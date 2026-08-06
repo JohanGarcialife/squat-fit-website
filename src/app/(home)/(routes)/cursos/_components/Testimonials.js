@@ -138,7 +138,7 @@ const Testimonials = () => {
                                     className="cursor-pointer px-3 py-5 "
                                     onClick={() => sliderRef.current && sliderRef.current.slickGoTo(index)}
                                 >
-                                    <div className="bg-[#3932C01A] h-full w-full lg:w-[420px] mx-auto p-5 sm:p-8 rounded-3xl shadow-lg border border-[#3932C0]/15 hover:shadow-xl transition-shadow duration-300  flex flex-col items-center text-center">
+                                    <div className="bg-[#363C981A] h-full w-full lg:w-[420px] mx-auto p-5 sm:p-8 rounded-3xl shadow-lg border border-[#363C98]/15 hover:shadow-xl transition-shadow duration-300  flex flex-col items-center text-center">
                                         <div className="relative  mb-6">
                                             <Image
                                                 src={testimonial.image}
@@ -172,7 +172,7 @@ const Testimonials = () => {
                                     onClick={() => sliderRef.current && sliderRef.current.slickGoTo(index)}
                                 >
                                     {/* min-h para que las dos tarjetas visibles queden a la misma altura */}
-                                    <div className="bg-[#3932C01A] h-full w-full lg:w-[420px] mx-auto min-h-[240px] p-5 sm:p-8 rounded-3xl shadow-lg border border-[#3932C0]/15 hover:shadow-xl transition-shadow duration-300  flex flex-col items-center text-center">
+                                    <div className="bg-[#363C981A] h-full w-full lg:w-[420px] mx-auto min-h-[240px] p-5 sm:p-8 rounded-3xl shadow-lg border border-[#363C98]/15 hover:shadow-xl transition-shadow duration-300  flex flex-col items-center text-center">
                                       <div className='flex gap-5 flex-row items-center '>
 
                                         <div className="relative  mb-6">
@@ -187,7 +187,7 @@ const Testimonials = () => {
                                         <div className='flex flex-col items-start'>
 
 
-                                        <h3 className="text-xl font-bold  text-[#3932C0] ">
+                                        <h3 className="text-xl font-bold  text-[#363C98] ">
                                             {testimonial.name}
                                         </h3>
                                         <div className="text-primary mb-4 text-4xl">

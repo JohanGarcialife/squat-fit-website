@@ -143,7 +143,7 @@ function VideoPlayer({ videoUrl, videoTitle }) {
         />
       </div>
       {videoTitle && (
-        <h3 className="mt-4 text-[#3932C0] font-semibold text-lg">{videoTitle}</h3>
+        <h3 className="mt-4 text-[#363C98] font-semibold text-lg">{videoTitle}</h3>
       )}
     </div>
   );
@@ -565,7 +565,7 @@ function CursosPageContent() {
   if (loading) {
     return (
       <div className="w-full min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#3932C0]"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#363C98]"></div>
       </div>
     );
   }
@@ -582,9 +582,9 @@ function CursosPageContent() {
   if (showPaywallScreen) {
     return (
       <div className="flex-1 w-full max-w-7xl mx-auto p-6 md:p-12 min-h-screen">
-        <h1 className="text-[#3932C0] text-5xl font-bold mb-16">Mis cursos</h1>
+        <h1 className="text-[#363C98] text-5xl font-bold mb-16">Mis cursos</h1>
         <div className="text-center mb-12">
-          <h2 className="text-[#3932C0] text-3xl font-bold mb-4">Aún no tienes acceso a los cursos</h2>
+          <h2 className="text-[#363C98] text-3xl font-bold mb-4">Aún no tienes acceso a los cursos</h2>
           <p className="text-gray-500 text-lg max-w-xl mx-auto leading-relaxed">
             Elige tu curso y cómo quieres acceder: <strong>mensual</strong> (suscripción),{' '}
             <strong>anual</strong> (pago único, 12 meses de acceso) o <strong>de por vida</strong>.
@@ -631,7 +631,7 @@ function CursosPageContent() {
   if (view === 'catalog' && !digitalLibraryGrantsAllCourses) {
     return (
       <div className="w-full max-w-6xl mx-auto p-6 md:p-12 min-h-screen">
-        <h1 className="text-[#3932C0] text-5xl font-bold mb-4">Mis cursos</h1>
+        <h1 className="text-[#363C98] text-5xl font-bold mb-4">Mis cursos</h1>
         <p className="text-gray-400 text-lg mb-10">
           {ownedCourseIds.size > 0
             ? 'Aquí tienes tus cursos. Prueba gratis la clase de muestra de los demás, o consigue el acceso completo.'
@@ -649,7 +649,7 @@ function CursosPageContent() {
                 onClick={() => openCourse(course)}
                 className="group text-left bg-white border-2 border-gray-100 rounded-[24px] overflow-hidden shadow-sm hover:shadow-xl hover:border-[#FF690B]/30 transition-all duration-300 cursor-pointer"
               >
-                <div className="relative w-full aspect-video bg-gradient-to-br from-[#3932C0]/10 to-[#FF690B]/10 overflow-hidden">
+                <div className="relative w-full aspect-video bg-gradient-to-br from-[#363C98]/10 to-[#FF690B]/10 overflow-hidden">
                   {course.image ? (
                     <img
                       src={course.image}
@@ -662,7 +662,7 @@ function CursosPageContent() {
                     </div>
                   )}
                   {owned ? (
-                    <span className="absolute top-3 left-3 rounded-full bg-[#3932C0] text-white text-xs font-bold px-3 py-1 shadow">
+                    <span className="absolute top-3 left-3 rounded-full bg-[#363C98] text-white text-xs font-bold px-3 py-1 shadow">
                       Tu curso
                     </span>
                   ) : hasSample ? (
@@ -674,7 +674,7 @@ function CursosPageContent() {
 
                 <div className="p-6">
                   <p className="text-[#FF690B] text-xs font-bold uppercase tracking-widest mb-2">Curso</p>
-                  <h2 className="text-[#3932C0] text-xl font-bold mb-2 group-hover:text-[#FF690B] transition-colors line-clamp-2">
+                  <h2 className="text-[#363C98] text-xl font-bold mb-2 group-hover:text-[#FF690B] transition-colors line-clamp-2">
                     {course.title || "Curso sin título"}
                   </h2>
                   {course.subtitle && (
@@ -693,7 +693,7 @@ function CursosPageContent() {
                   )}
                   <p
                     className="text-sm font-semibold mt-3"
-                    style={{ color: owned ? '#3932C0' : hasSample ? '#22C55E' : '#9CA3AF' }}
+                    style={{ color: owned ? '#363C98' : hasSample ? '#22C55E' : '#9CA3AF' }}
                   >
                     {owned ? 'Continuar curso' : hasSample ? 'Ver clase gratis' : 'Consíguelo para ver el temario'}
                   </p>
@@ -737,7 +737,7 @@ function CursosPageContent() {
 
     return (
       <div className="w-full max-w-6xl mx-auto p-6 md:p-12 min-h-screen">
-        <h1 className="text-[#3932C0] text-5xl font-bold mb-4">Mis cursos</h1>
+        <h1 className="text-[#363C98] text-5xl font-bold mb-4">Mis cursos</h1>
         <p className="text-gray-400 text-lg mb-8">{courseList.length} curso{courseList.length !== 1 ? 's' : ''} en tu cuenta</p>
 
         <BrandTabs tabs={STATUS_TABS} active={statusTab} onChange={setStatusTab} className="mb-10" />
@@ -756,7 +756,7 @@ function CursosPageContent() {
               className="group text-left bg-white border-2 border-gray-100 rounded-[24px] overflow-hidden shadow-sm hover:shadow-xl hover:border-[#FF690B]/30 transition-all duration-300 cursor-pointer"
             >
               {/* Imagen del curso */}
-              <div className="relative w-full aspect-video bg-gradient-to-br from-[#3932C0]/10 to-[#FF690B]/10 overflow-hidden">
+              <div className="relative w-full aspect-video bg-gradient-to-br from-[#363C98]/10 to-[#FF690B]/10 overflow-hidden">
                 {course.image ? (
                   <img
                     src={course.image}
@@ -781,7 +781,7 @@ function CursosPageContent() {
               {/* Info del curso */}
               <div className="p-6">
                 <p className="text-[#FF690B] text-xs font-bold uppercase tracking-widest mb-2">Curso</p>
-                <h2 className="text-[#3932C0] text-xl font-bold mb-2 group-hover:text-[#FF690B] transition-colors line-clamp-2">
+                <h2 className="text-[#363C98] text-xl font-bold mb-2 group-hover:text-[#FF690B] transition-colors line-clamp-2">
                   {course.title || "Curso sin título"}
                 </h2>
                 {course.subtitle && (
@@ -809,7 +809,7 @@ function CursosPageContent() {
                     {course.tutor.profile_picture ? (
                       <img src={course.tutor.profile_picture} alt={course.tutor.firstName} className="w-7 h-7 rounded-full object-cover" />
                     ) : (
-                      <div className="w-7 h-7 rounded-full bg-[#3932C0]/10 flex items-center justify-center text-xs font-bold text-[#3932C0]">
+                      <div className="w-7 h-7 rounded-full bg-[#363C98]/10 flex items-center justify-center text-xs font-bold text-[#363C98]">
                         {course.tutor.firstName?.[0]}
                       </div>
                     )}
@@ -851,15 +851,15 @@ function CursosPageContent() {
         </button>
       </div>
       <p className="text-[#FF690B] font-bold text-sm mb-2 ml-1">Curso</p>
-      <h1 className="text-[#3932C0] text-4xl md:text-5xl font-bold mb-8">
+      <h1 className="text-[#363C98] text-4xl md:text-5xl font-bold mb-8">
         {activeCourse?.title || "Curso sin Título"}
       </h1>
 
       {/* Loading del player */}
       {playerLoading ? (
         <div className="w-full aspect-video rounded-[20px] bg-gray-100 flex flex-col items-center justify-center mb-8 shadow-lg gap-3">
-          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#3932C0]"></div>
-          <p className="text-[#3932C0] font-medium text-sm">Cargando curso...</p>
+          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#363C98]"></div>
+          <p className="text-[#363C98] font-medium text-sm">Cargando curso...</p>
         </div>
       ) : (
         <>
@@ -885,8 +885,8 @@ function CursosPageContent() {
             {selectedVideo && (
               selectedVideo.loading || videoLoading ? (
                 <div className="w-full aspect-video rounded-[20px] bg-gray-100 flex flex-col items-center justify-center mb-8 shadow-lg gap-3">
-                  <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#3932C0]"></div>
-                  <p className="text-[#3932C0] font-medium text-sm">Cargando video...</p>
+                  <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#363C98]"></div>
+                  <p className="text-[#363C98] font-medium text-sm">Cargando video...</p>
                 </div>
               ) : selectedVideo.error || !selectedVideo.url ? (
                 // Error real: NO reproducimos el vídeo de prueba (el alumno creería
@@ -964,7 +964,7 @@ function CursosPageContent() {
           {!activeCourseAccess && (
             <div className="mb-12 rounded-2xl border-2 border-[#FF690B]/30 bg-[#FFF6F0] px-6 py-5 flex flex-col sm:flex-row items-center justify-between gap-4">
               <div>
-                <p className="text-[#3932C0] font-bold text-lg">¿Te está gustando?</p>
+                <p className="text-[#363C98] font-bold text-lg">¿Te está gustando?</p>
                 <p className="text-gray-500 text-sm">Consigue el acceso completo para ver todas las clases del curso.</p>
               </div>
               <Link
@@ -978,7 +978,7 @@ function CursosPageContent() {
           )}
 
           {/* Modules / Content */}
-          <h2 className="text-[#3932C0] text-2xl font-bold mb-6">Contenido del curso</h2>
+          <h2 className="text-[#363C98] text-2xl font-bold mb-6">Contenido del curso</h2>
           <div className="space-y-4">
             {modules.map((mod) => {
               const isExpanded = expandedModules[mod.id];
@@ -1027,7 +1027,7 @@ function CursosPageContent() {
                                 <span className="text-[#FF690B] flex-shrink-0 w-4">
                                   {isLocked ? <LockIcon /> : isActive ? <PlayIcon /> : null}
                                 </span>
-                                <span className={`font-medium text-base ${isLocked ? "text-gray-400" : isActive ? "text-[#3932C0]" : "text-[#FF690B]"}`}>
+                                <span className={`font-medium text-base ${isLocked ? "text-gray-400" : isActive ? "text-[#363C98]" : "text-[#FF690B]"}`}>
                                   {video.video_title || video.title}
                                 </span>
                                 {!activeCourseAccess && isFreeSample && (
@@ -1068,7 +1068,7 @@ export default function CursosPage() {
   return (
     <Suspense fallback={
       <div className="w-full min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#3932C0]"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#363C98]"></div>
       </div>
     }>
       <CursosPageContent />

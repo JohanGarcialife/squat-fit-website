@@ -38,7 +38,25 @@ export function formatoProteinas(receta) {
   if (valor === null || valor === undefined) return null;
   const texto = String(valor).trim();
   if (!texto || texto === '0') return null;
-  return /^[\d.,]+$/.test(texto) ? `${texto} g prot.` : texto;
+  // El backend manda casi siempre el número pelado («23»), pero a veces con la
+  // unidad ya escrita («23 g»). Se acepta cualquiera de los dos: con el patrón
+  // estricto de antes, las que traían «23 g» se escapaban del formato y salían
+  // con un aspecto distinto al resto en la misma rejilla.
+  const soloNumero = texto.match(/^([\d.,]+)\s*g?$/i);
+  if (!soloNumero) return texto;
+  // «P: 30 g», no «30.4 g prot.».
+  //
+  // Va en la tarjeta, al lado de las kcal y con el nombre de la receta al
+  // lado: el sitio con menos ancho de todo el panel. La abreviatura y el
+  // redondeo lo dejan en la mitad de caracteres, y el decimal no aporta —
+  // nadie elige una receta por 0,4 g de proteína.
+  //
+  // Se redondea, no se trunca: 30,6 es más 31 que 30. La coma decimal española
+  // se cambia por punto antes de convertir, porque `Number('30,6')` es NaN y
+  // habría dejado la tarjeta sin el dato.
+  const numero = Number(soloNumero[1].replace(',', '.'));
+  if (!Number.isFinite(numero)) return texto;
+  return `P: ${Math.round(numero)} g`;
 }
 
 function Datos({ receta, className = '' }) {
@@ -55,7 +73,7 @@ function Datos({ receta, className = '' }) {
         </span>
       )}
       {proteinas && (
-        <span className="inline-flex items-center gap-1 text-[#3932C0]">
+        <span className="inline-flex items-center gap-1 text-[#363C98]">
           <Beef className="w-3.5 h-3.5" /> {proteinas}
         </span>
       )}
@@ -81,7 +99,7 @@ function Etiquetas({ taxonomia, max = 3 }) {
       {etiquetas.map((e) => (
         <span
           key={e.id}
-          className="text-[10px] font-bold uppercase tracking-wide rounded-full bg-[#F1F0FB] text-[#3932C0]/70 px-2 py-0.5"
+          className="text-[10px] font-bold uppercase tracking-wide rounded-full bg-[#F1F0FB] text-[#363C98]/70 px-2 py-0.5"
         >
           {e.label}
         </span>

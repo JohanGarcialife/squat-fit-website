@@ -207,7 +207,7 @@ ${values.mensaje}
                 </p>
                 <Link
                   href="/empieza-tu-cambio"
-                  className="inline-block bg-[#3932C0] hover:bg-[#2e28a0] text-white font-bold py-3 px-6 rounded-xl transition-all"
+                  className="inline-block bg-[#363C98] hover:bg-[#2e28a0] text-white font-bold py-3 px-6 rounded-xl transition-all"
                 >
                   Cuéntanos tu caso
                 </Link>
@@ -217,7 +217,7 @@ ${values.mensaje}
 
               <p className="text-gray-500 text-sm text-center">
                 ¿Necesitas soporte de un curso, un libro o un pago que ya son tuyos?{' '}
-                <Link href="/login?redirect=/contacto" className="text-[#3932C0] font-bold hover:underline">
+                <Link href="/login?redirect=/contacto" className="text-[#363C98] font-bold hover:underline">
                   Inicia sesión
                 </Link>{' '}
                 y el formulario se abre aquí mismo, ya rellenado con tus datos.
@@ -373,7 +373,7 @@ ${values.mensaje}
               <button
                 type="submit"
                 disabled={isSubmitting || !gdprAccepted}
-                className="w-full bg-[#3932C0] hover:bg-[#2e28a0] text-white font-bold py-4 rounded-2xl transition-all cursor-pointer shadow-lg shadow-indigo-100 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-lg"
+                className="w-full bg-[#363C98] hover:bg-[#2e28a0] text-white font-bold py-4 rounded-2xl transition-all cursor-pointer shadow-lg shadow-indigo-100 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-lg"
               >
                 {isSubmitting ? (
                   <>

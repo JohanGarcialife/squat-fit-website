@@ -125,7 +125,7 @@ export default function CocinaPage() {
     <div className="flex-1 w-full max-w-7xl mx-auto p-6 md:p-12 min-h-screen">
 
       {/* Title */}
-      <h1 className="text-[#3932C0] text-5xl font-bold mb-16">Cocina</h1>
+      <h1 className="text-[#363C98] text-5xl font-bold mb-16">Cocina</h1>
 
       {/* ── MI PAUTA ─────────────────────────────────────────────────────────
           Sección movida desde Mi programa: la pauta nutricional (menús) del
@@ -178,7 +178,7 @@ export default function CocinaPage() {
             ))}
           </div>
           <div className="text-center sm:text-left">
-            <h2 className="text-[#3932C0] text-2xl font-bold group-hover:text-[#FF690B] transition-colors">
+            <h2 className="text-[#363C98] text-2xl font-bold group-hover:text-[#FF690B] transition-colors">
               Mis recetas
             </h2>
             <p className="text-slate-500 mt-1 leading-relaxed">
@@ -196,7 +196,7 @@ export default function CocinaPage() {
         <div className="py-12">
           {freeSampleRecipes.length > 0 && (
             <div className="mb-20">
-              <h2 className="text-[#3932C0] text-3xl font-bold mb-2 text-center">Prueba gratis</h2>
+              <h2 className="text-[#363C98] text-3xl font-bold mb-2 text-center">Prueba gratis</h2>
               <p className="text-gray-500 text-lg max-w-xl mx-auto text-center mb-10">
                 Estas {freeSampleRecipes.length} recetas están abiertas para que las pruebes antes de suscribirte.
               </p>
@@ -227,7 +227,7 @@ export default function CocinaPage() {
                     <div className="flex flex-col gap-2 p-5">
                       {/* El endpoint devuelve `name`; `title` viene siempre a
                           null en estas recetas, así que no se usa. */}
-                      <h3 className="text-[#3932C0] text-xl font-bold leading-snug">
+                      <h3 className="text-[#363C98] text-xl font-bold leading-snug">
                         {receta.name || 'Receta'}
                       </h3>
                       <div className="flex items-center gap-4 text-sm text-gray-500">
@@ -253,7 +253,7 @@ export default function CocinaPage() {
           )}
 
           <div className="text-center mb-12">
-            <h2 className="text-[#3932C0] text-3xl font-bold mb-4">
+            <h2 className="text-[#363C98] text-3xl font-bold mb-4">
               Aún no tienes acceso a la biblioteca
             </h2>
             <p className="text-gray-500 text-lg max-w-xl mx-auto leading-relaxed">

@@ -7,7 +7,7 @@
 // «Mis cursos» activo se veía en contorno naranja y desentonaba con los demás.
 export default function SchoolIcon({ filled, width = 30, height = 30 }) {
   return (
-    <svg xmlns="http://www.w3.org/2000/svg" width={width} height={height} viewBox="0 0 24 24" fill={filled ? "#FF690B" : "none"} stroke={filled ? "none" : "#3932C0"} strokeWidth={filled ? "0" : "2"} strokeLinecap="round" strokeLinejoin="round">
+    <svg xmlns="http://www.w3.org/2000/svg" width={width} height={height} viewBox="0 0 24 24" fill={filled ? "#FF690B" : "none"} stroke={filled ? "none" : "#363C98"} strokeWidth={filled ? "0" : "2"} strokeLinecap="round" strokeLinejoin="round">
       <path stroke="none" d="M0 0h24v24H0z" fill="none" />
       {filled ? (
         <>

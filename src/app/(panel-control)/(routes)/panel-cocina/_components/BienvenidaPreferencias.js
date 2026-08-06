@@ -51,13 +51,13 @@ export default function BienvenidaPreferencias() {
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-6">
-      <div className="absolute inset-0 bg-[#3932C0]/25 backdrop-blur-sm" />
+      <div className="absolute inset-0 bg-[#363C98]/25 backdrop-blur-sm" />
       <div className="relative w-full sm:max-w-xl bg-white rounded-t-[32px] sm:rounded-[32px] shadow-2xl p-6 sm:p-8 max-h-[92vh] overflow-y-auto">
         <span className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wide rounded-full bg-[#FFF6F0] text-[#FF690B] px-3 py-1">
           <Sparkles className="w-3.5 h-3.5" /> Antes de empezar
         </span>
 
-        <h2 className="text-[#3932C0] text-2xl sm:text-3xl font-bold mt-4 leading-tight">
+        <h2 className="text-[#363C98] text-2xl sm:text-3xl font-bold mt-4 leading-tight">
           ¿Cómo comes tú?
         </h2>
         <p className="text-slate-500 mt-2 leading-relaxed">
@@ -79,7 +79,7 @@ export default function BienvenidaPreferencias() {
                 className={`rounded-full px-4 py-2 text-sm font-bold border transition-colors cursor-pointer ${
                   activa
                     ? 'bg-[#FF690B] border-[#FF690B] text-white'
-                    : 'bg-white border-slate-200 text-[#3932C0] hover:border-[#FF690B]'
+                    : 'bg-white border-slate-200 text-[#363C98] hover:border-[#FF690B]'
                 }`}
               >
                 {d.label}
@@ -92,7 +92,7 @@ export default function BienvenidaPreferencias() {
           type="button"
           onClick={() => setAlergenosAbiertos((a) => !a)}
           aria-expanded={alergenosAbiertos}
-          className="mt-5 inline-flex items-center gap-1.5 text-sm font-bold text-[#3932C0]/70 hover:text-[#FF690B] transition-colors cursor-pointer"
+          className="mt-5 inline-flex items-center gap-1.5 text-sm font-bold text-[#363C98]/70 hover:text-[#FF690B] transition-colors cursor-pointer"
         >
           <ChevronDown
             className={`w-4 h-4 transition-transform ${alergenosAbiertos ? 'rotate-180' : ''}`}
@@ -113,7 +113,7 @@ export default function BienvenidaPreferencias() {
                   className={`rounded-full px-4 py-2 text-sm font-bold border transition-colors cursor-pointer ${
                     activa
                       ? 'bg-[#FF690B] border-[#FF690B] text-white'
-                      : 'bg-white border-slate-200 text-[#3932C0] hover:border-[#FF690B]'
+                      : 'bg-white border-slate-200 text-[#363C98] hover:border-[#FF690B]'
                   }`}
                 >
                   Sin {a.label.toLowerCase()}
@@ -143,7 +143,7 @@ export default function BienvenidaPreferencias() {
             disabled={!algunaMarcada}
             className={`rounded-2xl px-8 py-3 font-bold text-white transition-colors ${
               algunaMarcada
-                ? 'bg-[#3932C0] hover:bg-[#3932C0]/90 cursor-pointer'
+                ? 'bg-[#363C98] hover:bg-[#363C98]/90 cursor-pointer'
                 : 'bg-slate-200 cursor-not-allowed'
             }`}
           >

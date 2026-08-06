@@ -224,8 +224,8 @@ function MisRecetasContenido() {
     return (
       <div className="w-full min-h-screen flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#3932C0]" />
-          <p className="text-[#3932C0] font-semibold text-lg">Cargando tus recetas...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#363C98]" />
+          <p className="text-[#363C98] font-semibold text-lg">Cargando tus recetas...</p>
         </div>
       </div>
     );
@@ -237,7 +237,7 @@ function MisRecetasContenido() {
   if (!recipes.length) {
     return (
       <div className="flex-1 w-full max-w-5xl mx-auto p-6 md:p-12 min-h-screen">
-        <h1 className="text-[#3932C0] text-4xl md:text-5xl font-bold mb-4">Mis recetas</h1>
+        <h1 className="text-[#363C98] text-4xl md:text-5xl font-bold mb-4">Mis recetas</h1>
         <p className="text-gray-500 text-lg leading-relaxed mb-10">
           Aún no tienes recetas disponibles. Suscríbete a la{" "}
           <strong>Biblioteca Digital de Squad Fit</strong> para abrir las 149 recetas
@@ -252,7 +252,7 @@ function MisRecetasContenido() {
     <div className="flex-1 w-full max-w-7xl mx-auto p-6 md:p-10 pb-16 min-h-screen">
       <div className="flex items-start justify-between gap-4 mb-6">
         <div>
-          <h1 className="text-[#3932C0] text-4xl md:text-5xl font-bold">Mis recetas</h1>
+          <h1 className="text-[#363C98] text-4xl md:text-5xl font-bold">Mis recetas</h1>
           <p className="text-slate-400 mt-2">
             {recipes.length} {recipes.length === 1 ? "receta" : "recetas"} de tus libros de cocina.
           </p>
@@ -299,7 +299,7 @@ function MisRecetasContenido() {
                 aria-pressed={vista === id}
                 title={`Ver en ${label.toLowerCase()}`}
                 className={`flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-sm font-bold transition-colors cursor-pointer ${
-                  vista === id ? "bg-white text-[#FF690B] shadow-sm" : "text-slate-400 hover:text-[#3932C0]"
+                  vista === id ? "bg-white text-[#FF690B] shadow-sm" : "text-slate-400 hover:text-[#363C98]"
                 }`}
               >
                 <Icon className="w-4 h-4" /> <span className="hidden sm:inline">{label}</span>
@@ -320,8 +320,8 @@ function MisRecetasContenido() {
                 aria-pressed={activa}
                 className={`rounded-full px-3.5 py-1.5 text-sm font-bold border transition-colors cursor-pointer ${
                   activa
-                    ? "bg-[#3932C0] border-[#3932C0] text-white"
-                    : "bg-white border-slate-200 text-[#3932C0] hover:border-[#3932C0]"
+                    ? "bg-[#363C98] border-[#363C98] text-white"
+                    : "bg-white border-slate-200 text-[#363C98] hover:border-[#363C98]"
                 }`}
               >
                 <span className="mr-1.5">{c.icono}</span>
@@ -380,7 +380,7 @@ function MisRecetasContenido() {
       {visibles.length === 0 ? (
         <div className="flex flex-col items-center justify-center text-center gap-3 py-20">
           <span className="text-4xl">🔍</span>
-          <p className="text-[#3932C0]/60 font-semibold">
+          <p className="text-[#363C98]/60 font-semibold">
             Ninguna receta con esos filtros.
           </p>
           <button
@@ -395,7 +395,7 @@ function MisRecetasContenido() {
         <div className="space-y-10">
           {secciones.map((seccion) => (
             <section key={seccion.categoria} id={seccion.ancla} className="scroll-mt-24">
-              <h2 className="text-[#3932C0] text-2xl font-bold mb-4 flex items-center gap-2">
+              <h2 className="text-[#363C98] text-2xl font-bold mb-4 flex items-center gap-2">
                 <span>{seccion.icono}</span>
                 {seccion.categoria}
                 <span className="text-slate-300 text-base font-semibold">
@@ -437,7 +437,7 @@ function MisRecetasContenido() {
       {/* ── Los libros, para quien quiera hojearlos enteros ───────────────── */}
       {isSubscribed && libros.length > 0 && (
         <section className="mt-16 border-t border-slate-100 pt-10">
-          <h2 className="text-[#3932C0] text-2xl font-bold mb-6">Tus libros</h2>
+          <h2 className="text-[#363C98] text-2xl font-bold mb-6">Tus libros</h2>
           <div className="flex flex-wrap gap-6">
             {libros.flatMap((libro) => {
               const versiones = libro.versions?.length
@@ -501,7 +501,7 @@ export default function MisRecetasPage() {
     <Suspense
       fallback={
         <div className="w-full min-h-screen flex items-center justify-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#3932C0]" />
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#363C98]" />
         </div>
       }
     >
