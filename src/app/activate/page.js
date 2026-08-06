@@ -7,6 +7,7 @@ import Link from 'next/link';
 import { Loader2, CheckCircle, XCircle, Sparkles, MailCheck, Eye, EyeOff, Check } from 'lucide-react';
 import { enviarFormSubmit } from '@/app/components/ga4Formularios';
 import { PasswordChecklist, cumpleReglas } from '@/app/components/passwordRules';
+import { useAuthStore } from '@/stores/auth.store';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://squatfit-api-cyrc2g3zra-no.a.run.app';
 
@@ -33,6 +34,43 @@ function mensajeEnCastellano(bruto) {
   return 'Este enlace de activación no ha funcionado.';
 }
 
+/**
+ * ¿A qué parte del panel se le manda tras crear la contraseña?
+ *
+ * A la de lo que ha comprado. El orden es el de «lo más caro y lo más
+ * acompañado primero»: quien tiene programa viene por el programa, y quien
+ * tiene curso viene por el curso. Si no se puede averiguar, al inicio del
+ * panel, que ya le enseña lo suyo — nunca a la portada pública, que es de donde
+ * viene y donde no hay nada que le pertenezca.
+ */
+async function averiguarDestino(token) {
+  const cabeceras = { Authorization: `Bearer ${token}` };
+
+  try {
+    const { data } = await axios.get(`${API_BASE}/api/v1/advice/by-user`, { headers: cabeceras });
+    if (data && (data.status === 'active' || data.suscription_name || data.title)) return '/mi-programa';
+  } catch {
+    /* sin programa */
+  }
+
+  try {
+    const { data } = await axios.get(`${API_BASE}/api/v1/course/by-user`, { headers: cabeceras });
+    const cursos = Array.isArray(data) ? data : data?.courses;
+    if (Array.isArray(cursos) && cursos.length > 0) return '/panel-cursos';
+  } catch {
+    /* sin cursos */
+  }
+
+  try {
+    const { isSubscribed } = JSON.parse(atob(token.split('.')[1] || '')) || {};
+    if (isSubscribed) return '/panel-cocina';
+  } catch {
+    /* token ilegible */
+  }
+
+  return '/panel-control';
+}
+
 function ActivateContent() {
   const searchParams = useSearchParams();
   const token = searchParams.get('token');
@@ -49,6 +87,9 @@ function ActivateContent() {
   const [errorClave, setErrorClave] = useState('');
   const [claveLista, setClaveLista] = useState(false);
   const [verClave, setVerClave] = useState(false);
+  // Adónde le lleva el botón final. Si se ha podido entrar sola, a lo que ha
+  // comprado; si no, al login de siempre.
+  const [destino, setDestino] = useState(null);
   // Las dos condiciones que se comprueban mientras escribe, no al pulsar.
   const coinciden = claveRepetida.length > 0 && clave === claveRepetida;
   const puedeGuardar = cumpleReglas(clave) && coinciden;
@@ -139,6 +180,36 @@ function ActivateContent() {
       await axios.post(`${API_BASE}/api/v1/user/activate`, { token, password: clave });
       enviarFormSubmit({ id: 'activar_cuenta', nombre: 'Activar cuenta · crear contraseña' });
       setClaveLista(true);
+
+      // ENTRAR SOLA Y CAER EN LO QUE HA COMPRADO.
+      //
+      // Antes esto terminaba con un botón a /login: la persona acababa de
+      // escribir su contraseña dos veces y lo siguiente era escribirla otra
+      // vez, para aparecer en la portada. Quien llega aquí viene de comprar y
+      // lo que quiere ver es su compra.
+      //
+      // Se entra con lo que acaba de elegir —ya lo tenemos en el formulario, no
+      // hay que pedirle nada— y se le lleva a la sección de lo que tiene. Si
+      // algo de esto falla, se queda el botón de siempre: es un atajo, no un
+      // requisito.
+      try {
+        const { data: quien } = await axios.get(`${API_BASE}/api/v1/user/activation-email`, {
+          params: { token },
+        });
+        const correo = quien?.email;
+        if (!correo) return;
+
+        const { data: sesion } = await axios.post(`${API_BASE}/api/v1/user/login`, {
+          username: correo,
+          password: clave,
+        });
+        if (!sesion?.token) return;
+
+        useAuthStore.getState().setToken(sesion.token);
+        setDestino(await averiguarDestino(sesion.token));
+      } catch (err) {
+        console.warn('No se pudo entrar automáticamente; queda el botón de entrar.', err);
+      }
     } catch (error) {
       // El token se consume al fijar la contraseña, así que un 400 aquí suele
       // ser un segundo envío del mismo formulario. Se le manda a entrar en vez
@@ -231,8 +302,11 @@ function ActivateContent() {
             llegó a tener contraseña. El paso de más era el que los perdía.
           */}
           {claveLista ? (
-            <Link href="/login" className="w-full cursor-pointer bg-[#363C98] text-white rounded-3xl p-5 text-lg font-bold hover:bg-[#363C98]/90 transition duration-300 block">
-              Entrar en mi cuenta
+            <Link
+              href={destino || '/login'}
+              className="w-full cursor-pointer bg-[#363C98] text-white rounded-3xl p-5 text-lg font-bold hover:bg-[#363C98]/90 transition duration-300 block"
+            >
+              {destino ? 'Ir a lo que has comprado' : 'Entrar en mi cuenta'}
             </Link>
           ) : pideContrasena ? (
             <form onSubmit={guardarContrasena} className="w-full flex flex-col gap-3 text-left">
