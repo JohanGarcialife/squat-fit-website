@@ -85,9 +85,49 @@ export default function CheckoutAccess({ onReady }) {
         </p>
 
         {activationSent ? (
-          <div className="rounded-xl border border-orange-200 bg-orange-50 p-4 text-sm text-gray-700">
-            Ya tienes una cuenta creada con <strong>{email}</strong> pero sin contraseña. Te hemos enviado un email con
-            un enlace para crearla: en cuanto la tengas, vuelve aquí y continúa tu compra.
+          /* Este estado dejaba la pantalla SIN UN SOLO BOTÓN NI CAMPO: cero
+             inputs y cero botones, comprobado en producción el 6-ago. Quien no
+             recibía el correo se quedaba mirando un párrafo, en mitad de una
+             compra. Y el grupo que cae aquí es justo el peor: las cuentas
+             migradas que siguen sin contraseña.
+
+             Ahora el aviso se queda, pero con las tres salidas que hacían
+             falta: seguir cuando ya la tenga, pedirla por otra vía, o comprar
+             con otro correo. */
+          <div className="space-y-4">
+            <div className="rounded-xl border border-orange-200 bg-orange-50 p-4 text-sm text-gray-700">
+              Ya tienes una cuenta creada con <strong>{email}</strong> pero sin contraseña. Te hemos enviado un email
+              con un enlace para crearla: en cuanto la tengas, vuelve aquí y continúa tu compra.
+            </div>
+
+            <button
+              type="button"
+              onClick={() => {
+                setActivationSent(false);
+                setNeedsPassword(true);
+              }}
+              className="w-full rounded-xl bg-orange-500 py-3 font-bold text-white transition hover:bg-orange-600"
+            >
+              Ya tengo mi contraseña, continuar
+            </button>
+
+            <div className="flex flex-col gap-2 text-sm">
+              <a href={`/forgot-password?email=${encodeURIComponent(email.trim().toLowerCase())}`} className="text-center text-gray-600 underline">
+                No me ha llegado el correo
+              </a>
+              <button
+                type="button"
+                onClick={() => {
+                  setActivationSent(false);
+                  setNeedsPassword(false);
+                  setPassword('');
+                  setEmail('');
+                }}
+                className="text-center text-gray-600 underline"
+              >
+                Comprar con otro correo
+              </button>
+            </div>
           </div>
         ) : (
           <form onSubmit={needsPassword ? handleLogin : handleEmail} className="space-y-4">
