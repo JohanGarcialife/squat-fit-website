@@ -1,25 +1,40 @@
 /**
  * ¿Hay algo en este carrito que haya que meter en una caja?
  *
- * UNA SOLA REGLA PARA LAS DOS PREGUNTAS. Este criterio ya existía —lo usaba
- * `OrderSummary` para decidir si se cobra envío— pero el formulario no lo
- * miraba, así que la dirección de envío se pedía SIEMPRE. Comprando un curso,
- * que no se envía a ninguna parte y por el que no se cobra ni un céntimo de
- * porte, el cliente se encontraba con una dirección de envío que rellenar.
- * Fricción gratis en la única pantalla donde se pierde dinero de verdad.
+ * PRODUCTOS FÍSICOS HAY SEIS, Y SON ESTOS:
+ *   · Libro impreso — volumen 1
+ *   · Libro impreso — volumen 2
+ *   · Libro impreso — vol. 1 + vol. 2
+ *   · La Cocina Squad Fit (el bundle de todo)
+ *   · Copia extra impresa — volumen 1
+ *   · Copia extra impresa — volumen 2
  *
- * Que la regla viva aquí y no repetida en cada sitio es lo que impide que un
- * día se cobre envío sin haber pedido dirección, o al revés.
+ * Todo lo demás del catálogo —cursos, programas, biblioteca, recetarios
+ * digitales— se entrega abriendo el panel.
  *
- * EL CRITERIO. `isDirectCheckout` marca las compras de un solo clic que no
- * pasan por la tienda física: suscripciones, cursos, packs digitales. Lo que no
- * lleva esa marca viene del catálogo de libros impresos, que sí viaja. No es
- * una comprobación de «producto físico» en el catálogo —eso sería mejor y hoy
- * el carrito no lo trae—, pero es EXACTAMENTE el mismo criterio con el que se
- * cobra el envío, y esa coherencia es lo que importa: no puede pasar que se
- * cobre porte sin dirección.
+ * CÓMO SE SABE. Por una marca puesta al añadirlo (`esFisico`), no por descarte.
+ * La primera versión de esto preguntaba «¿no es compra directa?», y por descarte
+ * acababa siendo físico cualquier cosa que no fuera una suscripción: un curso
+ * comprado desde su ficha entraba como envío y al cliente le salía una
+ * dirección de envío que rellenar. La marca la pone `addPhysical` en Shop.js,
+ * que es la única puerta por la que un libro impreso llega al carrito.
+ *
+ * EL RESPALDO POR NOMBRE es para los carritos que ya estaban guardados en el
+ * navegador antes de existir la marca: se quedarían sin `esFisico` y su libro
+ * dejaría de pedir dirección. Reconoce los seis por cómo se llaman en el
+ * carrito («Impreso Volumen 1», «La Cocina Squad Fit», «Libro Físico - …»).
+ * Se puede quitar dentro de unas semanas, cuando ya no queden carritos viejos.
  */
+
+const NOMBRES_DE_LO_QUE_SE_ENVIA = /(impres|libro f[íi]sico|cocina squad ?fit|copia extra)/i;
+
+function esFisico(item) {
+  if (!item) return false;
+  if (item.esFisico === true) return true;
+  return NOMBRES_DE_LO_QUE_SE_ENVIA.test(String(item.name || ''));
+}
+
 export function hayQueEnviar(cart) {
   if (!Array.isArray(cart) || cart.length === 0) return false;
-  return cart.some((item) => !item?.isDirectCheckout);
+  return cart.some(esFisico);
 }

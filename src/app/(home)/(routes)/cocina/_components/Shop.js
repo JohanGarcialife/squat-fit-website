@@ -322,6 +322,15 @@ export default function Shop() {
     addToCart({
       id: product.id,
       type: product.type,
+      // LA MARCA DE QUE ESTO VIAJA EN UNA CAJA.
+      //
+      // `addPhysical` es la ÚNICA puerta por la que entra un libro impreso al
+      // carrito, así que aquí es donde se sabe con certeza. Antes se deducía
+      // por descarte —«si no es compra directa, será físico»—, y por descarte
+      // acababa siendo físico cualquier cosa que no fuera una suscripción.
+      // Físicos hay seis y son estos: los dos volúmenes impresos, el pack de
+      // los dos, el bundle «La Cocina Squad Fit» y las dos copias extra.
+      esFisico: true,
       // «Libro Físico - X» era un tercer nombre para el mismo producto: la
       // tarjeta decía «Impreso / Volumen 1», el carrito «Libro Físico - Volumen
       // 1» y el cargo de Stripe «Impreso Volumen 1». Tres sitios seguidos de la
