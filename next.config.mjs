@@ -110,6 +110,27 @@ const nextConfig = {
       // El porqué, y por qué NO se copia el cajón de sastre, en
       // redirects-legacy.mjs.
       ...legacyOnNewDomain,
+      // Las URLs /products/… de la tienda vieja. Google todavía las conoce —en
+      // Search Console salía /products/gomas-resistencia-cortas como referencia
+      // de la portada— y aquí morían en un 404.
+      //
+      // NO ES UNA DECISIÓN NUEVA, y por eso se pone sin preguntar: el dominio
+      // viejo YA responde a estas URLs con un 301 a la portada (comprobado el
+      // 6-ago: squatfit.es/products/gomas-resistencia-cortas → 301 →
+      // https://squadfit.es/). Allí lo hace su cajón de sastre; aquí no hay
+      // cajón de sastre a propósito —se tragaría los 404 de verdad de una web
+      // viva— así que se escribe la regla concreta y se acabó igualar el
+      // comportamiento.
+      //
+      // Y va a la PORTADA, no a /cocina ni a /cursos, porque lo que había ahí
+      // eran accesorios (gomas de resistencia), que no es ninguna de las dos
+      // cosas. Mandar a alguien a la tienda de libros porque buscaba unas gomas
+      // es peor que dejarle en la puerta.
+      {
+        source: '/products/:path*',
+        destination: '/',
+        permanent: true,
+      },
     ];
   },
   async headers() {
