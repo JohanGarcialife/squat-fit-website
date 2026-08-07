@@ -52,6 +52,18 @@ const MAP = [
   // /producto y acababa en /cursos siendo el recetario. En Search Console son
   // 11 clics y 351 impresiones en 3 meses.
   ['/producto/la-cocina-squat-fit', '/cocina'],
+  // Las otras dos variantes con T, del mismo repaso: revisadas las 79 páginas
+  // del dominio viejo que reciben clics, estas seguían cayendo en el comodín de
+  // /producto y acabando en /cursos siendo el recetario.
+  ['/producto/la-cocina-squat-fit-anual', '/cocina'],
+  ['/producto/la-cocina-squat-fit-permanente', '/cocina'],
+  // Recetas de Hamlet: también es recetario, no curso.
+  ['/producto/recetas-hamletsquatfit', '/cocina'],
+  // La categoría «ebooks» entera. Ya estaba su hijo
+  // /categoria-producto/ebooks/libro-de-cocina, pero la categoría suelta caía
+  // en el comodín de /categoria-producto y acababa en /cursos.
+  ['/categoria-producto/ebooks', '/cocina'],
+  ['/categoria-producto/ebooks/:path*', '/cocina'],
   ['/categoria-producto/ebooks/libro-de-cocina', '/cocina'],
 
   // --- Tienda: el resto de productos y categorías --------------------------
