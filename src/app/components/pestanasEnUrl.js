@@ -45,6 +45,15 @@ export function slugPestana(etiqueta) {
   return entero.replace(RELLENO, '') || entero
 }
 
+/**
+ * La almohadilla que se escribe para una pestaña. Por defecto sale de su
+ * nombre, pero una pestaña puede pedir otra con `hash:` cuando el nombre
+ * completo queda largo: «Únete al equipo» se enlaza como #empleo.
+ */
+function almohadilla(pestana) {
+  return pestana?.hash || slugPestana(pestana?.label || pestana?.id || '')
+}
+
 /** Qué pestaña pide la URL, o null si no pide ninguna que exista. */
 export function pestanaDeUrl(tabs) {
   const params = new URLSearchParams(window.location.search)
@@ -70,6 +79,7 @@ export function pestanaDeUrl(tabs) {
 
   const encontrada =
     tabs.find((t) => String(t.id).toLowerCase() === pedido) ||
+    tabs.find((t) => t.hash === pedido) ||
     tabs.find((t) => slugPestana(t.label) === pedido) ||
     tabs.find((t) => normalizar(t.label) === pedido) ||
     tabs.find((t) => String(t.id).toLowerCase() === podado) ||
@@ -109,7 +119,7 @@ export default function usePestanasEnUrl(tabs, setActiva) {
     const { tabs: actuales } = ref.current
     const esLaPrimera = actuales[0] && actuales[0].id === id
     const pestana = actuales.find((t) => t.id === id)
-    const hash = esLaPrimera ? '' : `#${slugPestana(pestana?.label || id)}`
+    const hash = esLaPrimera ? '' : `#${almohadilla(pestana) || id}`
     // Se conserva la query (/panel-cursos lleva ?id=…). replaceState y no
     // pushState: así «atrás» sale de la página en vez de recorrer pestañas.
     window.history.replaceState(
