@@ -11,6 +11,8 @@ import { TIER_META, groupTierOrder, buildTierCartItem, formatEuros, usuarioYaTie
 import { useProgramAccess } from '@/app/components/useProgramAccess';
 import useCerrarAlTocarFuera from '@/hooks/useCerrarAlTocarFuera';
 import CabeceraPaso from './CabeceraPaso';
+import Sugeridos from './Sugeridos';
+import { fetchTieredCourses } from '@/app/components/courseCatalog';
 
 // Sufijo de cobro por tramo (el trimestral se etiquetaba antes como «pago
 // único» porque el selector usaba un orden fijo de 3 tramos).
@@ -50,6 +52,18 @@ export default function Summary(props) {
     // un toque en el resto de la página (o Escape) lo pliega. La ref va en el
     // bottom sheet completo, así el botón «Ver detalle» sigue siendo un
     // interruptor y se puede tocar la moneda o «Continuar» sin que se cierre.
+    // Catálogo para los sugeridos. Se pide DESPUÉS de pintar el carrito y su
+    // fallo se traga a propósito: una sugerencia es un extra, y que la tienda
+    // no responda no puede impedir que alguien vea lo que va a pagar.
+    const [catalogo, setCatalogo] = useState([]);
+    useEffect(() => {
+        let vivo = true;
+        fetchTieredCourses()
+            .then((g) => { if (vivo) setCatalogo(g || []); })
+            .catch(() => {});
+        return () => { vivo = false; };
+    }, []);
+
     const hojaRef = useRef(null);
     const plegarDetalle = useCallback(() => setDetalleAbierto(false), []);
     useCerrarAlTocarFuera(detalleAbierto, plegarDetalle, [hojaRef]);
@@ -372,7 +386,14 @@ export default function Summary(props) {
 
                   Solo con físicos en el carrito: en uno 100 % digital no hay
                   envío que regalar y la barra sería una promesa sin sentido. */}
-              {hasPhysicalItems && freeShippingThreshold > 0 && (
+              {/* El umbral hace falta para la BARRA (sin denominador no hay
+                  porcentaje), pero NO para decir que ya lo tienes. Al añadir la
+                  barra lo exigí para todo el bloque, y con eso el «¡Envío gratis
+                  conseguido!» —que llevaba ahí desde antes— dejó de salir en el
+                  caso más frecuente: carrito por encima del mínimo, donde el
+                  presupuesto devuelve envío 0 y umbral vacío. Se ve en el
+                  carrito real con 242,89 €: envío 0,00 € y ni una palabra. */}
+              {hasPhysicalItems && (
                 <div className="mb-6 sm:mb-8 lg:mb-12 max-w-md mx-auto w-full">
                   {remainingForFreeShipping > 0 ? (
                     <>
@@ -383,12 +404,14 @@ export default function Summary(props) {
                         </span>{' '}
                         para el <span className="text-orange-500 font-bold">envío gratis</span>
                       </p>
-                      <BarraEnvio
-                        completado={Math.max(
-                          0,
-                          Math.min(1, (freeShippingThreshold - remainingForFreeShipping) / freeShippingThreshold),
-                        )}
-                      />
+                      {freeShippingThreshold > 0 && (
+                        <BarraEnvio
+                          completado={Math.max(
+                            0,
+                            Math.min(1, (freeShippingThreshold - remainingForFreeShipping) / freeShippingThreshold),
+                          )}
+                        />
+                      )}
                     </>
                   ) : (
                     <>
@@ -398,26 +421,6 @@ export default function Summary(props) {
                       <BarraEnvio completado={1} />
                     </>
                   )}
-                </div>
-              )}
-
-              {/* Un solo artículo por pedido.
-                  El cobro de físicos va por `create-payment-intent-version` o
-                  `-pack`, y ambos aceptan UN id: con dos artículos distintos el
-                  pago se corta. Eso ya pasaba, pero el aviso saltaba en el paso
-                  de PAGO — después de que el cliente hubiera dejado correo,
-                  dirección y DNI—, que es el peor momento para enterarse.
-                  Aquí se le dice en el paso 1, cuando corregirlo cuesta un clic
-                  en la papelera que ya tiene al lado. */}
-              {cart.length > 1 && (
-                <div className="mb-6 sm:mb-8 rounded-2xl border border-amber-300 bg-amber-50 p-4 text-left">
-                  <p className="text-amber-900 font-bold text-sm sm:text-base">
-                    Por ahora solo podemos enviar un artículo por pedido
-                  </p>
-                  <p className="text-amber-800 text-sm mt-1">
-                    Tienes {cart.length} en el carrito. Deja el que quieras recibir
-                    primero y haz el otro pedido después — te llegarán igual.
-                  </p>
                 </div>
               )}
 
@@ -550,6 +553,11 @@ export default function Summary(props) {
                     del curso y en el paso 3, que son los dos momentos donde
                     aporta algo — decidir el tramo y elegir cómo pagar. */}
               </div>
+
+              {/* Justo encima de «Continuar»: es el último momento en el que
+                  añadir algo sigue siendo fácil. Más arriba compite con la
+                  lista de lo que ya lleva; más abajo ya se ha ido. */}
+              <Sugeridos catalogo={catalogo} className="mb-6 max-w-md mx-auto w-full" />
 
               {/* Action Button — un poco más pequeño en móvil */}
               <button

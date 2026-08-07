@@ -369,12 +369,28 @@ export default function Payment(props) {
     // Session se redirige (vuelta a /cart?success=true); si devuelve un
     // clientSecret se monta el Payment Element; si el endpoint aún no está
     // desplegado (404), se mantiene el aviso honesto de «muy pronto».
-    if (directItem && (directItem.tierGroup || directItem.tier)) {
+    // ── A dónde va el cobro ────────────────────────────────────────────────
+    //
+    // Al checkout del CATÁLOGO si hay un tramo, o si hay más de un artículo:
+    // desde el carrito mixto es el único que sabe cobrar varias líneas en una
+    // sola sesión de Stripe. El camino antiguo de libros
+    // (`create-payment-intent-version` / `-pack`) acepta UN id y se queda para
+    // la compra suelta de un físico que no esté en el catálogo.
+    //
+    // El PRIMERO manda: es el que lleva el `payload` con el tramo elegido. Los
+    // demás viajan como `extra` y el backend los resuelve por su id de
+    // `products`.
+    const principal = directItem ?? cart[0];
+    const resto = cart.filter((i) => i !== principal);
+    const vaAlCatalogo =
+      (directItem && (directItem.tierGroup || directItem.tier)) || cart.length > 1;
+
+    if (vaAlCatalogo && principal) {
        // `datosCliente` es lo que el cliente escribió en el paso 2: de ahí
        // salen la dirección de envío (para que Stripe no la vuelva a pedir y
        // se envíe adonde se calculó el precio) y su nombre y teléfono (para
        // que el pago no aparezca sin nombre en el panel de Stripe).
-       createTierCheckout(directItem, { token, saveCard, formData: datosCliente })
+       createTierCheckout(principal, { token, saveCard, formData: datosCliente, extra: resto })
          .then((result) => {
            if (result.status === 'embedded') {
              // Lo normal desde ahora: el pago se pinta AQUÍ, sin salir de la web.
@@ -437,10 +453,14 @@ export default function Payment(props) {
        // llegaba después de rellenar TODO el formulario, que es el peor momento
        // posible para enterarse. Esto queda como última red por si alguien
        // manipula el carrito por el camino.
+       // Inalcanzable desde el carrito mixto: un carrito de más de un artículo
+       // se enruta arriba al checkout del catálogo, que sí sabe cobrar varias
+       // líneas. Se queda como última red por si alguien llega aquí con dos
+       // artículos que no estén en el catálogo — cobrar solo el primero sería
+       // peor que no cobrar.
        if (cart.length > 1) {
            toast.error(
-             `Por ahora solo podemos enviar un artículo por pedido, y tienes ${cart.length}. ` +
-             `Deja uno en el carrito y haz el otro pedido después.`,
+             'No hemos podido preparar el pago de todos los artículos. Escríbenos y lo resolvemos.',
              { duration: 7000 },
            );
            setLoading(false);

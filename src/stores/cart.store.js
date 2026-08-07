@@ -18,11 +18,18 @@ export const useCartStore = create(
       addToCart: (product) => {
         let currentCart = get().cart;
         
-        // Evitar carritos mixtos: Si el carrito actual tiene alguna suscripción/producto directo,
-        // vaciamos el carrito porque el usuario decidió agregar un producto físico que usa el checkout global.
-        if (currentCart.some(item => item.isDirectCheckout)) {
-            currentCart = [];
-        }
+        // Aquí se vaciaba el carrito si dentro había algún `isDirectCheckout`.
+        //
+        // No era un capricho: el checkout resolvía UN producto y el resto se
+        // perdía, así que vaciarlo era la forma de que el cliente no pagara
+        // creyendo que se llevaba dos cosas. El coste era el ticket medio —
+        // añadir un libro te borraba el curso, y nadie hace dos compras
+        // seguidas por gusto.
+        //
+        // Ya no hace falta: el backend cobra varias líneas en una sola sesión
+        // de Stripe y el webhook concede todas (ver `resolveProducts` y
+        // `concederRestoDelCarrito`). Si algún día se revierte aquello, esto
+        // tiene que volver: sin ello se cobraría de menos.
 
         const productInCart = currentCart.find((item) => item.id === product.id)
 
@@ -43,8 +50,15 @@ export const useCartStore = create(
         enviarAddToCart(product)
       },
 
-      // Opción de Compra Directa (Bypass de carrito para Suscripciones)
-      // Limpia el carrito y añade solo este item con sus instrucciones de checkout exactas
+      // Compra directa: el artículo trae sus propias instrucciones de checkout.
+      //
+      // SUSTITUYE el carrito a propósito, y esto sí se queda: es el camino de
+      // «Comprarlo» desde la ficha de un curso, donde el cliente eligió UN
+      // tramo concreto. Cambiar de mensual a anual tiene que reemplazar, no
+      // acumular las dos suscripciones del mismo curso.
+      //
+      // Para añadir sin reemplazar está `addToCart`, que desde el carrito
+      // mixto ya convive con los directos.
       setDirectCheckoutItem: (product) => {
         set({ cart: [{ ...product, quantity: 1, isDirectCheckout: true }] })
         // La compra directa (suscripciones) salta el carrito visible, pero
