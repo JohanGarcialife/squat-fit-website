@@ -51,7 +51,6 @@ const nextConfig = {
   // Redirección permanente para no romper enlaces guardados ni SEO.
   async redirects() {
     return [
-      { source: '/planes', destination: '/programa', permanent: true },
       // Dominio viejo -> nuevo. Van PRIMERO: todas llevan condición de host, así
       // que en squadfit.es no disparan nunca, y en squatfit.es tienen que ganar
       // a los enlaces cortos de abajo. Si no, /unete en el dominio viejo se
@@ -59,6 +58,13 @@ const nextConfig = {
       ...legacyRedirects,
       // Enlaces cortos al formulario, uno por origen (los antiguos Pretty Links).
       ...formLinkRedirects,
+      // `/planes` para el dominio NUEVO. Estaba la primera de todo el array, y
+      // como Next aplica la primera regla que encaja, ganaba también en el
+      // dominio viejo: allí saltaba a squatfit.es/programa (destino relativo) y
+      // la regla comodín de Cloudflare la mandaba a la portada. Puesta aquí, en
+      // squatfit.es gana la de redirects-legacy.mjs —que lleva host y destino
+      // absoluto— y en squadfit.es sigue funcionando esta.
+      { source: '/planes', destination: '/programa', permanent: true },
       // /formulario en el dominio NUEVO. Hasta ahora daba 404: la regla de
       // redirects-legacy.mjs lleva condición de host y solo dispara en
       // squatfit.es, así que quien copiaba el enlace del correo y le cambiaba
