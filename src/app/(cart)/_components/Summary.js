@@ -360,18 +360,43 @@ export default function Summary(props) {
                 <CurrencySelector currency={currency} setCurrency={setCurrency} currencies={currencies} />
               </div>
 
-              {/* Free Shipping Message — solo con productos físicos en el
-                  carrito (en carritos 100 % digitales no hay envío que regalar) */}
-              {hasPhysicalItems && (
-                <div className="text-center mb-6 sm:mb-8 lg:mb-12">
+              {/* ── Envío gratis: barra, no frase suelta ──────────────────────
+                  Era una línea de texto con un asterisco delante, del mismo
+                  tamaño que todo lo demás y perdida entre el selector de moneda
+                  y los totales. Decía el dato correcto y no lo veía nadie.
+
+                  Una barra convierte «te faltan 12 €» en algo que se entiende
+                  sin leer: se ve cuánto llevas y cuánto queda. Y el objetivo es
+                  justo ese — que apetezca añadir algo más en vez de pagar el
+                  envío.
+
+                  Solo con físicos en el carrito: en uno 100 % digital no hay
+                  envío que regalar y la barra sería una promesa sin sentido. */}
+              {hasPhysicalItems && freeShippingThreshold > 0 && (
+                <div className="mb-6 sm:mb-8 lg:mb-12 max-w-md mx-auto w-full">
                   {remainingForFreeShipping > 0 ? (
-                    <p className="text-indigo-900 text-sm sm:text-base lg:text-lg">
-                      *Añade <span className="font-bold">{convertPrice(remainingForFreeShipping)} {symbol}</span> para tener envío <span className="text-orange-500 font-bold">gratis</span>
-                    </p>
+                    <>
+                      <p className="text-indigo-900 text-sm mb-2">
+                        Te faltan{' '}
+                        <span className="font-bold">
+                          {convertPrice(remainingForFreeShipping)} {symbol}
+                        </span>{' '}
+                        para el <span className="text-orange-500 font-bold">envío gratis</span>
+                      </p>
+                      <BarraEnvio
+                        completado={Math.max(
+                          0,
+                          Math.min(1, (freeShippingThreshold - remainingForFreeShipping) / freeShippingThreshold),
+                        )}
+                      />
+                    </>
                   ) : (
-                    <p className="text-green-600 text-sm sm:text-base lg:text-lg font-bold">
-                      ¡Tienes envío gratis!
-                    </p>
+                    <>
+                      <p className="text-emerald-700 text-sm font-bold mb-2">
+                        ¡Envío gratis conseguido!
+                      </p>
+                      <BarraEnvio completado={1} />
+                    </>
                   )}
                 </div>
               )}
@@ -539,4 +564,32 @@ export default function Summary(props) {
         </div>
     </div>
   )
+}
+
+/**
+ * La barra de progreso hacia el envío gratis.
+ *
+ * `aria-hidden` a propósito: la cifra que importa —cuánto falta— ya está
+ * escrita justo encima en texto, así que para un lector de pantalla esta barra
+ * solo sería ruido repetido. Es decoración de un dato que ya se dice.
+ *
+ * La transición hace el trabajo de contar la historia: al añadir algo al
+ * carrito la barra AVANZA a la vista, y ese movimiento es lo que convierte un
+ * número en un incentivo.
+ */
+function BarraEnvio({ completado }) {
+  const lleno = completado >= 1;
+  return (
+    <div
+      aria-hidden="true"
+      className="h-2 w-full overflow-hidden rounded-full bg-indigo-100"
+    >
+      <div
+        className={`h-full rounded-full transition-all duration-500 ease-out ${
+          lleno ? 'bg-emerald-500' : 'bg-orange-500'
+        }`}
+        style={{ width: `${Math.round(completado * 100)}%` }}
+      />
+    </div>
+  );
 }
