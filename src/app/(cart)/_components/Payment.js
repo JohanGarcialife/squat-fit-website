@@ -22,6 +22,7 @@ import { toast } from 'react-hot-toast';
 import PagoSequra, { evaluarSequra } from './PagoSequra';
 import SequraSimulador from '@/app/components/SequraSimulador';
 import CabeceraPaso from './CabeceraPaso';
+import Spinner from '@/app/components/Spinner';
 
 /**
  * Iconos de los métodos de pago.
@@ -542,7 +543,7 @@ export default function Payment(props) {
   if (loading) {
     return (
         <div className="min-h-screen bg-white flex items-center justify-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-900"></div>
+            <Spinner size="lg" />
         </div>
     );
   }

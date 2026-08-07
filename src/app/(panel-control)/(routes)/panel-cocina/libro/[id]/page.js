@@ -13,6 +13,7 @@ import { useSystemRecipes } from "@/app/components/useSystemRecipes";
 import { trackRecipeEvent } from "@/app/components/recipeMetrics";
 import FreeSampleBadge from "@/app/components/FreeSampleBadge";
 import axios from "axios";
+import Spinner from "@/app/components/Spinner";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://squatfit-api-cyrc2g3zra-no.a.run.app';
 
@@ -285,7 +286,7 @@ export default function BookReaderPage({ params, searchParams }) {
     return (
       <div className="w-full min-h-screen bg-transparent flex items-center justify-center pt-8 pl-8 pr-12 pb-12">
         <div className="flex flex-col items-center gap-4">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#363C98]"></div>
+          <Spinner size="lg" />
           <p className="text-[#363C98] font-semibold text-lg">Cargando lector...</p>
         </div>
       </div>

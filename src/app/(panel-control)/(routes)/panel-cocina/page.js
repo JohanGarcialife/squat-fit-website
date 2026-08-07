@@ -18,6 +18,7 @@ import { SectionCard, EmptyState } from "@/app/components/ProgramSections";
 // ensuciar el ranking de recetas, y el libro entero no dice qué RECETA es
 // popular, que es lo único que decide una muestra gratis.
 import FreeSampleBadge from "@/app/components/FreeSampleBadge";
+import Spinner from "@/app/components/Spinner";
 
 export default function CocinaPage() {
   const { token, isSubscribed } = useAuthStore();
@@ -156,7 +157,7 @@ export default function CocinaPage() {
 
       {loading ? (
         <div className="flex justify-center items-center py-20">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-900"></div>
+            <Spinner size="lg" />
         </div>
       ) : (isSubscribed && ownedVersions.length > 0) ? (
         /* Con biblioteca: el recetario entero está en «Mis recetas». Aquí solo

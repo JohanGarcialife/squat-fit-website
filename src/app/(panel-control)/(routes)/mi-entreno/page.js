@@ -13,6 +13,7 @@ import {
   ArrowRight,
   School,
 } from 'lucide-react';
+import Spinner from '@/app/components/Spinner'
 
 /**
  * MI ENTRENO — todo lo relacionado con entrenamiento, en su propia pestaña.
@@ -32,7 +33,7 @@ export default function MiEntrenoPage() {
   if (loading) {
     return (
       <div className="flex-1 bg-[#F8F9FC] flex flex-col justify-center items-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#FF690B] mb-4" />
+        <Spinner size="lg" className="mb-4" />
         <span className="text-slate-500 font-extrabold text-sm">Cargando tu entreno…</span>
       </div>
     );

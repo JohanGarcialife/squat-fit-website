@@ -16,6 +16,7 @@ import GdprCheckbox from '@/app/components/GdprCheckbox';
 import { fmtWeight, weightToKg } from '@/app/components/weightUnits';
 import { hasAcceptedPrivacy, markPrivacyAccepted } from '@/app/components/privacyConsent';
 import { InfoBlock } from '@/app/components/FormChrome';
+import Spinner from '@/app/components/Spinner';
 
 const API = 'https://squatfit-api-cyrc2g3zra-no.a.run.app';
 const BLUE = '#363C98';
@@ -266,7 +267,7 @@ export default function OnboardingPage() {
   if (loading) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-white">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2" style={{ borderColor: ORANGE }} />
+        <Spinner size="lg" />
         <span className="text-slate-500 font-bold text-sm mt-4">Preparando tus preguntas…</span>
       </div>
     );

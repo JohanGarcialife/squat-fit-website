@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { ChevronLeft } from 'lucide-react'
 import Achievements from '@/app/(home)/_components/Achievements'
 import BrandTabs from '@/app/components/BrandTabs'
+import usePestanasEnUrl from '@/app/components/pestanasEnUrl'
 
 // «Conócenos» vive dentro de Ajustes (spec programas TMV). Contenido de marca
 // que antes estaba en la página «Info», ahora sin mezclarse con lo legal.
@@ -18,6 +19,10 @@ const ABOUT_TABS = [
 export default function ConocenosPage() {
   const [activeTab, setActiveTab] = useState('nosotros')
 
+  // Enlazable: /panel-ajustes/conocenos#maria, #hamlet. La almohadilla lleva
+  // el nombre de la pestaña sin el «Sobre», igual que en la web pública.
+  const cambiarPestana = usePestanasEnUrl(ABOUT_TABS, setActiveTab)
+
   return (
     <div className="flex-1 bg-[#F8F9FC] p-6 md:p-10 min-h-screen overflow-y-auto font-sans">
       <div className="max-w-5xl mx-auto">
@@ -29,7 +34,7 @@ export default function ConocenosPage() {
         </Link>
         <h1 className="text-3xl font-extrabold text-[#363C98] mb-6">Conócenos</h1>
 
-        <BrandTabs tabs={ABOUT_TABS} active={activeTab} onChange={setActiveTab} className="mb-8" />
+        <BrandTabs tabs={ABOUT_TABS} active={activeTab} onChange={cambiarPestana} className="mb-8" />
 
         <section className="bg-white rounded-3xl border border-slate-100 shadow-sm p-6 sm:p-10 text-gray-800 leading-relaxed min-h-[500px]">
           {activeTab === 'nosotros' && (

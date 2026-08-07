@@ -10,6 +10,7 @@ import toast from 'react-hot-toast';
 import { Eye, EyeOff } from 'lucide-react';
 import { safeRedirectPath } from '@/app/components/safeRedirect';
 import { enviarFormSubmit } from '@/app/components/ga4Formularios';
+import Spinner from '@/app/components/Spinner';
 
 function LoginContent() {
   const router = useRouter();
@@ -225,7 +226,7 @@ function LoginContent() {
                 <button type="submit" disabled={isSubmitting} className='cursor-pointer bg-white text-primary rounded-2xl py-3.5 text-base font-bold hover:bg-[#FFEDE0] transition duration-300 disabled:opacity-70 mt-1'>
                   {isSubmitting ? (
                     <span className="flex items-center justify-center gap-2">
-                      <span className="h-5 w-5 rounded-full border-2 border-primary/30 border-t-primary animate-spin"></span>
+                      <Spinner size="sm" />
                       Validando…
                     </span>
                   ) : (showPassword ? 'Iniciar Sesión' : 'Continuar')}
