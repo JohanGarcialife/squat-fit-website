@@ -8,6 +8,7 @@ import { useAuthStore } from '@/stores/auth.store';
 import { useCartStore } from '@/stores/cart.store';
 import TrustpilotInvitation from './TrustpilotInvitation';
 import { readOrderAccess } from './accesoComprado';
+import RegalarCompra from './RegalarCompra';
 
 // Icono por tipo de producto comprado.
 const ICONO = { curso: Play, biblioteca: BookOpen, libro: Package };
@@ -20,7 +21,7 @@ const PIE = {
   libro: 'Te lo enviamos a tu dirección',
 };
 
-export default function PaymentSuccess() {
+export default function PaymentSuccess({ pedidoRegalable = null }) {
   const router = useRouter();
   const { user } = useAuthStore();
   const { clearCart } = useCartStore();
@@ -149,6 +150,14 @@ export default function PaymentSuccess() {
               <ArrowRight size={16} className="text-indigo-400 group-hover:translate-x-1 transition-transform" />
             </div>
           </Link>
+        </div>
+
+        {/* Regalar la compra. Se pinta antes del logotipo y DESPUÉS de los
+            accesos: primero que vea lo que acaba de comprar, y luego la
+            opción. El componente se esconde solo si no hay pedido que regalar
+            o si no hay sesión. */}
+        <div className="flex justify-center">
+          <RegalarCompra orderId={pedidoRegalable} />
         </div>
 
         {/* --- Logotipo Final --- */}
