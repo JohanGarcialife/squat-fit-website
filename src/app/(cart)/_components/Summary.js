@@ -7,7 +7,8 @@ import CurrencySelector from './CurrencySelector';
 import { useCartStore } from '@/stores/cart.store';
 import { useCheckoutStore } from '@/stores/checkout.store';
 import { arancelParaCarrito } from './aranceles';
-import { TIER_META, groupTierOrder, buildTierCartItem, formatEuros } from '@/app/components/courseCatalog';
+import { TIER_META, groupTierOrder, buildTierCartItem, formatEuros, usuarioYaTiene } from '@/app/components/courseCatalog';
+import { useProgramAccess } from '@/app/components/useProgramAccess';
 import useCerrarAlTocarFuera from '@/hooks/useCerrarAlTocarFuera';
 import CabeceraPaso from './CabeceraPaso';
 
@@ -74,6 +75,28 @@ export default function Summary(props) {
     // Cursos con tramos (15.1): el item lleva su grupo completo, así que aquí
     // también se puede cambiar entre Mensual / Anual / De por vida.
     const isCourseTier = (item) => !!(item.tierGroup && item.tier);
+
+    // «Esto ya lo tienes».
+    //
+    // El aviso existía solo en la tarjeta de /cursos (CourseTierCard), y el
+    // carrito no decía nada. Comprobado en producción el 7-ago con una cuenta
+    // que YA tenía «Fuerte y Definid@»: la ficha avisaba, y al llegar al
+    // carrito el mismo curso aparecía a 187,99 € sin una palabra. El carrito es
+    // el último sitio donde mirar antes de pagar, así que era justo donde
+    // faltaba.
+    //
+    // Misma política que en la tarjeta, y es deliberada: se INFORMA, no se
+    // bloquea. Impedir la compra mataría el paso de mensual a permanente, que
+    // es una venta legítima. Lo que no puede pasar es que nadie se entere.
+    //
+    // Sin sesión, useProgramAccess no llama a nada, así que el visitante
+    // anónimo no paga ni una petición por esto. Y `checked` evita el parpadeo
+    // de enseñar el aviso antes de saber si es cierto.
+    const { courses, checked: accesosLeidos } = useProgramAccess();
+    const yaLoTiene = (item) =>
+        accesosLeidos &&
+        isCourseTier(item) &&
+        usuarioYaTiene(courses, item.tierGroup.baseName);
     const handleTierChange = (item, newTierKey) => {
         if (item.tier === newTierKey) return;
         setDirectCheckoutItem(buildTierCartItem(item.tierGroup, newTierKey));
@@ -185,6 +208,27 @@ export default function Summary(props) {
                         <p className="text-indigo-400 text-sm mb-6">
                             {isDigital(item) ? 'Suscripción online' : item.description || 'Volumen físico'}
                         </p>
+
+                        {/* Ya lo tiene: se dice y se le ofrece ir a verlo, sin
+                            quitarle el botón de pagar (ver nota arriba).
+                            Mismos colores y mismo texto que el aviso de la
+                            tarjeta de /cursos: es el mismo mensaje y no tiene
+                            por qué parecer otra cosa por estar en el carrito. */}
+                        {yaLoTiene(item) && (
+                            <div className="w-full -mt-4 mb-6 rounded-2xl bg-[#F3F2F9] border border-[#363C98]/15 p-4 text-left">
+                                <p className="text-[#363C98] font-bold text-sm">Ya tienes este curso</p>
+                                <p className="text-slate-500 text-sm mt-0.5">
+                                    Puedes verlo en tu panel. Si compras otra vez, pagarás de nuevo sin
+                                    añadir nada.
+                                </p>
+                                <Link
+                                    href="/panel-cursos"
+                                    className="inline-block mt-2 text-[#FF690B] font-bold text-sm hover:underline"
+                                >
+                                    Ir a mis cursos →
+                                </Link>
+                            </div>
+                        )}
 
                         <div className="flex items-center justify-between w-full mt-auto">
                             {/* Quantity or Period Selector */}
