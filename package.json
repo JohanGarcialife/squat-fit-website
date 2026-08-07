@@ -5,7 +5,10 @@
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build --turbopack",
-    "start": "next start"
+    "start": "next start",
+    "lint": "eslint . --quiet",
+    "lint:todo": "eslint .",
+    "lint:fix": "eslint . --fix"
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",
@@ -30,7 +33,10 @@
     "zustand": "^5.0.8"
   },
   "devDependencies": {
+    "@next/eslint-plugin-next": "^16.3.0",
     "@tailwindcss/postcss": "^4.1.13",
+    "eslint": "^9.39.5",
+    "eslint-plugin-react-hooks": "^7.1.1",
     "tailwindcss": "^4.1.13"
   }
 }
