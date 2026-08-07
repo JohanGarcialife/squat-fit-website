@@ -11,7 +11,7 @@ import usePestanasEnUrl from '@/app/components/pestanasEnUrl';
 import { ABOUT, Portrait, Sheet } from '../../_components/aboutStyles';
 
 // Los ids llevan el nombre de la pestaña, que es lo que acaba en la URL:
-// /conocenos#maria, #hamlet, #contacto, #unete-al-equipo. Los de esta mañana
+// /conocenos#maria, #hamlet, #contacto, #empleo. Los de esta mañana
 // (#sobre-maria, #sobre-hamlet) siguen abriendo su pestaña —el ayudante poda el
 // «sobre-» de lo que pide la URL— pero ya no se escriben. #la-empresa era la
 // pestaña por defecto, así que quien la tenga guardada cae donde caía.
@@ -19,7 +19,8 @@ const TABS = [
   { id: 'squad-fit', label: 'Squad Fit' },
   { id: 'maria', label: 'María' },
   { id: 'hamlet', label: 'Hamlet' },
-  { id: 'empleo', label: 'Únete al equipo' },
+  // `hash` a mano: «Únete al equipo» daría #unete-al-equipo, largo de dictar.
+  { id: 'empleo', label: 'Únete al equipo', hash: 'empleo' },
   { id: 'contacto', label: 'Contacto' },
 ];
 
