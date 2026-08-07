@@ -48,6 +48,11 @@ export default [
       '.next-*/**',
       'out/**',
       'public/**',
+      // Copias enteras del repo —con sus builds dentro— que crean las sesiones
+      // de trabajo. Sin esta línea, `npm run lint` devuelve 4.100 errores del
+      // bundle MINIFICADO (`self is not defined`, columnas de seis cifras) y
+      // los de verdad quedan enterrados. Ya está en .gitignore; faltaba aquí.
+      '.claude/**',
       'next.config.mjs',
       'eslint.config.mjs',
     ],
