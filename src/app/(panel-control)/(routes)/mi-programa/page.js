@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useAuthStore } from '@/stores/auth.store';
 import AccessNotice from '@/app/components/AccessNotice';
 import BrandTabs from '@/app/components/BrandTabs';
+import usePestanasEnUrl from '@/app/components/pestanasEnUrl';
 import WelcomeVideoCard from '@/app/components/WelcomeVideoCard';
 import { useProgramAccess } from '@/app/components/useProgramAccess';
 import CuentaAtrasPrograma from '@/app/components/CuentaAtrasPrograma';
@@ -30,6 +31,7 @@ import {
   Target,
   ArrowRight,
 } from 'lucide-react';
+import Spinner from '@/app/components/Spinner'
 
 // Formularios del programa (motor tipo onboarding en /formulario/<slug>).
 // Son lo único de "Pautas" que YA tiene backend real.
@@ -63,6 +65,9 @@ function CocinaLink({ text = 'Ver recetas y alternativas en Mi cocina' }) {
 export default function MiProgramaPage() {
   const { token } = useAuthStore();
   const [tab, setTab] = useState('plan');
+  // Enlazable: /mi-programa#pautas, #mi-progreso, #recursos. La almohadilla
+  // lleva el nombre visible, no el id interno ('plan' no se lo dice a nadie).
+  const cambiarPestana = usePestanasEnUrl(TABS, setTab);
   // Detección del programa activo (advice/by-user) compartida con el Sidebar
   // y el resto de pestañas: el objeto advice existe si el usuario tiene
   // asesoría/programa (lo sincronizan los webhooks de Stripe).
@@ -73,7 +78,7 @@ export default function MiProgramaPage() {
   if (loading) {
     return (
       <div className="flex-1 bg-[#F8F9FC] flex flex-col justify-center items-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#FF690B] mb-4" />
+        <Spinner size="lg" className="mb-4" />
         <span className="text-slate-500 font-extrabold text-sm">Cargando tu programa…</span>
       </div>
     );
@@ -169,7 +174,7 @@ export default function MiProgramaPage() {
           />
         </div>
 
-        <BrandTabs tabs={TABS} active={tab} onChange={setTab} />
+        <BrandTabs tabs={TABS} active={tab} onChange={cambiarPestana} />
 
         {/* ════════ PAUTAS ════════ */}
         {tab === 'plan' && (

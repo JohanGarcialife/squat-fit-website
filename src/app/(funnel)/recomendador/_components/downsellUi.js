@@ -16,6 +16,7 @@ import {
   TIER_META,
   groupTierOrder,
 } from '@/app/components/courseCatalog';
+import Spinner from "@/app/components/Spinner"
 
 // ---------------------------------------------------------------- Objetivo --
 export function ObjetivoPicker({ value, onChange }) {
@@ -85,10 +86,7 @@ export function CalculandoOverlay({ fase }) {
       <div className="text-center px-6">
         {fase === 'calculando' ? (
           <>
-            <div
-              className="mx-auto mb-6 h-16 w-16 animate-spin rounded-full border-4 border-[#E7E6FF] border-t-[#FF690B]"
-              aria-hidden
-            />
+            <Spinner size="lg" className="mx-auto mb-6" />
             <p className="text-xl font-extrabold text-[#363C98]">
               Calculando tu mejor opción…
             </p>

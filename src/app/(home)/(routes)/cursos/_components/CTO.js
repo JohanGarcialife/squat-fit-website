@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from 'react'
 import CourseTierCard from '@/app/components/CourseTierCard'
 import { fetchTieredCourses } from '@/app/components/courseCatalog'
+import Spinner from '@/app/components/Spinner'
 
 // Compra del curso Fuerte y Definid@ (15.1): UNA tarjeta con el selector
 // Mensual / Anual / De por vida, con los precios reales del catálogo
@@ -35,7 +36,7 @@ export default function CTO() {
         />
       ) : (
         <div className="w-full flex justify-center py-10">
-          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#363C98]" />
+          <Spinner size="md" />
         </div>
       )}
     </div>

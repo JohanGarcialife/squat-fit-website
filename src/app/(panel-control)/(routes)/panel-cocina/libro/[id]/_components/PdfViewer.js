@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { Document, Page, pdfjs } from 'react-pdf';
+import Spinner from '@/app/components/Spinner';
 import 'react-pdf/dist/Page/AnnotationLayer.css';
 import 'react-pdf/dist/Page/TextLayer.css';
 
@@ -15,7 +16,7 @@ export default function PdfViewer({ file, pageNumber, onDocumentLoadSuccess }) {
       onLoadSuccess={onDocumentLoadSuccess}
       loading={
         <div className="flex justify-center items-center h-[600px] w-[450px]">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-900"></div>
+          <Spinner size="md" />
         </div>
       }
     >

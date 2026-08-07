@@ -9,8 +9,10 @@ import { useProgramAccess } from "@/app/components/useProgramAccess";
 import { handleApiError } from "@/app/components/handleApiError";
 import CourseTierShop from "@/app/components/CourseTierShop";
 import BrandTabs from "@/app/components/BrandTabs";
+import usePestanasEnUrl from "@/app/components/pestanasEnUrl";
 import TestQuiz from "./_components/TestQuiz";
 import { RefreshCw, ArrowRight, AlertCircle } from "lucide-react";
+import Spinner from "@/app/components/Spinner";
 
 // ─── Interruptor de negocio: ¿Biblioteca Digital abre TODOS los cursos? ─────
 // HOY (comportamiento heredado, y con el que se DESPLIEGA esta rama): SÍ,
@@ -151,6 +153,15 @@ function VideoPlayer({ videoUrl, videoTitle }) {
 
 
 // ─── Main Page ────────────────────────────────────────────────────────────────
+// Nombres de las pestañas de estado sin la cuenta entre paréntesis: de aquí
+// salen las almohadillas (#en-progreso, #pendientes, #completados) y de aquí
+// se derivan las etiquetas con cuenta que se pintan.
+const STATUS_TABS_BASE = [
+  { id: 'progress', label: 'En progreso' },
+  { id: 'pending', label: 'Pendientes' },
+  { id: 'done', label: 'Completados' },
+];
+
 function CursosPageContent() {
   const searchParams = useSearchParams();
   const courseIdParam = searchParams.get("id");
@@ -188,6 +199,12 @@ function CursosPageContent() {
   //    si el detalle no responde, el curso queda en "En progreso" sin barra.
   const [progressMap, setProgressMap] = useState({});
   const [statusTab, setStatusTab] = useState('progress');
+  // Enlazable: /panel-cursos#pendientes, #completados. Los nombres van SIN la
+  // cuenta —abajo se pintan como «Pendientes (3)»— porque la cuenta cambia al
+  // cargar los datos y la almohadilla tiene que ser siempre la misma. El hook
+  // se llama aquí arriba, no junto a las pestañas: allí está dentro de una
+  // rama y las reglas de los hooks no lo permiten.
+  const cambiarPestanaEstado = usePestanasEnUrl(STATUS_TABS_BASE, setStatusTab);
 
   // ── Muestras gratuitas (sin suscripción): qué curso tiene, en su currícula
   //    pública, al menos una clase marcada video_is_free_sample=true. Se
@@ -565,7 +582,7 @@ function CursosPageContent() {
   if (loading) {
     return (
       <div className="w-full min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#363C98]"></div>
+        <Spinner size="lg" />
       </div>
     );
   }
@@ -723,11 +740,10 @@ function CursosPageContent() {
     };
     const counts = { progress: 0, pending: 0, done: 0 };
     courseList.forEach((c) => { counts[statusOf(c)]++; });
-    const STATUS_TABS = [
-      { id: 'progress', label: `En progreso (${counts.progress})` },
-      { id: 'pending', label: `Pendientes (${counts.pending})` },
-      { id: 'done', label: `Completados (${counts.done})` },
-    ];
+    const STATUS_TABS = STATUS_TABS_BASE.map((t) => ({
+      ...t,
+      label: `${t.label} (${counts[t.id]})`,
+    }));
     const visibleCourses = courseList.filter((c) => statusOf(c) === statusTab);
     const EMPTY_TAB_TEXT = {
       progress: 'No tienes ningún curso en progreso ahora mismo.',
@@ -740,7 +756,7 @@ function CursosPageContent() {
         <h1 className="text-[#363C98] text-5xl font-bold mb-4">Mis cursos</h1>
         <p className="text-gray-400 text-lg mb-8">{courseList.length} curso{courseList.length !== 1 ? 's' : ''} en tu cuenta</p>
 
-        <BrandTabs tabs={STATUS_TABS} active={statusTab} onChange={setStatusTab} className="mb-10" />
+        <BrandTabs tabs={STATUS_TABS} active={statusTab} onChange={cambiarPestanaEstado} className="mb-10" />
 
         {visibleCourses.length === 0 && (
           <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50/60 px-6 py-10 text-center mb-10">
@@ -858,7 +874,7 @@ function CursosPageContent() {
       {/* Loading del player */}
       {playerLoading ? (
         <div className="w-full aspect-video rounded-[20px] bg-gray-100 flex flex-col items-center justify-center mb-8 shadow-lg gap-3">
-          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#363C98]"></div>
+          <Spinner size="md" />
           <p className="text-[#363C98] font-medium text-sm">Cargando curso...</p>
         </div>
       ) : (
@@ -885,7 +901,7 @@ function CursosPageContent() {
             {selectedVideo && (
               selectedVideo.loading || videoLoading ? (
                 <div className="w-full aspect-video rounded-[20px] bg-gray-100 flex flex-col items-center justify-center mb-8 shadow-lg gap-3">
-                  <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#363C98]"></div>
+                  <Spinner size="md" />
                   <p className="text-[#363C98] font-medium text-sm">Cargando video...</p>
                 </div>
               ) : selectedVideo.error || !selectedVideo.url ? (
@@ -1068,7 +1084,7 @@ export default function CursosPage() {
   return (
     <Suspense fallback={
       <div className="w-full min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#363C98]"></div>
+        <Spinner size="lg" />
       </div>
     }>
       <CursosPageContent />

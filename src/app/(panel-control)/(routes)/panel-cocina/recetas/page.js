@@ -24,6 +24,7 @@ import {
 import TarjetaReceta, { urlDeImagen } from "../_components/TarjetaReceta";
 import PreferenciasChips from "../_components/PreferenciasChips";
 import BienvenidaPreferencias from "../_components/BienvenidaPreferencias";
+import Spinner from "@/app/components/Spinner";
 
 const API = process.env.NEXT_PUBLIC_API_URL;
 
@@ -224,7 +225,7 @@ function MisRecetasContenido() {
     return (
       <div className="w-full min-h-screen flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#363C98]" />
+          <Spinner size="lg" />
           <p className="text-[#363C98] font-semibold text-lg">Cargando tus recetas...</p>
         </div>
       </div>
@@ -501,7 +502,7 @@ export default function MisRecetasPage() {
     <Suspense
       fallback={
         <div className="w-full min-h-screen flex items-center justify-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#363C98]" />
+          <Spinner size="lg" />
         </div>
       }
     >

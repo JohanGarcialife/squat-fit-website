@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import CourseTierShopCard from './CourseTierCard';
 import { fetchTieredCourses } from './courseCatalog';
+import Spinner from '@/app/components/Spinner';
 
 // Tienda de cursos con tramos (15.1): una tarjeta por curso, cada una con su
 // selector Mensual / Anual / De por vida. Se usa en la tienda del panel
@@ -17,7 +18,7 @@ export default function CourseTierShop({ highlight }) {
   if (groups === null) {
     return (
       <div className="w-full flex justify-center py-16">
-        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#363C98]" />
+        <Spinner size="md" />
       </div>
     );
   }

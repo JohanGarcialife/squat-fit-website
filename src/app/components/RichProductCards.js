@@ -3,6 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { Star, BookOpen, Utensils, Users, Video, RefreshCw, Compass, Award, ClipboardList } from 'lucide-react';
+import Spinner from '@/app/components/Spinner';
 
 export default function RichProductCards({ onVerifyAccess, verifyLoading, show }) {
   const allCards = [
@@ -200,7 +201,7 @@ export default function RichProductCards({ onVerifyAccess, verifyLoading, show }
         >
           {verifyLoading ? (
             <>
-              <span className="inline-block h-3.5 w-3.5 animate-spin rounded-full border-b-2 border-current"></span>
+              <Spinner size="sm" />
               Actualizando…
             </>
           ) : (

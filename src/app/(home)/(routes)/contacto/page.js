@@ -12,6 +12,7 @@ import Link from 'next/link';
 import GdprCheckbox from '@/app/components/GdprCheckbox';
 import { normalizeName } from '@/app/components/nameUtils';
 import { enviarFormSubmit } from '@/app/components/ga4Formularios';
+import Spinner from '@/app/components/Spinner';
 
 // --- Esquema de Validación con Yup ---
 const ContactSchema = Yup.object().shape({
@@ -377,7 +378,7 @@ ${values.mensaje}
               >
                 {isSubmitting ? (
                   <>
-                    <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-white"></div>
+                    <Spinner size="sm" tono="claro" />
                     Enviando...
                   </>
                 ) : (

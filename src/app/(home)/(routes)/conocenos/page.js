@@ -7,53 +7,32 @@ import Education from '../../_components/Education';
 import SobreHamlet from '../../_components/SobreHamlet';
 import Empleo from '../../_components/Empleo';
 import BrandTabs from '@/app/components/BrandTabs';
+import usePestanasEnUrl from '@/app/components/pestanasEnUrl';
 import { ABOUT, Portrait, Sheet } from '../../_components/aboutStyles';
 
+// Los ids llevan el nombre de la pestaña, que es lo que acaba en la URL:
+// /conocenos#maria, #hamlet, #contacto, #unete-al-equipo. Los de esta mañana
+// (#sobre-maria, #sobre-hamlet) siguen abriendo su pestaña —el ayudante poda el
+// «sobre-» de lo que pide la URL— pero ya no se escriben. #la-empresa era la
+// pestaña por defecto, así que quien la tenga guardada cae donde caía.
 const TABS = [
-  { id: 'la-empresa', label: 'Squad Fit' },
-  { id: 'sobre-maria', label: 'María' },
-  { id: 'sobre-hamlet', label: 'Hamlet' },
+  { id: 'squad-fit', label: 'Squad Fit' },
+  { id: 'maria', label: 'María' },
+  { id: 'hamlet', label: 'Hamlet' },
   { id: 'empleo', label: 'Únete al equipo' },
   { id: 'contacto', label: 'Contacto' },
 ];
 
 // Página "Conócenos" con pestañas, formato hoja (aboutStyles). Estilo sobrio/legal.
-export default function NosotrosPage() {
-  const [activeTab, setActiveTab] = useState('la-empresa');
+export default function ConocenosPage() {
+  const [activeTab, setActiveTab] = useState('squad-fit');
 
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
 
-  // Enlace directo a una pestaña: /conocenos#contacto. La almohadilla es la
-  // forma que ya se usa en el resto de la web (/cocina#precios) y la que
-  // entiende cualquiera; se acepta también ?tab= porque es lo que hace
-  // /politicas y porque así los enlaces de una y otra forma no se rompen.
-  //
-  // Hace falta JavaScript: el navegador solo salta solo a un #ancla si existe
-  // un elemento con ese id, y aquí las pestañas no son secciones de la página
-  // —solo hay una montada cada vez—, así que la almohadilla no señala a nada
-  // que el navegador pueda encontrar. Esto la traduce a la pestaña.
-  useEffect(() => {
-    const abrirDesdeUrl = () => {
-      const wanted =
-        window.location.hash.replace('#', '') ||
-        new URLSearchParams(window.location.search).get('tab');
-      if (wanted && TABS.some((t) => t.id === wanted)) setActiveTab(wanted);
-    };
-    abrirDesdeUrl();
-    // Y también al vuelo: si ya estás en la página y pulsas un enlace a
-    // #contacto, no hay recarga y el efecto de arriba no se vuelve a ejecutar.
-    window.addEventListener('hashchange', abrirDesdeUrl);
-    return () => window.removeEventListener('hashchange', abrirDesdeUrl);
-  }, []);
-
-  // Al cambiar de pestaña la URL se actualiza para poder copiarla. replaceState
-  // y no pushState: así «atrás» sale de la página en vez de recorrer pestañas.
-  const changeTab = (id) => {
-    setActiveTab(id);
-    window.history.replaceState(null, '', id === 'la-empresa' ? '/conocenos' : `/conocenos#${id}`);
-  };
+  // Enlace directo a una pestaña: /conocenos#contacto, /conocenos#maria.
+  const changeTab = usePestanasEnUrl(TABS, setActiveTab);
 
   const goEmpleo = () => { changeTab('empleo'); window.scrollTo(0, 0); };
 
@@ -63,9 +42,9 @@ export default function NosotrosPage() {
       <BrandTabs tabs={TABS} active={activeTab} onChange={changeTab} className="mb-10" />
 
       <section className="min-h-[400px] text-gray-800">
-        {activeTab === 'la-empresa' && <ContenidoEmpresa onGoToEmpleo={goEmpleo} />}
-        {activeTab === 'sobre-maria' && <ContenidoSobreMaria />}
-        {activeTab === 'sobre-hamlet' && <SobreHamlet />}
+        {activeTab === 'squad-fit' && <ContenidoEmpresa onGoToEmpleo={goEmpleo} />}
+        {activeTab === 'maria' && <ContenidoSobreMaria />}
+        {activeTab === 'hamlet' && <SobreHamlet />}
         {activeTab === 'empleo' && <Empleo />}
         {activeTab === 'contacto' && <ContenidoContacto />}
       </section>

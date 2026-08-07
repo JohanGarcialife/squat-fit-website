@@ -42,6 +42,7 @@ import toast from 'react-hot-toast';
 import AccessNotice from '@/app/components/AccessNotice';
 import PhotoCropModal from '@/app/components/PhotoCropModal';
 import { PasswordChecklist, cumpleReglas } from '@/app/components/passwordRules';
+import Spinner from '@/app/components/Spinner';
 
 const API = 'https://squatfit-api-cyrc2g3zra-no.a.run.app';
 
@@ -885,7 +886,7 @@ export default function ProfilePage() {
   if (isLoading) {
     return (
       <div className="flex-1 bg-[#F8F9FC] flex flex-col justify-center items-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#FF690B] mb-4"></div>
+        <Spinner size="lg" className="mb-4" />
         <span className="text-slate-500 font-extrabold text-sm">Cargando perfil…</span>
       </div>
     );
@@ -1307,7 +1308,7 @@ export default function ProfilePage() {
             <div className="p-6 overflow-y-auto max-h-[60vh]">
               {isLoadingPurchases ? (
                 <div className="flex flex-col justify-center items-center py-12 gap-3">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#FF690B]"></div>
+                  <Spinner size="md" />
                   <span className="text-slate-400 text-xs font-semibold">Cargando transacciones…</span>
                 </div>
               ) : purchases.length === 0 ? (

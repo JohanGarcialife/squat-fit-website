@@ -265,3 +265,14 @@ img, a, button {
    Se usaba en el código pero nunca llegó a definirse. */
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* Spinner de marca (<Spinner />, components/Spinner.js). El giro va aquí y no
+   con `animate-spin` de Tailwind para poder pararlo con «reducir movimiento»:
+   quien lo tenga activado ve el aro latir en vez de girar, que sigue diciendo
+   «esto está trabajando» sin marear a nadie. */
+@keyframes sf-girar { to { transform: rotate(360deg); } }
+@keyframes sf-latir { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
+.sf-spinner { animation: sf-girar 0.8s linear infinite; }
+@media (prefers-reduced-motion: reduce) {
+  .sf-spinner { animation: sf-latir 1.6s ease-in-out infinite; }
+}

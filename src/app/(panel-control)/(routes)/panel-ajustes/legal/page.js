@@ -6,16 +6,20 @@ import { useSearchParams } from 'next/navigation'
 import { ChevronLeft } from 'lucide-react'
 import { LEGAL_SECTIONS } from '@/app/components/LegalContent'
 import BrandTabs from '@/app/components/BrandTabs'
+import usePestanasEnUrl from '@/app/components/pestanasEnUrl'
+
+const TABS = LEGAL_SECTIONS.map((s) => ({ id: s.id, label: s.label }))
 
 // «Legal» vive dentro de Ajustes (spec programas TMV). Usa el módulo legal
 // compartido con la web pública /politicas para mostrar exactamente lo mismo.
-// Acepta ?seccion=<id> para abrir directamente una pestaña (p. ej. privacidad).
+// Se abre por almohadilla (#privacidad) y también con el ?seccion=<id> de
+// siempre, que es lo que llevan los enlaces ya repartidos.
 function LegalPageContent() {
   const seccion = useSearchParams().get('seccion')
   const [activeTab, setActiveTab] = useState(
     LEGAL_SECTIONS.some((s) => s.id === seccion) ? seccion : LEGAL_SECTIONS[0]?.id
   )
-  const tabs = LEGAL_SECTIONS.map((s) => ({ id: s.id, label: s.label }))
+  const cambiarPestana = usePestanasEnUrl(TABS, setActiveTab)
   const Active = LEGAL_SECTIONS.find((s) => s.id === activeTab)?.Component
 
   return (
@@ -29,7 +33,7 @@ function LegalPageContent() {
         </Link>
         <h1 className="text-3xl font-extrabold text-[#363C98] mb-6">Legal</h1>
 
-        <BrandTabs tabs={tabs} active={activeTab} onChange={setActiveTab} className="mb-8" />
+        <BrandTabs tabs={TABS} active={activeTab} onChange={cambiarPestana} className="mb-8" />
 
         <section className="bg-white rounded-3xl border border-slate-100 shadow-sm p-6 sm:p-10 text-gray-800 leading-relaxed min-h-[500px]">
           {Active && <Active />}

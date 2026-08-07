@@ -11,6 +11,7 @@ import Image from 'next/image';
 import { Check } from 'lucide-react';
 import AccessNotice from '@/app/components/AccessNotice';
 import GdprCheckbox from '@/app/components/GdprCheckbox';
+import Spinner from '@/app/components/Spinner';
 
 const API = 'https://squatfit-api-cyrc2g3zra-no.a.run.app';
 
@@ -349,7 +350,7 @@ ${values.mensaje}
               >
                 {isSubmitting ? (
                   <>
-                    <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-white"></div>
+                    <Spinner size="sm" tono="claro" />
                     Enviando…
                   </>
                 ) : (
