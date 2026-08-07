@@ -9,6 +9,14 @@ import Empleo from '../../_components/Empleo';
 import BrandTabs from '@/app/components/BrandTabs';
 import { ABOUT, Portrait, Sheet } from '../../_components/aboutStyles';
 
+const TABS = [
+  { id: 'la-empresa', label: 'Squad Fit' },
+  { id: 'sobre-maria', label: 'María' },
+  { id: 'sobre-hamlet', label: 'Hamlet' },
+  { id: 'empleo', label: 'Únete al equipo' },
+  { id: 'contacto', label: 'Contacto' },
+];
+
 // Página "Conócenos" con pestañas, formato hoja (aboutStyles). Estilo sobrio/legal.
 export default function NosotrosPage() {
   const [activeTab, setActiveTab] = useState('la-empresa');
@@ -17,20 +25,42 @@ export default function NosotrosPage() {
     window.scrollTo(0, 0);
   }, []);
 
-  const tabs = [
-    { id: 'la-empresa', label: 'Squad Fit' },
-    { id: 'sobre-maria', label: 'María' },
-    { id: 'sobre-hamlet', label: 'Hamlet' },
-    { id: 'empleo', label: 'Únete al equipo' },
-    { id: 'contacto', label: 'Contacto' },
-  ];
+  // Enlace directo a una pestaña: /conocenos#contacto. La almohadilla es la
+  // forma que ya se usa en el resto de la web (/cocina#precios) y la que
+  // entiende cualquiera; se acepta también ?tab= porque es lo que hace
+  // /politicas y porque así los enlaces de una y otra forma no se rompen.
+  //
+  // Hace falta JavaScript: el navegador solo salta solo a un #ancla si existe
+  // un elemento con ese id, y aquí las pestañas no son secciones de la página
+  // —solo hay una montada cada vez—, así que la almohadilla no señala a nada
+  // que el navegador pueda encontrar. Esto la traduce a la pestaña.
+  useEffect(() => {
+    const abrirDesdeUrl = () => {
+      const wanted =
+        window.location.hash.replace('#', '') ||
+        new URLSearchParams(window.location.search).get('tab');
+      if (wanted && TABS.some((t) => t.id === wanted)) setActiveTab(wanted);
+    };
+    abrirDesdeUrl();
+    // Y también al vuelo: si ya estás en la página y pulsas un enlace a
+    // #contacto, no hay recarga y el efecto de arriba no se vuelve a ejecutar.
+    window.addEventListener('hashchange', abrirDesdeUrl);
+    return () => window.removeEventListener('hashchange', abrirDesdeUrl);
+  }, []);
 
-  const goEmpleo = () => { setActiveTab('empleo'); window.scrollTo(0, 0); };
+  // Al cambiar de pestaña la URL se actualiza para poder copiarla. replaceState
+  // y no pushState: así «atrás» sale de la página en vez de recorrer pestañas.
+  const changeTab = (id) => {
+    setActiveTab(id);
+    window.history.replaceState(null, '', id === 'la-empresa' ? '/conocenos' : `/conocenos#${id}`);
+  };
+
+  const goEmpleo = () => { changeTab('empleo'); window.scrollTo(0, 0); };
 
   return (
     <Sheet>
       {/* Barra de navegación arriba del todo */}
-      <BrandTabs tabs={tabs} active={activeTab} onChange={setActiveTab} className="mb-10" />
+      <BrandTabs tabs={TABS} active={activeTab} onChange={changeTab} className="mb-10" />
 
       <section className="min-h-[400px] text-gray-800">
         {activeTab === 'la-empresa' && <ContenidoEmpresa onGoToEmpleo={goEmpleo} />}

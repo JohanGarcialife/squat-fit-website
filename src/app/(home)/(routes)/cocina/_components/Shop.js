@@ -393,7 +393,11 @@ export default function Shop() {
     : null
 
   return (
-    <section id="shop" className="py-16 px-4 bg-gray-50">
+    <section id="shop" className="py-16 px-4 bg-gray-50 scroll-mt-24">
+      {/* /cocina#precios — el mismo sitio con un nombre que se puede dictar por
+          teléfono. El id "shop" se queda: lo usa RichProductCards y anda en
+          enlaces ya repartidos. La cabecera es sticky, de ahí el scroll-mt. */}
+      <span id="precios" aria-hidden="true" className="block scroll-mt-24" />
       <div className="max-w-[1120px] mx-auto">
         {/* Cabecera */}
         <div className="text-center mb-8">

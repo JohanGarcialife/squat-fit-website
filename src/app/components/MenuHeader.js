@@ -24,7 +24,7 @@ export default function MenuHeader() {
     else if (pathname?.startsWith('/programa')) active = 'programa';
     else if (pathname?.startsWith('/cocina')) active = 'cocina';
     else if (pathname?.startsWith('/cursos')) active = 'cursos';
-    else if (pathname?.startsWith('/nosotros')) active = 'nosotros';
+    else if (pathname?.startsWith('/conocenos')) active = 'nosotros';
 
     // En las propias páginas de acceso/registro no tiene sentido repetir
     // los botones "Acceder"/"Registro" en el header
@@ -67,7 +67,7 @@ export default function MenuHeader() {
                         { href: '/programa', key: 'programa', label: 'Programa' },
                         { href: '/cocina', key: 'cocina', label: 'Cocina' },
                         { href: '/cursos', key: 'cursos', label: 'Cursos' },
-                        { href: '/nosotros', key: 'nosotros', label: 'Conócenos' },
+                        { href: '/conocenos', key: 'nosotros', label: 'Conócenos' },
                     ].map((item) => (
                         <Link key={item.key} href={item.href}>
                             <p className={`px-4 py-1.5 rounded-2xl transition-colors ${active === item.key ? 'text-primary font-bold bg-[#FFEDE0]' : 'text-secondary hover:text-primary hover:bg-[#FF690B]/10'}`}>

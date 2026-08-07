@@ -69,6 +69,11 @@ export default function ProgramPricing() {
     // id="shop-plans": los CTAs "Unirme al programa" de toda la página hacen
     // scroll hasta aquí (antes apuntaban a un id inexistente y no hacían nada).
     <section id="shop-plans" className="relative bg-[#F8F9FC] py-20 sm:py-28 px-6 sm:px-12 md:px-20 overflow-hidden scroll-mt-24">
+      {/* /programa#reservar — el mismo destino que los CTAs de la página, pero
+          enlazable desde fuera. Se llama «reservar» y no «precios» porque aquí
+          no hay precio que enseñar: lo que se hace es reservar la llamada. El
+          id "shop-plans" se queda, que es al que apuntan los ocho botones. */}
+      <span id="reservar" aria-hidden="true" className="block scroll-mt-24" />
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[300px] bg-gradient-to-b from-[#363c98]/5 to-transparent rounded-full blur-3xl pointer-events-none -z-10" />
 
       {/* Cabecera */}

@@ -17,6 +17,7 @@ import CartDrawer from "../components/CartDrawer";
 import ToasterProvider from "@/components/ToasterProvider";
 import AutoShineObserver from "../components/AutoShineObserver";
 import UTMCapture from "../components/UTMCapture";
+import AnclaDeUrl from "../components/AnclaDeUrl";
 import CookieBanner from "@/app/components/CookieBanner";
 import RecargaSiHayDespliegue from "@/app/components/RecargaSiHayDespliegue";
 import CartScrollRestore from "@/app/components/CartScrollRestore";
@@ -111,6 +112,7 @@ export default function RootLayout({ children }) {
         <AutoShineObserver />
         <Header />
         <UTMCapture />
+        <AnclaDeUrl />
         <CartScrollRestore />
         {children}
         <Footer />

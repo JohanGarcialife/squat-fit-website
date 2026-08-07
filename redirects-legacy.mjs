@@ -22,8 +22,8 @@ const MAP = [
   // --- Cursos (LearnPress) -------------------------------------------------
   ['/courses/:path*', '/cursos'],
   ['/mis-cursos', '/cursos'],
-  ['/instructors-2', '/nosotros'],
-  ['/instructor-2', '/nosotros'],
+  ['/instructors-2', '/conocenos'],
+  ['/instructor-2', '/conocenos'],
   ['/become_a_teacher-2', '/'],
 
   // --- Libro de cocina -----------------------------------------------------
@@ -76,9 +76,9 @@ const MAP = [
   ['/mi-perfil', '/profile'],
 
   // --- Quiénes somos -------------------------------------------------------
-  ['/sobre-maria', '/nosotros'],
-  ['/sobre-hamlet', '/nosotros'],
-  ['/hamlet', '/nosotros'],
+  ['/sobre-maria', '/conocenos'],
+  ['/sobre-hamlet', '/conocenos'],
+  ['/hamlet', '/conocenos'],
 
   // --- Contacto ------------------------------------------------------------
   ['/contacto', '/contacto'],

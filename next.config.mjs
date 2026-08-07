@@ -52,6 +52,13 @@ const nextConfig = {
   async redirects() {
     return [
       { source: '/planes', destination: '/programa', permanent: true },
+      // Igual que /planes: la página se llama «Conócenos» en el menú, en el pie
+      // y en la propia hoja desde siempre, pero la URL decía /nosotros. Ahora
+      // coinciden. La vieja lleva años en el sitemap y en enlaces de fuera, así
+      // que se queda redirigida para siempre. El navegador conserva la
+      // almohadilla al seguir un 308, o sea que /nosotros#contacto también
+      // acaba abriendo la pestaña de contacto.
+      { source: '/nosotros', destination: '/conocenos', permanent: true },
       // Dominio viejo -> nuevo. Van PRIMERO: todas llevan condición de host, así
       // que en squadfit.es no disparan nunca, y en squatfit.es tienen que ganar
       // a los enlaces cortos de abajo. Si no, /unete en el dominio viejo se

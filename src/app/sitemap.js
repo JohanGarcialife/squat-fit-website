@@ -15,7 +15,7 @@ export default function sitemap() {
     '/programa',
     '/cocina',
     '/cursos',
-    '/nosotros',
+    '/conocenos',
     '/contacto',
     '/politicas',
   ];
