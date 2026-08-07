@@ -47,6 +47,11 @@ const MAP = [
   ['/producto/la-cocina-squad-fit-bundle', '/cocina'],
   ['/producto/la-cocina-squad-fit-permanente', '/cocina'],
   ['/producto/la-cocina-squad-fit-anual', '/cocina'],
+  // Con T, que es como se llamaba antes del renombrado. Estaban todas las
+  // variantes de «squad» y faltaba justo esta, así que caía en el comodín de
+  // /producto y acababa en /cursos siendo el recetario. En Search Console son
+  // 11 clics y 351 impresiones en 3 meses.
+  ['/producto/la-cocina-squat-fit', '/cocina'],
   ['/categoria-producto/ebooks/libro-de-cocina', '/cocina'],
 
   // --- Tienda: el resto de productos y categorías --------------------------
@@ -78,7 +83,9 @@ const MAP = [
   // --- Quiénes somos -------------------------------------------------------
   ['/sobre-maria', '/nosotros'],
   ['/sobre-hamlet', '/nosotros'],
-  ['/hamlet', '/nosotros'],
+  // Hamlet pidió el 7-ago que su página lleve al programa y no a «nosotros»:
+  // quien busca por su nombre viene a contratar, no a leer una biografía.
+  ['/hamlet', '/programa'],
 
   // --- Contacto ------------------------------------------------------------
   ['/contacto', '/contacto'],
@@ -99,6 +106,11 @@ const MAP = [
   // ella, un clic desde un correo viejo sin UTM llegaría sin origen ninguno.
   ['/formulario', '/empieza-tu-cambio?via=formulario', { statusCode: 307 }],
   // Todas estas landings sí se consolidan en /programa, que es el nuevo embudo.
+  // `/planes` ya estaba en next.config.mjs, pero SIN condición de host y con
+  // destino relativo: en el dominio viejo saltaba a squatfit.es/programa y allí
+  // la regla comodín de Cloudflare la mandaba a la portada del nuevo. La
+  // intención estaba; el destino se perdía. Aquí sí cruza de dominio.
+  ['/planes', '/programa'],
   ['/mis-asesorias', '/programa'],
   ['/calorias', '/programa'],
   ['/calorias-h', '/programa'],
