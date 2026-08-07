@@ -7,6 +7,7 @@ import AccessNotice from '@/app/components/AccessNotice';
 import BrandTabs from '@/app/components/BrandTabs';
 import WelcomeVideoCard from '@/app/components/WelcomeVideoCard';
 import { useProgramAccess } from '@/app/components/useProgramAccess';
+import CuentaAtrasPrograma from '@/app/components/CuentaAtrasPrograma';
 import { SectionCard, EmptyState, LinkRow, CARD } from '@/app/components/ProgramSections';
 import {
   ClipboardList,
@@ -86,14 +87,19 @@ export default function MiProgramaPage() {
       <div className="flex-1 bg-[#F8F9FC] p-6 md:p-10 min-h-screen overflow-y-auto">
         <div className="max-w-3xl mx-auto">
           <h1 className="text-3xl font-extrabold text-[#363C98] mb-8">Mi programa</h1>
-          <div className={CARD + ' text-center py-12 px-6'}>
+
+          {/* La cuenta atrás va PRIMERO y el enlace comercial debajo: a esta
+              pantalla llegan sobre todo clientes que ya pagan y a los que
+              acabamos de crear la cuenta. Enseñarles «conoce el programa» como
+              primer mensaje les diría que no han comprado nada. */}
+          <CuentaAtrasPrograma />
+
+          <div className={CARD + ' text-center py-10 px-6 mt-6'}>
             <div className="mx-auto mb-6 w-16 h-16 rounded-2xl bg-[#FFF6F0] flex items-center justify-center">
               <Target className="w-8 h-8 text-[#FF690B]" />
             </div>
-            <h2 className="text-2xl font-extrabold text-[#363C98] mb-3">Aún no tienes un programa activo</h2>
             <p className="text-slate-500 leading-relaxed max-w-md mx-auto mb-8">
               Aquí verás tu plan, tu seguimiento y tus recursos personalizados
-              cuando empieces un programa Tu Mejor Versión con nuestro equipo
               (tu entreno vivirá en Mi entreno y tu pauta en Mi cocina).
             </p>
             <Link
