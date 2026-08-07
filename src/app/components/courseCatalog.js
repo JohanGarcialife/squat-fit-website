@@ -459,10 +459,10 @@ export async function createTierCheckout(
 export const SESSION_STATUS_ENDPOINT = `${API_BASE}/api/v1/catalog/checkout/session-status`;
 
 export async function verifyCheckoutSession(sessionId) {
-  if (!sessionId) return { paid: false, amountTotal: null, currency: null };
+  if (!sessionId) return { paid: false, amountTotal: null, currency: null, orderId: null };
   try {
     const res = await fetch(`${SESSION_STATUS_ENDPOINT}?session_id=${encodeURIComponent(sessionId)}`);
-    if (!res.ok) return { paid: false, amountTotal: null, currency: null };
+    if (!res.ok) return { paid: false, amountTotal: null, currency: null, orderId: null };
     const data = await res.json();
     // `amount_total` y `currency` los añadió el backend el 2-ago (PR #101 de
     // SquatFit): es el importe REAL cobrado por Stripe, ya en euros, con el
@@ -473,9 +473,15 @@ export async function verifyCheckoutSession(sessionId) {
       paid: Boolean(data?.paid),
       amountTotal: typeof data?.amount_total === 'number' ? data.amount_total : null,
       currency: typeof data?.currency === 'string' ? data.currency : null,
+      // `order_id` lo añadió el backend el 7-ago: es lo que permite ofrecer
+      // REGALAR la compra en la pantalla de gracias. Llega null cuando el cobro
+      // entró por un enlace de pago sin metadata —esos no crean pedido—, y
+      // entonces no hay nada que regalar: quien lo use debe ESCONDER la opción,
+      // no enseñar un botón que va a fallar.
+      orderId: typeof data?.order_id === 'string' ? data.order_id : null,
     };
   } catch {
     // Red caída: no se puede confirmar, así que NO se trata como pagado.
-    return { paid: false, amountTotal: null, currency: null };
+    return { paid: false, amountTotal: null, currency: null, orderId: null };
   }
 }

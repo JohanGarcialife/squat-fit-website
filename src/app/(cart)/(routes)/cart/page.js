@@ -30,6 +30,9 @@ export default function CartPage() {
   const [isClient, setIsClient] = useState(false);
   const [step, setStep] = useState(1);
   const [success, setSuccess] = useState(false);
+  // Id del pedido recién pagado, para poder ofrecer regalarlo en la pantalla
+  // de gracias. Null si el cobro no creó pedido (enlace de pago sin metadata).
+  const [pedidoRegalable, setPedidoRegalable] = useState(null);
   // Casilla «guardar tarjeta» del paso 2 (save_card del checkout de
   // catálogo). Vive aquí, no en el store persistido de envío: así arranca
   // SIEMPRE desmarcada en cada visita a /cart, nunca heredada de una compra
@@ -75,7 +78,7 @@ export default function CartPage() {
     // recarga de la pantalla de gracias cuente la venta dos veces. Se lee el
     // carrito ANTES de vaciarlo, que es lo único que queda del pedido en el
     // navegador al volver de Stripe.
-    const finishAsPaid = (transactionId, importeReal = null, moneda = null) => {
+    const finishAsPaid = (transactionId, importeReal = null, moneda = null, orderId = null) => {
       const comprado = useCartStore.getState().cart;
       // El importe bueno es el que confirma Stripe (`amount_total`): trae el
       // envío y los cupones dentro. El subtotal del carrito queda de respaldo
@@ -86,6 +89,9 @@ export default function CartPage() {
         value: importeReal ?? valorDesdeCarrito(comprado),
         currency: moneda || 'EUR',
       });
+      // Se guarda para la pantalla de gracias, que es donde se ofrece regalar
+      // la compra. Sin él no se puede llamar a POST /orders/:id/regalar.
+      setPedidoRegalable(orderId);
       setSuccess(true);
       setStep(3); // Render the success screen
       useCartStore.getState().clearCart();
@@ -97,9 +103,9 @@ export default function CartPage() {
     // pagado — un `?success=true` suelto en la URL ya no basta.
     if (sessionId) {
       setVerifyingPayment(true);
-      verifyCheckoutSession(sessionId).then(({ paid, amountTotal, currency }) => {
+      verifyCheckoutSession(sessionId).then(({ paid, amountTotal, currency, orderId }) => {
         setVerifyingPayment(false);
-        if (paid) finishAsPaid(sessionId, amountTotal, currency);
+        if (paid) finishAsPaid(sessionId, amountTotal, currency, orderId);
         // Si no está pagada, se deja el carrito intacto: mejor que el
         // cliente reintente el pago a que vea una "compra completada" falsa.
       });
@@ -272,7 +278,7 @@ export default function CartPage() {
   }
 
   if (success) {
-    return <PaymentSuccess />;
+    return <PaymentSuccess pedidoRegalable={pedidoRegalable} />;
   }
 
   if (cart.length === 0) {

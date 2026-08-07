@@ -106,10 +106,9 @@ export default function CourseTierCard({ group, defaultTier = 'anual', subtitle,
 
         {yaLoTiene && (
           <div className="mt-6 rounded-2xl bg-[#F3F2F9] border border-[#363C98]/15 p-4 text-left">
-            <p className="text-[#363C98] font-bold text-sm">Ya tienes este curso</p>
+            <p className="text-[#363C98] font-bold text-sm">¿Quieres regalarlo?</p>
             <p className="text-slate-500 text-sm mt-0.5">
-              Puedes verlo en tu panel. Si compras otra vez, pagarás de nuevo sin
-              añadir nada.
+              Compra de nuevo y, al finalizar, te pediremos el email de la persona y nosotros le mandaremos sus accesos.
             </p>
             <Link
               href="/panel-cursos"
