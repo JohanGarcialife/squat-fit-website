@@ -348,12 +348,30 @@ function datosDelComprador(formData) {
   };
 }
 
-export async function createTierCheckout(item, { token, saveCard = false, formData } = {}) {
+/**
+ * `extra` son los DEMÁS artículos del carrito (carrito mixto).
+ *
+ * Antes solo viajaba `item`: el resto del carrito no llegaba al backend, y
+ * por eso el store lo vaciaba al mezclar físico con digital — para que no se
+ * notara que se iba a perder. Ahora van todos en la misma sesión de Stripe.
+ */
+export async function createTierCheckout(
+  item,
+  { token, saveCard = false, formData, extra = [] } = {},
+) {
   const origin = resolveOrigin();
 
   const attempt = async (base) => {
     const payload = {
-      items: [{ ...item.payload, quantity: 1 }],
+      items: [
+        { ...item.payload, quantity: item.quantity || 1 },
+        ...extra.map((i) => ({
+          // Sin `payload` no hay forma de decirle al backend qué producto es;
+          // se cae a su id, que es lo que resuelve por uuid de `products`.
+          ...(i.payload ?? { product_id: i.product_id ?? i.id }),
+          quantity: i.quantity || 1,
+        })),
+      ],
       ...datosDelComprador(formData),
       // Checkout INCRUSTADO: el pago se monta dentro de nuestra página en vez
       // de mandar al cliente a checkout.stripe.com. Si el backend desplegado
