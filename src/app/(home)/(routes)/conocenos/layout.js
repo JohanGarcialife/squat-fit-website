@@ -11,6 +11,6 @@ export const metadata = {
     'Conoce a María Casas y al equipo de Squad Fit: quiénes somos, cómo trabajamos y por qué hacemos las cosas de esta manera.',
 };
 
-export default function NosotrosLayout({ children }) {
+export default function ConocenosLayout({ children }) {
   return children;
 }

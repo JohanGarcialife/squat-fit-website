@@ -19,7 +19,10 @@ export default function CTO() {
   }, [])
 
   return (
-    <div className='flex flex-col items-center justify-center my-16 px-4 md:px-0'>
+    // id="precios": es la sección donde de verdad se compra el curso (la
+    // tarjeta con Mensual / Anual / De por vida). /cursos#precios lleva aquí,
+    // igual que /cocina#precios lleva a la tienda del recetario.
+    <div id='precios' className='flex flex-col items-center justify-center my-16 px-4 md:px-0 scroll-mt-24'>
       <p className='text-black max-w-2xl text-center text-xl mb-12'>
         Obtén el curso definitivo que te enseñará a <span className='font-bold'>transformar tu cuerpo</span> y no solo llegar al objetivo físico que siempre has querido sino a cómo <span className='font-bold'>mantenerlo</span> de por vida
       </p>

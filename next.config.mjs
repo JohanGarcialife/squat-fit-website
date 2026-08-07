@@ -65,6 +65,18 @@ const nextConfig = {
       // squatfit.es gana la de redirects-legacy.mjs —que lleva host y destino
       // absoluto— y en squadfit.es sigue funcionando esta.
       { source: '/planes', destination: '/programa', permanent: true },
+      // La página se llama «Conócenos» en el menú, en el pie y en la propia
+      // hoja desde siempre, pero la URL decía /nosotros. Ahora coinciden. La
+      // vieja lleva años en el sitemap y en enlaces de fuera, así que se queda
+      // redirigida para siempre; el navegador conserva la almohadilla al
+      // seguir un 308, o sea que /nosotros#contacto también abre la pestaña de
+      // contacto.
+      //
+      // AQUÍ ABAJO Y NO LA PRIMERA, por lo mismo que /planes: arriba ganaría
+      // también en el dominio viejo y con destino relativo acabaría en
+      // squatfit.es/conocenos, que la regla comodín de Cloudflare manda a la
+      // portada.
+      { source: '/nosotros', destination: '/conocenos', permanent: true },
       // /formulario en el dominio NUEVO. Hasta ahora daba 404: la regla de
       // redirects-legacy.mjs lleva condición de host y solo dispara en
       // squatfit.es, así que quien copiaba el enlace del correo y le cambiaba

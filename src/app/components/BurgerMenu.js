@@ -118,7 +118,7 @@ export default function BurgerMenu() {
             { href: '/programa', label: 'Programa' },
             { href: '/cocina', label: 'Cocina' },
             { href: '/cursos', label: 'Cursos' },
-            { href: '/nosotros', label: 'Conócenos' },
+            { href: '/conocenos', label: 'Conócenos' },
             { href: '/politicas', label: 'Políticas' },
           ].map((item) => {
             // '/' (Inicio) solo activo en la home exacta; el resto por prefijo

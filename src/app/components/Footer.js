@@ -39,7 +39,7 @@ export default function Footer() {
           <div>
             <h4 className={HEADING_CLASS}>Squad Fit</h4>
             <ul className="space-y-3 sm:space-y-4">
-              <li><Link href="/nosotros" className={LINK_CLASS}>Nosotros</Link></li>
+              <li><Link href="/conocenos" className={LINK_CLASS}>Conócenos</Link></li>
               <li><Link href="/politicas" className={LINK_CLASS}>Legal</Link></li>
               <li><Link href="/contacto" className={LINK_CLASS}>Contacto</Link></li>
               <li>
