@@ -4,6 +4,7 @@ import HeroSection from './_components/HeroSection'
 import Benefits from './_components/Benefits'
 import Testimonials from './_components/Testimonials'
 import CourseContent from './_components/CourseContent'
+import ClasesGratis from './_components/ClasesGratis'
 import CoursesCarousel from './_components/CoursesCarousel'
 import Content from './_components/Content'
 import GoalsAndBenefits from './_components/GoalsAndBenefits'
@@ -43,6 +44,11 @@ export default function page() {
         <Reveal><Benefits /></Reveal>
         <Reveal><Testimonials /></Reveal>
         <Reveal><CourseContent /></Reveal>
+        {/* Va justo después de «Qué incluye el curso» y ANTES del carrusel de
+            precios: quien acaba de leer lo que se lleva y está a punto de ver lo
+            que cuesta es exactamente quien necesita saber que puede probarlo
+            antes. Detrás del precio ya no sirve de nada. */}
+        <Reveal><ClasesGratis /></Reveal>
         <Reveal><CoursesCarousel /></Reveal>
         <Reveal><GoalsAndBenefits /></Reveal>
         <Reveal><Content /></Reveal>
