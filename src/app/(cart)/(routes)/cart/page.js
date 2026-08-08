@@ -16,7 +16,7 @@ import FormData from "../../_components/FormData";
 import Payment from "../../_components/Payment";
 import PaymentSuccess from "../../_components/PaymentSuccess";
 import { markLeavingCart } from "@/app/components/CartScrollRestore";
-import { verifyCheckoutSession } from "@/app/components/courseCatalog";
+import { verifyCheckoutSession, pedidoDeUnPago } from "@/app/components/courseCatalog";
 import {
   enviarPurchase,
   enviarBeginCheckout,
@@ -126,9 +126,40 @@ export default function CartPage() {
           return;
         }
         return loadStripe(pk).then((stripe) =>
-          stripe.retrievePaymentIntent(paymentIntentSecret).then(({ paymentIntent }) => {
+          stripe.retrievePaymentIntent(paymentIntentSecret).then(async ({ paymentIntent }) => {
             setVerifyingPayment(false);
-            if (paymentIntent?.status === 'succeeded') finishAsPaid(paymentIntent.id);
+            if (paymentIntent?.status === 'succeeded') {
+              // Esta rama —la de redirección obligatoria: 3-D Secure, Klarna,
+              // PayPal— llamaba a `finishAsPaid` con UN SOLO argumento, así que
+              // los otros tres caían a sus valores por defecto. Dos cosas se
+              // perdían por el camino, y en España esta rama no es el caso raro
+              // sino el de la mayoría de las tarjetas:
+              //
+              //   · el IMPORTE: el `purchase` de GA4 salía con el subtotal del
+              //     carrito como respaldo en vez de con lo cobrado, que para
+              //     quien paga envío o usa cupón no es el mismo número;
+              //   · el PEDIDO: sin `orderId`, `pedidoRegalable` quedaba null y
+              //     la pantalla de gracias escondía el formulario de regalo, de
+              //     modo que quien pagaba con 3-D Secure no lo veía nunca.
+              //
+              // El importe sale del PaymentIntent, que es lo que Stripe ha
+              // cobrado de verdad. El pedido hay que PREGUNTARLO, porque en esta
+              // vuelta Stripe solo devuelve el `payment_intent`: para eso está
+              // GET /orders/por-pago/:id, que resuelve de quién es el pedido con
+              // el usuario del token.
+              //
+              // Se espera al pedido antes de dar la compra por cerrada. Si la
+              // llamada falla devuelve null y todo sigue igual que antes: se
+              // confirma la compra y no se ofrece regalar. Nunca se rompe la
+              // confirmación de algo que ya está pagado por un extra.
+              const orderId = await pedidoDeUnPago(paymentIntent.id, token);
+              finishAsPaid(
+                paymentIntent.id,
+                typeof paymentIntent.amount === 'number' ? paymentIntent.amount / 100 : null,
+                paymentIntent.currency ? paymentIntent.currency.toUpperCase() : null,
+                orderId,
+              );
+            }
           }),
         );
       }).catch(() => setVerifyingPayment(false));
