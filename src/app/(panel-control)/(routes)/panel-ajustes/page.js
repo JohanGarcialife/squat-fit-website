@@ -30,7 +30,7 @@ import {
 } from 'lucide-react';
 import Spinner from '@/app/components/Spinner'
 
-const API = 'https://squatfit-api-cyrc2g3zra-no.a.run.app';
+const API = 'https://api.squadfit.es';
 
 const CARD = 'bg-white rounded-3xl p-6 sm:p-8 border border-slate-100 shadow-sm';
 const LABEL = 'text-slate-400 text-xs font-semibold uppercase tracking-wider';

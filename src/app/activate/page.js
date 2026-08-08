@@ -9,7 +9,7 @@ import { enviarFormSubmit } from '@/app/components/ga4Formularios';
 import { PasswordChecklist, cumpleReglas } from '@/app/components/passwordRules';
 import { useAuthStore } from '@/stores/auth.store';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://squatfit-api-cyrc2g3zra-no.a.run.app';
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://api.squadfit.es';
 
 // La API responde en inglés. Esta pantalla la ve un cliente que acaba de pagar,
 // así que no se le enseña el mensaje crudo del servidor.

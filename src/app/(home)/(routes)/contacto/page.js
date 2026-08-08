@@ -110,7 +110,7 @@ ${values.mensaje}
         };
 
         await axios.post(
-          'https://squatfit-api-cyrc2g3zra-no.a.run.app/api/v1/support/backoffice/tickets',
+          'https://api.squadfit.es/api/v1/support/backoffice/tickets',
           payload,
           { headers: { Authorization: `Bearer ${token}` } }
         );

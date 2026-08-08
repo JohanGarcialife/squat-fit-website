@@ -6,7 +6,7 @@ import { useAuthStore } from '@/stores/auth.store'
 import { handleApiError } from '@/app/components/handleApiError'
 
 const API =
-  process.env.NEXT_PUBLIC_API_URL || 'https://squatfit-api-cyrc2g3zra-no.a.run.app'
+  process.env.NEXT_PUBLIC_API_URL || 'https://api.squadfit.es'
 
 /**
  * Recetas del sistema — GET /api/v1/recipe/system (mismo hook que usan el

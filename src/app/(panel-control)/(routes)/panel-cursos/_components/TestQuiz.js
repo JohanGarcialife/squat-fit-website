@@ -7,7 +7,7 @@ import axios from 'axios';
 // el final. Las preguntas llegan SIN solución (GET course/tests); la corrección
 // la devuelve el servidor al entregar (POST course/tests/submit) con la
 // respuesta correcta y la explicación por pregunta. Repetible.
-const API = process.env.NEXT_PUBLIC_API_URL || 'https://squatfit-api-cyrc2g3zra-no.a.run.app';
+const API = process.env.NEXT_PUBLIC_API_URL || 'https://api.squadfit.es';
 
 export default function TestQuiz({ test, token, onClose }) {
   const questions = (test?.questions || []).slice().sort(

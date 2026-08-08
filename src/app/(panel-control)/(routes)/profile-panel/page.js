@@ -44,7 +44,7 @@ import PhotoCropModal from '@/app/components/PhotoCropModal';
 import { PasswordChecklist, cumpleReglas } from '@/app/components/passwordRules';
 import Spinner from '@/app/components/Spinner';
 
-const API = 'https://squatfit-api-cyrc2g3zra-no.a.run.app';
+const API = 'https://api.squadfit.es';
 
 // --- País / teléfono ---------------------------------------------------------
 const esPhoneLocalization = { ...esPhone, gb: 'Inglaterra' };

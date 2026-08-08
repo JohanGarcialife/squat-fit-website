@@ -24,7 +24,7 @@
 
 import React, { useEffect, useState } from 'react';
 
-const API = 'https://squatfit-api-cyrc2g3zra-no.a.run.app';
+const API = 'https://api.squadfit.es';
 
 /**
  * Verde de seQura, tomado de su propia web (sequra.es) el 4-ago, no inventado.

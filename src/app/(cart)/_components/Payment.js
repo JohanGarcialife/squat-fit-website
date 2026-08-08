@@ -505,7 +505,7 @@ export default function Payment(props) {
     const fetchPaymentIntent = async () => {
       try {
         const response = await axios.post(
-          `https://squatfit-api-cyrc2g3zra-no.a.run.app${endpoint}`,
+          `https://api.squadfit.es${endpoint}`,
           payload,
           { headers: { Authorization: `Bearer ${token}` } }
         );

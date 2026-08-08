@@ -6,7 +6,7 @@ import { useAuthStore } from '@/stores/auth.store'
 import { handleApiError } from '@/app/components/handleApiError'
 
 const API =
-  process.env.NEXT_PUBLIC_API_URL || 'https://squatfit-api-cyrc2g3zra-no.a.run.app'
+  process.env.NEXT_PUBLIC_API_URL || 'https://api.squadfit.es'
 
 /**
  * Detección de accesos del panel del cliente (programa y curso Entrena en casa).
