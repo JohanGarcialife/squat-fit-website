@@ -31,9 +31,28 @@ const SITIO = new URL('https://squadfit.es');
 export const metadata = {
   metadataBase: SITIO,
   alternates: { canonical: './' },
-  // Mismo criterio que en (home): título propio por página vía plantilla.
-  // /login y /register están en el sitemap, así que también necesitan uno
-  // distinto cada una — lo ponen sus layouts de ruta.
+  // FUERA DEL ÍNDICE DE GOOGLE. Cubre las tres rutas de este grupo —/login,
+  // /register y /forgot-password—, que hasta el 8-ago-2026 eran perfectamente
+  // indexables: sin `noindex`, sin bloqueo en `robots.txt` y con canónica
+  // propia. Comprobado en producción una por una.
+  //
+  // El 3-ago se las quitó del sitemap con el argumento de que «nadie llega a
+  // una tienda buscando su formulario de acceso», pero quitar una página del
+  // sitemap NO impide indexarla: solo deja de proponerla. Google ya conocía
+  // /login —Search Console la tiene rastreada del 23 de julio— así que hacía
+  // falta decírselo explícitamente.
+  //
+  // `follow: true` a propósito: que no se indexen, pero que Google sí siga los
+  // enlaces que llevan de aquí a las páginas que sí venden. El pie de página
+  // está en este mismo layout.
+  //
+  // NO se bloquean además en `robots.txt`, y no es un olvido: si se bloquea el
+  // rastreo, Google no puede leer este `noindex` y la página se queda indexada
+  // sin que haya forma de sacarla. Para desindexar hay que dejar rastrear.
+  robots: { index: false, follow: true },
+  // Mismo criterio que en (home): título propio por página vía plantilla. Cada
+  // ruta pone el suyo en su layout — siguen necesitándolo aunque no se indexen,
+  // porque es lo que se lee en la pestaña del navegador.
   title: {
     default: "Squad Fit",
     template: "%s · Squad Fit",
