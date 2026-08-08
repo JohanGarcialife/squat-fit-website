@@ -458,6 +458,40 @@ export async function createTierCheckout(
 // así que la vuelta a /cart lo consulta aquí antes de dar nada por bueno.
 export const SESSION_STATUS_ENDPOINT = `${API_BASE}/api/v1/catalog/checkout/session-status`;
 
+/**
+ * El pedido que creó un cobro, a partir de su PaymentIntent.
+ *
+ * POR QUÉ EXISTE. `verifyCheckoutSession` trae el `order_id` cuando la compra
+ * vuelve por una Checkout Session, pero en la vuelta de una redirección
+ * obligatoria —3-D Secure, Klarna, PayPal— Stripe solo devuelve el
+ * `payment_intent`, y entonces no había forma de saber qué pedido era. Sin el
+ * id, la pantalla de gracias escondía el formulario de regalo, así que quien
+ * pagaba con 3-D Secure —la mayoría de las tarjetas en España— no llegaba a ver
+ * la oferta nunca.
+ *
+ * PIDE TOKEN: el backend resuelve de quién es el pedido con el usuario del
+ * token, no con nada que se le mande. Sin sesión no hay nada que preguntar, así
+ * que se devuelve null sin llamar.
+ *
+ * Devuelve null y no lanza en cualquier fallo: esto es un extra de la pantalla
+ * de gracias, y que falle solo debe significar «no ofrezcas regalar», nunca
+ * romper la confirmación de una compra que ya está pagada.
+ */
+export async function pedidoDeUnPago(paymentIntentId, token) {
+  if (!paymentIntentId || !token) return null;
+  try {
+    const res = await fetch(
+      `${API_BASE}/api/v1/orders/por-pago/${encodeURIComponent(paymentIntentId)}`,
+      { headers: { Authorization: `Bearer ${token}` } },
+    );
+    if (!res.ok) return null;
+    const data = await res.json();
+    return typeof data?.orderId === 'string' ? data.orderId : null;
+  } catch {
+    return null;
+  }
+}
+
 export async function verifyCheckoutSession(sessionId) {
   if (!sessionId) return { paid: false, amountTotal: null, currency: null, orderId: null };
   try {
