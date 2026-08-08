@@ -128,7 +128,24 @@ export default function CartPage() {
         return loadStripe(pk).then((stripe) =>
           stripe.retrievePaymentIntent(paymentIntentSecret).then(({ paymentIntent }) => {
             setVerifyingPayment(false);
-            if (paymentIntent?.status === 'succeeded') finishAsPaid(paymentIntent.id);
+            if (paymentIntent?.status === 'succeeded') {
+              // El importe sale del PaymentIntent —que es lo que Stripe ha
+              // cobrado de verdad, con envío y cupones ya dentro— igual que en
+              // la otra rama. Sin estos dos argumentos, `finishAsPaid` caía a
+              // sus valores por defecto y el `purchase` de GA4 se emitía con el
+              // SUBTOTAL DEL CARRITO como respaldo: para quien paga con envío o
+              // con cupón, ese número no es el que se ha cobrado.
+              //
+              // Afecta solo a esta rama, la de redirección obligatoria (3-D
+              // Secure, Klarna, PayPal), que en España es el camino de la
+              // mayoría de las tarjetas. La rama de Checkout Session ya pasaba
+              // el importe bueno desde el principio.
+              finishAsPaid(
+                paymentIntent.id,
+                typeof paymentIntent.amount === 'number' ? paymentIntent.amount / 100 : null,
+                paymentIntent.currency ? paymentIntent.currency.toUpperCase() : null,
+              );
+            }
           }),
         );
       }).catch(() => setVerifyingPayment(false));
