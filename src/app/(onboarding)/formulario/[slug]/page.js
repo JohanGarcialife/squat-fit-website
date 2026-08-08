@@ -14,7 +14,7 @@ import AccessNotice from '@/app/components/AccessNotice';
 import FormRunner from '@/app/components/FormRunner';
 import { FORM_DEFINITIONS, computeWeeklyScores, isoWeekId } from '@/app/components/formDefinitions';
 
-const API = 'https://squatfit-api-cyrc2g3zra-no.a.run.app';
+const API = 'https://api.squadfit.es';
 
 // Guardado en el backend (conectado 20-jul-2026, lote 4): las respuestas van a
 // POST /api/v1/forms/public-answer con los form_ids estables sembrados por la

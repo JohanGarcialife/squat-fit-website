@@ -3,7 +3,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { jwtDecode } from 'jwt-decode';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://squatfit-api-cyrc2g3zra-no.a.run.app';
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://api.squadfit.es';
 
 export const useAuthStore = create(
   persist(

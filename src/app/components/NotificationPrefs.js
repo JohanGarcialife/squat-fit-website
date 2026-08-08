@@ -5,7 +5,7 @@ import axios from 'axios';
 import toast from 'react-hot-toast';
 import { Lock } from 'lucide-react';
 
-const API = 'https://squatfit-api-cyrc2g3zra-no.a.run.app';
+const API = 'https://api.squadfit.es';
 
 // Preferencias de notificación del cliente (GET/PUT /api/v1/alerts/preferences,
 // desplegado con la campana 9.5). Compartido por la sección de Alertas y por

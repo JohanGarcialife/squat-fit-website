@@ -16,7 +16,7 @@ import {
 import { useAuthStore } from '@/stores/auth.store';
 import ConfirmationModal from '@/app/components/ConfirmationModal';
 
-const API = process.env.NEXT_PUBLIC_API_URL || 'https://squatfit-api-cyrc2g3zra-no.a.run.app';
+const API = process.env.NEXT_PUBLIC_API_URL || 'https://api.squadfit.es';
 
 const CARD = 'bg-white rounded-3xl p-6 sm:p-8 border border-slate-100 shadow-sm';
 const LABEL = 'text-slate-400 text-xs font-semibold uppercase tracking-wider';

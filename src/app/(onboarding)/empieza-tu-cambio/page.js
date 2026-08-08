@@ -50,7 +50,7 @@ const BOOKING_URL = 'https://agenda.squadfit.es/sesion-diagnostica';
 // Endpoint público de forms (lote 4, 20-jul-2026): guarda la solicitud en el
 // backend sin sesión, con rate-limit y honeypot. form_id estable sembrado por
 // la migración del backend (Prellamada — Aquí empieza tu cambio).
-const SUBMIT_ENDPOINT = 'https://squatfit-api-cyrc2g3zra-no.a.run.app/api/v1/forms/public-answer';
+const SUBMIT_ENDPOINT = 'https://api.squadfit.es/api/v1/forms/public-answer';
 const PRELLAMADA_FORM_ID = 'f0a11e00-0000-4000-a000-000000000001';
 const STORAGE_KEY = 'sqf-prellamada-solicitudes';
 
@@ -281,7 +281,7 @@ const esPhoneLocalization = { ...esPhone, gb: 'Inglaterra' };
 // pantallas se saltan. Solo se saltan las que quedan REALMENTE contestadas: si el
 // perfil no tiene fecha de nacimiento, la pantalla de la edad se sigue enseñando.
 const USER_INFO_URL =
-  `${process.env.NEXT_PUBLIC_API_URL || 'https://squatfit-api-cyrc2g3zra-no.a.run.app'}/api/v1/user/info`;
+  `${process.env.NEXT_PUBLIC_API_URL || 'https://api.squadfit.es'}/api/v1/user/info`;
 
 // Años cumplidos a partir de la fecha de nacimiento del perfil (ISO).
 function edadDesdeNacimiento(iso) {

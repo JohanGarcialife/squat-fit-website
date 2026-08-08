@@ -6,7 +6,7 @@ import Casilla from './Casilla';
 import { CLASES_CAMPO, CLASES_ETIQUETA } from './CheckoutForm';
 import { useAuthStore } from '@/stores/auth.store';
 
-const API = process.env.NEXT_PUBLIC_API_URL || 'https://squatfit-api-cyrc2g3zra-no.a.run.app';
+const API = process.env.NEXT_PUBLIC_API_URL || 'https://api.squadfit.es';
 
 /** Etiquetas de un toque. Cubren casi todo; «Otra» abre el campo libre. */
 const SUGERENCIAS = ['Casa', 'Trabajo', 'Hotel', 'Otra'];

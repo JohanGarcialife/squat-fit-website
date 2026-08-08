@@ -15,7 +15,7 @@ import FreeSampleBadge from "@/app/components/FreeSampleBadge";
 import axios from "axios";
 import Spinner from "@/app/components/Spinner";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://squatfit-api-cyrc2g3zra-no.a.run.app';
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://api.squadfit.es';
 
 // Sin imagen real, mismo criterio que el resto de Mi cocina.
 function getValidImageUrl(url) {

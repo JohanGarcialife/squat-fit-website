@@ -48,7 +48,7 @@ export const dynamic = 'force-dynamic';
 
 const REDIRECTS_API_READY = true; // encendido 20-jul-2026: /api/v1/redirects/:slug vivo en prod (lote 4)
 
-const API = process.env.NEXT_PUBLIC_API_URL || 'https://squatfit-api-cyrc2g3zra-no.a.run.app';
+const API = process.env.NEXT_PUBLIC_API_URL || 'https://api.squadfit.es';
 
 // Si el backend no contesta en este plazo, mejor enseñar una página que dejar la
 // pestaña girando: estos enlaces se pulsan desde el móvil y con prisa. 4 s es de

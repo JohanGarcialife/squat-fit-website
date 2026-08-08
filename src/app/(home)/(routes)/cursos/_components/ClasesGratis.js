@@ -42,7 +42,7 @@ import { Unlock } from 'lucide-react';
  * la página más de una vez.
  */
 async function cuantasMuestrasPorCurso() {
-  const API = process.env.NEXT_PUBLIC_API_URL || 'https://squatfit-api-cyrc2g3zra-no.a.run.app';
+  const API = process.env.NEXT_PUBLIC_API_URL || 'https://api.squadfit.es';
 
   try {
     const res = await fetch(`${API}/api/v1/course/all`, {

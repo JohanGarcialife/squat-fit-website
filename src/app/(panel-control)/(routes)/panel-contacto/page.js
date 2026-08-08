@@ -13,7 +13,7 @@ import AccessNotice from '@/app/components/AccessNotice';
 import GdprCheckbox from '@/app/components/GdprCheckbox';
 import Spinner from '@/app/components/Spinner';
 
-const API = 'https://squatfit-api-cyrc2g3zra-no.a.run.app';
+const API = 'https://api.squadfit.es';
 
 // --- Esquema de Validación con Yup ---
 const ContactSchema = Yup.object().shape({

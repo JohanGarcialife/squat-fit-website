@@ -10,7 +10,7 @@
 // dejó el seed 15.1 en la BD de producción — la tienda nunca se queda en blanco.
 import { resolveOrigin } from '@/app/components/UTMCapture';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://squatfit-api-cyrc2g3zra-no.a.run.app';
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://api.squadfit.es';
 
 export const PRODUCTS_ENDPOINT = `${API_BASE}/api/v1/catalog`;
 

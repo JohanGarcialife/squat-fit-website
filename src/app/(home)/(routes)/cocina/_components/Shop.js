@@ -169,7 +169,7 @@ export default function Shop() {
 
     async function fetchProducts() {
       try {
-        const API = process.env.NEXT_PUBLIC_API_URL || 'https://squatfit-api-cyrc2g3zra-no.a.run.app'
+        const API = process.env.NEXT_PUBLIC_API_URL || 'https://api.squadfit.es'
         const [booksRes, packsRes] = await Promise.all([
           fetch(`${API}/api/v1/book/all`),
           fetch(`${API}/api/v1/book/packs`),

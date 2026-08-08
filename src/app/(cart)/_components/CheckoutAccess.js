@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import toast from 'react-hot-toast';
 import { useAuthStore } from '@/stores/auth.store';
 
-const API = process.env.NEXT_PUBLIC_API_URL || 'https://squatfit-api-cyrc2g3zra-no.a.run.app';
+const API = process.env.NEXT_PUBLIC_API_URL || 'https://api.squadfit.es';
 
 /**
  * Paso de acceso del checkout SIN muro de login:

@@ -51,7 +51,7 @@ import { useAuthStore } from '@/stores/auth.store';
 // Mismo patrón que REDIRECTS_API_READY en src/app/r/[slug]/route.js.
 export const RECIPE_METRICS_READY = true;
 
-const API = process.env.NEXT_PUBLIC_API_URL || 'https://squatfit-api-cyrc2g3zra-no.a.run.app';
+const API = process.env.NEXT_PUBLIC_API_URL || 'https://api.squadfit.es';
 const ENDPOINT = `${API}/api/v1/content-events`;
 
 // Agrupar en vez de una petición por micro-evento: se manda cuando se junten
