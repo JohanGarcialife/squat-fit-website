@@ -103,6 +103,52 @@ export default function RootLayout({ children }) {
             Tiene que ir dentro del <head> para que Trustpilot verifique el
             dominio. */}
         <TrustpilotInvitations />
+
+        {/* DATOS ESTRUCTURADOS. El sitio no tenía ninguno: cero `ld+json` en
+            todas las páginas, comprobado el 8-ago-2026 en producción.
+            Sin esto, Google ve el nombre «María Casas» escrito en el texto,
+            pero no tiene ninguna afirmación de que ESTE sitio sea el suyo.
+
+            POR QUÉ IMPORTA AQUÍ, con números de Search Console (28 días):
+
+              maria squat fit    1 clic  / 105 impresiones
+              maria casas        0       /  68
+              mariasquatfit      0       /  34
+              maria squad fit    0       /  28
+              ─────────────────────────────────
+              por su nombre      3 clics / 273 impresiones  → 1,1 %
+
+            Son el 48 % de las impresiones del sitio y dan 3 de los 31 clics.
+            Mientras, las consultas de marca sí convierten: `squatfit` 5 de 11,
+            `squad fit` 3 de 8. Quien busca la marca entra; quien busca a la
+            persona, no.
+
+            LO QUE ESTO NO ARREGLA SOLO: falta `sameAs` con los perfiles de
+            María —YouTube, Instagram, TikTok—, que es la señal que de verdad
+            une persona y sitio. No van puestos a propósito: la web no enlaza
+            hoy a ninguna red (comprobado en el html y en el repo), así que no
+            tengo URLs confirmadas, y un `sameAs` apuntando a un perfil
+            equivocado es peor que no ponerlo. En cuanto estén, se añaden aquí
+            y en el Footer. */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              '@context': 'https://schema.org',
+              '@type': 'Organization',
+              name: 'Squad Fit',
+              url: 'https://squadfit.es',
+              logo: 'https://squadfit.es/LogoSquadFit-horizontal.png',
+              description:
+                'Programa de dieta, entreno y mentalidad para un cambio físico real y duradero.',
+              founder: {
+                '@type': 'Person',
+                name: 'María Casas',
+                url: 'https://squadfit.es/conocenos',
+              },
+            }),
+          }}
+        />
       </head>
       <body
         className={`${inter.variable} antialiased`}
